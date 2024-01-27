@@ -31,7 +31,12 @@ const CUSTOM_NODES: CustomNode[] = [
 
 export default class FlowchartCanvasExtension extends CanvasExtension {
   renderMenu(): void {
-    let menuOption = this.createMenuOption('more-menu-options', 'More node types', 'shapes', () => menuOption.classList.toggle('expanded'))
+    let menuOption = this.createMenuOption(
+      'more-menu-options', 
+      'More node types', 
+      'shapes', 
+      () => menuOption.classList.toggle('expanded')
+    )
 
     // Add popup menu
     const customNodesMenu = document.createElement('div')
@@ -40,13 +45,13 @@ export default class FlowchartCanvasExtension extends CanvasExtension {
 
     // Add custom nodes
     for (const node of CUSTOM_NODES) {
-      const nodeButton = document.createElement('div')
-      nodeButton.classList.add('custom-node-button')
-      nodeButton.setAttribute('aria-label', node.menuName)
-      nodeButton.setAttribute('data-tooltip-position', 'top')
-      nodeButton.addEventListener('click', () => this.addCustomNode(this.canvas, node))
-      setIcon(nodeButton, node.icon())
-
+      const nodeButton = this.createMenuOption(
+        '',
+        node.menuName,
+        node.icon(),
+        () => this.addCustomNode(this.canvas, node)
+      )
+      
       customNodesMenu.appendChild(nodeButton)
     }
 
