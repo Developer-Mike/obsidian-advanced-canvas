@@ -13,6 +13,7 @@
   flex-direction: row;
   justify-content: center;
   align-items: center;
+  gap: 5px;
   max-width: 500%;
 
   position: absolute;
@@ -57,11 +58,6 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-}
-
-/* Placeholder */
-.oval-node .canvas-node-container .canvas-node-placeholder::after {
-  border-radius: 500px;
 }
 
 /* Diamond Node */
