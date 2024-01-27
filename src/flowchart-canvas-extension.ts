@@ -26,6 +26,16 @@ const CUSTOM_NODES: CustomNode[] = [
     defaultSize: { width: 150, height: 100 },
     menuName: 'Diamond Shaped Card',
     icon: () => 'diamond'
+  },
+  {
+    alias: ['in-out', 'in', 'input', 'out', 'output', 'parallelogram'],
+    className: 'parallelogram-node',
+    defaultSize: { width: 150, height: 100 },
+    menuName: 'Parallelogram Shaped Card',
+    icon: () => {
+      addIcon('parallelogram', '<rect transform="skewX(-20)" rx="5" height="50" width="70" y="25" x="35" stroke-width="5.5" stroke="currentColor" fill="transparent"/>')
+      return 'parallelogram'
+    }
   }
 ]
 
@@ -51,7 +61,7 @@ export default class FlowchartCanvasExtension extends CanvasExtension {
         node.icon(),
         () => this.addCustomNode(this.canvas, node)
       )
-      
+
       customNodesMenu.appendChild(nodeButton)
     }
 

@@ -91,14 +91,13 @@
   background-color: var(--background-primary);
 }
 
-/* Border */
 .diamond-node::after {
   content: '';
   position: absolute;
-  left: -2px;
-  top: -2px;
-  width: calc(100% + 4px);
-  height: calc(100% + 4px);
+  left: -3px;
+  top: -3px;
+  width: calc(100% + 6px);
+  height: calc(100% + 6px);
 
   z-index: -1;
 
@@ -106,7 +105,27 @@
   background-color: rgb(var(--canvas-color));
 }
 
-/* Placeholder */
 .diamond-node .canvas-node-container .canvas-node-placeholder::after {
   display: none;
+}
+
+/* Parallelogram Node */
+.parallelogram-node .canvas-node-container {
+  transform: skewX(-20deg);
+}
+
+.parallelogram-node .canvas-node-container .canvas-node-content {
+  transform: skewX(20deg);
+}
+
+.parallelogram-node .canvas-node-content .markdown-preview-view {
+  padding: 0 !important;
+  overflow-y: initial;
+}
+
+.parallelogram-node .canvas-node-content .markdown-rendered .markdown-preview-section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
