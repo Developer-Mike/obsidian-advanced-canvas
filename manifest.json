@@ -1,0 +1,10 @@
+{
+	"id": "advanced-canvas",
+	"name": "Advanced Canvas",
+	"version": "0.0.1",
+	"minAppVersion": "1.1.0",
+	"description": "Level up your canvas with more features!",
+	"author": "Developer-Mike",
+	"authorUrl": "https://github.com/Developer-Mike",
+	"isDesktopOnly": false
+}

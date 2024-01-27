@@ -1,0 +1,116 @@
+/* Menu */
+#more-menu-options {
+  position: relative;
+}
+
+#more-menu-options .custom-nodes-menu {
+  visibility: hidden;
+  scale: 0;
+  transform-origin: bottom left;
+  transition: all 0.15s ease-in-out;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  max-width: 500%;
+
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+
+  margin-bottom: 10px;
+  padding: 10px;
+
+  background-color: var(--background-primary);
+  border-radius: var(--radius-m);
+  box-shadow: var(--input-shadow);
+}
+
+#more-menu-options.expanded .custom-nodes-menu {
+  visibility: visible;
+  scale: 1;
+}
+
+#more-menu-options .custom-nodes-menu .custom-node-button {
+  padding: 10px;
+  border-radius: var(--radius-s);
+}
+
+#more-menu-options .custom-nodes-menu .custom-node-button:hover {
+  background-color: var(--background-secondary);
+}
+
+/* Oval Node */
+.oval-node .canvas-node-container {
+  border-radius: 500px;
+}
+
+.oval-node .canvas-node-content .markdown-preview-view {
+  padding: 0 !important;
+  overflow-y: initial;
+}
+
+.oval-node .canvas-node-content .markdown-rendered .markdown-preview-section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Placeholder */
+.oval-node .canvas-node-container .canvas-node-placeholder::after {
+  border-radius: 500px;
+}
+
+/* Diamond Node */
+.diamond-node .canvas-node-container {
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.diamond-node .canvas-node-content .markdown-preview-view {
+  padding: 0 !important;
+  overflow-y: initial;
+}
+
+.diamond-node .canvas-node-content .markdown-rendered .markdown-preview-section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.diamond-node::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);;
+  background-color: var(--background-primary);
+}
+
+/* Border */
+.diamond-node::after {
+  content: '';
+  position: absolute;
+  left: -2px;
+  top: -2px;
+  width: calc(100% + 4px);
+  height: calc(100% + 4px);
+
+  z-index: -1;
+
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);;
+  background-color: rgb(var(--canvas-color));
+}
+
+/* Placeholder */
+.diamond-node .canvas-node-container .canvas-node-placeholder::after {
+  display: none;
+}
