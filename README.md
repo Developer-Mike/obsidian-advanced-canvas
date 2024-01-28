@@ -25,6 +25,10 @@ An [Obsidian](https://obsidian.md/) plugin that supercharges your canvas experie
 ![Sample Presentation](/assets/sample-presentation.png)
 ![Presentation Mode](/assets/presentation-mode.gif)
 
+#### Complex example
+![Complex Presentation](/assets/sample-presentation-complex.png)
+![Complex Presentation GIF](/assets/sample-presentation-complex.gif)
+
 ### Updated menu
 ![Menu](/assets/card-menu.png)
 
