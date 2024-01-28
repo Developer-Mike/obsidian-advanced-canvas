@@ -1,8 +1,8 @@
 import { ItemView, Plugin } from 'obsidian'
-import CanvasExtension from './canvas-extension'
-import FlowchartCanvasExtension from './flowchart-canvas-extension'
-import GroupCanvasExtension from './group-canvas-extension'
-import PresentationCanvasExtension from './presentation-canvas-extension'
+import CanvasExtension from './canvas-extensions/canvas-extension'
+import FlowchartCanvasExtension from './canvas-extensions/flowchart-canvas-extension'
+import GroupCanvasExtension from './canvas-extensions/group-canvas-extension'
+import PresentationCanvasExtension from './canvas-extensions/presentation-canvas-extension'
 
 const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   GroupCanvasExtension,

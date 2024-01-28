@@ -1,0 +1,115 @@
+.center-text-node .canvas-node-content {
+  .markdown-preview-view {
+    padding: 0 !important;
+    overflow-y: initial;
+
+    .markdown-preview-section {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+}
+
+/* Menu */
+#more-menu-options {
+  position: relative;
+
+  &.expanded .custom-nodes-menu {
+    visibility: visible;
+    scale: 1;
+  }
+
+  .custom-nodes-menu {
+    visibility: hidden;
+    scale: 0;
+    transform-origin: bottom left;
+    transition: all 0.15s ease-in-out;
+  
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    max-width: 500%;
+  
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+  
+    margin-bottom: 10px;
+    padding: 10px;
+  
+    background-color: var(--background-primary);
+    border-radius: var(--radius-m);
+    box-shadow: var(--input-shadow);
+
+    .custom-node-button {
+      padding: 10px;
+      border-radius: var(--radius-s);
+
+      &:hover {
+        background-color: var(--background-secondary);
+      }
+    }
+  }
+}
+
+/* Oval Node */
+.oval-node .canvas-node-container {
+  @extend .center-text-node;
+  border-radius: 500px;
+}
+
+/* Diamond Node */
+.diamond-node {
+  @extend .center-text-node;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);;
+    background-color: var(--background-primary);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: -3px;
+    top: -3px;
+    width: calc(100% + 6px);
+    height: calc(100% + 6px);
+  
+    z-index: -1;
+  
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);;
+    background-color: rgb(var(--canvas-color));
+  }
+
+  .canvas-node-container {
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+
+    .canvas-node-placeholder::after {
+      display: none;
+    }
+  }
+}
+
+/* Parallelogram Node */
+.parallelogram-node .canvas-node-container {
+  @extend .center-text-node;
+  transform: skewX(-20deg);
+
+  .canvas-node-content {
+    transform: skewX(20deg);
+  }
+}
