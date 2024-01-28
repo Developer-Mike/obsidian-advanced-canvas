@@ -1,4 +1,5 @@
 import { setIcon } from "obsidian"
+import AdvancedCanvasPlugin from "src/main"
 
 export interface MenuOption {
   id: string
@@ -8,14 +9,14 @@ export interface MenuOption {
 }
 
 export default abstract class CanvasExtension {
-  plugin: any
+  plugin: AdvancedCanvasPlugin
   canvas: any
   private observer: MutationObserver
 
   abstract renderMenu(): void
   abstract renderNode(node: any): void
 
-  constructor(plugin: any) {
+  constructor(plugin: AdvancedCanvasPlugin) {
     this.plugin = plugin
 
     this.plugin.registerEvent(this.plugin.app.workspace.on('active-leaf-change', this.onActiveLeafChange.bind(this)))

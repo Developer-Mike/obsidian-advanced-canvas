@@ -1,10 +1,8 @@
+import { calculateBBoxWithoutPadding } from "src/utils/canvas-helper"
 import CanvasExtension from "./canvas-extension"
 
-const SLIDE_NODE = {
-  defaultSize: { width: 1600, height: 900 },
-}
-
 export default class PresentationCanvasExtension extends CanvasExtension {
+  savedViewport: any = null
   isPresentationMode: boolean = false
   slides: any[] = []
   currentSlideIndex: number = 0
@@ -108,9 +106,13 @@ export default class PresentationCanvasExtension extends CanvasExtension {
   private addSlide() {
     const slideNumber = this.getSlides().length + 1
 
+    const slideSizeString = this.plugin.settingsManager.settings.defaultSlideSize
+    const slideSizeArray = slideSizeString.split('x').map((value: string) => parseInt(value))
+    const slideSize = { width: slideSizeArray[0], height: slideSizeArray[1] }
+
     this.canvas.createGroupNode({
-      pos: this.getCenterCoordinates(SLIDE_NODE.defaultSize),
-      size: SLIDE_NODE.defaultSize,
+      pos: this.getCenterCoordinates(slideSize),
+      size: slideSize,
       label: this.getSlideName(slideNumber),
       save: true,
       focus: false,
@@ -119,12 +121,23 @@ export default class PresentationCanvasExtension extends CanvasExtension {
 
   private gotoSlide(index: number) {
     this.currentSlideIndex = index
-    this.canvas.zoomToBbox(this.slides[this.currentSlideIndex].bbox)
+    let nodeBBox = this.slides[this.currentSlideIndex].bbox
+
+    if (this.plugin.settingsManager.settings.zoomToSlideWithoutPadding) {
+      nodeBBox = calculateBBoxWithoutPadding(this.canvas, nodeBBox)
+    }
+
+    this.canvas.zoomToBbox(nodeBBox)
   }
 
   private async startPresentation() {
     this.slides = this.getSlides()
     this.currentSlideIndex = -1
+    this.savedViewport = {
+      x: this.canvas.tx,
+      y: this.canvas.ty,
+      zoom: this.canvas.tZoom,
+    }
 
     // Enter fullscreen mode
     this.canvas.wrapperEl.requestFullscreen()
@@ -134,11 +147,10 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     this.canvas.setReadonly(true)
 
     // Register event handler for keyboard navigation
-    this.canvas.wrapperEl.onkeydown = (e: any) => {
-      if (e.key === 'ArrowRight') {
-        this.nextSlide()
-      } else if (e.key === 'ArrowLeft') {
-        this.previousSlide()
+    if (this.plugin.settingsManager.settings.useArrowKeysToChangeSlides) {
+      this.canvas.wrapperEl.onkeydown = (e: any) => {
+        if (e.key === 'ArrowRight') this.nextSlide()
+        else if (e.key === 'ArrowLeft') this.previousSlide()
       }
     }
 
@@ -158,13 +170,19 @@ export default class PresentationCanvasExtension extends CanvasExtension {
   }
 
   private endPresentation() {
+    // Unregister event handlers
     this.canvas.wrapperEl.onkeydown = null
     this.canvas.wrapperEl.onfullscreenchange = null
 
-    this.canvas.wrapperEl.classList.remove('presentation-mode')
+    // Unlock canvas
     this.canvas.setReadonly(false)
 
+    // Exit fullscreen mode
+    this.canvas.wrapperEl.classList.remove('presentation-mode')
     if (document.fullscreenElement) document.exitFullscreen()
+
+    // Reset viewport
+    this.canvas.setViewport(this.savedViewport.x, this.savedViewport.y, this.savedViewport.zoom)
     this.isPresentationMode = false
   }
 
