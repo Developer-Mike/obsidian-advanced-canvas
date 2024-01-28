@@ -1,4 +1,3 @@
-import { ItemView } from "obsidian"
 import CanvasExtension from "./canvas-extension"
 
 const SLIDE_NODE = {

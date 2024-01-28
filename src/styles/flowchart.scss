@@ -75,7 +75,7 @@
     width: 100%;
     height: 100%;
 
-    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);;
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
     background-color: var(--background-primary);
   }
 
@@ -91,6 +91,16 @@
   
     clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);;
     background-color: rgb(var(--canvas-color));
+  }
+
+  /* Remove theme outline */
+  &.is-themed .canvas-node-container {
+    box-shadow: none;
+  }
+  
+  /* Clip for theme but not while editing */
+  .canvas-node-content:not(:has(.embed-iframe)) {
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
   }
 
   .canvas-node-container {
@@ -109,7 +119,7 @@
   @extend .center-text-node;
   transform: skewX(-20deg);
 
-  .canvas-node-content {
+  .canvas-node-content .markdown-embed-content {
     transform: skewX(20deg);
   }
 }
