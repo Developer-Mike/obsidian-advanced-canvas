@@ -1,9 +1,3 @@
-<style>
-img {
-    border-radius: 16px;
-}
-</style>
-
 # Advanced Canvas
 An [Obsidian](https://obsidian.md/) plugin that supercharges your canvas experience. Create presentations, flowcharts and more!
 
