@@ -2,7 +2,8 @@
 An [Obsidian](https://obsidian.md/) plugin that supercharges your canvas experience. Create presentations, flowcharts and more!
 
 ## Installation
-- Extract the `advanced-canvas.zip` to your vault's plugins folder: `<vault>/.obsidian/plugins/`
+- Create a folder named `advanced-canvas` in your vault's plugins folder (`<vault>/.obsidian/plugins/`).
+- Download `main.js`, `styles.css` and `manifest.json` from the latest release and put them in the `advanced-canvas` folder.
 - Enable the plugin in Settings -> Community plugins -> Installed plugins
 
 ## Features
