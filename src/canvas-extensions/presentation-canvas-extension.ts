@@ -1,4 +1,6 @@
+import { scaleBBox } from "src/utils/bbox-helper"
 import CanvasExtension from "./canvas-extension"
+import delay from "src/utils/delay-helper"
 
 export default class PresentationCanvasExtension extends CanvasExtension {
   savedViewport: any = null
@@ -118,18 +120,35 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     })
   }
 
-  private gotoSlide(index: number) {
-    this.currentSlideIndex = index
-    let nodeBBox = this.slides[this.currentSlideIndex].bbox
+  private async gotoSlide(slideIndex: number) {
+    const useCustomZoomFunction = this.plugin.settingsManager.settings.zoomToSlideWithoutPadding
+    const animationDurationMs = this.plugin.settingsManager.settings.slideTransitionAnimationDuration * 1000
+    
+    if (animationDurationMs > 0) {
+      const animationIntensity = this.plugin.settingsManager.settings.slideTransitionAnimationIntensity
 
-    if (this.plugin.settingsManager.settings.zoomToSlideWithoutPadding)
-      this.zoomToBBox(nodeBBox)
+      const currentSlideBBoxEnlarged = scaleBBox(this.slides[this.currentSlideIndex].bbox, animationIntensity)
+      if (useCustomZoomFunction) this.zoomToBBox(currentSlideBBoxEnlarged)
+      else this.canvas.zoomToBbox(currentSlideBBoxEnlarged)
+
+      await delay(animationDurationMs / 2)
+
+      const nextSlideBBoxEnlarged = scaleBBox(this.slides[slideIndex].bbox, animationIntensity)
+      if (useCustomZoomFunction) this.zoomToBBox(nextSlideBBoxEnlarged)
+      else this.canvas.zoomToBbox(nextSlideBBoxEnlarged)
+
+      await delay(animationDurationMs / 2)
+    }
+
+    let nodeBBox = this.slides[slideIndex].bbox
+    if (useCustomZoomFunction) this.zoomToBBox(nodeBBox)
     else this.canvas.zoomToBbox(nodeBBox)
+    
+    this.currentSlideIndex = slideIndex
   }
 
   private async startPresentation() {
     this.slides = this.getSlides()
-    this.currentSlideIndex = -1
     this.savedViewport = {
       x: this.canvas.tx,
       y: this.canvas.ty,
@@ -137,6 +156,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     }
 
     // Enter fullscreen mode
+    this.canvas.wrapperEl.focus()
     this.canvas.wrapperEl.requestFullscreen()
     this.canvas.wrapperEl.classList.add('presentation-mode')
 
@@ -160,10 +180,10 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     this.isPresentationMode = true
 
     // Wait for fullscreen to be enabled
-    await new Promise((resolve) => setTimeout(resolve, 500))
+    await delay(500)
 
     // Zoom to first slide
-    this.nextSlide()
+    this.gotoSlide(0)
   }
 
   private endPresentation() {
@@ -185,19 +205,21 @@ export default class PresentationCanvasExtension extends CanvasExtension {
 
   private nextSlide() {
     // Only go to next slide if there are any slides left
-    if (this.currentSlideIndex < this.slides.length - 1) {
-      this.currentSlideIndex += 1
-    }
+    let targetSlideIndex = Math.min(
+      this.currentSlideIndex + 1, 
+      this.slides.length - 1
+    )
 
-    this.gotoSlide(this.currentSlideIndex)
+    this.gotoSlide(targetSlideIndex)
   }
 
   private previousSlide() {
     // Only go to previous slide if there are any slides left
-    if (this.currentSlideIndex > 0) {
-      this.currentSlideIndex -= 1
-    }
+    let targetSlideIndex = Math.max(
+      0,
+      this.currentSlideIndex - 1
+    )
 
-    this.gotoSlide(this.currentSlideIndex)
+    this.gotoSlide(targetSlideIndex)
   }
 }

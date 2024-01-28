@@ -1,5 +1,6 @@
 import { setIcon } from "obsidian"
 import AdvancedCanvasPlugin from "src/main"
+import { BBox, scaleBBox } from "src/utils/bbox-helper"
 
 export interface MenuOption {
   id: string
@@ -87,19 +88,9 @@ export default abstract class CanvasExtension {
     }
   }
 
-  zoomToBBox(bbox: { minX: number, minY: number, maxX: number, maxY: number }) {
+  zoomToBBox(bbox: BBox) {
     const PADDING_CORRECTION_FACTOR = 1 / 1.1
-
-    // Calculate BBox without padding
-    const widthAdjustment = (1 - PADDING_CORRECTION_FACTOR) * (bbox.maxX - bbox.minX)
-    const heightAdjustment = (1 - PADDING_CORRECTION_FACTOR) * (bbox.maxY - bbox.minY)
-
-    const zoomedBBox = {
-      minX: bbox.minX + widthAdjustment / 2,
-      maxX: bbox.maxX - widthAdjustment / 2,
-      minY: bbox.minY + heightAdjustment / 2,
-      maxY: bbox.maxY - heightAdjustment / 2
-    }
+    const zoomedBBox = scaleBBox(bbox, PADDING_CORRECTION_FACTOR)
 
     this.canvas.zoomToBbox(zoomedBBox)
     
@@ -108,7 +99,7 @@ export default abstract class CanvasExtension {
       this.canvas.canvasRect.width / (bbox.maxX - bbox.minX),
       this.canvas.canvasRect.height / (bbox.maxY - bbox.minY)
     )
-    
+
     this.canvas.tZoom = Math.log2(scaleFactor)
   }
 }

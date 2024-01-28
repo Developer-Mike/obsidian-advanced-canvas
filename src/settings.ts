@@ -10,12 +10,16 @@ export interface AdvancedCanvasPluginSettings {
   defaultSlideSize: string
   useArrowKeysToChangeSlides: boolean
   zoomToSlideWithoutPadding: boolean
+  slideTransitionAnimationDuration: number
+  slideTransitionAnimationIntensity: number
 }
 
 export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   defaultSlideSize: Object.values(SLIDE_SIZE_OPTIONS).first(),
   useArrowKeysToChangeSlides: true,
-  zoomToSlideWithoutPadding: false,
+  zoomToSlideWithoutPadding: true,
+  slideTransitionAnimationDuration: 0.5,
+  slideTransitionAnimationIntensity: 1.25,
 }
 
 export default class AdvancedCanvasSettingsManager {
@@ -89,6 +93,30 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           .setValue(this.settingsManager.settings.zoomToSlideWithoutPadding)
           .onChange(async (value) => {
             this.settingsManager.settings.zoomToSlideWithoutPadding = value
+            await this.settingsManager.saveSettings()
+          })
+      )
+
+    new Setting(containerEl)
+      .setName("Slide transition animation duration")
+      .setDesc("The duration of the slide transition animation in seconds. Set to 0 to disable the animation.")
+      .addText((text) =>
+        text
+          .setValue(this.settingsManager.settings.slideTransitionAnimationDuration.toString())
+          .onChange(async (value) => {
+            this.settingsManager.settings.slideTransitionAnimationDuration = parseFloat(value)
+            await this.settingsManager.saveSettings()
+          })
+      )
+
+    new Setting(containerEl)
+      .setName("Slide transition animation intensity")
+      .setDesc("The intensity of the slide transition animation. The higher the value, the more the canvas will zoom out before zooming in on the next slide.")
+      .addText((text) =>
+        text
+          .setValue(this.settingsManager.settings.slideTransitionAnimationIntensity.toString())
+          .onChange(async (value) => {
+            this.settingsManager.settings.slideTransitionAnimationIntensity = parseFloat(value)
             await this.settingsManager.saveSettings()
           })
       )
