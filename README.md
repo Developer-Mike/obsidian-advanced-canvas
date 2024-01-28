@@ -13,3 +13,4 @@ An [Obsidian](https://obsidian.md/) plugin that improves the canvas experience.
   - Press `Esc` to exit the presentation mode
 
 ## Known issues
+- None
