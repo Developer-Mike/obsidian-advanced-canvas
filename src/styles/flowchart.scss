@@ -57,15 +57,15 @@
   }
 }
 
-/* Rectangle Node */
-.rectangle-node {
-  @extend .center-text-node;
-}
-
 /* Oval Node */
 .oval-node .canvas-node-container {
   @extend .center-text-node;
   border-radius: 500px;
+}
+
+/* Rectangle Node */
+.rectangle-node {
+  @extend .center-text-node;
 }
 
 /* Diamond Node */
