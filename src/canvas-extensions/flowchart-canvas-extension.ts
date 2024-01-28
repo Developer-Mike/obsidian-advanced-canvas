@@ -11,6 +11,13 @@ interface CustomNode {
 
 const CUSTOM_NODES: CustomNode[] = [
   {
+    alias: ['process', 'rectangle', 'rect'],
+    className: 'rectangle-node',
+    defaultSize: { width: 150, height: 60 },
+    menuName: 'Rectangle shaped card',
+    icon: () => 'rectangle-horizontal'
+  },
+  {
     alias: ['start-end', 'start', 'end', 'oval'],
     className: 'oval-node',
     defaultSize: { width: 150, height: 60 },
