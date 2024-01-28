@@ -14,7 +14,7 @@ const CUSTOM_NODES: CustomNode[] = [
     alias: ['start-end', 'start', 'end', 'oval'],
     className: 'oval-node',
     defaultSize: { width: 150, height: 60 },
-    menuName: 'Oval Shaped Card',
+    menuName: 'Oval shaped card',
     icon: () => {
       addIcon('oval', '<rect rx="31.25" height="62.5" width="93.75" y="18.75" x="3.125" stroke-width="5.5" stroke="currentColor" fill="transparent"/>')
       return 'oval'
@@ -24,14 +24,14 @@ const CUSTOM_NODES: CustomNode[] = [
     alias: ['if', 'diamond'],
     className: 'diamond-node',
     defaultSize: { width: 150, height: 100 },
-    menuName: 'Diamond Shaped Card',
+    menuName: 'Diamond shaped card',
     icon: () => 'diamond'
   },
   {
     alias: ['in-out', 'in', 'input', 'out', 'output', 'parallelogram'],
     className: 'parallelogram-node',
     defaultSize: { width: 150, height: 60 },
-    menuName: 'Parallelogram Shaped Card',
+    menuName: 'Parallelogram shaped card',
     icon: () => {
       addIcon('parallelogram', '<rect transform="skewX(-20)" rx="5" height="50" width="70" y="25" x="35" stroke-width="5.5" stroke="currentColor" fill="transparent"/>')
       return 'parallelogram'
@@ -43,7 +43,7 @@ export default class FlowchartCanvasExtension extends CanvasExtension {
   renderMenu(): void {
     let menuOption = this.createMenuOption(
       'more-menu-options', 
-      'More node types', 
+      'More node types',
       'shapes', 
       () => menuOption.classList.toggle('expanded')
     )

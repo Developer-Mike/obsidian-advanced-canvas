@@ -1,6 +1,7 @@
 import esbuild from "esbuild";
 import process from "process";
 import builtins from "builtin-modules";
+import sassPlugin from "esbuild-plugin-sass";
 
 const banner =
 `/*
@@ -38,6 +39,11 @@ const context = await esbuild.context({
 	sourcemap: prod ? false : "inline",
 	treeShaking: true,
 	outfile: "main.js",
+	plugins: [
+		sassPlugin({
+      filter: /^main\.scss$/,
+    }),
+	],
 });
 
 if (prod) {

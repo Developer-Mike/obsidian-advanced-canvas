@@ -11,7 +11,7 @@ export default class GroupCanvasExtension extends CanvasExtension {
     this.addMenuOption(
       this.createMenuOption(
         'create-group', 
-        'Create Group', 
+        'Create group', 
         'group', 
         () => this.addGroupNode(this.canvas)
       )

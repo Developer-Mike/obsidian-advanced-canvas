@@ -1,21 +1,19 @@
 import { ItemView, Plugin } from 'obsidian'
-import CommandHelper from './command-helper'
 import CanvasExtension from './canvas-extension'
 import FlowchartCanvasExtension from './flowchart-canvas-extension'
 import GroupCanvasExtension from './group-canvas-extension'
+import PresentationCanvasExtension from './presentation-canvas-extension'
 
 const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   GroupCanvasExtension,
+  PresentationCanvasExtension,
   FlowchartCanvasExtension,
 ]
 
 export default class AdvancedCanvasPlugin extends Plugin {
-  commandHelper: CommandHelper
   canvasExtensions: CanvasExtension[]
 
 	async onload() {
-    this.commandHelper = new CommandHelper(this)
-
     // @ts-ignore
     this.canvasExtensions = CANVAS_EXTENSIONS.map((Extension) => new Extension(this))
 	}
