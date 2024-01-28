@@ -6,6 +6,7 @@ const SLIDE_NODE = {
 }
 
 export default class PresentationCanvasExtension extends CanvasExtension {
+  isPresentationMode: boolean = false
   slides: any[] = []
   currentSlideIndex: number = 0
 
@@ -22,6 +23,28 @@ export default class PresentationCanvasExtension extends CanvasExtension {
 			id: 'start-presentation',
       name: 'Start presentation',
       checkCallback: this.canvasCommand(() => this.startPresentation())
+    })
+
+    this.plugin.addCommand({
+      id: 'previous-slide',
+      name: 'Previous slide',
+      checkCallback: (checking: boolean) => {
+        if (checking) return this.canvas && this.isPresentationMode
+
+        this.previousSlide()
+        return true
+      }
+    })
+
+    this.plugin.addCommand({
+			id: 'next-slide',
+      name: 'Next slide',
+      checkCallback: (checking: boolean) => {
+        if (checking) return this.canvas && this.isPresentationMode
+
+        this.nextSlide()
+        return true
+      }
     })
   }
 
@@ -126,6 +149,8 @@ export default class PresentationCanvasExtension extends CanvasExtension {
       this.endPresentation()
     }
 
+    this.isPresentationMode = true
+
     // Wait for fullscreen to be enabled
     await new Promise((resolve) => setTimeout(resolve, 250))
 
@@ -141,6 +166,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     this.canvas.setReadonly(false)
 
     if (document.fullscreenElement) document.exitFullscreen()
+    this.isPresentationMode = false
   }
 
   private nextSlide() {
