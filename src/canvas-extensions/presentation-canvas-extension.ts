@@ -6,6 +6,9 @@ const SLIDE_NODE = {
 }
 
 export default class PresentationCanvasExtension extends CanvasExtension {
+  slides: any[] = []
+  currentSlideIndex: number = 0
+
   constructor(plugin: any) {
     super(plugin)
 
@@ -92,20 +95,69 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     })
   }
 
-  private async startPresentation() {
-    const slides = this.getSlides()
-    const slideIndex = 0
+  private gotoSlide(index: number) {
+    this.currentSlideIndex = index
+    this.canvas.zoomToBbox(this.slides[this.currentSlideIndex].bbox)
+  }
 
+  private async startPresentation() {
+    this.slides = this.getSlides()
+    this.currentSlideIndex = -1
+
+    // Enter fullscreen mode
     this.canvas.wrapperEl.requestFullscreen()
-    this.canvas.wrapperEl.onfullscreenchange = (e: any) => {
-      if (!document.fullscreenElement) {
-        this.canvas.wrapperEl.onfullscreenchange = null
-        console.log('Exited presentation mode')
-        // Exit presentation mode
+    this.canvas.wrapperEl.classList.add('presentation-mode')
+
+    // Lock canvas
+    this.canvas.setReadonly(true)
+
+    // Register event handler for keyboard navigation
+    this.canvas.wrapperEl.onkeydown = (e: any) => {
+      if (e.key === 'ArrowRight') {
+        this.nextSlide()
+      } else if (e.key === 'ArrowLeft') {
+        this.previousSlide()
       }
     }
 
+    // Register event handler for exiting presentation mode
+    this.canvas.wrapperEl.onfullscreenchange = (_e: any) => {
+      if (document.fullscreenElement) return
+      this.endPresentation()
+    }
+
+    // Wait for fullscreen to be enabled
     await new Promise((resolve) => setTimeout(resolve, 250))
-    this.canvas.zoomToBbox(slides[slideIndex].bbox)
+
+    // Zoom to first slide
+    this.nextSlide()
+  }
+
+  private endPresentation() {
+    this.canvas.wrapperEl.onkeydown = null
+    this.canvas.wrapperEl.onfullscreenchange = null
+
+    this.canvas.wrapperEl.classList.remove('presentation-mode')
+    this.canvas.setReadonly(false)
+
+    if (document.fullscreenElement) document.exitFullscreen()
+  }
+
+  private nextSlide() {
+    // Only go to next slide if there are any slides left
+    if (this.currentSlideIndex < this.slides.length - 1) {
+      this.currentSlideIndex += 1
+    }
+
+    this.gotoSlide(this.currentSlideIndex)
+  }
+
+  private previousSlide() {
+    // Only go to previous slide if there are any slides left
+    if (this.currentSlideIndex > 0) {
+      this.currentSlideIndex -= 1
+    }
+
+    this.gotoSlide(this.currentSlideIndex)
   }
 }
