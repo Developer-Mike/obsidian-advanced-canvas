@@ -1,12 +1,15 @@
 import { scaleBBox } from "src/utils/bbox-helper"
 import CanvasExtension from "./canvas-extension"
 import delay from "src/utils/delay-helper"
+import { Notice } from "obsidian"
+
+const START_SLIDE_NAME = 'Start'
+const DEFAULT_SLIDE_NAME = 'New Slide'
 
 export default class PresentationCanvasExtension extends CanvasExtension {
   savedViewport: any = null
   isPresentationMode: boolean = false
-  slides: any[] = []
-  currentSlideIndex: number = 0
+  visitedSlides: any[] = []
 
   constructor(plugin: any) {
     super(plugin)
@@ -68,45 +71,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
 
   renderNode(_node: any): void {}
 
-  private getSlideName(index: number): string {
-    return `Slide ${index}`
-  }
-
-  private getStartSlide(): any {
-    for (const [_, node] of this.canvas.nodes) {
-      const nodeData = node.getData()
-      if (nodeData.type !== 'group') continue
-      if (nodeData.label === this.getSlideName(1)) return node
-    }
-
-    return null
-  }
-
-  private getNextSlide(currentSlide: any): any {
-    const edge = this.canvas.getEdgesForNode(currentSlide).first()
-    if (edge == null) return null
-
-    return edge.to.node
-  }
-
-  private getSlides(): any[] {
-    const slides: any[] = []
-
-    const startSlide = this.getStartSlide()
-    if (startSlide == null) return slides
-
-    let currentSlide = startSlide
-    while (currentSlide != null && !slides.contains(currentSlide)) {
-      slides.push(currentSlide)
-      currentSlide = this.getNextSlide(currentSlide)
-    }
-
-    return slides
-  }
-
   private addSlide() {
-    const slideNumber = this.getSlides().length + 1
-
     const slideSizeString = this.plugin.settingsManager.settings.defaultSlideSize
     const slideSizeArray = slideSizeString.split('x').map((value: string) => parseInt(value))
     const slideSize = { width: slideSizeArray[0], height: slideSizeArray[1] }
@@ -114,41 +79,45 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     this.canvas.createGroupNode({
       pos: this.getCenterCoordinates(slideSize),
       size: slideSize,
-      label: this.getSlideName(slideNumber),
+      label: DEFAULT_SLIDE_NAME,
       save: true,
       focus: false,
     })
   }
 
-  private async gotoSlide(slideIndex: number) {
+  private async animateSlideTransition(fromSlide: any, toSlide: any) {
     const useCustomZoomFunction = this.plugin.settingsManager.settings.zoomToSlideWithoutPadding
     const animationDurationMs = this.plugin.settingsManager.settings.slideTransitionAnimationDuration * 1000
     
-    if (animationDurationMs > 0) {
+    if (animationDurationMs > 0 && fromSlide) {
       const animationIntensity = this.plugin.settingsManager.settings.slideTransitionAnimationIntensity
 
-      const currentSlideBBoxEnlarged = scaleBBox(this.slides[this.currentSlideIndex].bbox, animationIntensity)
+      const currentSlideBBoxEnlarged = scaleBBox(fromSlide.bbox, animationIntensity)
       if (useCustomZoomFunction) this.zoomToBBox(currentSlideBBoxEnlarged)
       else this.canvas.zoomToBbox(currentSlideBBoxEnlarged)
 
       await delay(animationDurationMs / 2)
 
-      const nextSlideBBoxEnlarged = scaleBBox(this.slides[slideIndex].bbox, animationIntensity)
+      const nextSlideBBoxEnlarged = scaleBBox(toSlide.bbox, animationIntensity)
       if (useCustomZoomFunction) this.zoomToBBox(nextSlideBBoxEnlarged)
       else this.canvas.zoomToBbox(nextSlideBBoxEnlarged)
 
       await delay(animationDurationMs / 2)
     }
 
-    let nodeBBox = this.slides[slideIndex].bbox
+    let nodeBBox = toSlide.bbox
     if (useCustomZoomFunction) this.zoomToBBox(nodeBBox)
     else this.canvas.zoomToBbox(nodeBBox)
-    
-    this.currentSlideIndex = slideIndex
   }
 
   private async startPresentation() {
-    this.slides = this.getSlides()
+    const startSlide = this.getStartSlide()
+    if (!startSlide) {
+      new Notice('No start slide found. Please create a group node with the label "Start".')
+      return
+    }
+
+    this.visitedSlides = []
     this.savedViewport = {
       x: this.canvas.tx,
       y: this.canvas.ty,
@@ -183,7 +152,8 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     await delay(500)
 
     // Zoom to first slide
-    this.gotoSlide(0)
+    this.visitedSlides.push(startSlide)
+    this.animateSlideTransition(null, startSlide)
   }
 
   private endPresentation() {
@@ -203,23 +173,65 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     this.isPresentationMode = false
   }
 
-  private nextSlide() {
-    // Only go to next slide if there are any slides left
-    let targetSlideIndex = Math.min(
-      this.currentSlideIndex + 1, 
-      this.slides.length - 1
-    )
+  private getStartSlide(): any {
+    for (const [_, node] of this.canvas.nodes) {
+      const nodeData = node.getData()
+      if (nodeData.type !== 'group') continue
+      if (nodeData.label === START_SLIDE_NAME) return node
+    }
 
-    this.gotoSlide(targetSlideIndex)
+    return null
+  }
+
+  private nextSlide() {
+    const fromSlide = this.visitedSlides.last()
+    if (!fromSlide) return
+
+    const outgoingEdges = this.canvas.getEdgesForNode(fromSlide).filter((edge: any) => edge.from.node === fromSlide)
+    let toSlide = outgoingEdges.first()?.to.node
+
+    // If there are multiple outgoing edges, we need to look at the edge label
+    if (outgoingEdges.length > 1) {
+      // Create map of edge labels to nodes
+      const edgeLabeled = outgoingEdges
+        .map((edge: any) => ({ label: edge.label, node: edge.to.node }))
+        // Sort by label
+        .sort((a: any, b: any) => {
+          if (!a.label) return 1
+          if (!b.label) return -1
+
+          return a.label.localeCompare(b.label)
+        })
+
+      // Find which edges already have been traversed
+      const traversedEdgesCount = this.visitedSlides.filter((visitedSlide: any) => visitedSlide == fromSlide).length - 1
+
+      // Select next edge
+      const nextEdge = edgeLabeled[traversedEdgesCount]
+      toSlide = nextEdge.node
+    }
+
+    if (toSlide) {
+      this.visitedSlides.push(toSlide)
+      this.animateSlideTransition(fromSlide, toSlide)
+    } else {
+      // No more slides left, animate to same slide
+      this.animateSlideTransition(fromSlide, fromSlide)
+    }
   }
 
   private previousSlide() {
-    // Only go to previous slide if there are any slides left
-    let targetSlideIndex = Math.max(
-      0,
-      this.currentSlideIndex - 1
-    )
+    const fromSlide = this.visitedSlides.pop()
+    if (!fromSlide) return
 
-    this.gotoSlide(targetSlideIndex)
+    let toSlide = this.visitedSlides.last()
+
+    // Fall back to same slide if there are no more slides before
+    if (!toSlide) {
+      toSlide = fromSlide
+      this.visitedSlides.push(fromSlide)
+    }
+
+    this.animateSlideTransition(fromSlide, toSlide)
   }
 }
