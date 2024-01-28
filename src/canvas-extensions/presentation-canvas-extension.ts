@@ -1,4 +1,3 @@
-import { calculateBBoxWithoutPadding } from "src/utils/canvas-helper"
 import CanvasExtension from "./canvas-extension"
 
 export default class PresentationCanvasExtension extends CanvasExtension {
@@ -123,11 +122,9 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     this.currentSlideIndex = index
     let nodeBBox = this.slides[this.currentSlideIndex].bbox
 
-    if (this.plugin.settingsManager.settings.zoomToSlideWithoutPadding) {
-      nodeBBox = calculateBBoxWithoutPadding(this.canvas, nodeBBox)
-    }
-
-    this.canvas.zoomToBbox(nodeBBox)
+    if (this.plugin.settingsManager.settings.zoomToSlideWithoutPadding)
+      this.zoomToBBox(nodeBBox)
+    else this.canvas.zoomToBbox(nodeBBox)
   }
 
   private async startPresentation() {
@@ -163,7 +160,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     this.isPresentationMode = true
 
     // Wait for fullscreen to be enabled
-    await new Promise((resolve) => setTimeout(resolve, 250))
+    await new Promise((resolve) => setTimeout(resolve, 500))
 
     // Zoom to first slide
     this.nextSlide()

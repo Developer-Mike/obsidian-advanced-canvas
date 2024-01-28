@@ -2,8 +2,8 @@ import { PluginSettingTab, Setting } from "obsidian"
 import AdvancedCanvasPlugin from "./main"
 
 const SLIDE_SIZE_OPTIONS: { [key: string]: string } = {
-  '1600x900': '16:9',
-  '1800x1200': '3:2',
+  '1200x675': '16:9',
+  '1350x900': '3:2',
 }
 
 export interface AdvancedCanvasPluginSettings {
@@ -13,7 +13,7 @@ export interface AdvancedCanvasPluginSettings {
 }
 
 export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
-  defaultSlideSize: '16:9',
+  defaultSlideSize: Object.values(SLIDE_SIZE_OPTIONS).first(),
   useArrowKeysToChangeSlides: true,
   zoomToSlideWithoutPadding: false,
 }

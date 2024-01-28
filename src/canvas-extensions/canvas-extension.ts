@@ -86,4 +86,29 @@ export default abstract class CanvasExtension {
       y: (viewBounds.minY + viewBounds.maxY) / 2 - nodeSize.height / 2,
     }
   }
+
+  zoomToBBox(bbox: { minX: number, minY: number, maxX: number, maxY: number }) {
+    const PADDING_CORRECTION_FACTOR = 1 / 1.1
+
+    // Calculate BBox without padding
+    const widthAdjustment = (1 - PADDING_CORRECTION_FACTOR) * (bbox.maxX - bbox.minX)
+    const heightAdjustment = (1 - PADDING_CORRECTION_FACTOR) * (bbox.maxY - bbox.minY)
+
+    const zoomedBBox = {
+      minX: bbox.minX + widthAdjustment / 2,
+      maxX: bbox.maxX - widthAdjustment / 2,
+      minY: bbox.minY + heightAdjustment / 2,
+      maxY: bbox.maxY - heightAdjustment / 2
+    }
+
+    this.canvas.zoomToBbox(zoomedBBox)
+    
+    // Calculate zoom factor without clamp
+    const scaleFactor = Math.min(
+      this.canvas.canvasRect.width / (bbox.maxX - bbox.minX),
+      this.canvas.canvasRect.height / (bbox.maxY - bbox.minY)
+    )
+    
+    this.canvas.tZoom = Math.log2(scaleFactor)
+  }
 }
