@@ -32,7 +32,7 @@
 - [Presentation mode](#presentation)
   - Create presentations by connecting nodes with arrows
 
-## Updated canvas card menu
+## Updated Canvas Card Menu
 <img src="./assets/card-menu.png" alt="New canvas menu"/>
 
 ## Flowchart
@@ -87,7 +87,7 @@
     <img src="./assets/flowchart-nodes/database.png" alt="Database Shape"/>
 </details>
 
-## Presentation mode
+## Presentation Mode
 <img src="./assets/presentation-mode.gif" alt="Presentation mode example"/>
 
 <details>
@@ -95,7 +95,7 @@
     <img src="./assets/sample-presentation.png" alt="Presentation canvas file"/>
 </details>
 
-### More complex example
+### More Complex Example
 <img src="./assets/sample-presentation-complex.gif" alt="Complex presentation mode example"/>
 
 <details>
@@ -119,12 +119,12 @@
 ## Settings
 <img src="./assets/settings.png" alt="Settings Screen"/>
 
-## Planned features
+## Planned Features
 - [ ] New presentation slides should be created without intersecting the existing ones
 - [ ] Fix the document flowchart node (looks sketchy right now)
 - [ ] Clean up flowchart node icons and css
 - [x] Add better presentation mode navigation (Looping back to previous slides)
 - [x] Add more flowchart shapes
 
-## Known issues
+## Known Issues
 - None so far 👀 - Create an issue if you find any!
