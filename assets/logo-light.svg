@@ -1,13 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black"
     stroke-linecap="round" stroke-linejoin="round">
-
-   <style>
-        * { stroke: black; }
-
-        @media (prefers-color-scheme: dark) {
-            * { stroke: white; }
-        }
-    </style>
 
     <circle stroke-width="1" cx="12" cy="12" r="10" />
 

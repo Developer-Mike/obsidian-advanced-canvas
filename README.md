@@ -1,5 +1,8 @@
 <h3 align="center">
-	<img src="./assets/logo.svg" width="100" alt="Logo"/><br/><br/>
+    <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="./assets/logo-dark.svg">
+        <img alt="Logo" src="./assets/logo-light.svg" width="100">
+    </picture><br/><br/>
 	Advanced Canvas for <a href="https://obsidian.md">Obsidian.md</a>
 </h3>
 
