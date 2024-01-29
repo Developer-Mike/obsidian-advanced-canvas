@@ -36,14 +36,16 @@ An [Obsidian](https://obsidian.md/) plugin that supercharges your canvas experie
 ![Settings](/assets/settings.png)
 
 ## Usage
-- All the features are available in the context menu of the canvas
+- All the features are available in the card menu of the canvas
 - The first slide of the presentation needs to be named `Start` (case sensitive)
 - If you want to loop back to a previous slide, you can number the arrows in the order you want to navigate through them
 
 ## Planned features
 - [ ] New presentation slides should be created without intersecting the existing ones
+- [ ] Fix the document flowchart node (looks sketchy right now)
+- [ ] Clean up flowchart node icons and css
 - [x] Add better presentation mode navigation (Looping back to previous slides)
-- [ ] Add more flowchart shapes
+- [x] Add more flowchart shapes
 
 ## Known issues
 - None so far 👀 - Create an issue if you find any!
