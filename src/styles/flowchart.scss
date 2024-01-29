@@ -230,8 +230,10 @@
 
   .canvas-node-container {
     border-radius: 0;
-    border-bottom: 0;
     box-shadow: none !important;
+
+    border-bottom: 0;
+    border-top: 0;
   }
 
   /* Offset text if not editing */
@@ -239,9 +241,9 @@
     transform: translateY(calc($oval-height / 3));
   }
 
-  &::after, &::before {
-    background-color: var(--background-primary);
-    border: 2px solid rgb(var(--canvas-color));
+  /* Move top of cylinder to background */
+  &:has(.embed-iframe)::after {
+    z-index: -1;
   }
 
   &.is-focused::after, &.is-focused::before {
@@ -258,6 +260,9 @@
     height: $oval-height;
 
     border-radius: 50%;
+    border: 2px solid rgb(var(--canvas-color));
+    
+    background-color: var(--background-primary);
   }
 
   /* Top of cylinder */

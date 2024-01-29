@@ -1,4 +1,4 @@
-import { addIcon, setIcon } from "obsidian"
+import { addIcon } from "obsidian"
 import CanvasExtension from "./canvas-extension"
 
 interface CustomNode {
@@ -130,7 +130,7 @@ export default class FlowchartCanvasExtension extends CanvasExtension {
     const nodeData = node.getData()
 
     if (nodeData.type !== 'text') return
-    if (!nodeData.text.match(/^%%.*%%/)) return
+    if (!nodeData.text.match(/%%.*%%/)) return
 
     const alias = nodeData.text.split('%%')[1]
     const customNode = CUSTOM_NODES.find((node: CustomNode) => node.alias.includes(alias))
