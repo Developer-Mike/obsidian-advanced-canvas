@@ -16,6 +16,9 @@
     <b>⚡ Supercharge</b> your canvas experience! Create presentations, flowcharts and more!
 </p>
 
+> [!WARNING]
+> The next version of this plugin will be a complete rewrite. It will be a big improvement over the current version, but it will also break the current flowchart nodes. If you are using the flowchart nodes, please wait for the next release before using them in your notes.
+
 ## Installation (waiting for approval for the community plugins list)
 - Create a folder named `advanced-canvas` in your vault's plugins folder (`<vault>/.obsidian/plugins/`).
 - Download `main.js`, `styles.css` and `manifest.json` from the latest release and put them in the `advanced-canvas` folder.
@@ -122,10 +125,12 @@
 ## Settings
 <img src="./assets/settings.png" alt="Settings Screen"/>
 
-## Planned Features
+## Roadmap
+- [ ] Finish `unknownData` implementation
+- [ ] Fix icons in the menu popup
+- [ ] Clean up the scss code
+- [ ] Add types for the canvas data
 - [ ] New presentation slides should be created without intersecting the existing ones
-- [ ] Fix the document flowchart node (looks sketchy right now)
-- [ ] Clean up flowchart node icons and css
 - [x] Add better presentation mode navigation (Looping back to previous slides)
 - [x] Add more flowchart shapes
 
