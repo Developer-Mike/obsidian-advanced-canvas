@@ -15,7 +15,7 @@
 }
 
 /* Menu */
-#node-shape {
+#node-shape-option {
   position: relative;
 
   &.expanded .shapes-menu {
@@ -31,7 +31,7 @@
   
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 5px;
+    gap: 1px;
   
     position: absolute;
     bottom: 100%;
@@ -39,11 +39,12 @@
     transform: translateX(-50%);
   
     margin-bottom: 10px;
-    padding: 10px;
+    padding: var(--size-2-1);
   
     background-color: var(--background-primary);
-    border-radius: var(--radius-m);
-    box-shadow: var(--input-shadow);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: var(--radius-s);
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.07);
 
     .custom-node-button {
       padding: 10px;

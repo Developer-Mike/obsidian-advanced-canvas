@@ -1,23 +1,23 @@
-import { scaleBBox } from "src/utils/bbox-helper"
-import CanvasExtension from "./canvas-extension"
-import delay from "src/utils/delay-helper"
-import { Notice } from "obsidian"
+import { scaleBBox } from 'src/utils/bbox-helper'
+import CanvasExtension from './canvas-extension'
+import delay from 'src/utils/delay-helper'
+import { Notice } from 'obsidian'
 
-const START_SLIDE_NAME = 'Start'
-const DEFAULT_SLIDE_NAME = 'New Slide'
+const START_SLIDE_NAME = 'Start Node'
+const DEFAULT_SLIDE_NAME = 'New Node'
 
 export default class PresentationCanvasExtension extends CanvasExtension {
   savedViewport: any = null
   isPresentationMode: boolean = false
-  visitedSlides: any[] = []
+  visitedNodes: any[] = []
 
   constructor(plugin: any) {
     super(plugin)
 
     this.plugin.addCommand({
-			id: 'create-new-slide',
-			name: 'Create new slide',
-			checkCallback: this.canvasCommand(() => this.addSlide())
+			id: 'create-new-node',
+			name: 'Create new node',
+			checkCallback: this.canvasCommand(() => this.addNode())
     })
 
     this.plugin.addCommand({
@@ -27,23 +27,23 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     })
 
     this.plugin.addCommand({
-      id: 'previous-slide',
-      name: 'Previous slide',
+      id: 'previous-node',
+      name: 'Previous node',
       checkCallback: (checking: boolean) => {
         if (checking) return this.canvas && this.isPresentationMode
 
-        this.previousSlide()
+        this.previousNode()
         return true
       }
     })
 
     this.plugin.addCommand({
-			id: 'next-slide',
-      name: 'Next slide',
+			id: 'next-node',
+      name: 'Next node',
       checkCallback: (checking: boolean) => {
         if (checking) return this.canvas && this.isPresentationMode
 
-        this.nextSlide()
+        this.nextNode()
         return true
       }
     })
@@ -64,61 +64,95 @@ export default class PresentationCanvasExtension extends CanvasExtension {
         'new-slide', 
         'Create new slide', 
         'gallery-vertical', 
-        () => this.addSlide()
+        () => this.addNode()
       )
     )
   }
 
-  onPopupMenuCreated(): void {}
-  onNodeChanged(_node: any): void {}
+  onPopupMenuCreated(): void {
+    this.addPopupMenuOption(
+      this.createPopupMenuOption(
+        'start-node', 
+        'Set as start slide', 
+        'play', 
+        () => this.setStartNode([...this.canvas.selection].first())
+      )
+    )
+  }
 
-  private addSlide() {
-    const slideSizeString = this.plugin.settingsManager.settings.defaultSlideSize
-    const slideSizeArray = slideSizeString.split('x').map((value: string) => parseInt(value))
-    const slideSize = { width: slideSizeArray[0], height: slideSizeArray[1] }
+  onNodeChanged(node: any): void {
+    if (node.unknownData.isStartNode) 
+      node.nodeEl.classList.add('start-node')
+    else node.nodeEl.classList.remove('start-node')
+  }
+  
+  private getStartNode(): any {
+    for (const [_, node] of this.canvas.nodes) {
+      if (node.unknownData.isStartNode) return node
+    }
 
-    this.canvas.createGroupNode({
-      pos: this.getCenterCoordinates(slideSize),
-      size: slideSize,
-      label: DEFAULT_SLIDE_NAME,
+    return null
+  }
+
+  private setStartNode(node: any) {
+    if (!node) return
+
+    const startNode = this.getStartNode()
+    if (startNode) this.setNodeUnknownData(startNode, 'isStartNode', false)
+
+    this.setNodeUnknownData(node, 'isStartNode', true)
+  }
+
+  private addNode() {
+    const isStartNode = this.getStartNode() == null
+    const nodeSizeString = this.plugin.settingsManager.settings.defaultSlideSize
+    const nodeSizeArray = nodeSizeString.split('x').map((value: string) => parseInt(value))
+    const nodeSize = { width: nodeSizeArray[0], height: nodeSizeArray[1] }
+
+    const groupNode = this.canvas.createGroupNode({
+      pos: this.getCenterCoordinates(nodeSize),
+      size: nodeSize,
+      label: isStartNode ? START_SLIDE_NAME : DEFAULT_SLIDE_NAME,
       save: true,
       focus: false,
     })
+
+    if (isStartNode) this.setNodeUnknownData(groupNode, 'isStartNode', true)
   }
 
-  private async animateSlideTransition(fromSlide: any, toSlide: any) {
+  private async animateNodeTransition(fromNode: any, toNode: any) {
     const useCustomZoomFunction = this.plugin.settingsManager.settings.zoomToSlideWithoutPadding
     const animationDurationMs = this.plugin.settingsManager.settings.slideTransitionAnimationDuration * 1000
     
-    if (animationDurationMs > 0 && fromSlide) {
+    if (animationDurationMs > 0 && fromNode) {
       const animationIntensity = this.plugin.settingsManager.settings.slideTransitionAnimationIntensity
 
-      const currentSlideBBoxEnlarged = scaleBBox(fromSlide.bbox, animationIntensity)
-      if (useCustomZoomFunction) this.zoomToBBox(currentSlideBBoxEnlarged)
-      else this.canvas.zoomToBbox(currentSlideBBoxEnlarged)
+      const currentNodeBBoxEnlarged = scaleBBox(fromNode.bbox, animationIntensity)
+      if (useCustomZoomFunction) this.zoomToBBox(currentNodeBBoxEnlarged)
+      else this.canvas.zoomToBbox(currentNodeBBoxEnlarged)
 
       await delay(animationDurationMs / 2)
 
-      const nextSlideBBoxEnlarged = scaleBBox(toSlide.bbox, animationIntensity)
-      if (useCustomZoomFunction) this.zoomToBBox(nextSlideBBoxEnlarged)
-      else this.canvas.zoomToBbox(nextSlideBBoxEnlarged)
+      const nextNodeBBoxEnlarged = scaleBBox(toNode.bbox, animationIntensity)
+      if (useCustomZoomFunction) this.zoomToBBox(nextNodeBBoxEnlarged)
+      else this.canvas.zoomToBbox(nextNodeBBoxEnlarged)
 
       await delay(animationDurationMs / 2)
     }
 
-    let nodeBBox = toSlide.bbox
+    let nodeBBox = toNode.bbox
     if (useCustomZoomFunction) this.zoomToBBox(nodeBBox)
     else this.canvas.zoomToBbox(nodeBBox)
   }
 
   private async startPresentation() {
-    const startSlide = this.getStartSlide()
-    if (!startSlide) {
-      new Notice('No start slide found. Please create a group node with the label "Start".')
+    const startNode = this.getStartNode()
+    if (!startNode) {
+      new Notice('No start node found. Please mark a node as a start node trough the popup menu.')
       return
     }
 
-    this.visitedSlides = []
+    this.visitedNodes = []
     this.savedViewport = {
       x: this.canvas.tx,
       y: this.canvas.ty,
@@ -136,8 +170,8 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     // Register event handler for keyboard navigation
     if (this.plugin.settingsManager.settings.useArrowKeysToChangeSlides) {
       this.canvas.wrapperEl.onkeydown = (e: any) => {
-        if (e.key === 'ArrowRight') this.nextSlide()
-        else if (e.key === 'ArrowLeft') this.previousSlide()
+        if (e.key === 'ArrowRight') this.nextNode()
+        else if (e.key === 'ArrowLeft') this.previousNode()
       }
     }
 
@@ -152,9 +186,9 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     // Wait for fullscreen to be enabled
     await delay(500)
 
-    // Zoom to first slide
-    this.visitedSlides.push(startSlide)
-    this.animateSlideTransition(null, startSlide)
+    // Zoom to first node
+    this.visitedNodes.push(startNode)
+    this.animateNodeTransition(null, startNode)
   }
 
   private endPresentation() {
@@ -174,22 +208,12 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     this.isPresentationMode = false
   }
 
-  private getStartSlide(): any {
-    for (const [_, node] of this.canvas.nodes) {
-      const nodeData = node.getData()
-      if (nodeData.type !== 'group') continue
-      if (nodeData.label === START_SLIDE_NAME) return node
-    }
+  private nextNode() {
+    const fromNode = this.visitedNodes.last()
+    if (!fromNode) return
 
-    return null
-  }
-
-  private nextSlide() {
-    const fromSlide = this.visitedSlides.last()
-    if (!fromSlide) return
-
-    const outgoingEdges = this.canvas.getEdgesForNode(fromSlide).filter((edge: any) => edge.from.node === fromSlide)
-    let toSlide = outgoingEdges.first()?.to.node
+    const outgoingEdges = this.canvas.getEdgesForNode(fromNode).filter((edge: any) => edge.from.node === fromNode)
+    let toNode = outgoingEdges.first()?.to.node
 
     // If there are multiple outgoing edges, we need to look at the edge label
     if (outgoingEdges.length > 1) {
@@ -205,34 +229,34 @@ export default class PresentationCanvasExtension extends CanvasExtension {
         })
 
       // Find which edges already have been traversed
-      const traversedEdgesCount = this.visitedSlides.filter((visitedSlide: any) => visitedSlide == fromSlide).length - 1
+      const traversedEdgesCount = this.visitedNodes.filter((visitedNode: any) => visitedNode == fromNode).length - 1
 
       // Select next edge
       const nextEdge = edgeLabeled[traversedEdgesCount]
-      toSlide = nextEdge.node
+      toNode = nextEdge.node
     }
 
-    if (toSlide) {
-      this.visitedSlides.push(toSlide)
-      this.animateSlideTransition(fromSlide, toSlide)
+    if (toNode) {
+      this.visitedNodes.push(toNode)
+      this.animateNodeTransition(fromNode, toNode)
     } else {
-      // No more slides left, animate to same slide
-      this.animateSlideTransition(fromSlide, fromSlide)
+      // No more nodes left, animate to same node
+      this.animateNodeTransition(fromNode, fromNode)
     }
   }
 
-  private previousSlide() {
-    const fromSlide = this.visitedSlides.pop()
-    if (!fromSlide) return
+  private previousNode() {
+    const fromNode = this.visitedNodes.pop()
+    if (!fromNode) return
 
-    let toSlide = this.visitedSlides.last()
+    let toNode = this.visitedNodes.last()
 
-    // Fall back to same slide if there are no more slides before
-    if (!toSlide) {
-      toSlide = fromSlide
-      this.visitedSlides.push(fromSlide)
+    // Fall back to same node if there are no more nodes before
+    if (!toNode) {
+      toNode = fromNode
+      this.visitedNodes.push(fromNode)
     }
 
-    this.animateSlideTransition(fromSlide, toSlide)
+    this.animateNodeTransition(fromNode, toNode)
   }
 }

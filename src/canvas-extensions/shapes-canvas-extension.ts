@@ -101,7 +101,7 @@ export default class ShapesCanvasExtension extends CanvasExtension {
   onCardMenuCreated(): void {}
   onPopupMenuCreated(): void {
     let menuOption = this.createPopupMenuOption(
-      'node-shape',
+      'node-shape-option',
       'Node shape',
       'shapes', 
       () => menuOption.classList.toggle('expanded')
@@ -145,8 +145,7 @@ export default class ShapesCanvasExtension extends CanvasExtension {
 
   private setShapeForSelection(selection: any, shape: Shape) {  
     for (const node of selection) {
-      node.unknownData.shape = shape.id
-      this.onNodeChanged(node)
+      this.setNodeUnknownData(node, 'shape', shape.id)
     }
   }
 }

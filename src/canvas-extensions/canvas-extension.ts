@@ -3,18 +3,11 @@ import { setIcon, setTooltip } from "obsidian"
 import AdvancedCanvasPlugin from "src/main"
 import { BBox, scaleBBox } from "src/utils/bbox-helper"
 
-export interface MenuOption {
-  id: string
-  icon: () => string
-  label: string,
-  callback?: () => void
-}
-
 export default abstract class CanvasExtension {
   plugin: AdvancedCanvasPlugin
   _canvas: any
   set canvas(canvas: any) { this._canvas = canvas }
-  get canvas() { 
+  get canvas() {
     if (this._canvas == null) this._canvas = this.plugin.getCurrentCanvas()
     return this._canvas
   }
@@ -28,17 +21,22 @@ export default abstract class CanvasExtension {
     
     this.plugin.registerEvent(this.plugin.app.workspace.on('active-leaf-change', () => this.initLayout()))
     this.initLayout()
+
+    this.plugin.app.workspace.onLayoutReady(() => {
+      const success = this.initPopupMenuListener()
+      if (success) return
+
+      const layoutChangeListener = this.plugin.app.workspace.on('layout-change', () => {
+        const success = this.initPopupMenuListener()
+        if (success) this.plugin.app.workspace.offref(layoutChangeListener)
+      })
+      this.plugin.registerEvent(layoutChangeListener)
+    })
   }
 
-  private initLayout() {
-    this.canvas = this.plugin.getCurrentCanvas()
-    if (!this.canvas) return
-
-    const canvasPopupMenu = this.canvas.menu
-    if (!canvasPopupMenu) return
-
-    this.onCardMenuCreated()
-    this.initNodes()
+  private initPopupMenuListener(): boolean {
+    const canvasPopupMenu = this.canvas?.menu
+    if (!canvasPopupMenu) return false
 
     const that = this
     const popupMenuUninstaller = around(canvasPopupMenu.constructor.prototype, {
@@ -47,11 +45,22 @@ export default abstract class CanvasExtension {
           const result = next.call(this, ...args)
 
           that.onPopupMenuCreated()
-
+          next.call(this)
+          
           return result
         }
     })
     this.plugin.register(popupMenuUninstaller)
+
+    return true
+  }
+
+  private initLayout() {
+    this.canvas = this.plugin.getCurrentCanvas()
+    if (!this.canvas) return
+
+    this.onCardMenuCreated()
+    this.initNodes()
   }
 
   private initNodes() {
@@ -93,6 +102,13 @@ export default abstract class CanvasExtension {
 
     popupMenuEl.querySelector(`#${element.id}`)?.remove()
     popupMenuEl.appendChild(element)
+  }
+
+  setNodeUnknownData(node: any, key: string, value: any) {
+    node.unknownData[key] = value
+
+    this.onNodeChanged(node)
+    this.canvas.requestSave()
   }
 
   getCenterCoordinates(nodeSize: { width: number, height: number }): { x: number, y: number } {

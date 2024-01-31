@@ -7,3 +7,27 @@
     visibility: hidden;
   }
 }
+
+.canvas-wrapper.presentation-mode .start-node::before {
+  visibility: hidden;
+}
+
+.start-node::before {
+  content: 'Start';
+
+  position: absolute;
+  top: calc(-1 * var(--size-4-1) * var(--zoom-multiplier));
+  right: 0;
+
+  transform: translate(0, -100%) scale(var(--zoom-multiplier));
+  transform-origin: bottom right;
+
+  max-width: calc(100% / var(--zoom-multiplier));
+  padding: var(--size-4-1) var(--size-4-2);
+
+  font-size: 1em;
+  
+  border-radius: var(--radius-s);
+  color: var(--color-green);
+  background-color: rgba(var(--color-green-rgb), 0.1);
+}
