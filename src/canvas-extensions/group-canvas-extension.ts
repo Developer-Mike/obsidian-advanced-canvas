@@ -6,10 +6,12 @@ const GROUP_NODE = {
 }
 
 export default class GroupCanvasExtension extends CanvasExtension {
-  renderNode(_node: any): void {}
-  renderMenu(): void {
-    this.addMenuOption(
-      this.createMenuOption(
+  onNodeChanged(_node: any): void {}
+  onPopupMenuCreated(): void {}
+
+  onCardMenuCreated(): void {
+    this.addCardMenuOption(
+      this.createCardMenuOption(
         'create-group', 
         'Create group', 
         'group', 

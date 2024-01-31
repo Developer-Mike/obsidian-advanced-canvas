@@ -15,15 +15,15 @@
 }
 
 /* Menu */
-#more-menu-options {
+#node-shape {
   position: relative;
 
-  &.expanded .custom-nodes-menu {
+  &.expanded .shapes-menu {
     visibility: visible;
     scale: 1;
   }
 
-  .custom-nodes-menu {
+  .shapes-menu {
     visibility: hidden;
     scale: 0;
     transform-origin: bottom left;
@@ -57,18 +57,18 @@
 }
 
 /* Oval Node */
-.oval-node .canvas-node-container {
+.oval-shape .canvas-node-container {
   @extend .center-text-node;
   border-radius: 500px;
 }
 
 /* Rectangle Node */
-.rectangle-node {
+.rectangle-shape {
   @extend .center-text-node;
 }
 
 /* Diamond Node */
-.diamond-node {
+.diamond-shape {
   @extend .center-text-node;
 
   &::before {
@@ -119,7 +119,7 @@
 }
 
 /* Parallelogram Node */
-.parallelogram-node .canvas-node-container {
+.parallelogram-shape .canvas-node-container {
   @extend .center-text-node;
   transform: skewX(-20deg);
 
@@ -129,13 +129,13 @@
 }
 
 /* Circle Node */
-.circle-node .canvas-node-container {
+.circle-shape .canvas-node-container {
   @extend .center-text-node;
   border-radius: 50%;
 }
 
 /* Predefined Node */
-.predefined-node {
+.predefined-process-shape {
   @extend .center-text-node;
   $line-padding: 10px;
 
@@ -188,7 +188,7 @@
 }
 
 /* Document Node */
-.document-node {
+.document-shape {
   @extend .center-text-node;
   $wave-height: 10px;
   $border-width: 2px;
@@ -244,7 +244,7 @@
 }
 
 /* Database Node */
-.database-node {
+.database-shape {
   @extend .center-text-node;
   $oval-height: 50px;
 

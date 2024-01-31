@@ -58,9 +58,9 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     }
   }
 
-  renderMenu(): void {
-    this.addMenuOption(
-      this.createMenuOption(
+  onCardMenuCreated(): void {
+    this.addCardMenuOption(
+      this.createCardMenuOption(
         'new-slide', 
         'Create new slide', 
         'gallery-vertical', 
@@ -69,7 +69,8 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     )
   }
 
-  renderNode(_node: any): void {}
+  onPopupMenuCreated(): void {}
+  onNodeChanged(_node: any): void {}
 
   private addSlide() {
     const slideSizeString = this.plugin.settingsManager.settings.defaultSlideSize
