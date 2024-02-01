@@ -38,8 +38,12 @@
 - [Presentation mode](#presentation)
   - Create presentations by connecting nodes with arrows
 
-## Updated Canvas Card Menu
-<img src="./assets/card-menu.png" alt="New canvas menu"/>
+## Updated UI
+### Canvas Card Menu
+<img src="./assets/card-menu.png" alt="New canvas card menu"/>
+
+### Node Popup Menu
+<img src="./assets/popup-menu.png" alt="New node popup menu"/>
 
 ## Node Shapes
 <details>
@@ -48,7 +52,7 @@
 </details>
 
 ### Usage
-- Use the [updated card menu](#updated-canvas-card-menu) set a node's shape
+- Use the [updated popup menu](#node-popup-menu) set a node's shape
 
 ### Shapes
 <details>
@@ -92,7 +96,7 @@
 </details>
 
 ## Presentation Mode
-<img src="./assets/presentation-mode.gif" alt="Presentation mode example"/>
+<img src="./assets/sample-presentation-simple.gif" alt="Presentation mode example"/>
 
 <details>
     <summary>Canvas File</summary>
@@ -109,12 +113,12 @@
 
 ### Usage
 - Create the first slide
-  - Create the first slide of the presentation using the [updated card menu](#updated-canvas-card-menu)
-  - OR create a node and mark it as the first slide using the [updated card menu](#updated-canvas-card-menu)
+  - Create the first slide of the presentation using the [updated popup menu](#node-popup-menu)
+  - OR create a node and mark it as the first slide using the [updated card menu](#canvas-card-menu)
 - Add more slides
   - Link the slides using arrows
     - If you want to loop back to a previous slide, you can number the arrows in the order you want to navigate through them
-  - <b>TIP:</b> Create slides with consistent dimensions by using the [updated card menu](#updated-canvas-card-menu)
+  - <b>TIP:</b> Create slides with consistent dimensions by using the [updated card menu](#canvas-card-menu)
 - Control the presentation
   - Start the presentation using the command palette (`Advanced Canvas: Start presentation`)
   - Change slides using the arrow keys
@@ -124,14 +128,9 @@
 <img src="./assets/settings.png" alt="Settings Screen"/>
 
 ## Roadmap
-- [x] Finish `unknownData` implementation
 - [ ] Fix icons in the menu popup
 - [ ] Clean up the scss code
-- [ ] Add types for the canvas data
-- [ ] New presentation slides should be created without intersecting the existing ones
 - [ ] Add `unknownData` changes to the undo/redo stack
-- [x] Add better presentation mode navigation (Looping back to previous slides)
-- [x] Add more flowchart shapes
 
 ## Known Issues
 - None so far 👀 - Create an issue if you find any!

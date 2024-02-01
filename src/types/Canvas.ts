@@ -28,12 +28,14 @@ export interface CanvasNode {
 }
 
 export interface CanvasNodeUnknownData {
-  type: string
+  type: CanvasNodeType
   shape: string
   isStartNode: boolean
 
   [key: string]: any
 }
+
+export type CanvasNodeType = 'text' | 'group' | 'file'
 
 export interface CanvasEdge {
   label: string
