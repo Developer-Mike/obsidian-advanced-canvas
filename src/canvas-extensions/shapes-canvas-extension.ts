@@ -1,5 +1,6 @@
 import { addIcon } from "obsidian"
 import CanvasExtension from "./canvas-extension"
+import { CanvasNode } from "src/types/Canvas"
 
 interface Shape {
   id: string|null
@@ -128,7 +129,7 @@ export default class ShapesCanvasExtension extends CanvasExtension {
     this.addPopupMenuOption(menuOption)
   }
 
-  onNodeChanged(node: any): void {
+  onNodeChanged(node: CanvasNode): void {
     const nodeShape = node.unknownData.shape
     const nodeType = SHAPES.find(n => n.id === nodeShape)
 
@@ -143,7 +144,7 @@ export default class ShapesCanvasExtension extends CanvasExtension {
     node.nodeEl.classList.add(nodeType.className)
   }
 
-  private setShapeForSelection(selection: any, shape: Shape) {  
+  private setShapeForSelection(selection: Set<CanvasNode>, shape: Shape) {  
     for (const node of selection) {
       if (node.unknownData.type !== 'text') continue
       this.setNodeUnknownData(node, 'shape', shape.id)

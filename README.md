@@ -124,11 +124,12 @@
 <img src="./assets/settings.png" alt="Settings Screen"/>
 
 ## Roadmap
-- [ ] Finish `unknownData` implementation
+- [x] Finish `unknownData` implementation
 - [ ] Fix icons in the menu popup
 - [ ] Clean up the scss code
 - [ ] Add types for the canvas data
 - [ ] New presentation slides should be created without intersecting the existing ones
+- [ ] Add `unknownData` changes to the undo/redo stack
 - [x] Add better presentation mode navigation (Looping back to previous slides)
 - [x] Add more flowchart shapes
 

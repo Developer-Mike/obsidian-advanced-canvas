@@ -1,3 +1,4 @@
+import { CanvasNode } from "src/types/Canvas"
 import CanvasExtension from "./canvas-extension"
 
 const GROUP_NODE = {
@@ -6,7 +7,7 @@ const GROUP_NODE = {
 }
 
 export default class GroupCanvasExtension extends CanvasExtension {
-  onNodeChanged(_node: any): void {}
+  onNodeChanged(_node: CanvasNode): void {}
   onPopupMenuCreated(): void {}
 
   onCardMenuCreated(): void {
@@ -15,12 +16,15 @@ export default class GroupCanvasExtension extends CanvasExtension {
         'create-group', 
         'Create group', 
         'group', 
-        () => this.addGroupNode(this.canvas)
+        () => this.addGroupNode()
       )
     )
   }
 
-  private addGroupNode(canvas: any) {
+  private addGroupNode() {
+    const canvas = this.canvas
+    if (!canvas) return
+
     canvas.createGroupNode({
       pos: this.getCenterCoordinates(GROUP_NODE.defaultSize),
       size: GROUP_NODE.defaultSize,

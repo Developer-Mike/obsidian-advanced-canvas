@@ -1,12 +1,13 @@
 import { around } from "monkey-around"
 import { setIcon, setTooltip } from "obsidian"
 import AdvancedCanvasPlugin from "src/main"
+import { Canvas, CanvasNode } from "src/types/Canvas"
 import { BBox, scaleBBox } from "src/utils/bbox-helper"
 
 export default abstract class CanvasExtension {
   plugin: AdvancedCanvasPlugin
-  _canvas: any
-  set canvas(canvas: any) { this._canvas = canvas }
+  _canvas: Canvas
+  set canvas(canvas: Canvas) { this._canvas = canvas }
   get canvas() {
     if (this._canvas == null) this._canvas = this.plugin.getCurrentCanvas()
     return this._canvas
@@ -14,7 +15,7 @@ export default abstract class CanvasExtension {
 
   abstract onCardMenuCreated(): void
   abstract onPopupMenuCreated(): void
-  abstract onNodeChanged(node: any): void
+  abstract onNodeChanged(node: CanvasNode): void
 
   constructor(plugin: AdvancedCanvasPlugin) {
     this.plugin = plugin
@@ -104,7 +105,7 @@ export default abstract class CanvasExtension {
     popupMenuEl.appendChild(element)
   }
 
-  setNodeUnknownData(node: any, key: string, value: any) {
+  setNodeUnknownData(node: CanvasNode, key: string, value: any) {
     node.unknownData[key] = value
 
     this.onNodeChanged(node)

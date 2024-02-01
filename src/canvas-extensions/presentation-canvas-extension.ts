@@ -2,6 +2,7 @@ import { scaleBBox } from 'src/utils/bbox-helper'
 import CanvasExtension from './canvas-extension'
 import delay from 'src/utils/delay-helper'
 import { Notice } from 'obsidian'
+import { CanvasEdge, CanvasNode } from 'src/types/Canvas'
 
 const START_SLIDE_NAME = 'Start Node'
 const DEFAULT_SLIDE_NAME = 'New Node'
@@ -80,21 +81,21 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     )
   }
 
-  onNodeChanged(node: any): void {
+  onNodeChanged(node: CanvasNode): void {
     if (node.unknownData.isStartNode) 
       node.nodeEl.classList.add('start-node')
     else node.nodeEl.classList.remove('start-node')
   }
   
-  private getStartNode(): any {
+  private getStartNode(): CanvasNode|undefined {
     for (const [_, node] of this.canvas.nodes) {
       if (node.unknownData.isStartNode) return node
     }
 
-    return null
+    return undefined
   }
 
-  private setStartNode(node: any) {
+  private setStartNode(node: CanvasNode|undefined) {
     if (!node) return
 
     const startNode = this.getStartNode()
@@ -120,7 +121,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     if (isStartNode) this.setNodeUnknownData(groupNode, 'isStartNode', true)
   }
 
-  private async animateNodeTransition(fromNode: any, toNode: any) {
+  private async animateNodeTransition(fromNode: CanvasNode|undefined, toNode: CanvasNode) {
     const useCustomZoomFunction = this.plugin.settingsManager.settings.zoomToSlideWithoutPadding
     const animationDurationMs = this.plugin.settingsManager.settings.slideTransitionAnimationDuration * 1000
     
@@ -188,7 +189,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
 
     // Zoom to first node
     this.visitedNodes.push(startNode)
-    this.animateNodeTransition(null, startNode)
+    this.animateNodeTransition(undefined, startNode)
   }
 
   private endPresentation() {
@@ -212,16 +213,14 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     const fromNode = this.visitedNodes.last()
     if (!fromNode) return
 
-    const outgoingEdges = this.canvas.getEdgesForNode(fromNode).filter((edge: any) => edge.from.node === fromNode)
+    const outgoingEdges = this.canvas.getEdgesForNode(fromNode).filter((edge: CanvasEdge) => edge.from.node === fromNode)
     let toNode = outgoingEdges.first()?.to.node
 
     // If there are multiple outgoing edges, we need to look at the edge label
     if (outgoingEdges.length > 1) {
       // Create map of edge labels to nodes
-      const edgeLabeled = outgoingEdges
-        .map((edge: any) => ({ label: edge.label, node: edge.to.node }))
-        // Sort by label
-        .sort((a: any, b: any) => {
+      const sortedEdges = outgoingEdges
+        .sort((a: CanvasEdge, b: CanvasEdge) => {
           if (!a.label) return 1
           if (!b.label) return -1
 
@@ -229,11 +228,12 @@ export default class PresentationCanvasExtension extends CanvasExtension {
         })
 
       // Find which edges already have been traversed
-      const traversedEdgesCount = this.visitedNodes.filter((visitedNode: any) => visitedNode == fromNode).length - 1
+      const traversedEdgesCount = this.visitedNodes
+        .filter((visitedNode: CanvasNode) => visitedNode == fromNode).length - 1
 
       // Select next edge
-      const nextEdge = edgeLabeled[traversedEdgesCount]
-      toNode = nextEdge.node
+      const nextEdge = sortedEdges[traversedEdgesCount]
+      toNode = nextEdge.to.node
     }
 
     if (toNode) {
