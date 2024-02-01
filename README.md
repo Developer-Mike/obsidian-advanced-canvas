@@ -26,7 +26,7 @@
 
 ## Features
 - Create groups independently of the nodes ([Updated card menu](#updated-canvas-card-menu))
-- [Flowchart](#flowchart) shapes
+- (Flowchart) [Node shapes](#node-shapes)
   - Process shape
   - Terminal shape
   - Decision shape
@@ -41,21 +41,19 @@
 ## Updated Canvas Card Menu
 <img src="./assets/card-menu.png" alt="New canvas menu"/>
 
-## Flowchart
+## Node Shapes
 <details>
     <summary>Flowchart Example</summary>
     <img src="./assets/sample-flowchart.png" alt="Flowchart Example"/>
 </details>
 
 ### Usage
-- Use the [updated card menu](#updated-canvas-card-menu) to create flowchart nodes
-- OR alter the node type by adding a comment at the beginning or end of the node (e.g. `%%process%%`)
-  - Look up the aliases in the [code file](./src/canvas-extensions/flowchart-canvas-extension.ts)
+- Use the [updated card menu](#updated-canvas-card-menu) set a node's shape
 
 ### Shapes
 <details>
-    <summary>Process Shape</summary>
-    <img src="./assets/flowchart-nodes/process.png" alt="Process Shape"/>
+    <summary>Process/Center Shape</summary>
+    <img src="./assets/flowchart-nodes/process.png" alt="Process/Center Shape"/>
 </details>
 
 <details>
@@ -112,7 +110,7 @@
 ### Usage
 - Create the first slide
   - Create the first slide of the presentation using the [updated card menu](#updated-canvas-card-menu)
-  - OR create a group and name it `Start` (case sensitive)
+  - OR create a node and mark it as the first slide using the [updated card menu](#updated-canvas-card-menu)
 - Add more slides
   - Link the slides using arrows
     - If you want to loop back to a previous slide, you can number the arrows in the order you want to navigate through them

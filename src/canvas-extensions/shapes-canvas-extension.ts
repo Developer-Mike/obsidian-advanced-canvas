@@ -145,6 +145,7 @@ export default class ShapesCanvasExtension extends CanvasExtension {
 
   private setShapeForSelection(selection: any, shape: Shape) {  
     for (const node of selection) {
+      if (node.unknownData.type !== 'text') continue
       this.setNodeUnknownData(node, 'shape', shape.id)
     }
   }
