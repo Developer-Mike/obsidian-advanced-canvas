@@ -125,7 +125,6 @@
 <img src="./assets/settings.png" alt="Settings Screen"/>
 
 ## Roadmap
-- [ ] Fix icons in the menu popup
 - [ ] Clean up the scss code
 - [ ] Add `unknownData` changes to the undo/redo stack
 
