@@ -21,3 +21,6 @@ data.json
 
 # Exclude macOS Finder (System Explorer) View States
 .DS_Store
+
+# Exclude large mp4 files
+assets/*.mp4
