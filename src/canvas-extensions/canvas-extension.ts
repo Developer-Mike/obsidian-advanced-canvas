@@ -23,37 +23,58 @@ export default abstract class CanvasExtension {
     this.plugin.registerEvent(this.plugin.app.workspace.on('active-leaf-change', () => this.initLayout()))
     this.initLayout()
 
-    this.plugin.app.workspace.onLayoutReady(() => {
-      const success = this.initPopupMenuListener()
-      if (success) return
+    const that = this
 
-      const layoutChangeListener = this.plugin.app.workspace.on('layout-change', () => {
-        const success = this.initPopupMenuListener()
-        if (success) this.plugin.app.workspace.offref(layoutChangeListener)
-      })
-      this.plugin.registerEvent(layoutChangeListener)
+    // Patch canvas undo/redo function
+    this.patchWorkspaceFunction(() => this.canvas, {
+      undo: (next: any) => function (...args: any) {
+        const result = next.call(this, ...args)
+
+        that.updateAllNodes()
+
+        return result
+      },
+      redo: (next: any) => function (...args: any) {
+        const result = next.call(this, ...args)
+
+        that.updateAllNodes()
+
+        return result
+      }
+    })
+
+    // Patch popup menu
+    this.patchWorkspaceFunction(() => this.canvas.menu, {
+      render: (next: any) => function (...args: any) {
+        const result = next.call(this, ...args)
+
+        that.onPopupMenuCreated()
+        next.call(this)
+        
+        return result
+      }
     })
   }
 
-  private initPopupMenuListener(): boolean {
-    const canvasPopupMenu = this.canvas?.menu
-    if (!canvasPopupMenu) return false
-
-    const that = this
-    const popupMenuUninstaller = around(canvasPopupMenu.constructor.prototype, {
-      render: (next: any) =>
-        function (...args: any) {
-          const result = next.call(this, ...args)
-
-          that.onPopupMenuCreated()
-          next.call(this)
-          
-          return result
-        }
+  patchWorkspaceFunction(getTarget: () => any, functions: { [key: string]: (next: any) => any }) {
+    const tryPatch = () => {
+      const target = getTarget()
+  
+      const uninstaller = around(target.constructor.prototype, functions)
+      this.plugin.register(uninstaller)
+  
+      return true
+    }
+  
+    const successful = tryPatch()
+    if (successful) return
+  
+    const listener = this.plugin.app.workspace.on('layout-change', () => {
+      const successful = tryPatch()
+      if (successful) this.plugin.app.workspace.offref(listener)
     })
-    this.plugin.register(popupMenuUninstaller)
-
-    return true
+  
+    this.plugin.registerEvent(listener)
   }
 
   private initLayout() {
@@ -61,10 +82,10 @@ export default abstract class CanvasExtension {
     if (!this.canvas) return
 
     this.onCardMenuCreated()
-    this.initNodes()
+    this.updateAllNodes()
   }
 
-  private initNodes() {
+  private updateAllNodes() {
     for (const  [_, node] of this.canvas?.nodes) {
       this.onNodeChanged(node)
     }
@@ -107,8 +128,8 @@ export default abstract class CanvasExtension {
 
   setNodeUnknownData(node: CanvasNode, key: string, value: any) {
     node.unknownData[key] = value
-
     this.onNodeChanged(node)
+
     this.canvas.requestSave()
   }
 

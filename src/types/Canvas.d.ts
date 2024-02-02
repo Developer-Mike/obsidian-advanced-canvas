@@ -1,4 +1,5 @@
 export interface Canvas {
+  data: CanvasData
   nodes: Map<string, CanvasNode>
   menu: PopupMenu
   selection: Set<CanvasNode>
@@ -11,6 +12,8 @@ export interface Canvas {
   ty: number
   tZoom: number
 
+  getData(): CanvasData
+
   getEdgesForNode(node: CanvasNode): CanvasEdge[]
   createGroupNode(options: any): CanvasNode
 
@@ -18,7 +21,14 @@ export interface Canvas {
   setViewport(tx: number, ty: number, tZoom: number): void
   zoomToBbox(bbox: BBox): void
   setReadonly(readonly: boolean): void
+
+  requestPushHistory(data: CanvasData): void
   requestSave(): void
+}
+
+export interface CanvasData {
+  nodes: CanvasNode[]
+  edges: CanvasEdge[]
 }
 
 export interface CanvasNode {

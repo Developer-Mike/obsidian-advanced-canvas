@@ -126,7 +126,6 @@
 
 ## Roadmap
 - [ ] Clean up the scss code
-- [ ] Add `unknownData` changes to the undo/redo stack
 
 ## Known Issues
 - None so far 👀 - Create an issue if you find any!
