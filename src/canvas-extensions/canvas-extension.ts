@@ -25,7 +25,7 @@ export default abstract class CanvasExtension {
 
     const that = this
 
-    // Patch canvas undo/redo function
+    // Patch canvas undo/redo and the handlePaste function
     this.patchWorkspaceFunction(() => this.canvas, {
       undo: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
@@ -37,6 +37,14 @@ export default abstract class CanvasExtension {
       redo: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
 
+        that.updateAllNodes()
+
+        return result
+      },
+      handlePaste: (next: any) => function (...args: any) {
+        const result = next.call(this, ...args)
+
+        console.log('Pasted', ...args)
         that.updateAllNodes()
 
         return result
@@ -56,7 +64,7 @@ export default abstract class CanvasExtension {
     })
   }
 
-  patchWorkspaceFunction(getTarget: () => any, functions: { [key: string]: (next: any) => any }) {
+  patchWorkspaceFunction(getTarget: () => any, functions: { [key: string]: (next: any) => (...args: any) => any }) {
     const tryPatch = () => {
       const target = getTarget()
   

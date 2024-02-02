@@ -126,6 +126,13 @@
 
 ## Roadmap
 - [ ] Clean up the scss code
+  - [ ] Terminal shape
+  - [ ] Decision shape
+  - [ ] Input/Output shape
+  - [ ] On-page Reference shape
+  - [ ] Predefined Process shape
+  - [ ] Document shape
+  - [ ] Database shape
 
 ## Known Issues
 - None so far 👀 - Create an issue if you find any!
