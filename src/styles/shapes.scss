@@ -60,7 +60,7 @@
 /* Oval Node */
 .oval-shape .canvas-node-container {
   @extend .center-text-node;
-  border-radius: 500px;
+  border-radius: 5000px;
 }
 
 /* Rectangle Node */
@@ -71,6 +71,19 @@
 /* Diamond Node */
 .diamond-shape {
   @extend .center-text-node;
+  $clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  --border-width: 2px;
+
+  .canvas-node-container {
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+
+    /* Clip placeholder */
+    .canvas-node-placeholder::after {
+      clip-path: $clip-path;
+    }
+  }
 
   &::before {
     content: '';
@@ -80,41 +93,56 @@
     width: 100%;
     height: 100%;
 
-    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    clip-path: $clip-path;
     background-color: var(--background-primary);
   }
 
   &::after {
     content: '';
     position: absolute;
-    left: -3px;
-    top: -3px;
-    width: calc(100% + 6px);
-    height: calc(100% + 6px);
+    left: calc(var(--border-width) * -1);
+    top: calc(var(--border-width) * -1);
+    width: calc(100% + var(--border-width) * 2);
+    height: calc(100% + var(--border-width) * 2);
   
     z-index: -1;
   
-    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);;
+    clip-path: $clip-path;
     background-color: rgb(var(--canvas-color));
   }
 
-  /* Remove theme outline */
-  &.is-themed .canvas-node-container {
-    box-shadow: none;
-  }
-  
-  /* Clip for theme but not while editing */
-  .canvas-node-content:not(:has(.embed-iframe)) {
-    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  /* Focused */
+  &.is-focused {
+    --border-width: 4px;
+
+    .canvas-node-container {
+      box-shadow: none !important;
+    }
+
+    &::after {
+      background-color: var(--color-accent);
+    }
   }
 
-  .canvas-node-container {
-    background-color: transparent;
-    border: none;
-    box-shadow: none;
+  /* Themed */
+  &.is-themed {
+    .canvas-node-container {
+      box-shadow: none;
+    }
+    
+    /* Clip theme fill */
+    .canvas-node-content:not(:has(.embed-iframe)) {
+      clip-path: $clip-path;
+    }
 
-    .canvas-node-placeholder::after {
-      display: none;
+    &::after {
+      background-color: rgba(var(--canvas-color), 0.7);
+    }
+  }
+
+  &.is-themed.is-focused {
+    &::after {
+      background-color: rgb(var(--canvas-color));
     }
   }
 }
@@ -123,6 +151,9 @@
 .parallelogram-shape .canvas-node-container {
   @extend .center-text-node;
   transform: skewX(-20deg);
+
+  /* Fix blurry text */
+  backface-visibility: hidden;
 
   .canvas-node-content .markdown-embed-content {
     transform: skewX(20deg);
@@ -139,31 +170,12 @@
 .predefined-process-shape {
   @extend .center-text-node;
   $line-padding: 10px;
-
-  padding: 0 $line-padding;
-
-  &.is-focused .canvas-node-container {
-    &::before, &::after {
-      background-color: var(--color-accent);
-    }
-  }
-
-  &.is-themed {
-    .canvas-node-container {
-      &::before, &::after {
-        background-color: rgba(var(--canvas-color), 0.7);
-      }
-    }
-
-    &.is-focused .canvas-node-container {
-      &::before, &::after {
-        background-color: rgb(var(--canvas-color));
-      }
-    }
-  }
+  $line-width: 2px;
 
   .canvas-node-container {
-    box-shadow: none !important;
+    .canvas-node-content {
+      padding: 0 $line-padding;
+    }
 
     &::before, &::after {
       content: '';
@@ -172,18 +184,40 @@
       position: absolute;
       top: 0;
 
-      width: 2px;
+      width: $line-width;
       height: 100%;
 
       background-color: rgb(var(--canvas-color));
     }
 
     &::before {
-      left: $line-padding;
+      left: calc($line-padding - $line-width);
     }
 
     &::after {
-      right: $line-padding;
+      right: calc($line-padding - $line-width);
+    }
+  }
+
+  /* Focused */
+  &.is-focused .canvas-node-container {
+    &::before, &::after {
+      box-shadow: var(--shadow-border-accent);
+      background-color: var(--color-accent);
+    }
+  }
+
+  /* Themed */
+  &.is-themed .canvas-node-container {
+    &::before, &::after {
+      background-color: rgba(var(--canvas-color), 0.7);
+    }
+  }
+
+  &.is-themed.is-focused .canvas-node-container {
+    &::before, &::after {
+      box-shadow: var(--shadow-border-themed);
+      background-color: rgb(var(--canvas-color));
     }
   }
 }

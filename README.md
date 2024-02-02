@@ -24,8 +24,8 @@
 ## Features
 - Create groups independently of the nodes ([Updated card menu](#updated-canvas-card-menu))
 - (Flowchart) [Node shapes](#node-shapes)
-  - Process shape
   - Terminal shape
+  - Process shape
   - Decision shape
   - Input/Output shape
   - On-page Reference shape
@@ -53,13 +53,13 @@
 
 ### Shapes
 <details>
-    <summary>Process/Center Shape</summary>
-    <img src="./assets/flowchart-nodes/process.png" alt="Process/Center Shape"/>
+    <summary>Terminal Shape</summary>
+    <img src="./assets/flowchart-nodes/terminal.png" alt="Terminal Shape"/>
 </details>
 
 <details>
-    <summary>Terminal Shape</summary>
-    <img src="./assets/flowchart-nodes/terminal.png" alt="Terminal Shape"/>
+    <summary>Process/Center Shape</summary>
+    <img src="./assets/flowchart-nodes/process.png" alt="Process/Center Shape"/>
 </details>
 
 <details>
@@ -126,11 +126,12 @@
 
 ## Roadmap
 - [ ] Clean up the scss code
-  - [ ] Terminal shape
-  - [ ] Decision shape
-  - [ ] Input/Output shape
-  - [ ] On-page Reference shape
-  - [ ] Predefined Process shape
+  - [x] Terminal shape
+  - [x] Process shape
+  - [x] Decision shape
+  - [x] Input/Output shape
+  - [x] On-page Reference shape
+  - [x] Predefined Process shape
   - [ ] Document shape
   - [ ] Database shape
 
