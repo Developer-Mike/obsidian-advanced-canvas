@@ -67,6 +67,7 @@ export default abstract class CanvasExtension {
   patchWorkspaceFunction(getTarget: () => any, functions: { [key: string]: (next: any) => (...args: any) => any }) {
     const tryPatch = () => {
       const target = getTarget()
+      if (!target) return false
   
       const uninstaller = around(target.constructor.prototype, functions)
       this.plugin.register(uninstaller)

@@ -72,7 +72,7 @@
 .diamond-shape {
   @extend .center-text-node;
   $clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-  --border-width: 2px;
+  --border-width: 4px;
 
   .canvas-node-container {
     background-color: transparent;
@@ -113,7 +113,7 @@
 
   /* Focused */
   &.is-focused {
-    --border-width: 4px;
+    --border-width: 6px;
 
     .canvas-node-container {
       box-shadow: none !important;

@@ -97,7 +97,7 @@
 
 <details>
     <summary>Canvas File</summary>
-    <img src="./assets/sample-presentation.png" alt="Presentation canvas file"/>
+    <img src="./assets/sample-presentation-simple.png" alt="Presentation canvas file"/>
 </details>
 
 ### More Complex Example
