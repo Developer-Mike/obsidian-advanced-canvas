@@ -52,7 +52,7 @@ export default abstract class CanvasExtension {
     })
 
     // Patch popup menu
-    this.patchWorkspaceFunction(() => this.canvas.menu, {
+    this.patchWorkspaceFunction(() => this.canvas?.menu, {
       render: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
 
