@@ -7,6 +7,7 @@ const GROUP_NODE = {
 }
 
 export default class GroupCanvasExtension extends CanvasExtension {
+  onCanvasChanged(): void {}
   onNodeChanged(_node: CanvasNode): void {}
   onPopupMenuCreated(): void {}
 

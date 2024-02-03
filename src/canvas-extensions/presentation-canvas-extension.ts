@@ -59,6 +59,8 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     }
   }
 
+  onCanvasChanged(): void {}
+
   onCardMenuCreated(): void {
     this.addCardMenuOption(
       this.createCardMenuOption(

@@ -13,6 +13,7 @@ export default abstract class CanvasExtension {
     return this._canvas
   }
 
+  abstract onCanvasChanged(): void
   abstract onCardMenuCreated(): void
   abstract onPopupMenuCreated(): void
   abstract onNodeChanged(node: CanvasNode): void
@@ -90,6 +91,7 @@ export default abstract class CanvasExtension {
     this.canvas = this.plugin.getCurrentCanvas()
     if (!this.canvas) return
 
+    this.onCanvasChanged()
     this.onCardMenuCreated()
     this.updateAllNodes()
   }
