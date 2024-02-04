@@ -99,6 +99,7 @@ const SHAPES: Shape[] = [
 ]
 
 export default class ShapesCanvasExtension extends CanvasExtension {
+  onCanvasChanged(): void {}
   onCardMenuCreated(): void {}
   onPopupMenuCreated(): void {
     let menuOption = this.createPopupMenuOption(

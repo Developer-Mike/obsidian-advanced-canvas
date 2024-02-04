@@ -1,0 +1,9 @@
+<svg viewBox='0 0 141.42135624 141.42135624' preserveAspectRatio='none'>
+    <style>
+        rect {
+            transform-origin: center;
+            transform: rotate(45deg) scale(1.05);
+        }
+    </style>
+    <rect rx='8' x='20.71067812' y='20.71067812' width='100' height='100' />
+</svg>

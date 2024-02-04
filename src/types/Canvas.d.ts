@@ -3,6 +3,7 @@ export interface Canvas {
   nodes: Map<string, CanvasNode>
   menu: PopupMenu
   selection: Set<CanvasNode>
+  nodeInteractionLayer: NodeInteractionLayer
 
   wrapperEl: HTMLElement
   cardMenuEl: HTMLElement
@@ -22,6 +23,9 @@ export interface Canvas {
   zoomToBbox(bbox: BBox): void
   setReadonly(readonly: boolean): void
 
+  undo(): void
+  redo(): void
+  handlePaste(): void
   requestPushHistory(data: CanvasData): void
   requestSave(): void
 }
@@ -58,8 +62,14 @@ export interface CanvasEdge {
   }
 }
 
+export interface NodeInteractionLayer {
+  interactionEl: HTMLElement
+  setTarget(node: CanvasNode): void
+}
+
 export interface PopupMenu {
   menuEl: HTMLElement
+  render(): void
 }
 
 export interface BBox {

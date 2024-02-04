@@ -4,8 +4,10 @@ import ShapesCanvasExtension from './canvas-extensions/shapes-canvas-extension'
 import GroupCanvasExtension from './canvas-extensions/group-canvas-extension'
 import PresentationCanvasExtension from './canvas-extensions/presentation-canvas-extension'
 import AdvancedCanvasSettingsManager from './settings'
+import InteractionTaggerCanvasExtension from './canvas-extensions/interaction-tagger-canvas-extension'
 
 const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
+  InteractionTaggerCanvasExtension,
   GroupCanvasExtension,
   PresentationCanvasExtension,
   ShapesCanvasExtension,
