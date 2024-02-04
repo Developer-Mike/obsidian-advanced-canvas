@@ -14,79 +14,25 @@
   }
 }
 
-.clipped-node {
-  @extend .center-text-node;
-  --border-width: 4px;
-
-  .canvas-node-container {
-    background-color: transparent;
-    border: none;
-    box-shadow: none;
-
-    /* Clip placeholder */
-    .canvas-node-placeholder::after {
-      clip-path: var(--clip-path);
-    }
-  }
-
-  &::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-
-    clip-path: var(--clip-path);
-    background-color: var(--background-primary);
-  }
-
-  &::after {
-    content: '';
-    position: absolute;
-    left: calc(var(--border-width) * -1);
-    top: calc(var(--border-width) * -1);
-    width: calc(100% + var(--border-width) * 2);
-    height: calc(100% + var(--border-width) * 2);
-  
-    z-index: -1;
-  
-    clip-path: var(--clip-path);
-    background-color: rgb(var(--canvas-color));
-  }
+.reactive-node {
+  --border-color: rgb(var(--canvas-color));
+  --box-shadow: none;
 
   /* Focused */
-  &.is-focused {
-    --border-width: 6px;
-
-    .canvas-node-container {
-      box-shadow: none !important;
-    }
-
-    &::after {
-      background-color: var(--color-accent);
-    }
+  &.is-focused, &.is-selected {
+    --border-color: var(--color-accent);
+    --box-shadow: var(--shadow-border-accent);
   }
 
   /* Themed */
   &.is-themed {
-    .canvas-node-container {
-      box-shadow: none;
-    }
-    
-    /* Clip theme fill */
-    .canvas-node-content:not(:has(.embed-iframe)) {
-      clip-path: var(--clip-path);
-    }
-
-    &::after {
-      background-color: rgba(var(--canvas-color), 0.7);
-    }
+    --border-color: rgba(var(--canvas-color), 0.7);
   }
 
-  &.is-themed.is-focused {
-    &::after {
-      background-color: rgb(var(--canvas-color));
+  &.is-themed {
+    &.is-focused, &.is-selected {
+      --border-color: rgb(var(--canvas-color));
+      --box-shadow: var(--shadow-border-themed);
     }
   }
 }
@@ -147,8 +93,60 @@
 
 /* Diamond Node */
 .diamond-shape {
-  --clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-  @extend .clipped-node;
+  @extend .center-text-node;
+  @extend .reactive-node;
+
+  // https://yoksel.github.io/url-encoder/ - assets/diamond.svg
+  $mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 141.42135624 141.42135624' preserveAspectRatio='none'%3E%3Cstyle%3E rect %7B transform-origin: center; transform: rotate(45deg) scale(1.05); %7D %3C/style%3E%3Crect fill='white' rx='8' x='20.71067812' y='20.71067812' width='100' height='100' /%3E%3C/svg%3E");
+
+  @mixin masked {
+    mask-image: $mask;
+    -webkit-mask-image: $mask;
+    mask-repeat: no-repeat;
+    -webkit-mask-repeat: no-repeat;
+    mask-size: 100%;
+    -webkit-mask-size: 100%;
+  }
+
+  .canvas-node-container {
+    border: none;
+    box-shadow: none !important;
+
+    /* Clip while not editing */
+    &:not(:has(.embed-iframe)) {
+      @include masked;
+    }
+
+    /* Clip placeholder */
+    .canvas-node-placeholder::after {
+      @include masked;
+    }
+  }
+
+  /* Border */
+  --border-width: 3px;
+  &::before {
+    @include masked;
+
+    content: '';
+    position: absolute;
+    top: calc(var(--border-width) * -1);
+    left: calc(var(--border-width) * -1);
+    width: calc(100% + var(--border-width) * 2);
+    height: calc(100% + var(--border-width) * 2);
+
+    background-color: var(--border-color);
+  }
+
+  /* Focused */
+  &.is-focused, &.is-selected {
+    --border-width: 5px;
+  }
+
+  /* Themed */
+  &.is-themed .canvas-node-container {
+    box-shadow: none;
+  }
 }
 
 /* Parallelogram Node */
@@ -173,6 +171,8 @@
 /* Predefined Node */
 .predefined-process-shape {
   @extend .center-text-node;
+  @extend .reactive-node;
+
   $line-padding: 10px;
   $line-width: 3px;
 
@@ -191,7 +191,8 @@
       width: $line-width;
       height: 100%;
 
-      background-color: rgb(var(--canvas-color));
+      background-color: var(--border-color);
+      box-shadow: var(--box-shadow);
     }
 
     &::before {
@@ -202,89 +203,18 @@
       right: calc($line-padding - $line-width);
     }
   }
-
-  /* Focused */
-  &.is-focused .canvas-node-container {
-    &::before, &::after {
-      box-shadow: var(--shadow-border-accent);
-      background-color: var(--color-accent);
-    }
-  }
-
-  /* Themed */
-  &.is-themed .canvas-node-container {
-    &::before, &::after {
-      background-color: rgba(var(--canvas-color), 0.7);
-    }
-  }
-
-  &.is-themed.is-focused .canvas-node-container {
-    &::before, &::after {
-      box-shadow: var(--shadow-border-themed);
-      background-color: rgb(var(--canvas-color));
-    }
-  }
 }
 
 /* Document Node */
 .document-shape {
-  @extend .center-text-node;
-  $wave-height: 10px;
-  $border-width: 2px;
-
-  .canvas-node-container {
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-
-    border-bottom: 0;
-    box-shadow: none !important;
-  }
-
-  &.is-focused::after, &.is-focused::before {
-    border-color: var(--color-accent);
-  }
-
-  &::before, &::after {
-    content: '';
-    z-index: 1;
-
-    position: absolute;
-    bottom: 0;
-
-    box-sizing: border-box;
-    width: calc(50% + $border-width / 2);
-    height: $wave-height;
-    transform: translateY(50%);
-
-    border: $border-width solid rgb(var(--canvas-color));
-  }
-
-  &::before{
-    left: 0;
-    transform: translateY($wave-height - $border-width);
-
-    background-color: var(--background-primary);
-    
-    border-radius: 50% / 100%;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    border-top: 0;
-  }
+  // M71.25 0C73.32 0 75 1.68 75 3.75L75 39.375Q56.25 29.25 37.5 39.375 18.75 49.5 0 39.375L0 3.75C0 1.68 1.68 0 3.75 0Z
   
-  &::after{
-    right: 0;
-    transform: translateY(-$border-width);
-    
-    border-radius: 50% / 100%;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-    border-bottom: 0;
-  }
 }
 
 /* Database Node */
 .database-shape {
   @extend .center-text-node;
+  @extend .reactive-node;
   $oval-height: 50px;
 
   .canvas-node-container {
@@ -327,7 +257,7 @@
     height: $oval-height;
 
     border-radius: 50%;
-    border: 2px solid rgb(var(--canvas-color));
+    border: 2px solid var(--border-color);
     
     background-color: var(--background-primary);
   }
@@ -342,23 +272,5 @@
   &::before {
     bottom: 0;
     transform: translateY(50%);
-  }
-
-  &.is-focused {
-    &::before, &::after {
-      border-color: var(--color-accent);
-    }
-  }
-
-  &.is-themed {
-    &::before, &::after {
-      border-color: rgba(var(--canvas-color), 0.7);
-    }
-
-    &.is-focused {
-      &::before, &::after {
-        border-color: rgb(var(--canvas-color));
-      }
-    }
   }
 }
