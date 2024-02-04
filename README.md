@@ -125,15 +125,7 @@
 <img src="./assets/settings.png" alt="Settings Screen"/>
 
 ## Roadmap
-- [ ] Clean up the scss code
-  - [x] Terminal shape
-  - [x] Process shape
-  - [x] Decision shape
-  - [x] Input/Output shape
-  - [x] On-page Reference shape
-  - [x] Predefined Process shape
-  - [ ] Document shape
-  - [ ] Database shape
+- [ ] Show shapes in the preview
 
 ## Known Issues
 - None so far 👀 - Create an issue if you find any!
