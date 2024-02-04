@@ -16,11 +16,13 @@
 
 .reactive-node {
   --border-color: rgb(var(--canvas-color));
+  --border-width: 3px;
   --box-shadow: none;
 
   /* Focused */
   &.is-focused, &.is-selected {
     --border-color: var(--color-accent);
+    --border-width: 5px;
     --box-shadow: var(--shadow-border-accent);
   }
 
@@ -35,6 +37,15 @@
       --box-shadow: var(--shadow-border-themed);
     }
   }
+}
+
+@mixin masked($mask) {
+  mask-image: $mask;
+  -webkit-mask-image: $mask;
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+  mask-size: 100%;
+  -webkit-mask-size: 100%;
 }
 
 /* Menu */
@@ -96,17 +107,8 @@
   @extend .center-text-node;
   @extend .reactive-node;
 
-  // https://yoksel.github.io/url-encoder/ - assets/diamond.svg
+  // https://yoksel.github.io/url-encoder/ - assets/diamond-shape.svg
   $mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 141.42135624 141.42135624' preserveAspectRatio='none'%3E%3Cstyle%3E rect %7B transform-origin: center; transform: rotate(45deg) scale(1.05); %7D %3C/style%3E%3Crect fill='white' rx='8' x='20.71067812' y='20.71067812' width='100' height='100' /%3E%3C/svg%3E");
-
-  @mixin masked {
-    mask-image: $mask;
-    -webkit-mask-image: $mask;
-    mask-repeat: no-repeat;
-    -webkit-mask-repeat: no-repeat;
-    mask-size: 100%;
-    -webkit-mask-size: 100%;
-  }
 
   .canvas-node-container {
     border: none;
@@ -114,19 +116,18 @@
 
     /* Clip while not editing */
     &:not(:has(.embed-iframe)) {
-      @include masked;
+      @include masked($mask);
     }
 
     /* Clip placeholder */
     .canvas-node-placeholder::after {
-      @include masked;
+      @include masked($mask);
     }
   }
 
   /* Border */
-  --border-width: 3px;
   &::before {
-    @include masked;
+    @include masked($mask);
 
     content: '';
     position: absolute;
@@ -136,16 +137,6 @@
     height: calc(100% + var(--border-width) * 2);
 
     background-color: var(--border-color);
-  }
-
-  /* Focused */
-  &.is-focused, &.is-selected {
-    --border-width: 5px;
-  }
-
-  /* Themed */
-  &.is-themed .canvas-node-container {
-    box-shadow: none;
   }
 }
 
@@ -174,7 +165,6 @@
   @extend .reactive-node;
 
   $line-padding: 10px;
-  $line-width: 3px;
 
   .canvas-node-container {
     .canvas-node-content {
@@ -188,27 +178,45 @@
       position: absolute;
       top: 0;
 
-      width: $line-width;
+      width: var(--border-width);
       height: 100%;
 
       background-color: var(--border-color);
-      box-shadow: var(--box-shadow);
     }
 
     &::before {
-      left: calc($line-padding - $line-width);
+      left: calc($line-padding - var(--border-width));
     }
 
     &::after {
-      right: calc($line-padding - $line-width);
+      right: calc($line-padding - var(--border-width));
     }
   }
 }
 
 /* Document Node */
 .document-shape {
-  // M71.25 0C73.32 0 75 1.68 75 3.75L75 39.375Q56.25 29.25 37.5 39.375 18.75 49.5 0 39.375L0 3.75C0 1.68 1.68 0 3.75 0Z
+  @extend .center-text-node;
+  @extend .reactive-node;
+
+  // https://yoksel.github.io/url-encoder/ - assets/document-shape.svg
+  $mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 75 45' preserveAspectRatio='none'%3E%3Cpath d='M75 0 75 39.375Q56.25 29.25 37.5 39.375 18.75 49.5 0 39.375L0 0Z' /%3E%3C/svg%3E");
+
+  --border-width: 2.5px;
+  filter: drop-shadow(0 var(--border-width) 0 var(--border-color))
+          drop-shadow(0 calc(var(--border-width) * -1) 0 var(--border-color));
   
+  .canvas-node-container {
+    @include masked($mask);
+    border: var(--border-width) solid var(--border-color);
+    border-top: none;
+    border-bottom: none;
+  }
+
+  /* Focused */
+  &.is-focused, &.is-selected {
+    --border-width: 4px;
+  }
 }
 
 /* Database Node */
@@ -218,33 +226,17 @@
   $oval-height: 50px;
 
   .canvas-node-container {
-    border-radius: 0;
+    border: var(--border-width) solid var(--border-color);
     border-bottom: 0;
     border-top: 0;
 
+    border-radius: 0;
     box-shadow: none !important;
-  }
 
-  /* Disable default theme fill */
-  &.is-themed .canvas-node-content {
-    background-color: transparent;
-  }
-
-  /* Add theme fill (if not editing) */
-  &.is-themed:not(:has(.embed-iframe)) {
-    .canvas-node-container, &::after, &::before {
-      box-shadow: inset 0 0 0 1000px rgba(var(--canvas-color), 0.07) !important;
+    /* Clip placeholder */
+    .canvas-node-placeholder {
+      transform: translateY(calc($oval-height / 2));
     }
-  }
-
-  /* Offset text if not editing */
-  .canvas-node-content:not(:has(.embed-iframe)) {
-    transform: translateY(calc($oval-height / 3));
-  }
-
-  /* Move top of cylinder to background */
-  &:has(.embed-iframe)::after {
-    z-index: -1;
   }
 
   &::before, &::after {
@@ -257,20 +249,40 @@
     height: $oval-height;
 
     border-radius: 50%;
-    border: 2px solid var(--border-color);
+    border: var(--border-width) solid var(--border-color);
     
     background-color: var(--background-primary);
   }
 
   /* Top of cylinder */
   &::after {
-    top: 0;
-    transform: translateY(-50%);
+    top: calc(-1 * $oval-height / 2);
   }
 
   /* Bottom of cylinder */
   &::before {
-    bottom: 0;
-    transform: translateY(50%);
+    bottom: calc(-1 * $oval-height / 2);
+  }
+
+  /* Disable default theme fill */
+  &.is-themed .canvas-node-content {
+    background-color: transparent;
+  }
+
+  /* Add theme fill if not editing */
+  &.is-themed:not(:has(.embed-iframe)) {
+    .canvas-node-container, &::after, &::before {
+      box-shadow: inset 0 0 0 1000px rgba(var(--canvas-color), 0.07) !important;
+    }
+  }
+
+  /* Offset text if not editing */
+  .canvas-node-content:not(:has(.embed-iframe)) {
+    transform: translateY(calc($oval-height / 2.5));
+  }
+
+  /* Move top of cylinder to background while editing */
+  &:has(.embed-iframe)::after {
+    z-index: -1;
   }
 }
