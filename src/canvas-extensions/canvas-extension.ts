@@ -45,7 +45,6 @@ export default abstract class CanvasExtension {
       handlePaste: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
 
-        console.log('Pasted', ...args)
         that.updateAllNodes()
 
         return result
