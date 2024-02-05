@@ -1,5 +1,5 @@
 import AdvancedCanvasPlugin from "src/main"
-import { Canvas, CanvasNode } from "src/types/Canvas"
+import { CanvasNode } from "src/types/Canvas"
 import { patchWorkspaceFunction } from "src/utils/patch-helper"
 import { CanvasEvent } from "./events"
 
@@ -9,23 +9,39 @@ export default class CanvasEventEmitter {
   constructor(plugin: AdvancedCanvasPlugin) {
     this.plugin = plugin
     const that = this
-    
-    // Listen for canvas change
-    const leafChangeEvent = this.plugin.app.workspace.on('active-leaf-change', () => {
-      const canvas = this.plugin.getCurrentCanvas()
 
-      if (canvas) {
-        this.patchCanvas(canvas)
-        this.triggerWorkspaceEvent(CanvasEvent.CanvasChanged, canvas)
-        this.triggerWorkspaceEvent(CanvasEvent.NodesChanged, canvas, [...canvas.nodes.values()])
-      }
-    })
-    this.plugin.registerEvent(leafChangeEvent)
-
-    // Patch canvas undo/redo and the handlePaste function
+    // Patch canvas
     patchWorkspaceFunction(this.plugin, () => this.plugin.getCurrentCanvas(), {
-      undo: (next: any) => this.redirectAndUpdateAllNodes(next),
-      redo: (next: any) => this.redirectAndUpdateAllNodes(next),
+      // Add custom function
+      setNodeUnknownData: (_next: any) => function (node: CanvasNode, key: string, value: any) {
+        node.unknownData[key] = value
+        this.requestSave()
+  
+        that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [node])
+      },
+      // Listen to canvas change
+      importData: (next: any) => function (...args: any) {
+        const result = next.call(this, ...args)
+
+        that.triggerWorkspaceEvent(CanvasEvent.CanvasChanged, this)
+        that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()])
+
+        return result
+      },
+      undo: (next: any) => function (...args: any) {
+        const result = next.call(this, ...args)
+
+        that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()])
+
+        return result
+      },
+      redo: (next: any) => function (...args: any) {
+        const result = next.call(this, ...args)
+
+        that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()])
+
+        return result
+      },
       addNode: (next: any) => function (node: CanvasNode) {
         const result = next.call(this, node)
 
@@ -35,13 +51,12 @@ export default class CanvasEventEmitter {
       }
     })
 
-    // Patch popup menu
+    // Patch canvas popup menu
     patchWorkspaceFunction(this.plugin, () => this.plugin.getCurrentCanvas()?.menu, {
       render: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
 
-        const canvas = that.plugin.getCurrentCanvas()
-        if (canvas) that.triggerWorkspaceEvent(CanvasEvent.PopupMenuCreated, canvas)
+        that.triggerWorkspaceEvent(CanvasEvent.PopupMenuCreated, this.canvas)
 
         // Re-Center the popup menu
         next.call(this)
@@ -55,39 +70,20 @@ export default class CanvasEventEmitter {
       setTarget: (next: any) => function (node: CanvasNode) {
         const result = next.call(this, node)
 
-        const canvas = that.plugin.getCurrentCanvas()
-        if (canvas) that.triggerWorkspaceEvent(CanvasEvent.NodeInteraction, canvas, node)
+        that.triggerWorkspaceEvent(CanvasEvent.NodeInteraction, this.canvas, node)
 
         return result
       }
     })
 
-    // Trigger canvas changed event when canvas is already loaded
-    this.triggerWorkspaceEvent('active-leaf-change')
-  }
+    // Update current canvas
+    this.plugin.app.workspace.onLayoutReady(() => {
+      const canvas = this.plugin.getCurrentCanvas()
+      if (!canvas) return
 
-  private patchCanvas(canvas: Canvas) {
-    const that = this
-
-    canvas.setNodeUnknownData = function (node: CanvasNode, key: string, value: any) {
-      node.unknownData[key] = value
-      this.requestSave()
-
-      that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [node])
-    }
-  }
-
-  private redirectAndUpdateAllNodes(next: any): (...args: any) => any {
-    const that = this
-
-    return function (...args: any) {
-      const result = next.call(this, ...args)
-
-      const canvas = that.plugin.getCurrentCanvas()
-      if (canvas) that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, canvas, canvas.nodes)
-
-      return result
-    }
+      this.triggerWorkspaceEvent(CanvasEvent.CanvasChanged, canvas)
+      this.triggerWorkspaceEvent(CanvasEvent.NodesChanged, canvas, [...canvas.nodes.values()])
+    })
   }
 
   private triggerWorkspaceEvent(event: string, ...args: any) {

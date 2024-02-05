@@ -45,6 +45,7 @@ export interface CanvasData {
 }
 
 export interface CanvasNode {
+  canvas: Canvas
   nodeEl: HTMLElement
   bbox: BBox
   unknownData: CanvasNodeUnknownData

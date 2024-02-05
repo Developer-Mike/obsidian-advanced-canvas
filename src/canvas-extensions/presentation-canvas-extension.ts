@@ -82,9 +82,9 @@ export default class PresentationCanvasExtension {
     CanvasHelper.addCardMenuOption(
       canvas,
       CanvasHelper.createCardMenuOption(
-        'new-slide', 
-        'Create new slide', 
-        'gallery-vertical', 
+        'new-slide',
+        'Create new slide',
+        'gallery-vertical',
         () => this.addSlide(canvas)
       )
     )
