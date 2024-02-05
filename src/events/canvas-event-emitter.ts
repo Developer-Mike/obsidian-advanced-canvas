@@ -24,9 +24,15 @@ export default class CanvasEventEmitter {
 
     // Patch canvas undo/redo and the handlePaste function
     patchWorkspaceFunction(this.plugin, () => this.plugin.getCurrentCanvas(), {
-      undo: this.redirectAndUpdateAllNodes,
-      redo: this.redirectAndUpdateAllNodes,
-      handlePaste: this.redirectAndUpdateAllNodes
+      undo: (next: any) => this.redirectAndUpdateAllNodes(next),
+      redo: (next: any) => this.redirectAndUpdateAllNodes(next),
+      addNode: (next: any) => function (node: CanvasNode) {
+        const result = next.call(this, node)
+
+        that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [node])
+
+        return result
+      }
     })
 
     // Patch popup menu
@@ -34,7 +40,6 @@ export default class CanvasEventEmitter {
       render: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
 
-        // TODO: Get canvas from args or result
         const canvas = that.plugin.getCurrentCanvas()
         if (canvas) that.triggerWorkspaceEvent(CanvasEvent.PopupMenuCreated, canvas)
 
@@ -78,7 +83,6 @@ export default class CanvasEventEmitter {
     return function (...args: any) {
       const result = next.call(this, ...args)
 
-      // TODO: Get canvas from args or result
       const canvas = that.plugin.getCurrentCanvas()
       if (canvas) that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, canvas, canvas.nodes)
 

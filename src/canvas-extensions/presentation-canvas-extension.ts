@@ -1,19 +1,21 @@
-import { scaleBBox } from 'src/utils/bbox-helper'
-import CanvasExtension from './canvas-extension'
 import delay from 'src/utils/delay-helper'
 import { Notice } from 'obsidian'
 import { Canvas, CanvasEdge, CanvasNode } from 'src/types/Canvas'
+import AdvancedCanvasPlugin from 'src/main'
+import { CanvasEvent } from 'src/events/events'
+import * as CanvasHelper from "src/utils/canvas-helper"
 
 const START_SLIDE_NAME = 'Start Node'
 const DEFAULT_SLIDE_NAME = 'New Node'
 
-export default class PresentationCanvasExtension extends CanvasExtension {
+export default class PresentationCanvasExtension {
+  plugin: AdvancedCanvasPlugin
   savedViewport: any = null
   isPresentationMode: boolean = false
   visitedNodes: any[] = []
 
   constructor(plugin: any) {
-    super(plugin)
+    this.plugin = plugin
 
     this.plugin.addCommand({
 			id: 'create-new-slide',
@@ -52,6 +54,17 @@ export default class PresentationCanvasExtension extends CanvasExtension {
         return true
       }
     })
+
+    // Register events
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.CanvasChanged,
+      (canvas: Canvas) => this.onCanvasChanged(canvas)
+    ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.PopupMenuCreated,
+      (canvas: Canvas) => this.onPopupMenuCreated(canvas)
+    ))
   }
 
   canvasCommand(callback: (canvas: Canvas) => void): (checking: boolean) => boolean {
@@ -66,9 +79,9 @@ export default class PresentationCanvasExtension extends CanvasExtension {
   }
 
   onCanvasChanged(canvas: Canvas): void {
-    this.addCardMenuOption(
+    CanvasHelper.addCardMenuOption(
       canvas,
-      this.createCardMenuOption(
+      CanvasHelper.createCardMenuOption(
         'new-slide', 
         'Create new slide', 
         'gallery-vertical', 
@@ -78,9 +91,9 @@ export default class PresentationCanvasExtension extends CanvasExtension {
   }
 
   onPopupMenuCreated(canvas: Canvas): void {
-    this.addPopupMenuOption(
+    CanvasHelper.addPopupMenuOption(
       canvas,
-      this.createPopupMenuOption(
+      CanvasHelper.createPopupMenuOption(
         'start-node', 
         'Set as start slide', 
         'play', 
@@ -88,9 +101,6 @@ export default class PresentationCanvasExtension extends CanvasExtension {
       )
     )
   }
-
-  onNodesChanged(_canvas: Canvas, _nodes: CanvasNode[]): void {}
-  onNodeInteraction(_canvas: Canvas, _node: CanvasNode): void {}
   
   private getStartNode(canvas: Canvas): CanvasNode|undefined {
     for (const [_, node] of canvas.nodes) {
@@ -116,7 +126,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     const nodeSize = { width: nodeSizeArray[0], height: nodeSizeArray[1] }
 
     const groupNode = canvas.createGroupNode({
-      pos: this.getCenterCoordinates(canvas, nodeSize),
+      pos: CanvasHelper.getCenterCoordinates(canvas, nodeSize),
       size: nodeSize,
       label: isStartNode ? START_SLIDE_NAME : DEFAULT_SLIDE_NAME,
       save: true,
@@ -133,21 +143,21 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     if (animationDurationMs > 0 && fromNode) {
       const animationIntensity = this.plugin.settingsManager.settings.slideTransitionAnimationIntensity
 
-      const currentNodeBBoxEnlarged = scaleBBox(fromNode.bbox, animationIntensity)
-      if (useCustomZoomFunction) this.zoomToBBox(canvas, currentNodeBBoxEnlarged)
+      const currentNodeBBoxEnlarged = CanvasHelper.scaleBBox(fromNode.bbox, animationIntensity)
+      if (useCustomZoomFunction) CanvasHelper.zoomToBBox(canvas, currentNodeBBoxEnlarged)
       else canvas.zoomToBbox(currentNodeBBoxEnlarged)
 
       await delay(animationDurationMs / 2)
 
-      const nextNodeBBoxEnlarged = scaleBBox(toNode.bbox, animationIntensity)
-      if (useCustomZoomFunction) this.zoomToBBox(canvas, nextNodeBBoxEnlarged)
+      const nextNodeBBoxEnlarged = CanvasHelper.scaleBBox(toNode.bbox, animationIntensity)
+      if (useCustomZoomFunction) CanvasHelper.zoomToBBox(canvas, nextNodeBBoxEnlarged)
       else canvas.zoomToBbox(nextNodeBBoxEnlarged)
 
       await delay(animationDurationMs / 2)
     }
 
     let nodeBBox = toNode.bbox
-    if (useCustomZoomFunction) this.zoomToBBox(canvas, nodeBBox)
+    if (useCustomZoomFunction) CanvasHelper.zoomToBBox(canvas, nodeBBox)
     else canvas.zoomToBbox(nodeBBox)
   }
 

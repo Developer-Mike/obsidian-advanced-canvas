@@ -1,31 +1,38 @@
-import { Canvas, CanvasNode } from "src/types/Canvas"
-import CanvasExtension from "./canvas-extension"
+import { Canvas } from "src/types/Canvas"
+import * as CanvasHelper from "src/utils/canvas-helper"
+import AdvancedCanvasPlugin from "src/main"
+import { CanvasEvent } from "src/events/events"
 
 const GROUP_NODE = {
   defaultLabel: 'New Group',
   defaultSize: { width: 500, height: 250 },
 }
 
-export default class GroupCanvasExtension extends CanvasExtension {
-  onCanvasChanged(canvas: Canvas): void {
-    this.addCardMenuOption(
-      canvas,
-      this.createCardMenuOption(
-        'create-group',
-        'Create group',
-        'group', 
-        () => this.addGroupNode(canvas)
-      )
-    )
-  }
+export default class GroupCanvasExtension {
+  plugin: AdvancedCanvasPlugin
 
-  onNodesChanged(_canvas: Canvas, _nodes: CanvasNode[]): void {}
-  onPopupMenuCreated(_canvas: Canvas): void {}
-  onNodeInteraction(_canvas: Canvas, _node: CanvasNode): void {}
+  super(plugin: any) {
+    this.plugin = plugin
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.CanvasChanged,
+      (canvas: Canvas) => {
+        CanvasHelper.addCardMenuOption(
+          canvas,
+          CanvasHelper.createCardMenuOption(
+            'create-group',
+            'Create group',
+            'group', 
+            () => this.addGroupNode(canvas)
+          )
+        )
+      }
+    ))
+  }
 
   private addGroupNode(canvas: Canvas) {
     canvas.createGroupNode({
-      pos: this.getCenterCoordinates(canvas, GROUP_NODE.defaultSize),
+      pos: CanvasHelper.getCenterCoordinates(canvas, GROUP_NODE.defaultSize),
       size: GROUP_NODE.defaultSize,
       label: GROUP_NODE.defaultLabel,
       save: true,

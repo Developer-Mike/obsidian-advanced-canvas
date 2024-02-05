@@ -1,15 +1,14 @@
 import { ItemView, Plugin } from 'obsidian'
-import CanvasExtension from './canvas-extensions/canvas-extension'
+import AdvancedCanvasSettingsManager from './settings'
 import ShapesCanvasExtension from './canvas-extensions/shapes-canvas-extension'
 import GroupCanvasExtension from './canvas-extensions/group-canvas-extension'
 import PresentationCanvasExtension from './canvas-extensions/presentation-canvas-extension'
-import AdvancedCanvasSettingsManager from './settings'
 import InteractionTaggerCanvasExtension from './canvas-extensions/interaction-tagger-canvas-extension'
 import UnknownDataTaggerCanvasExtension from './canvas-extensions/unknown-data-tagger-canvas-extension'
 import CanvasEventEmitter from './events/canvas-event-emitter'
 import { Canvas } from './types/Canvas'
 
-const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
+const CANVAS_EXTENSIONS: any[] = [
   UnknownDataTaggerCanvasExtension,
   InteractionTaggerCanvasExtension,
   GroupCanvasExtension,
@@ -20,7 +19,7 @@ const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
 export default class AdvancedCanvasPlugin extends Plugin {
   settingsManager: AdvancedCanvasSettingsManager
   canvasEventEmitter: CanvasEventEmitter
-  canvasExtensions: CanvasExtension[]
+  canvasExtensions: any[]
 
 	async onload() {
     this.settingsManager = new AdvancedCanvasSettingsManager(this)
@@ -28,8 +27,6 @@ export default class AdvancedCanvasPlugin extends Plugin {
     this.settingsManager.addSettingsTab()
 
     this.canvasEventEmitter = new CanvasEventEmitter(this)
-
-    // @ts-expect-error
     this.canvasExtensions = CANVAS_EXTENSIONS.map((Extension) => new Extension(this))
 	}
 

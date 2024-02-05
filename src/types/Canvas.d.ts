@@ -32,6 +32,13 @@ export interface Canvas {
   setNodeUnknownData(node: CanvasNode, key: string, value: any): void
 }
 
+export interface BBox {
+  minX: number
+  maxX: number
+  minY: number
+  maxY: number
+}
+
 export interface CanvasData {
   nodes: CanvasNode[]
   edges: CanvasEdge[]

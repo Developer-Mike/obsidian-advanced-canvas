@@ -1,6 +1,8 @@
 import { addIcon } from "obsidian"
-import CanvasExtension from "./canvas-extension"
 import { Canvas, CanvasNode } from "src/types/Canvas"
+import AdvancedCanvasPlugin from "src/main"
+import * as CanvasHelper from "src/utils/canvas-helper"
+import { CanvasEvent } from "src/events/events"
 
 interface Shape {
   id: string|null
@@ -88,14 +90,23 @@ const SHAPES: Shape[] = [
   }
 ]
 
-export default class ShapesCanvasExtension extends CanvasExtension {
-  onCanvasChanged(_canvas: Canvas): void {}
+export default class ShapesCanvasExtension {
+  plugin: AdvancedCanvasPlugin
+
+  constructor(plugin: AdvancedCanvasPlugin) {
+    this.plugin = plugin
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.PopupMenuCreated,
+      (canvas: Canvas) => this.onPopupMenuCreated(canvas)
+    ))
+  }
 
   onPopupMenuCreated(canvas: Canvas): void {
     if (!this.hasValidShapeInSelection(canvas.selection))
       return
 
-    let menuOption = this.createPopupMenuOption(
+    let menuOption = CanvasHelper.createPopupMenuOption(
       'node-shape-option',
       'Node shape',
       'shapes', 
@@ -109,7 +120,7 @@ export default class ShapesCanvasExtension extends CanvasExtension {
 
     // Add custom nodes
     for (const shape of SHAPES) {
-      const shapeButton = this.createPopupMenuOption(
+      const shapeButton = CanvasHelper.createPopupMenuOption(
         '',
         shape.menuName,
         shape.icon(),
@@ -120,11 +131,8 @@ export default class ShapesCanvasExtension extends CanvasExtension {
     }
 
     // Add menu option to menu bar
-    this.addPopupMenuOption(canvas, menuOption)
+    CanvasHelper.addPopupMenuOption(canvas, menuOption)
   }
-
-  onNodesChanged(_canvas: Canvas, _nodes: CanvasNode[]): void {}
-  onNodeInteraction(_canvas: Canvas, _node: CanvasNode): void {}
 
   private hasValidShapeInSelection(selection: Set<CanvasNode>): boolean {
     if (!selection) return false
