@@ -104,9 +104,9 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     if (!node) return
 
     const startNode = this.getStartNode(canvas)
-    if (startNode) canvas.setNodeUnknownData(canvas, startNode, 'isStartNode', false)
+    if (startNode) canvas.setNodeUnknownData(startNode, 'isStartNode', false)
 
-    canvas.setNodeUnknownData(canvas, node, 'isStartNode', true)
+    canvas.setNodeUnknownData(node, 'isStartNode', true)
   }
 
   private addSlide(canvas: Canvas) {
