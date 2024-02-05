@@ -102,6 +102,9 @@ export default class ShapesCanvasExtension extends CanvasExtension {
   onCanvasChanged(): void {}
   onCardMenuCreated(): void {}
   onPopupMenuCreated(): void {
+    if (!this.hasValidShapeInSelection(this.canvas?.selection))
+      return
+
     let menuOption = this.createPopupMenuOption(
       'node-shape-option',
       'Node shape',
@@ -143,6 +146,16 @@ export default class ShapesCanvasExtension extends CanvasExtension {
     // Add new shape
     if (!nodeType?.className) return
     node.nodeEl.classList.add(nodeType.className)
+  }
+
+  private hasValidShapeInSelection(selection: Set<CanvasNode>): boolean {
+    if (!selection) return false
+
+    for (const node of selection) {
+      if (node.unknownData.type === 'text') return true
+    }
+    
+    return false
   }
 
   private setShapeForSelection(selection: Set<CanvasNode>, shape: Shape) {  
