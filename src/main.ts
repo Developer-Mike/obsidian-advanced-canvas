@@ -5,8 +5,12 @@ import GroupCanvasExtension from './canvas-extensions/group-canvas-extension'
 import PresentationCanvasExtension from './canvas-extensions/presentation-canvas-extension'
 import AdvancedCanvasSettingsManager from './settings'
 import InteractionTaggerCanvasExtension from './canvas-extensions/interaction-tagger-canvas-extension'
+import UnknownDataTaggerCanvasExtension from './canvas-extensions/unknown-data-tagger-canvas-extension'
+import CanvasEventEmitter from './events/canvas-event-emitter'
+import { Canvas } from './types/Canvas'
 
 const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
+  UnknownDataTaggerCanvasExtension,
   InteractionTaggerCanvasExtension,
   GroupCanvasExtension,
   PresentationCanvasExtension,
@@ -15,6 +19,7 @@ const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
 
 export default class AdvancedCanvasPlugin extends Plugin {
   settingsManager: AdvancedCanvasSettingsManager
+  canvasEventEmitter: CanvasEventEmitter
   canvasExtensions: CanvasExtension[]
 
 	async onload() {
@@ -22,16 +27,18 @@ export default class AdvancedCanvasPlugin extends Plugin {
     await this.settingsManager.loadSettings()
     this.settingsManager.addSettingsTab()
 
-    // @ts-ignore
+    this.canvasEventEmitter = new CanvasEventEmitter(this)
+
+    // @ts-expect-error
     this.canvasExtensions = CANVAS_EXTENSIONS.map((Extension) => new Extension(this))
 	}
 
   onunload() {}
 
-  getCurrentCanvas(): any {
+  getCurrentCanvas(): Canvas|null {
     const canvasView = this.app.workspace.getActiveViewOfType(ItemView)
-		if (canvasView?.getViewType() !== 'canvas') return null
 
+		if (canvasView?.getViewType() !== 'canvas') return null
     return (canvasView as any).canvas
   }
 }

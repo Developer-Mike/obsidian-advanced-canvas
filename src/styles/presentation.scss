@@ -16,7 +16,7 @@
   visibility: hidden;
 }
 
-.start-node::before {
+.canvas-node[data-is-start-node=true]::before {
   content: 'Start';
 
   position: absolute;

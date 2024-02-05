@@ -28,6 +28,8 @@ export interface Canvas {
   handlePaste(): void
   requestPushHistory(data: CanvasData): void
   requestSave(): void
+
+  setNodeUnknownData(node: CanvasNode, key: string, value: any): void
 }
 
 export interface CanvasData {

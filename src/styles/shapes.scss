@@ -92,18 +92,18 @@
 }
 
 /* Oval Node */
-.oval-shape .canvas-node-container {
+.canvas-node[data-shape='oval'] .canvas-node-container {
   @extend .center-text-node;
   border-radius: 5000px;
 }
 
 /* Rectangle Node */
-.rectangle-shape {
+.canvas-node[data-shape='centered-rectangle'] {
   @extend .center-text-node;
 }
 
 /* Diamond Node */
-.diamond-shape {
+.canvas-node[data-shape='diamond'] {
   @extend .center-text-node;
   @extend .reactive-node;
 
@@ -141,7 +141,7 @@
 }
 
 /* Parallelogram Node */
-.parallelogram-shape .canvas-node-container {
+.canvas-node[data-shape='parallelogram'] .canvas-node-container {
   @extend .center-text-node;
   transform: skewX(-20deg);
 
@@ -154,13 +154,13 @@
 }
 
 /* Circle Node */
-.circle-shape .canvas-node-container {
+.canvas-node[data-shape='circle'] .canvas-node-container {
   @extend .center-text-node;
   border-radius: 50%;
 }
 
 /* Predefined Node */
-.predefined-process-shape {
+.canvas-node[data-shape='predefined-process'] {
   @extend .center-text-node;
   @extend .reactive-node;
 
@@ -195,7 +195,7 @@
 }
 
 /* Document Node */
-.document-shape {
+.canvas-node[data-shape='document'] {
   @extend .center-text-node;
   @extend .reactive-node;
 
@@ -220,7 +220,7 @@
 }
 
 /* Database Node */
-.database-shape {
+.canvas-node[data-shape='database'] {
   @extend .center-text-node;
   @extend .reactive-node;
   $oval-height: 50px;

@@ -1,26 +1,23 @@
-import { CanvasNode } from "src/types/Canvas"
+import { Canvas, CanvasNode } from "src/types/Canvas"
 import CanvasExtension from "./canvas-extension"
+import { EXPOSED_DATA } from "./unknown-data-tagger-canvas-extension"
+
+export const TARGET_NODE_DATASET_PREFIX = "target"
 
 export default class InteractionTaggerCanvasExtension extends CanvasExtension {
-  constructor(plugin: any) {
-    super(plugin)
+  onCanvasChanged(_canvas: Canvas): void {}
+  onNodesChanged(_canvas: Canvas, _nodes: CanvasNode[]): void {}
+  onPopupMenuCreated(_canvas: Canvas): void {}
 
-    this.patchWorkspaceFunction(() => this.canvas?.nodeInteractionLayer, {
-      setTarget: (next: any) => function (node: CanvasNode) {
-        const result = next.call(this, node)
+  onNodeInteraction(canvas: Canvas, node: CanvasNode): void {
+    const interactionEl = canvas.nodeInteractionLayer.interactionEl
+    if (!interactionEl) return
 
-        const targetNodeClasses = node?.nodeEl?.classList?.value
-        const interactionElDataset = this.canvas?.nodeInteractionLayer?.interactionEl?.dataset
-        if (!interactionElDataset) return
-        interactionElDataset.targetNode = targetNodeClasses
+    for (const dataKey of EXPOSED_DATA) {
+      const datasetKey = TARGET_NODE_DATASET_PREFIX + dataKey.charAt(0).toUpperCase() + dataKey.slice(1)
 
-        return result
-      }
-    })
+      const dataValue = node?.unknownData[dataKey]
+      if (dataValue) interactionEl.dataset[datasetKey] = dataValue
+    }
   }
-
-  onCanvasChanged(): void {}
-  onNodeChanged(_node: CanvasNode): void {}
-  onPopupMenuCreated(): void {}
-  onCardMenuCreated(): void {}
 }

@@ -1,10 +1,9 @@
 import { addIcon } from "obsidian"
 import CanvasExtension from "./canvas-extension"
-import { CanvasNode } from "src/types/Canvas"
+import { Canvas, CanvasNode } from "src/types/Canvas"
 
 interface Shape {
   id: string|null
-  className: string|null
   menuName: string
   icon: () => string
 }
@@ -12,13 +11,11 @@ interface Shape {
 const SHAPES: Shape[] = [
   {
     id: null,
-    className: null,
     menuName: 'Default',
     icon: () => 'circle-off'
   },
   {
     id: 'oval',
-    className: 'oval-shape',
     menuName: 'Oval',
     icon: () => {
       addIcon('oval', `
@@ -29,19 +26,16 @@ const SHAPES: Shape[] = [
   },
   {
     id: 'centered-rectangle',
-    className: 'rectangle-shape',
     menuName: 'Rectangle',
     icon: () => 'rectangle-horizontal'
   },
   {
     id: 'diamond',
-    className: 'diamond-shape',
     menuName: 'Diamond',
     icon: () => 'diamond'
   },
   {
     id: 'parallelogram',
-    className: 'parallelogram-shape',
     menuName: 'Parallelogram',
     icon: () => {
       addIcon('parallelogram', `
@@ -52,13 +46,11 @@ const SHAPES: Shape[] = [
   },
   {
     id: 'circle',
-    className: 'circle-shape',
     menuName: 'Circle',
     icon: () => 'circle'
   },
   {
     id: 'predefined-process',
-    className: 'predefined-process-shape',
     menuName: 'Predefined process',
     icon: () => {
       addIcon('predefined-process', `
@@ -73,7 +65,6 @@ const SHAPES: Shape[] = [
   },
   {
     id: 'document',
-    className: 'document-shape',
     menuName: 'Document',
     icon: () => {
       addIcon('document', `
@@ -84,7 +75,6 @@ const SHAPES: Shape[] = [
   },
   {
     id: 'database',
-    className: 'database-shape',
     menuName: 'Database',
     icon: () => {
       addIcon('database-shape', `
@@ -99,10 +89,10 @@ const SHAPES: Shape[] = [
 ]
 
 export default class ShapesCanvasExtension extends CanvasExtension {
-  onCanvasChanged(): void {}
-  onCardMenuCreated(): void {}
-  onPopupMenuCreated(): void {
-    if (!this.hasValidShapeInSelection(this.canvas?.selection))
+  onCanvasChanged(_canvas: Canvas): void {}
+
+  onPopupMenuCreated(canvas: Canvas): void {
+    if (!this.hasValidShapeInSelection(canvas.selection))
       return
 
     let menuOption = this.createPopupMenuOption(
@@ -123,30 +113,18 @@ export default class ShapesCanvasExtension extends CanvasExtension {
         '',
         shape.menuName,
         shape.icon(),
-        () => this.setShapeForSelection(this.canvas.selection, shape)
+        () => this.setShapeForSelection(canvas, shape)
       )
 
       shapesMenu.appendChild(shapeButton)
     }
 
     // Add menu option to menu bar
-    this.addPopupMenuOption(menuOption)
+    this.addPopupMenuOption(canvas, menuOption)
   }
 
-  onNodeChanged(node: CanvasNode): void {
-    const nodeShape = node.unknownData.shape
-    const nodeType = SHAPES.find(n => n.id === nodeShape)
-
-    // Remove all previous shapes
-    for (const shape of SHAPES) {
-      if (!shape.className) continue
-      node.nodeEl.classList.remove(shape.className)
-    }
-
-    // Add new shape
-    if (!nodeType?.className) return
-    node.nodeEl.classList.add(nodeType.className)
-  }
+  onNodesChanged(_canvas: Canvas, _nodes: CanvasNode[]): void {}
+  onNodeInteraction(_canvas: Canvas, _node: CanvasNode): void {}
 
   private hasValidShapeInSelection(selection: Set<CanvasNode>): boolean {
     if (!selection) return false
@@ -158,10 +136,10 @@ export default class ShapesCanvasExtension extends CanvasExtension {
     return false
   }
 
-  private setShapeForSelection(selection: Set<CanvasNode>, shape: Shape) {  
-    for (const node of selection) {
+  private setShapeForSelection(canvas: Canvas, shape: Shape) {  
+    for (const node of canvas.selection) {
       if (node.unknownData.type !== 'text') continue
-      this.setNodeUnknownData(node, 'shape', shape.id)
+      canvas.setNodeUnknownData(node, 'shape', shape.id)
     }
   }
 }
