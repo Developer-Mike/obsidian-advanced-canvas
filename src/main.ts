@@ -5,6 +5,7 @@ import GroupCanvasExtension from './canvas-extensions/group-canvas-extension'
 import PresentationCanvasExtension from './canvas-extensions/presentation-canvas-extension'
 import AdvancedCanvasSettingsManager from './settings'
 import InteractionTaggerCanvasExtension from './canvas-extensions/interaction-tagger-canvas-extension'
+import CanvasEmbedExtension from './canvas-embed-extension'
 
 const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   InteractionTaggerCanvasExtension,
@@ -16,17 +17,24 @@ const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
 export default class AdvancedCanvasPlugin extends Plugin {
   settingsManager: AdvancedCanvasSettingsManager
   canvasExtensions: CanvasExtension[]
+  canvasEmbedExtension: CanvasEmbedExtension
 
 	async onload() {
     this.settingsManager = new AdvancedCanvasSettingsManager(this)
-    this.settingsManager.loadSettings()
+    await this.settingsManager.loadSettings()
     this.settingsManager.addSettingsTab()
+
+    setTimeout(() => {
+      this.canvasEmbedExtension = new CanvasEmbedExtension(this)
+    }, 100);
 
     // @ts-ignore
     this.canvasExtensions = CANVAS_EXTENSIONS.map((Extension) => new Extension(this))
 	}
 
-  onunload() {}
+  onunload() {
+    this.canvasEmbedExtension.onunload()
+  }
 
   getCurrentCanvas(): any {
     const canvasView = this.app.workspace.getActiveViewOfType(ItemView)
