@@ -34,6 +34,8 @@
   - Database shape
 - [Presentation mode](#presentation)
   - Create presentations by connecting nodes with arrows
+- Expose [canvas events](#canvas-events) to use them in other plugins
+- Expose node data to style them using CSS
 
 ## Updated UI
 ### Canvas Card Menu
@@ -120,6 +122,23 @@
   - Start the presentation using the command palette (`Advanced Canvas: Start presentation`)
   - Change slides using the arrow keys
   - Exit the presentation using the `ESC` key
+
+## Canvas Events
+All custom events are prefixed with `advanced-canvas:` and can be listened to using `app.workspace.on` (Just like the default events).
+
+Events:
+- `advanced-canvas:canvas-changed`
+  - Fired when a new canvas gets loaded
+  - Payload: `Canvas`
+- `advanced-canvas:popup-menu-created`
+  - Fired when the a node popup menu gets created (Not firing multiple times if it gets moved between nodes of the same type)
+  - Payload: `Canvas`, `Node`
+- `advanced-canvas:nodes-changed`
+  - Fired when any node gets changed
+  - Payload: `Canvas`, `Node[]`
+- `advanced-canvas:node-interaction`
+  - Fired when a node gets hovered over
+  - Payload: `Canvas`, `Node`
 
 ## Settings
 <img src="./assets/settings.png" alt="Settings Screen"/>

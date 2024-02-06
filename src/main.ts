@@ -4,13 +4,13 @@ import ShapesCanvasExtension from './canvas-extensions/shapes-canvas-extension'
 import GroupCanvasExtension from './canvas-extensions/group-canvas-extension'
 import PresentationCanvasExtension from './canvas-extensions/presentation-canvas-extension'
 import InteractionTaggerCanvasExtension from './canvas-extensions/interaction-tagger-canvas-extension'
-import UnknownDataTaggerCanvasExtension from './canvas-extensions/unknown-data-tagger-canvas-extension'
+import NodeDataTaggerCanvasExtension from './canvas-extensions/node-data-tagger-canvas-extension'
 import CanvasEventEmitter from './events/canvas-event-emitter'
 import { Canvas } from './types/Canvas'
 import ReadonlyCanvasExtension from './canvas-extensions/readonly-canvas-extension'
 
 const CANVAS_EXTENSIONS: any[] = [
-  UnknownDataTaggerCanvasExtension,
+  NodeDataTaggerCanvasExtension,
   InteractionTaggerCanvasExtension,
   ReadonlyCanvasExtension,
   GroupCanvasExtension,
