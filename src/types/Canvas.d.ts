@@ -7,6 +7,8 @@ export interface Canvas {
 
   wrapperEl: HTMLElement
   cardMenuEl: HTMLElement
+  canvasControlsEl: HTMLElement
+  quickSettingsButton: HTMLElement
 
   canvasRect: DOMRect
   tx: number
