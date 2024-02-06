@@ -2,6 +2,7 @@ import { Canvas } from "src/types/Canvas"
 import * as CanvasHelper from "src/utils/canvas-helper"
 import AdvancedCanvasPlugin from "src/main"
 import { CanvasEvent } from "src/events/events"
+import { AdvancedCanvasPluginSettings } from "src/settings"
 
 export default class ReadonlyCanvasExtension {
   plugin: AdvancedCanvasPlugin
@@ -9,14 +10,12 @@ export default class ReadonlyCanvasExtension {
   constructor(plugin: any) {
     this.plugin = plugin
 
-    if (!this.plugin.settingsManager.settings.betterReadonlyEnabled) return
+    if (!this.plugin.settingsManager.getSetting('betterReadonlyEnabled')) return
 
     /* Register listeners */
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.PopupMenuCreated,
-      (canvas: Canvas, _node: any) => {
-        canvas.menu.menuEl.style.visibility = this.plugin.settingsManager.settings.disableNodePopup ? 'hidden' : 'visible'
-      }
+      (canvas: Canvas, _node: any) => this.updatePopupMenu(canvas)
     ))
 
     /* Add settings */
@@ -47,12 +46,7 @@ export default class ReadonlyCanvasExtension {
         'Disable node popup', 
         'arrow-up-right-from-circle', 
         'disableNodePopup',
-        (state: Boolean) => {
-          const menuEl = canvas.menu?.menuEl
-          if (!menuEl) return
-          
-          canvas.menu.menuEl.style.visibility = state ? 'hidden' : 'visible'
-        }
+        () => this.updatePopupMenu(canvas)
       )
     )
 
@@ -77,19 +71,18 @@ export default class ReadonlyCanvasExtension {
     )
   }
 
-  private createToggle(id: string, text: string, icon: string, settingKey: string, callback?: (state: Boolean) => void): HTMLElement {
+  private createToggle(id: string, text: string, icon: string, settingKey: keyof AdvancedCanvasPluginSettings, callback?: () => void): HTMLElement {
     const toggle = CanvasHelper.createQuickSettingsButton(
       id,
       text,
       icon,
-      () => {
-        // @ts-expect-error
-        const newValue = !this.plugin.settingsManager.settings[settingKey]
-        this.plugin.settingsManager.setSetting({ [settingKey]: newValue })
-        toggle.dataset.toggled = newValue.toString()
+      () => { (async () => {
+        const newValue = !this.plugin.settingsManager.getSetting(settingKey)
+        await this.plugin.settingsManager.setSetting({ [settingKey]: newValue })
 
-        callback?.call(this, newValue)
-      }
+        toggle.dataset.toggled = this.plugin.settingsManager.getSetting(settingKey).toString()
+        callback?.call(this)
+      })() }
     )
     toggle.classList.add('show-while-readonly')
 
@@ -97,5 +90,12 @@ export default class ReadonlyCanvasExtension {
     toggle.dataset.toggled = this.plugin.settingsManager.settings[settingKey].toString()
 
     return toggle
+  }
+
+  private updatePopupMenu(canvas: Canvas) {
+    const menuEl = canvas.menu?.menuEl
+    if (!menuEl) return
+    
+    canvas.menu.menuEl.style.visibility = this.plugin.settingsManager.getSetting('disableNodePopup') ? 'hidden' : 'visible'
   }
 }

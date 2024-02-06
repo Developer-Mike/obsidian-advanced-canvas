@@ -17,7 +17,7 @@ export default class PresentationCanvasExtension {
   constructor(plugin: any) {
     this.plugin = plugin
 
-    if (!this.plugin.settingsManager.settings.presentationFeatureEnabled) return
+    if (!this.plugin.settingsManager.getSetting('presentationFeatureEnabled')) return
 
     this.plugin.addCommand({
 			id: 'create-new-slide',
@@ -123,7 +123,7 @@ export default class PresentationCanvasExtension {
 
   private addSlide(canvas: Canvas) {
     const isStartNode = this.getStartNode(canvas) == null
-    const nodeSizeString = this.plugin.settingsManager.settings.defaultSlideSize
+    const nodeSizeString = this.plugin.settingsManager.getSetting('defaultSlideSize')
     const nodeSizeArray = nodeSizeString.split('x').map((value: string) => parseInt(value))
     const nodeSize = { width: nodeSizeArray[0], height: nodeSizeArray[1] }
 
@@ -139,11 +139,11 @@ export default class PresentationCanvasExtension {
   }
 
   private async animateNodeTransition(canvas: Canvas, fromNode: CanvasNode|undefined, toNode: CanvasNode) {
-    const useCustomZoomFunction = this.plugin.settingsManager.settings.zoomToSlideWithoutPadding
-    const animationDurationMs = this.plugin.settingsManager.settings.slideTransitionAnimationDuration * 1000
+    const useCustomZoomFunction = this.plugin.settingsManager.getSetting('zoomToSlideWithoutPadding')
+    const animationDurationMs = this.plugin.settingsManager.getSetting('slideTransitionAnimationDuration') * 1000
     
     if (animationDurationMs > 0 && fromNode) {
-      const animationIntensity = this.plugin.settingsManager.settings.slideTransitionAnimationIntensity
+      const animationIntensity = this.plugin.settingsManager.getSetting('slideTransitionAnimationIntensity')
 
       const currentNodeBBoxEnlarged = CanvasHelper.scaleBBox(fromNode.bbox, animationIntensity)
       if (useCustomZoomFunction) CanvasHelper.zoomToBBox(canvas, currentNodeBBoxEnlarged)
@@ -186,7 +186,7 @@ export default class PresentationCanvasExtension {
     canvas.setReadonly(true)
 
     // Register event handler for keyboard navigation
-    if (this.plugin.settingsManager.settings.useArrowKeysToChangeSlides) {
+    if (this.plugin.settingsManager.getSetting('useArrowKeysToChangeSlides')) {
       canvas.wrapperEl.onkeydown = (e: any) => {
         if (e.key === 'ArrowRight') this.nextNode(canvas)
         else if (e.key === 'ArrowLeft') this.previousNode(canvas)

@@ -41,9 +41,9 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
 }
 
 export default class AdvancedCanvasSettingsManager {
-  plugin: AdvancedCanvasPlugin
-  settings: AdvancedCanvasPluginSettings
-  settingsTab: AdvancedCanvasPluginSettingTab
+  private plugin: AdvancedCanvasPlugin
+  private settings: AdvancedCanvasPluginSettings
+  private settingsTab: AdvancedCanvasPluginSettingTab
 
   constructor(plugin: AdvancedCanvasPlugin) {
     this.plugin = plugin
@@ -57,13 +57,17 @@ export default class AdvancedCanvasSettingsManager {
     await this.plugin.saveData(this.settings)
   }
 
+  getSetting<T extends keyof AdvancedCanvasPluginSettings>(key: T): AdvancedCanvasPluginSettings[T] {
+    return this.settings[key]
+  }
+
   async setSetting(data: Partial<AdvancedCanvasPluginSettings>) {
     this.settings = Object.assign(this.settings, data)
     await this.saveSettings()
   }
 
   addSettingsTab() {
-    this.settingsTab = new AdvancedCanvasPluginSettingTab(this)
+    this.settingsTab = new AdvancedCanvasPluginSettingTab(this.plugin, this)
     this.plugin.addSettingTab(this.settingsTab)
   }
 }
@@ -71,8 +75,8 @@ export default class AdvancedCanvasSettingsManager {
 export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
   settingsManager: AdvancedCanvasSettingsManager
 
-  constructor(settingsManager: AdvancedCanvasSettingsManager) {
-    super(settingsManager.plugin.app, settingsManager.plugin)
+  constructor(plugin: AdvancedCanvasPlugin, settingsManager: AdvancedCanvasSettingsManager) {
+    super(plugin.app, plugin)
     this.settingsManager = settingsManager
   }
 
@@ -89,7 +93,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       .addToggle((toggle) =>
         toggle
           .setTooltip("Requires a reload to take effect.")
-          .setValue(this.settingsManager.settings.shapesFeatureEnabled)
+          .setValue(this.settingsManager.getSetting('shapesFeatureEnabled'))
           .onChange(async (value) => await this.settingsManager.setSetting({ shapesFeatureEnabled: value }))
       )
 
@@ -100,7 +104,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       .addToggle((toggle) =>
         toggle
           .setTooltip("Requires a reload to take effect.")
-          .setValue(this.settingsManager.settings.betterReadonlyEnabled)
+          .setValue(this.settingsManager.getSetting('betterReadonlyEnabled'))
           .onChange(async (value) => await this.settingsManager.setSetting({ betterReadonlyEnabled: value }))
       )
 
@@ -148,7 +152,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       .addToggle((toggle) =>
         toggle
           .setTooltip("Requires a reload to take effect.")
-          .setValue(this.settingsManager.settings.presentationFeatureEnabled)
+          .setValue(this.settingsManager.getSetting('presentationFeatureEnabled'))
           .onChange(async (value) => await this.settingsManager.setSetting({ presentationFeatureEnabled: value }))
       )
 
@@ -158,7 +162,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       .addDropdown((dropdown) =>
         dropdown
           .addOptions(SLIDE_SIZE_OPTIONS)
-          .setValue(this.settingsManager.settings.defaultSlideSize)
+          .setValue(this.settingsManager.getSetting('defaultSlideSize'))
           .onChange(async (value) => await this.settingsManager.setSetting({ defaultSlideSize: value }))
         )
 
@@ -167,7 +171,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       .setDesc("When enabled, you can use the arrow keys to change slides in presentation mode.")
       .addToggle((toggle) =>
         toggle
-          .setValue(this.settingsManager.settings.useArrowKeysToChangeSlides)
+          .setValue(this.settingsManager.getSetting('useArrowKeysToChangeSlides'))
           .onChange(async (value) => await this.settingsManager.setSetting({ useArrowKeysToChangeSlides: value }))
       )
 
@@ -176,7 +180,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       .setDesc("When enabled, the canvas will zoom to the slide without padding.")
       .addToggle((toggle) =>
         toggle
-          .setValue(this.settingsManager.settings.zoomToSlideWithoutPadding)
+          .setValue(this.settingsManager.getSetting('zoomToSlideWithoutPadding'))
           .onChange(async (value) => await this.settingsManager.setSetting({ zoomToSlideWithoutPadding: value }))
       )
 
@@ -185,7 +189,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       .setDesc("The duration of the slide transition animation in seconds. Set to 0 to disable the animation.")
       .addText((text) =>
         text
-          .setValue(this.settingsManager.settings.slideTransitionAnimationDuration.toString())
+          .setValue(this.settingsManager.getSetting('slideTransitionAnimationDuration').toString())
           .onChange(async (value) => await this.settingsManager.setSetting({ slideTransitionAnimationDuration: parseFloat(value) }))
       )
 
@@ -194,7 +198,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       .setDesc("The intensity of the slide transition animation. The higher the value, the more the canvas will zoom out before zooming in on the next slide.")
       .addText((text) =>
         text
-          .setValue(this.settingsManager.settings.slideTransitionAnimationIntensity.toString())
+          .setValue(this.settingsManager.getSetting('slideTransitionAnimationIntensity').toString())
           .onChange(async (value) => await this.settingsManager.setSetting({ slideTransitionAnimationIntensity: parseFloat(value) }))
       )
   }
