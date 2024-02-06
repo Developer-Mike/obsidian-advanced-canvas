@@ -7,6 +7,8 @@ const SLIDE_SIZE_OPTIONS: { [key: string]: string } = {
 }
 
 export interface AdvancedCanvasPluginSettings {
+  shapesFeatureEnabled: boolean
+  presentationFeatureEnabled: boolean
   defaultSlideSize: string
   useArrowKeysToChangeSlides: boolean
   zoomToSlideWithoutPadding: boolean
@@ -15,6 +17,8 @@ export interface AdvancedCanvasPluginSettings {
 }
 
 export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
+  shapesFeatureEnabled: true,
+  presentationFeatureEnabled: true,
   defaultSlideSize: Object.values(SLIDE_SIZE_OPTIONS).first(),
   useArrowKeysToChangeSlides: true,
   zoomToSlideWithoutPadding: true,
@@ -57,8 +61,33 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
     let { containerEl } = this
     containerEl.empty()
 
+    containerEl.createEl('h1', { cls: 'main-header', text: 'Advanced Canvas' })
+
     new Setting(containerEl)
-      .setName("Presentation Settings")
+      .setHeading()
+      .setName("Shapes")
+      .addToggle((toggle) =>
+        toggle
+          .setTooltip("Requires a reload to take effect.")
+          .setValue(this.settingsManager.settings.shapesFeatureEnabled)
+          .onChange(async (value) => {
+            this.settingsManager.settings.shapesFeatureEnabled = value
+            await this.settingsManager.saveSettings()
+          })
+      )
+
+    new Setting(containerEl)
+      .setHeading()
+      .setName("Presentations")
+      .addToggle((toggle) =>
+        toggle
+          .setTooltip("Requires a reload to take effect.")
+          .setValue(this.settingsManager.settings.presentationFeatureEnabled)
+          .onChange(async (value) => {
+            this.settingsManager.settings.presentationFeatureEnabled = value
+            await this.settingsManager.saveSettings()
+          })
+      )
 
     new Setting(containerEl)
       .setName("Default slize ratio")

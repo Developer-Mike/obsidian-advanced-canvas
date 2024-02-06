@@ -17,6 +17,8 @@ export default class PresentationCanvasExtension {
   constructor(plugin: any) {
     this.plugin = plugin
 
+    if (!this.plugin.settingsManager.settings.presentationFeatureEnabled) return
+
     this.plugin.addCommand({
 			id: 'create-new-slide',
 			name: 'Create new slide',

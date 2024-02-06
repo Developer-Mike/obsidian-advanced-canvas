@@ -96,6 +96,8 @@ export default class ShapesCanvasExtension {
   constructor(plugin: AdvancedCanvasPlugin) {
     this.plugin = plugin
 
+    if (!this.plugin.settingsManager.settings.shapesFeatureEnabled) return
+
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.PopupMenuCreated,
       (canvas: Canvas) => this.onPopupMenuCreated(canvas)
