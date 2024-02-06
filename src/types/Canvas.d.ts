@@ -15,6 +15,9 @@ export interface Canvas {
   ty: number
   tZoom: number
 
+  readonly: boolean
+  setReadonly(readonly: boolean): void
+
   getData(): CanvasData
 
   getEdgesForNode(node: CanvasNode): CanvasEdge[]
@@ -23,7 +26,6 @@ export interface Canvas {
   getViewportBBox(): BBox
   setViewport(tx: number, ty: number, tZoom: number): void
   zoomToBbox(bbox: BBox): void
-  setReadonly(readonly: boolean): void
 
   undo(): void
   redo(): void

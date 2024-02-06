@@ -56,11 +56,9 @@ export function createPopupMenuOption(id: string, label: string, icon: string, c
   return menuOption
 }
 
-export function addPopupMenuOption(canvas: Canvas, element: HTMLElement, hideWhileReadonly = true) {
+export function addPopupMenuOption(canvas: Canvas, element: HTMLElement) {
   const popupMenuEl = canvas?.menu?.menuEl
   if (!popupMenuEl) return
-
-  if (hideWhileReadonly) element.classList.add('hide-while-readonly')
 
   popupMenuEl.querySelector(`#${element.id}`)?.remove()
   popupMenuEl.appendChild(element)

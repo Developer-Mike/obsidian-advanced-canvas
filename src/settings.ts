@@ -10,7 +10,6 @@ export interface AdvancedCanvasPluginSettings {
   shapesFeatureEnabled: boolean
 
   betterReadonlyEnabled: boolean
-  disableNodeInteraction: boolean
   disableNodePopup: boolean
   disableZoom: boolean
   disablePan: boolean
@@ -27,7 +26,6 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   shapesFeatureEnabled: true,
 
   betterReadonlyEnabled: true,
-  disableNodeInteraction: false,
   disableNodePopup: false,
   disableZoom: false,
   disablePan: false,

@@ -105,7 +105,8 @@ export default class ShapesCanvasExtension {
   }
 
   onPopupMenuCreated(canvas: Canvas): void {
-    if (!this.hasValidShapeInSelection(canvas.selection))
+    // If the canvas is readonly or there is no valid shape in the selection, return
+    if (canvas.readonly || !this.hasValidShapeInSelection(canvas.selection))
       return
 
     let menuOption = CanvasHelper.createPopupMenuOption(

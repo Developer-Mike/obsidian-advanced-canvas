@@ -93,6 +93,9 @@ export default class PresentationCanvasExtension {
   }
 
   onPopupMenuCreated(canvas: Canvas): void {
+    // If the canvas is readonly, return
+    if (canvas.readonly) return
+    
     CanvasHelper.addPopupMenuOption(
       canvas,
       CanvasHelper.createPopupMenuOption(

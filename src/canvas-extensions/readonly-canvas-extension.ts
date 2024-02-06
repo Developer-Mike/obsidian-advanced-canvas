@@ -18,33 +18,31 @@ export default class ReadonlyCanvasExtension {
       (canvas: Canvas, _node: any) => this.updatePopupMenu(canvas)
     ))
 
+    /* Readonly listener */
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.ReadonlyChanged,
+      (canvas: Canvas, _readonly: boolean) => {
+        this.updatePopupMenu(canvas)
+      }
+    ))
+
     /* Add settings */
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.CanvasChanged,
-      (canvas: Canvas) => this.onCanvasChanged(canvas)
+      (canvas: Canvas) => this.addQuickSettings(canvas)
     ))
   }
 
-  onCanvasChanged(canvas: Canvas) {
+  addQuickSettings(canvas: Canvas) {
     const settingsContainer = canvas.quickSettingsButton?.parentElement
     if (!settingsContainer) return
 
     CanvasHelper.addQuickSettingsButton(
       settingsContainer,
       this.createToggle(
-        'disable-node-interaction', 
-        'Disable node interaction', 
-        'mouse-pointer-square-dashed', 
-        'disableNodeInteraction'
-      )
-    )
-
-    CanvasHelper.addQuickSettingsButton(
-      settingsContainer,
-      this.createToggle(
-        'disable-node-popup', 
-        'Disable node popup', 
-        'arrow-up-right-from-circle', 
+        'disable-node-popup',
+        'Disable node popup',
+        'arrow-up-right-from-circle',
         'disableNodePopup',
         () => this.updatePopupMenu(canvas)
       )
@@ -86,16 +84,13 @@ export default class ReadonlyCanvasExtension {
     )
     toggle.classList.add('show-while-readonly')
 
-    // @ts-expect-error
-    toggle.dataset.toggled = this.plugin.settingsManager.settings[settingKey].toString()
+    toggle.dataset.toggled = this.plugin.settingsManager.getSetting(settingKey).toString()
 
     return toggle
   }
 
   private updatePopupMenu(canvas: Canvas) {
-    const menuEl = canvas.menu?.menuEl
-    if (!menuEl) return
-    
-    canvas.menu.menuEl.style.visibility = this.plugin.settingsManager.getSetting('disableNodePopup') ? 'hidden' : 'visible'
+    const hidden = canvas.readonly && this.plugin.settingsManager.getSetting('disableNodePopup')
+    canvas.menu.menuEl.style.visibility = hidden ? 'hidden' : 'visible'
   }
 }

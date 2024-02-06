@@ -139,6 +139,9 @@ Events:
 - `advanced-canvas:node-interaction`
   - Fired when a node gets hovered over
   - Payload: `Canvas`, `Node`
+- `advanced-canvas:readonly-changed`
+  - Fired when the readonly state of the canvas changes
+  - Payload: `Canvas`, `boolean`
 
 ## Settings
 <img src="./assets/settings.png" alt="Settings Screen"/>

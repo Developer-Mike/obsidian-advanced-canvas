@@ -48,6 +48,13 @@ export default class CanvasEventEmitter {
         that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [node])
 
         return result
+      },
+      setReadonly: (next: any) => function (readonly: boolean) {
+        const result = next.call(this, readonly)
+
+        that.triggerWorkspaceEvent(CanvasEvent.ReadonlyChanged, this, readonly)
+
+        return result
       }
     })
 
