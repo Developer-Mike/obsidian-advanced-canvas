@@ -124,8 +124,14 @@
 ## Settings
 <img src="./assets/settings.png" alt="Settings Screen"/>
 
-## Roadmap
-- [ ] Show shapes in the preview
+## Contributing
+All contributions are welcome! Here's how you can help:
+- Create a fork of the repository
+- Create a branch with a descriptive name
+- Make your changes
+- Debug the plugin using `npm run dev`
+- Create a pull request
+- Wait for the review
 
-## Known Issues
-- None so far 👀 - Create an issue if you find any!
+## Known Issues - Create an issue if you find any!
+- [ ] Shapes are not shown in the preview

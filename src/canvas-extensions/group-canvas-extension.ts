@@ -11,7 +11,7 @@ const GROUP_NODE = {
 export default class GroupCanvasExtension {
   plugin: AdvancedCanvasPlugin
 
-  super(plugin: any) {
+  constructor(plugin: any) {
     this.plugin = plugin
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
