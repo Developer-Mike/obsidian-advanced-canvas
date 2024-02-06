@@ -76,14 +76,20 @@ export default class CanvasEventEmitter {
       }
     })
 
-    // Update current canvas
-    this.plugin.app.workspace.onLayoutReady(() => {
+    // Update current canvas on startup
+    const startupListener = this.plugin.app.workspace.on('active-leaf-change', () => {
       const canvas = this.plugin.getCurrentCanvas()
       if (!canvas) return
 
       this.triggerWorkspaceEvent(CanvasEvent.CanvasChanged, canvas)
       this.triggerWorkspaceEvent(CanvasEvent.NodesChanged, canvas, [...canvas.nodes.values()])
+
+      this.plugin.app.workspace.offref(startupListener)
     })
+    this.plugin.registerEvent(startupListener)
+
+    // Trigger instantly (Plugin reload)
+    startupListener.fn.call(this.plugin.app.workspace)
   }
 
   private triggerWorkspaceEvent(event: string, ...args: any) {

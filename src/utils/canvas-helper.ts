@@ -13,6 +13,22 @@ export function scaleBBox(bbox: BBox, scale: number): BBox {
   }
 }
 
+export function createQuickSettingsButton(id: string, label: string, icon: string, callback?: () => void): HTMLElement {
+  const quickSetting = document.createElement('div')
+  quickSetting.id = id
+  quickSetting.classList.add('canvas-control-item')
+  setIcon(quickSetting, icon)
+  setTooltip(quickSetting, label, { placement: 'left' })
+  quickSetting.addEventListener('click', () => callback?.())
+
+  return quickSetting
+}
+
+export function addQuickSettingsButton(controlGroup: HTMLElement, element: HTMLElement) {
+  controlGroup.querySelector(`#${element.id}`)?.remove()
+  controlGroup.appendChild(element)
+}
+
 export function createCardMenuOption(id: string, label: string, icon: string, callback?: () => void): HTMLElement {
   const menuOption = document.createElement('div')
   menuOption.id = id

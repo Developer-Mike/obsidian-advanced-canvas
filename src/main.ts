@@ -7,13 +7,15 @@ import InteractionTaggerCanvasExtension from './canvas-extensions/interaction-ta
 import UnknownDataTaggerCanvasExtension from './canvas-extensions/unknown-data-tagger-canvas-extension'
 import CanvasEventEmitter from './events/canvas-event-emitter'
 import { Canvas } from './types/Canvas'
+import ReadonlyCanvasExtension from './canvas-extensions/readonly-canvas-extension'
 
 const CANVAS_EXTENSIONS: any[] = [
   UnknownDataTaggerCanvasExtension,
   InteractionTaggerCanvasExtension,
+  ReadonlyCanvasExtension,
   GroupCanvasExtension,
-  PresentationCanvasExtension,
   ShapesCanvasExtension,
+  PresentationCanvasExtension,
 ]
 
 export default class AdvancedCanvasPlugin extends Plugin {

@@ -8,6 +8,13 @@ const SLIDE_SIZE_OPTIONS: { [key: string]: string } = {
 
 export interface AdvancedCanvasPluginSettings {
   shapesFeatureEnabled: boolean
+
+  betterReadonlyEnabled: boolean
+  disableNodeInteraction: boolean
+  disableNodePopup: boolean
+  disableZoom: boolean
+  disablePan: boolean
+
   presentationFeatureEnabled: boolean
   defaultSlideSize: string
   useArrowKeysToChangeSlides: boolean
@@ -18,6 +25,13 @@ export interface AdvancedCanvasPluginSettings {
 
 export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   shapesFeatureEnabled: true,
+
+  betterReadonlyEnabled: true,
+  disableNodeInteraction: false,
+  disableNodePopup: false,
+  disableZoom: false,
+  disablePan: false,
+
   presentationFeatureEnabled: true,
   defaultSlideSize: Object.values(SLIDE_SIZE_OPTIONS).first(),
   useArrowKeysToChangeSlides: true,
@@ -43,6 +57,11 @@ export default class AdvancedCanvasSettingsManager {
     await this.plugin.saveData(this.settings)
   }
 
+  async setSetting(data: Partial<AdvancedCanvasPluginSettings>) {
+    this.settings = Object.assign(this.settings, data)
+    await this.saveSettings()
+  }
+
   addSettingsTab() {
     this.settingsTab = new AdvancedCanvasPluginSettingTab(this)
     this.plugin.addSettingTab(this.settingsTab)
@@ -66,27 +85,71 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setHeading()
       .setName("Shapes")
+      .setDesc("Shape your nodes for creating e.g. mind maps or flow charts.")
       .addToggle((toggle) =>
         toggle
           .setTooltip("Requires a reload to take effect.")
           .setValue(this.settingsManager.settings.shapesFeatureEnabled)
-          .onChange(async (value) => {
-            this.settingsManager.settings.shapesFeatureEnabled = value
-            await this.settingsManager.saveSettings()
-          })
+          .onChange(async (value) => await this.settingsManager.setSetting({ shapesFeatureEnabled: value }))
       )
 
     new Setting(containerEl)
       .setHeading()
+      .setName("Better readonly")
+      .setDesc("Improve the readonly mode.") 
+      .addToggle((toggle) =>
+        toggle
+          .setTooltip("Requires a reload to take effect.")
+          .setValue(this.settingsManager.settings.betterReadonlyEnabled)
+          .onChange(async (value) => await this.settingsManager.setSetting({ betterReadonlyEnabled: value }))
+      )
+
+    /* Would require a solution to sync the settings with the canvas */
+    /*new Setting(containerEl)
+      .setName("Disable node interaction")
+      .setDesc("When enabled, you can't interact with the nodes when in readonly mode.")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.settingsManager.settings.disableNodeInteraction)
+          .onChange(async (value) => await this.settingsManager.setSetting({ disableNodeInteraction: value }))
+      )
+
+    new Setting(containerEl)
+      .setName("Disable node popup menu")
+      .setDesc("When enabled, the node popup menu won't show when in readonly mode. (If node interation is disabled, this setting has no effect.)")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.settingsManager.settings.disableNodePopup)
+          .onChange(async (value) => await this.settingsManager.setSetting({ disableNodePopup: value }))
+      )
+
+    new Setting(containerEl)
+      .setName("Disable zoom")
+      .setDesc("When enabled, you can't zoom when in readonly mode.")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.settingsManager.settings.disableZoom)
+          .onChange(async (value) => await this.settingsManager.setSetting({ disableZoom: value }))
+      )
+
+    new Setting(containerEl)
+      .setName("Disable pan")
+      .setDesc("When enabled, you can't pan when in readonly mode.")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.settingsManager.settings.disablePan)
+          .onChange(async (value) => await this.settingsManager.setSetting({ disablePan: value }))
+      )*/
+
+    new Setting(containerEl)
+      .setHeading()
       .setName("Presentations")
+      .setDesc("Create a presentation from your canvas.")
       .addToggle((toggle) =>
         toggle
           .setTooltip("Requires a reload to take effect.")
           .setValue(this.settingsManager.settings.presentationFeatureEnabled)
-          .onChange(async (value) => {
-            this.settingsManager.settings.presentationFeatureEnabled = value
-            await this.settingsManager.saveSettings()
-          })
+          .onChange(async (value) => await this.settingsManager.setSetting({ presentationFeatureEnabled: value }))
       )
 
     new Setting(containerEl)
@@ -96,10 +159,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
         dropdown
           .addOptions(SLIDE_SIZE_OPTIONS)
           .setValue(this.settingsManager.settings.defaultSlideSize)
-          .onChange(async (value) => {
-            this.settingsManager.settings.defaultSlideSize = value
-            await this.settingsManager.saveSettings()
-          })
+          .onChange(async (value) => await this.settingsManager.setSetting({ defaultSlideSize: value }))
         )
 
     new Setting(containerEl)
@@ -108,10 +168,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       .addToggle((toggle) =>
         toggle
           .setValue(this.settingsManager.settings.useArrowKeysToChangeSlides)
-          .onChange(async (value) => {
-            this.settingsManager.settings.useArrowKeysToChangeSlides = value
-            await this.settingsManager.saveSettings()
-          })
+          .onChange(async (value) => await this.settingsManager.setSetting({ useArrowKeysToChangeSlides: value }))
       )
 
     new Setting(containerEl)
@@ -120,10 +177,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       .addToggle((toggle) =>
         toggle
           .setValue(this.settingsManager.settings.zoomToSlideWithoutPadding)
-          .onChange(async (value) => {
-            this.settingsManager.settings.zoomToSlideWithoutPadding = value
-            await this.settingsManager.saveSettings()
-          })
+          .onChange(async (value) => await this.settingsManager.setSetting({ zoomToSlideWithoutPadding: value }))
       )
 
     new Setting(containerEl)
@@ -132,10 +186,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       .addText((text) =>
         text
           .setValue(this.settingsManager.settings.slideTransitionAnimationDuration.toString())
-          .onChange(async (value) => {
-            this.settingsManager.settings.slideTransitionAnimationDuration = parseFloat(value)
-            await this.settingsManager.saveSettings()
-          })
+          .onChange(async (value) => await this.settingsManager.setSetting({ slideTransitionAnimationDuration: parseFloat(value) }))
       )
 
     new Setting(containerEl)
@@ -144,10 +195,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       .addText((text) =>
         text
           .setValue(this.settingsManager.settings.slideTransitionAnimationIntensity.toString())
-          .onChange(async (value) => {
-            this.settingsManager.settings.slideTransitionAnimationIntensity = parseFloat(value)
-            await this.settingsManager.saveSettings()
-          })
+          .onChange(async (value) => await this.settingsManager.setSetting({ slideTransitionAnimationIntensity: parseFloat(value) }))
       )
   }
 }

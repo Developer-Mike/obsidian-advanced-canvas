@@ -8,4 +8,8 @@ declare module "obsidian" {
   export default interface App {
     workspace: CustomWorkspace
   }
+
+  export interface EventRef {
+    fn: (...args: any) => any
+  }
 }
