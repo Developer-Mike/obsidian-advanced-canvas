@@ -38,6 +38,9 @@
   - Disable node popup menus
   - Lock the canvas' position
   - Lock the canvas' zoom
+- [Encapsulate selection](#encapsulate-selection)
+  - Create a new canvas from the selected nodes
+  - Create a link to the new canvas in the current canvas
 - Expose [canvas events](#canvas-events) to use them in other plugins
 - Expose node data to style them using CSS
 
@@ -149,6 +152,15 @@ In presentation mode, you can navigate through the nodes using the arrow keys. T
 
 ### Usage
 - Use the [updated control menu](#canvas-control-menu) to toggle the new features (Only shown if the canvas is in readonly mode)
+
+## Encapsulate Selection
+- Create a new canvas from the selected nodes
+- Create a link to the new canvas in the current canvas
+
+### Usage
+- Select the nodes you want to encapsulate
+- Use the context menu (right click) to encapsulate the selection
+- OR use the command palette (`Advanced Canvas: Encapsulate selection`)
 
 ## Canvas Events
 All custom events are prefixed with `advanced-canvas:` and can be listened to using `app.workspace.on` (Just like the default events).
