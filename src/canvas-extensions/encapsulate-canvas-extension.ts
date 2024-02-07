@@ -1,6 +1,8 @@
-import { Menu } from "obsidian"
+import { Menu, SuggestModal } from "obsidian"
 import { Canvas } from "src/@types/Canvas"
 import AdvancedCanvasPlugin from "src/main"
+import FileNameModal from "src/utils/modal-helper"
+import * as CanvasHelper from "src/utils/canvas-helper"
 
 const ENCAPSULATED_FILE_NODE_SIZE = { width: 300, height: 300 }
 
@@ -10,6 +12,20 @@ export default class EncapsulateCanvasExtension {
   constructor(plugin: AdvancedCanvasPlugin) {
     this.plugin = plugin
 
+    if (!this.plugin.settingsManager.getSetting('canvasEncapsulationEnabled')) return
+
+    /* Add command to encapsulate selection */
+    this.plugin.addCommand({
+      id: 'encapsulate-canvas',
+      name: 'Encapsulate canvas',
+      checkCallback: CanvasHelper.canvasCommand(
+        this.plugin,
+        (canvas: Canvas) => !canvas.readonly && canvas.selection.size > 0,
+        (canvas: Canvas) => this.encapsulateSelection(canvas)
+      )
+    })
+
+    /* Add encapsulate option to context menu */
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       'canvas:selection-menu',
       (menu: Menu, canvas: Canvas) => {
@@ -31,7 +47,11 @@ export default class EncapsulateCanvasExtension {
     if (!sourceFileFolder) return // Should never happen
 
     // TODO: Check if file already exists
-    const targetFilePath = `${sourceFileFolder}/${canvas.view.file.basename} - Encapsulated.canvas`
+    const targetFilePath = await FileNameModal.awaitInput(new FileNameModal(
+      this.plugin.app,
+      sourceFileFolder,
+      'canvas'
+    ))
 
     const newFileData = { nodes: selection.nodes, edges: selection.edges }
     const file = await this.plugin.app.vault.create(targetFilePath, JSON.stringify(newFileData, null, 2))
