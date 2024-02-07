@@ -22,7 +22,10 @@
 - Enable the plugin in Settings -> Community plugins -> Installed plugins
 
 ## Features
+All features can be enabled/disabled in the settings.
+
 - Create groups independently of the nodes ([Updated card menu](#updated-canvas-card-menu))
+- More [canvas commands](#canvas-commands)
 - (Flowchart) [Node shapes](#node-shapes)
   - Terminal shape
   - Process shape
@@ -62,6 +65,16 @@
     <summary>Canvas Control Menu</summary>
     <img src="./assets/control-menu.png" alt="New canvas control menu"/>
 </details>
+
+## Canvas Commands
+- `Advanced Canvas: Create text node`
+  - Create a new text node
+- `Advanced Canvas: Clone node up/down/left/right`
+  - Clone the selected node in the direction of the arrow keys
+  - The cloned node will have the same dimensions and color as the original node
+- `Advanced Canvas: Expand node up/down/left/right`
+  - Expand the selected node in the direction of the arrow keys
+  - Default hotkey: `Alt` + `Arrow keys`
 
 ## Node Shapes
 <details>

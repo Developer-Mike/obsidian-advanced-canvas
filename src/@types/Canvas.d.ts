@@ -2,6 +2,7 @@ import { TFile } from "obsidian"
 
 export interface Canvas {
   view: CanvasView
+  config: CanvasConfig
 
   data: CanvasData
   getData(): CanvasData
@@ -32,6 +33,7 @@ export interface Canvas {
 
   getEdgesForNode(node: CanvasNode): CanvasEdge[]
 
+  createTextNode(options: TextNodeOptions): CanvasNode
   createGroupNode(options: GroupNodeOptions): CanvasNode
   createFileNode(options: FileNodeOptions): CanvasNode
   removeNode(node: CanvasNode): void
@@ -55,7 +57,11 @@ export interface Canvas {
   lockedX: number
   lockedY: number
   lockedZoom: number
-  setNodeUnknownData(node: CanvasNode, key: string, value: any): void
+  setNodeUnknownData(node: CanvasNode, key: keyof CanvasNodeUnknownData, value: any): void
+}
+
+export interface CanvasConfig {
+  defaultTextNodeDimensions: Size
 }
 
 export interface CanvasView {
@@ -88,6 +94,10 @@ export interface NodeOptions {
   focus?: boolean
 }
 
+export interface TextNodeOptions extends NodeOptions {
+  text?: string
+}
+
 export interface GroupNodeOptions extends NodeOptions {
   label?: string
 }
@@ -108,6 +118,9 @@ export interface CanvasNode {
   canvas: Canvas
   nodeEl: HTMLElement
   bbox: BBox
+  getBBox(): BBox
+  text?: string
+  color: string
   unknownData: CanvasNodeUnknownData
 }
 
