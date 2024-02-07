@@ -1,4 +1,4 @@
-import { Canvas, CanvasNode } from "src/types/Canvas"
+import { Canvas, CanvasNode } from "src/@types/Canvas"
 import { CanvasEvent } from "src/events/events"
 import AdvancedCanvasPlugin from "src/main"
 

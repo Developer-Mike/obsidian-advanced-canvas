@@ -1,4 +1,4 @@
-import { Canvas, CanvasNode } from "src/types/Canvas"
+import { Canvas, CanvasNode } from "src/@types/Canvas"
 import { EXPOSED_DATA } from "./node-data-tagger-canvas-extension"
 import AdvancedCanvasPlugin from "src/main"
 import { CanvasEvent } from "src/events/events"

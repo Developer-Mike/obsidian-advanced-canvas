@@ -6,7 +6,7 @@ import PresentationCanvasExtension from './canvas-extensions/presentation-canvas
 import InteractionTaggerCanvasExtension from './canvas-extensions/interaction-tagger-canvas-extension'
 import NodeDataTaggerCanvasExtension from './canvas-extensions/node-data-tagger-canvas-extension'
 import CanvasEventEmitter from './events/canvas-event-emitter'
-import { Canvas } from './types/Canvas'
+import { Canvas } from './@types/Canvas'
 import ReadonlyCanvasExtension from './canvas-extensions/readonly-canvas-extension'
 
 const CANVAS_EXTENSIONS: any[] = [

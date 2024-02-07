@@ -1,4 +1,4 @@
-import { Canvas } from "src/types/Canvas"
+import { Canvas } from "src/@types/Canvas"
 import * as CanvasHelper from "src/utils/canvas-helper"
 import AdvancedCanvasPlugin from "src/main"
 import { CanvasEvent } from "src/events/events"
@@ -9,13 +9,34 @@ export default class ReadonlyCanvasExtension {
 
   constructor(plugin: any) {
     this.plugin = plugin
+    const that = this
 
     if (!this.plugin.settingsManager.getSetting('betterReadonlyEnabled')) return
 
-    /* Register listeners */
+    /* Popup listener */
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.PopupMenuCreated,
       (canvas: Canvas, _node: any) => this.updatePopupMenu(canvas)
+    ))
+
+    /* Zoom and Pan listener */
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.ViewportChanged.Before,
+      (canvas: Canvas) => {
+        if (!canvas.readonly) return
+
+        if (that.plugin.settingsManager.getSetting('disableZoom')) {
+          canvas.zoom = canvas.lockedZoom || canvas.zoom
+          canvas.tZoom = canvas.lockedZoom || canvas.tZoom
+        }
+
+        if (that.plugin.settingsManager.getSetting('disablePan')) {
+          canvas.x = canvas.lockedX || canvas.x
+          canvas.tx = canvas.lockedX || canvas.tx
+          canvas.y = canvas.lockedY || canvas.y
+          canvas.ty = canvas.lockedY || canvas.ty
+        }
+      }
     ))
 
     /* Readonly listener */
@@ -23,6 +44,8 @@ export default class ReadonlyCanvasExtension {
       CanvasEvent.ReadonlyChanged,
       (canvas: Canvas, _readonly: boolean) => {
         this.updatePopupMenu(canvas)
+        this.updateLockedZoom(canvas)
+        this.updateLockedPan(canvas)
       }
     ))
 
@@ -54,7 +77,8 @@ export default class ReadonlyCanvasExtension {
         'disable-zoom', 
         'Disable zoom', 
         'zoom-in', 
-        'disableZoom'
+        'disableZoom',
+        () => this.updateLockedZoom(canvas)
       )
     )
 
@@ -64,7 +88,8 @@ export default class ReadonlyCanvasExtension {
         'disable-pan', 
         'Disable pan', 
         'move', 
-        'disablePan'
+        'disablePan',
+        () => this.updateLockedPan(canvas)
       )
     )
   }
@@ -92,5 +117,14 @@ export default class ReadonlyCanvasExtension {
   private updatePopupMenu(canvas: Canvas) {
     const hidden = canvas.readonly && this.plugin.settingsManager.getSetting('disableNodePopup')
     canvas.menu.menuEl.style.visibility = hidden ? 'hidden' : 'visible'
+  }
+
+  private updateLockedZoom(canvas: Canvas) {
+    canvas.lockedZoom = canvas.tZoom
+  }
+
+  private updateLockedPan(canvas: Canvas) {
+    canvas.lockedX = canvas.tx
+    canvas.lockedY = canvas.ty
   }
 }

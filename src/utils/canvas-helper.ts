@@ -1,5 +1,5 @@
 import { setIcon, setTooltip } from "obsidian"
-import { BBox, Canvas } from "src/types/Canvas"
+import { BBox, Canvas } from "src/@types/Canvas"
 
 export function scaleBBox(bbox: BBox, scale: number): BBox {
   let diffX = (scale - 1) * (bbox.maxX - bbox.minX)

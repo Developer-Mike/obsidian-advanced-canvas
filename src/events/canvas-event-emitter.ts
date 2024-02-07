@@ -1,5 +1,5 @@
 import AdvancedCanvasPlugin from "src/main"
-import { CanvasNode } from "src/types/Canvas"
+import { CanvasNode } from "src/@types/Canvas"
 import { patchWorkspaceFunction } from "src/utils/patch-helper"
 import { CanvasEvent } from "./events"
 
@@ -22,38 +22,34 @@ export default class CanvasEventEmitter {
       // Listen to canvas change
       importData: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
-
         that.triggerWorkspaceEvent(CanvasEvent.CanvasChanged, this)
         that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()])
-
+        return result
+      },
+      markViewportChanged: (next: any) => function (...args: any) {
+        that.triggerWorkspaceEvent(CanvasEvent.ViewportChanged.Before, this)
+        const result = next.call(this, ...args)
+        that.triggerWorkspaceEvent(CanvasEvent.ViewportChanged.After, this)
         return result
       },
       undo: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
-
         that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()])
-
         return result
       },
       redo: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
-
         that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()])
-
         return result
       },
       addNode: (next: any) => function (node: CanvasNode) {
         const result = next.call(this, node)
-
         that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [node])
-
         return result
       },
       setReadonly: (next: any) => function (readonly: boolean) {
         const result = next.call(this, readonly)
-
         that.triggerWorkspaceEvent(CanvasEvent.ReadonlyChanged, this, readonly)
-
         return result
       }
     })

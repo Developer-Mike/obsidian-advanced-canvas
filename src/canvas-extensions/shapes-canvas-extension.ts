@@ -1,5 +1,5 @@
 import { addIcon } from "obsidian"
-import { Canvas, CanvasNode } from "src/types/Canvas"
+import { Canvas, CanvasNode } from "src/@types/Canvas"
 import AdvancedCanvasPlugin from "src/main"
 import * as CanvasHelper from "src/utils/canvas-helper"
 import { CanvasEvent } from "src/events/events"

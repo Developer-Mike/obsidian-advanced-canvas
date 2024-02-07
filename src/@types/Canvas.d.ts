@@ -11,8 +11,11 @@ export interface Canvas {
   quickSettingsButton: HTMLElement
 
   canvasRect: DOMRect
+  x: number
   tx: number
+  y: number
   ty: number
+  zoom: number
   tZoom: number
 
   readonly: boolean
@@ -23,8 +26,10 @@ export interface Canvas {
   getEdgesForNode(node: CanvasNode): CanvasEdge[]
   createGroupNode(options: any): CanvasNode
 
-  getViewportBBox(): BBox
   setViewport(tx: number, ty: number, tZoom: number): void
+  markViewportChanged(): void
+
+  getViewportBBox(): BBox
   zoomToBbox(bbox: BBox): void
 
   undo(): void
@@ -33,6 +38,10 @@ export interface Canvas {
   requestPushHistory(data: CanvasData): void
   requestSave(): void
 
+  // Custom
+  lockedX: number
+  lockedY: number
+  lockedZoom: number
   setNodeUnknownData(node: CanvasNode, key: string, value: any): void
 }
 

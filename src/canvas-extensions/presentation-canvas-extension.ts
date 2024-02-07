@@ -1,6 +1,6 @@
 import delay from 'src/utils/delay-helper'
 import { Notice } from 'obsidian'
-import { Canvas, CanvasEdge, CanvasNode } from 'src/types/Canvas'
+import { Canvas, CanvasEdge, CanvasNode } from 'src/@types/Canvas'
 import AdvancedCanvasPlugin from 'src/main'
 import { CanvasEvent } from 'src/events/events'
 import * as CanvasHelper from "src/utils/canvas-helper"

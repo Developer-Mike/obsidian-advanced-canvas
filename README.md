@@ -130,6 +130,9 @@ Events:
 - `advanced-canvas:canvas-changed`
   - Fired when a new canvas gets loaded
   - Payload: `Canvas`
+- `advanced-canvas:viewport-changed:before` and `advanced-canvas:viewport-changed:after`
+  - Fired before and after the viewport gets changed
+  - Payload: `Canvas`
 - `advanced-canvas:popup-menu-created`
   - Fired when the a node popup menu gets created (Not firing multiple times if it gets moved between nodes of the same type)
   - Payload: `Canvas`, `Node`
