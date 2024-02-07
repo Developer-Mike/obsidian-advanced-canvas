@@ -63,7 +63,10 @@ export default class EncapsulateCanvasExtension {
 
     // Add link to new file in current canvas
     canvas.createFileNode({
-      pos: selection.center,
+      pos: {
+        x: selection.center.x - ENCAPSULATED_FILE_NODE_SIZE.width / 2,
+        y: selection.center.y - ENCAPSULATED_FILE_NODE_SIZE.height / 2
+      },
       size: ENCAPSULATED_FILE_NODE_SIZE,
       file: file
     })
