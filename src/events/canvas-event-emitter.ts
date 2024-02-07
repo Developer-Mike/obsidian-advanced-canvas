@@ -1,5 +1,5 @@
 import AdvancedCanvasPlugin from "src/main"
-import { CanvasNode } from "src/@types/Canvas"
+import { BBox, CanvasNode } from "src/@types/Canvas"
 import { patchWorkspaceFunction } from "src/utils/patch-helper"
 import { CanvasEvent } from "./events"
 
@@ -30,6 +30,12 @@ export default class CanvasEventEmitter {
         that.triggerWorkspaceEvent(CanvasEvent.ViewportChanged.Before, this)
         const result = next.call(this, ...args)
         that.triggerWorkspaceEvent(CanvasEvent.ViewportChanged.After, this)
+        return result
+      },
+      zoomToBbox: (next: any) => function (bbox: BBox) {
+        that.triggerWorkspaceEvent(CanvasEvent.ZoomToBbox.Before, this, bbox)
+        const result = next.call(this, bbox)
+        that.triggerWorkspaceEvent(CanvasEvent.ZoomToBbox.After, this, bbox)
         return result
       },
       undo: (next: any) => function (...args: any) {

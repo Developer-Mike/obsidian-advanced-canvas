@@ -3,6 +3,7 @@ import * as CanvasHelper from "src/utils/canvas-helper"
 import AdvancedCanvasPlugin from "src/main"
 import { CanvasEvent } from "src/events/events"
 import { AdvancedCanvasPluginSettings } from "src/settings"
+import { patchWorkspaceFunction } from "src/utils/patch-helper"
 
 export default class ReadonlyCanvasExtension {
   plugin: AdvancedCanvasPlugin
@@ -20,23 +21,41 @@ export default class ReadonlyCanvasExtension {
     ))
 
     /* Zoom and Pan listener */
+    let movingToBBox = false
+
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.ViewportChanged.Before,
       (canvas: Canvas) => {
+        // Only allow viewport change once when using zoom to bbox
+        if (movingToBBox) {
+          movingToBBox = false
+
+          that.updateLockedZoom(canvas)
+          that.updateLockedPan(canvas)
+
+          return
+        }
+
         if (!canvas.readonly) return
 
         if (that.plugin.settingsManager.getSetting('disableZoom')) {
-          canvas.zoom = canvas.lockedZoom || canvas.zoom
-          canvas.tZoom = canvas.lockedZoom || canvas.tZoom
+          canvas.zoom = canvas.lockedZoom ?? canvas.zoom
+          canvas.tZoom = canvas.lockedZoom ?? canvas.tZoom
         }
 
         if (that.plugin.settingsManager.getSetting('disablePan')) {
-          canvas.x = canvas.lockedX || canvas.x
-          canvas.tx = canvas.lockedX || canvas.tx
-          canvas.y = canvas.lockedY || canvas.y
-          canvas.ty = canvas.lockedY || canvas.ty
+          canvas.x = canvas.lockedX ?? canvas.x
+          canvas.tx = canvas.lockedX ?? canvas.tx
+          canvas.y = canvas.lockedY ?? canvas.y
+          canvas.ty = canvas.lockedY ?? canvas.ty
         }
       }
+    ))
+
+    // Allow viewport change when using zoom to bbox
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.ZoomToBbox.Before,
+      () => movingToBBox = true
     ))
 
     /* Readonly listener */

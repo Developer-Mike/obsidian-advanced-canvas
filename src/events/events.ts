@@ -6,6 +6,10 @@ export const CanvasEvent = {
     Before: `${PLUGIN_EVENT_PREFIX}:viewport-changed:before`,
     After: `${PLUGIN_EVENT_PREFIX}:viewport-changed:after`
   },
+  ZoomToBbox: {
+    Before: `${PLUGIN_EVENT_PREFIX}:zoom-to-bbox:before`,
+    After: `${PLUGIN_EVENT_PREFIX}:zoom-to-bbox:after`
+  },
   PopupMenuCreated: `${PLUGIN_EVENT_PREFIX}:popup-menu-created`,
   NodesChanged: `${PLUGIN_EVENT_PREFIX}:nodes-changed`,
   NodeInteraction: `${PLUGIN_EVENT_PREFIX}:node-interaction`,

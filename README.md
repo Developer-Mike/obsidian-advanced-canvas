@@ -133,6 +133,9 @@ Events:
 - `advanced-canvas:viewport-changed:before` and `advanced-canvas:viewport-changed:after`
   - Fired before and after the viewport gets changed
   - Payload: `Canvas`
+- `advanced-canvas:zoom-to-bbox:before` and `advanced-canvas:zoom-to-bbox:after`
+  - Fired before and after the canvas gets zoomed to a bounding box (e.g. zoom to selection, zoom to fit all)
+  - Payload: `Canvas`, `BBox`
 - `advanced-canvas:popup-menu-created`
   - Fired when the a node popup menu gets created (Not firing multiple times if it gets moved between nodes of the same type)
   - Payload: `Canvas`, `Node`
