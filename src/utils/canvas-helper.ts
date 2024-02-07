@@ -37,6 +37,10 @@ export function createCardMenuOption(canvas: Canvas, id: string, label: string, 
   setIcon(menuOption, icon)
   setTooltip(menuOption, label, { placement: 'top' })
 
+  menuOption.addEventListener('click', (_e) => {
+    onPlaced(canvas, getCenterCoordinates(canvas, previewNodeSize()))
+  })
+
   menuOption.addEventListener('pointerdown', (e) => {
     canvas.dragTempNode(e, previewNodeSize(), (pos: Position) => {
       canvas.deselectAll()
