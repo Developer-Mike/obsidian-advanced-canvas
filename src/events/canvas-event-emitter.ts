@@ -85,6 +85,8 @@ export default class CanvasEventEmitter {
       if (!canvas) return
 
       this.triggerWorkspaceEvent(CanvasEvent.CanvasChanged, canvas)
+      this.triggerWorkspaceEvent(CanvasEvent.ViewportChanged.After, canvas)
+      this.triggerWorkspaceEvent(CanvasEvent.ReadonlyChanged, canvas, canvas.readonly)
       this.triggerWorkspaceEvent(CanvasEvent.NodesChanged, canvas, [...canvas.nodes.values()])
 
       this.plugin.app.workspace.offref(startupListener)
