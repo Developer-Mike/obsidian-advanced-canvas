@@ -9,10 +9,12 @@ import CanvasEventEmitter from './events/canvas-event-emitter'
 import { Canvas } from './@types/Canvas'
 import ReadonlyCanvasExtension from './canvas-extensions/readonly-canvas-extension'
 import EncapsulateCanvasExtension from './canvas-extensions/encapsulate-canvas-extension'
+import CommandsCanvasExtension from './canvas-extensions/commands-canvas-extension'
 
 const CANVAS_EXTENSIONS: any[] = [
   NodeDataTaggerCanvasExtension,
   InteractionTaggerCanvasExtension,
+  CommandsCanvasExtension,
   ReadonlyCanvasExtension,
   GroupCanvasExtension,
   EncapsulateCanvasExtension,

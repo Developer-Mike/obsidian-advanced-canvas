@@ -9,6 +9,11 @@ const SLIDE_SIZE_OPTIONS: { [key: string]: string } = {
 export interface AdvancedCanvasPluginSettings {
   shapesFeatureEnabled: boolean
 
+  commandsFeatureEnabled: boolean
+  zoomToClonedNode: boolean
+  cloneNodeMargin: number
+  expandNodeStepSize: number
+
   betterReadonlyEnabled: boolean
   disableNodePopup: boolean
   disableZoom: boolean
@@ -26,6 +31,11 @@ export interface AdvancedCanvasPluginSettings {
 
 export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   shapesFeatureEnabled: true,
+
+  commandsFeatureEnabled: true,
+  zoomToClonedNode: true,
+  cloneNodeMargin: 25,
+  expandNodeStepSize: 25,
 
   betterReadonlyEnabled: true,
   disableNodePopup: false,
@@ -97,6 +107,44 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           .setTooltip("Requires a reload to take effect.")
           .setValue(this.settingsManager.getSetting('shapesFeatureEnabled'))
           .onChange(async (value) => await this.settingsManager.setSetting({ shapesFeatureEnabled: value }))
+      )
+
+    new Setting(containerEl)
+      .setHeading()
+      .setName("Extended Commands")
+      .setDesc("Add more commands to the canvas.")
+      .addToggle((toggle) =>
+        toggle
+          .setTooltip("Requires a reload to take effect.")
+          .setValue(this.settingsManager.getSetting('commandsFeatureEnabled'))
+          .onChange(async (value) => await this.settingsManager.setSetting({ commandsFeatureEnabled: value }))
+      )
+
+    new Setting(containerEl)
+      .setName("Zoom to cloned node")
+      .setDesc("When enabled, the canvas will zoom to the cloned node.")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.settingsManager.getSetting('zoomToClonedNode'))
+          .onChange(async (value) => await this.settingsManager.setSetting({ zoomToClonedNode: value }))
+      )
+
+    new Setting(containerEl)
+      .setName("Clone node margin")
+      .setDesc("The margin between the cloned node and the source node.")
+      .addText((text) =>
+        text
+          .setValue(this.settingsManager.getSetting('cloneNodeMargin').toString())
+          .onChange(async (value) => await this.settingsManager.setSetting({ cloneNodeMargin: parseInt(value) }))
+      )
+
+    new Setting(containerEl)
+      .setName("Expand node step size")
+      .setDesc("The step size for expanding the node.")
+      .addText((text) =>
+        text
+          .setValue(this.settingsManager.getSetting('expandNodeStepSize').toString())
+          .onChange(async (value) => await this.settingsManager.setSetting({ expandNodeStepSize: parseInt(value) }))
       )
 
     new Setting(containerEl)
