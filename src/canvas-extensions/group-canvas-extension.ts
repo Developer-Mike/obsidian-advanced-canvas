@@ -1,12 +1,9 @@
-import { Canvas } from "src/@types/Canvas"
+import { Canvas, Position } from "src/@types/Canvas"
 import * as CanvasHelper from "src/utils/canvas-helper"
 import AdvancedCanvasPlugin from "src/main"
 import { CanvasEvent } from "src/events/events"
 
-const GROUP_NODE = {
-  defaultLabel: 'New Group',
-  defaultSize: { width: 500, height: 250 },
-}
+const GROUP_NODE_SIZE = { width: 300, height: 300 }
 
 export default class GroupCanvasExtension {
   plugin: AdvancedCanvasPlugin
@@ -20,23 +17,20 @@ export default class GroupCanvasExtension {
         CanvasHelper.addCardMenuOption(
           canvas,
           CanvasHelper.createCardMenuOption(
+            canvas,
             'create-group',
             'Create group',
-            'group', 
-            () => this.addGroupNode(canvas)
+            'group',
+            () => GROUP_NODE_SIZE,
+            (canvas: Canvas, pos: Position) => {
+              canvas.createGroupNode({
+                pos: pos,
+                size: GROUP_NODE_SIZE
+              })
+            }
           )
         )
       }
     ))
-  }
-
-  private addGroupNode(canvas: Canvas) {
-    canvas.createGroupNode({
-      pos: CanvasHelper.getCenterCoordinates(canvas, GROUP_NODE.defaultSize),
-      size: GROUP_NODE.defaultSize,
-      label: GROUP_NODE.defaultLabel,
-      save: true,
-      focus: true,
-    })
   }
 }

@@ -24,7 +24,9 @@ export interface Canvas {
   getData(): CanvasData
 
   getEdgesForNode(node: CanvasNode): CanvasEdge[]
-  createGroupNode(options: any): CanvasNode
+  createGroupNode(options: GroupNodeOptions): CanvasNode
+  dragTempNode(dragEvent: any, nodeSize: Size, onDropped: (position: Position) => void): void
+  deselectAll(): void
 
   setViewport(tx: number, ty: number, tZoom: number): void
   markViewportChanged(): void
@@ -45,11 +47,29 @@ export interface Canvas {
   setNodeUnknownData(node: CanvasNode, key: string, value: any): void
 }
 
+export interface Size {
+  width: number
+  height: number
+}
+
+export interface Position {
+  x: number
+  y: number
+}
+
 export interface BBox {
   minX: number
   maxX: number
   minY: number
   maxY: number
+}
+
+export interface GroupNodeOptions {
+  pos: Position
+  size: Size
+  label?: string
+  save?: boolean
+  focus?: boolean
 }
 
 export interface CanvasData {

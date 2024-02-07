@@ -1,5 +1,5 @@
 import { setIcon, setTooltip } from "obsidian"
-import { BBox, Canvas } from "src/@types/Canvas"
+import { BBox, Canvas, Position, Size } from "src/@types/Canvas"
 
 export function scaleBBox(bbox: BBox, scale: number): BBox {
   let diffX = (scale - 1) * (bbox.maxX - bbox.minX)
@@ -29,13 +29,20 @@ export function addQuickSettingsButton(controlGroup: HTMLElement, element: HTMLE
   controlGroup.appendChild(element)
 }
 
-export function createCardMenuOption(id: string, label: string, icon: string, callback?: () => void): HTMLElement {
+export function createCardMenuOption(canvas: Canvas, id: string, label: string, icon: string, previewNodeSize: () => Size, onPlaced: (canvas: Canvas, pos: Position) => void): HTMLElement {
   const menuOption = document.createElement('div')
   menuOption.id = id
   menuOption.classList.add('canvas-card-menu-button')
+  menuOption.classList.add('mod-draggable')
   setIcon(menuOption, icon)
   setTooltip(menuOption, label, { placement: 'top' })
-  menuOption.addEventListener('click', () => callback?.())
+
+  menuOption.addEventListener('pointerdown', (e) => {
+    canvas.dragTempNode(e, previewNodeSize(), (pos: Position) => {
+      canvas.deselectAll()
+      onPlaced(canvas, pos)
+    })
+  })
 
   return menuOption
 }
@@ -64,7 +71,7 @@ export function addPopupMenuOption(canvas: Canvas, element: HTMLElement) {
   popupMenuEl.appendChild(element)
 }
 
-export function getCenterCoordinates(canvas: Canvas, nodeSize: { width: number, height: number }): { x: number, y: number } {
+export function getCenterCoordinates(canvas: Canvas, nodeSize: Size): Position {
   const viewBounds = canvas.getViewportBBox()
 
   return { 

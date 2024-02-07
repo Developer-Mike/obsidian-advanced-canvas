@@ -1,12 +1,12 @@
 import delay from 'src/utils/delay-helper'
 import { Notice } from 'obsidian'
-import { Canvas, CanvasEdge, CanvasNode } from 'src/@types/Canvas'
+import { Canvas, CanvasEdge, CanvasNode, Position, Size } from 'src/@types/Canvas'
 import AdvancedCanvasPlugin from 'src/main'
 import { CanvasEvent } from 'src/events/events'
 import * as CanvasHelper from "src/utils/canvas-helper"
 
-const START_SLIDE_NAME = 'Start Node'
-const DEFAULT_SLIDE_NAME = 'New Node'
+const START_SLIDE_NAME = 'Start Slide'
+const DEFAULT_SLIDE_NAME = 'New Slide'
 
 export default class PresentationCanvasExtension {
   plugin: AdvancedCanvasPlugin
@@ -84,10 +84,12 @@ export default class PresentationCanvasExtension {
     CanvasHelper.addCardMenuOption(
       canvas,
       CanvasHelper.createCardMenuOption(
+        canvas,
         'new-slide',
         'Create new slide',
         'gallery-vertical',
-        () => this.addSlide(canvas)
+        () => this.getSlideSize(),
+        (canvas: Canvas, pos: Position) => this.addSlide(canvas, pos)
       )
     )
   }
@@ -124,17 +126,22 @@ export default class PresentationCanvasExtension {
     canvas.setNodeUnknownData(node, 'isStartNode', true)
   }
 
-  private addSlide(canvas: Canvas) {
+  private getSlideSize(): Size {
+    const slideSizeString = this.plugin.settingsManager.getSetting('defaultSlideSize')
+    const slideSizeArray = slideSizeString.split('x').map((value: string) => parseInt(value))
+    return { width: slideSizeArray[0], height: slideSizeArray[1] }
+  }
+
+  private addSlide(canvas: Canvas, pos?: Position) {
+    if (!pos) pos = CanvasHelper.getCenterCoordinates(canvas, this.getSlideSize())
+
     const isStartNode = this.getStartNode(canvas) == null
-    const nodeSizeString = this.plugin.settingsManager.getSetting('defaultSlideSize')
-    const nodeSizeArray = nodeSizeString.split('x').map((value: string) => parseInt(value))
-    const nodeSize = { width: nodeSizeArray[0], height: nodeSizeArray[1] }
+    const nodeSize = this.getSlideSize()
 
     const groupNode = canvas.createGroupNode({
-      pos: CanvasHelper.getCenterCoordinates(canvas, nodeSize),
+      pos: pos,
       size: nodeSize,
       label: isStartNode ? START_SLIDE_NAME : DEFAULT_SLIDE_NAME,
-      save: true,
       focus: false,
     })
 

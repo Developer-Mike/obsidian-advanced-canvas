@@ -3,7 +3,6 @@ import * as CanvasHelper from "src/utils/canvas-helper"
 import AdvancedCanvasPlugin from "src/main"
 import { CanvasEvent } from "src/events/events"
 import { AdvancedCanvasPluginSettings } from "src/settings"
-import { patchWorkspaceFunction } from "src/utils/patch-helper"
 
 export default class ReadonlyCanvasExtension {
   plugin: AdvancedCanvasPlugin
