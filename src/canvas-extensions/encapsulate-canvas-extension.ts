@@ -46,7 +46,6 @@ export default class EncapsulateCanvasExtension {
     const sourceFileFolder = canvas.view.file.parent?.path
     if (!sourceFileFolder) return // Should never happen
 
-    // TODO: Check if file already exists
     const targetFilePath = await FileNameModal.awaitInput(new FileNameModal(
       this.plugin.app,
       sourceFileFolder,
