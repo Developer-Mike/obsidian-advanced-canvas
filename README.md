@@ -34,15 +34,31 @@
   - Database shape
 - [Presentation mode](#presentation)
   - Create presentations by connecting nodes with arrows
+- [Better readonly](#better-readonly)
+  - Disable node popup menus
+  - Lock the canvas' position
+  - Lock the canvas' zoom
 - Expose [canvas events](#canvas-events) to use them in other plugins
 - Expose node data to style them using CSS
 
 ## Updated UI
 ### Canvas Card Menu
-<img src="./assets/card-menu.png" alt="New canvas card menu"/>
+<details>
+    <summary>Canvas Card Menu</summary>
+    <img src="./assets/card-menu.png" alt="New canvas card menu"/>
+</details>
 
 ### Node Popup Menu
-<img src="./assets/popup-menu.png" alt="New node popup menu"/>
+<details>
+    <summary>Node Popup Menu</summary>
+    <img src="./assets/popup-menu.png" alt="New node popup menu"/>
+</details>
+
+### Canvas Control Menu
+<details>
+    <summary>Canvas Control Menu</summary>
+    <img src="./assets/control-menu.png" alt="New canvas control menu"/>
+</details>
 
 ## Node Shapes
 <details>
@@ -95,6 +111,8 @@
 </details>
 
 ## Presentation Mode
+In presentation mode, you can navigate through the nodes using the arrow keys. The diffrent slides/nodes are connected using arrows. If you want to have multiple arrows pointing from the same node, you can number them in the order you want to navigate through them. While in presentation mode, the canvas is in readonly mode (So [better readonly](#better-readonly) effects the presentation mode as well!). You can exit the presentation mode using the `ESC` key.
+
 <img src="./assets/sample-presentation-simple.gif" alt="Presentation mode example"/>
 
 <details>
@@ -122,6 +140,15 @@
   - Start the presentation using the command palette (`Advanced Canvas: Start presentation`)
   - Change slides using the arrow keys
   - Exit the presentation using the `ESC` key
+
+## Better Readonly
+- Disable node popup menus
+- Lock the canvas' position
+- Lock the canvas' zoom
+- BUT to retain some interactivity, it allows zooming to a bounding box (e.g. zoom to selection, zoom to fit all)
+
+### Usage
+- Use the [updated control menu](#canvas-control-menu) to toggle the new features (Only shown if the canvas is in readonly mode)
 
 ## Canvas Events
 All custom events are prefixed with `advanced-canvas:` and can be listened to using `app.workspace.on` (Just like the default events).
