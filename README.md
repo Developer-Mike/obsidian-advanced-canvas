@@ -154,8 +154,7 @@ In presentation mode, you can navigate through the nodes using the arrow keys. T
 - Use the [updated control menu](#canvas-control-menu) to toggle the new features (Only shown if the canvas is in readonly mode)
 
 ## Encapsulate Selection
-- Create a new canvas from the selected nodes
-- Create a link to the new canvas in the current canvas
+Move the current selection to a new canvas and create a link in the current canvas.
 
 ### Usage
 - Select the nodes you want to encapsulate
