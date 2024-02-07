@@ -22,39 +22,41 @@ export default class PresentationCanvasExtension {
     this.plugin.addCommand({
 			id: 'create-new-slide',
 			name: 'Create new slide',
-			checkCallback: this.canvasCommand((canvas: Canvas) => this.addSlide(canvas))
+			checkCallback: CanvasHelper.canvasCommand(
+        this.plugin,
+        (canvas: Canvas) => !canvas.readonly && !this.isPresentationMode,
+        (canvas: Canvas) => this.addSlide(canvas)
+      )
     })
 
     this.plugin.addCommand({
 			id: 'start-presentation',
       name: 'Start presentation',
-      checkCallback: this.canvasCommand((canvas: Canvas) => this.startPresentation(canvas))
+      checkCallback: CanvasHelper.canvasCommand(
+        this.plugin, 
+        (_canvas: Canvas) => !this.isPresentationMode,
+        (canvas: Canvas) => this.startPresentation(canvas)
+      )
     })
 
     this.plugin.addCommand({
       id: 'previous-node',
       name: 'Previous node',
-      checkCallback: (checking: boolean) => {
-        const canvas = this.plugin.getCurrentCanvas()
-        if (checking) return canvas !== null && this.isPresentationMode
-
-        if (canvas) this.previousNode(canvas)
-
-        return true
-      }
+      checkCallback: CanvasHelper.canvasCommand(
+        this.plugin,
+        (_canvas: Canvas) => this.isPresentationMode,
+        (canvas: Canvas) => this.previousNode(canvas)
+      )
     })
 
     this.plugin.addCommand({
 			id: 'next-node',
       name: 'Next node',
-      checkCallback: (checking: boolean) => {
-        const canvas = this.plugin.getCurrentCanvas()
-        if (checking) return canvas !== null && this.isPresentationMode
-
-        if (canvas) this.nextNode(canvas)
-
-        return true
-      }
+      checkCallback: CanvasHelper.canvasCommand(
+        this.plugin,
+        (_canvas: Canvas) => this.isPresentationMode,
+        (canvas: Canvas) => this.nextNode(canvas)
+      )
     })
 
     // Register events
@@ -67,17 +69,6 @@ export default class PresentationCanvasExtension {
       CanvasEvent.PopupMenuCreated,
       (canvas: Canvas) => this.onPopupMenuCreated(canvas)
     ))
-  }
-
-  canvasCommand(callback: (canvas: Canvas) => void): (checking: boolean) => boolean {
-    return (checking: boolean) => {
-      const canvas = this.plugin.getCurrentCanvas()
-      if (checking) return canvas !== null
-
-      if (canvas) callback(canvas)
-
-      return true
-    }
   }
 
   onCanvasChanged(canvas: Canvas): void {

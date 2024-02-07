@@ -1,8 +1,13 @@
+import { TFile } from "obsidian"
+
 export interface Canvas {
+  view: CanvasView
+
   data: CanvasData
+  getData(): CanvasData
+
   nodes: Map<string, CanvasNode>
   menu: PopupMenu
-  selection: Set<CanvasNode>
   nodeInteractionLayer: NodeInteractionLayer
 
   wrapperEl: HTMLElement
@@ -21,12 +26,17 @@ export interface Canvas {
   readonly: boolean
   setReadonly(readonly: boolean): void
 
-  getData(): CanvasData
+  selection: Set<CanvasNode>
+  getSelectionData(): { nodes: CanvasNodeData[], edges: CanvasEdgeData[], center: Position }
+  deselectAll(): void
 
   getEdgesForNode(node: CanvasNode): CanvasEdge[]
+
   createGroupNode(options: GroupNodeOptions): CanvasNode
+  createFileNode(options: FileNodeOptions): CanvasNode
+  removeNode(node: CanvasNode): void
+
   dragTempNode(dragEvent: any, nodeSize: Size, onDropped: (position: Position) => void): void
-  deselectAll(): void
 
   setViewport(tx: number, ty: number, tZoom: number): void
   markViewportChanged(): void
@@ -36,6 +46,7 @@ export interface Canvas {
 
   undo(): void
   redo(): void
+
   handlePaste(): void
   requestPushHistory(data: CanvasData): void
   requestSave(): void
@@ -45,6 +56,10 @@ export interface Canvas {
   lockedY: number
   lockedZoom: number
   setNodeUnknownData(node: CanvasNode, key: string, value: any): void
+}
+
+export interface CanvasView {
+  file: TFile
 }
 
 export interface Size {
@@ -64,18 +79,30 @@ export interface BBox {
   maxY: number
 }
 
-export interface GroupNodeOptions {
+type Side = 'top' | 'right' | 'bottom' | 'left'
+
+export interface NodeOptions {
   pos: Position
   size: Size
-  label?: string
   save?: boolean
   focus?: boolean
+}
+
+export interface GroupNodeOptions extends NodeOptions {
+  label?: string
+}
+
+export interface FileNodeOptions extends NodeOptions {
+  file: TFile
+  subpath?: string
 }
 
 export interface CanvasData {
   nodes: CanvasNode[]
   edges: CanvasEdge[]
 }
+
+export interface CanvasNodeData extends CanvasNodeUnknownData {}
 
 export interface CanvasNode {
   canvas: Canvas
@@ -93,6 +120,17 @@ export interface CanvasNodeUnknownData {
 }
 
 export type CanvasNodeType = 'text' | 'group' | 'file'
+
+export interface CanvasEdgeData {
+  fromNode: string
+  toNode: string
+
+  fromSide: Side
+  toSide: Side
+
+  id: string
+  label?: string
+}
 
 export interface CanvasEdge {
   label: string

@@ -20,6 +20,8 @@ export interface AdvancedCanvasPluginSettings {
   zoomToSlideWithoutPadding: boolean
   slideTransitionAnimationDuration: number
   slideTransitionAnimationIntensity: number
+
+  canvasEncapsulationEnabled: boolean
 }
 
 export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
@@ -36,6 +38,8 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   zoomToSlideWithoutPadding: true,
   slideTransitionAnimationDuration: 0.5,
   slideTransitionAnimationIntensity: 1.25,
+
+  canvasEncapsulationEnabled: true,
 }
 
 export default class AdvancedCanvasSettingsManager {
@@ -198,6 +202,17 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
         text
           .setValue(this.settingsManager.getSetting('slideTransitionAnimationIntensity').toString())
           .onChange(async (value) => await this.settingsManager.setSetting({ slideTransitionAnimationIntensity: parseFloat(value) }))
+      )
+
+    new Setting(containerEl)
+      .setHeading()
+      .setName("Canvas encapsulation")
+      .setDesc("Encapsulate a selection of nodes and edges into a new canvas.")
+      .addToggle((toggle) =>
+        toggle
+          .setTooltip("Requires a reload to take effect.")
+          .setValue(this.settingsManager.getSetting('canvasEncapsulationEnabled'))
+          .onChange(async (value) => await this.settingsManager.setSetting({ canvasEncapsulationEnabled: value }))
       )
   }
 }
