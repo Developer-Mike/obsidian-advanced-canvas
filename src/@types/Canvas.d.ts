@@ -45,6 +45,7 @@ export interface Canvas {
 
   getViewportBBox(): BBox
   zoomToBbox(bbox: BBox): void
+  zoomToSelection(): void
 
   undo(): void
   redo(): void

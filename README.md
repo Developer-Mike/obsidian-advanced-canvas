@@ -69,6 +69,8 @@ All features can be enabled/disabled in the settings.
 ## Canvas Commands
 - `Advanced Canvas: Create text node`
   - Create a new text node
+- `Advanced Canvas: Zoom to selection`
+  - Zoom to the bounding box of the selected nodes
 - `Advanced Canvas: Clone node up/down/left/right`
   - Clone the selected node in the direction of the arrow keys
   - The cloned node will have the same dimensions and color as the original node

@@ -29,6 +29,16 @@ export default class CommandsCanvasExtension {
       )
     })
 
+    this.plugin.addCommand({
+      id: 'zoom-to-selection',
+      name: 'Zoom to selection',
+      checkCallback: CanvasHelper.canvasCommand(
+        this.plugin,
+        (canvas: Canvas) => canvas.selection.size > 0,
+        (canvas: Canvas) => canvas.zoomToSelection()
+      )
+    })
+
     for (const direction of DRIECTIONS) {
       this.plugin.addCommand({
         id: `clone-node-${direction}`,
