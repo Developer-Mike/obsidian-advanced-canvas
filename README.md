@@ -203,7 +203,7 @@ Events:
   - Payload: `Canvas`, `boolean`
 
 ## Settings
-<img src="./assets/settings.png" alt="Settings Screen"/>
+Every feature can be enabled/disabled in the settings. All features were made to be as customizable as possible.
 
 ## Contributing
 All contributions are welcome! Here's how you can help:
