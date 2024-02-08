@@ -1,4 +1,21 @@
-import { TFile } from "obsidian"
+import { TFile, View } from "obsidian"
+
+export interface Size {
+  width: number
+  height: number
+}
+
+export interface Position {
+  x: number
+  y: number
+}
+
+export interface BBox {
+  minX: number
+  maxX: number
+  minY: number
+  maxY: number
+}
 
 export interface Canvas {
   view: CanvasView
@@ -7,21 +24,31 @@ export interface Canvas {
   getData(): CanvasData
 
   nodes: Map<string, CanvasNode>
-  menu: PopupMenu
-  nodeInteractionLayer: NodeInteractionLayer
+  edges: Map<string, CanvasEdge>
+  getEdgesForNode(node: CanvasNode): CanvasEdge[]
 
   wrapperEl: HTMLElement
+  menu: PopupMenu
   cardMenuEl: HTMLElement
   canvasControlsEl: HTMLElement
   quickSettingsButton: HTMLElement
+  nodeInteractionLayer: NodeInteractionLayer
 
   canvasRect: DOMRect
+  getViewportBBox(): BBox
+  setViewport(tx: number, ty: number, tZoom: number): void
+  markViewportChanged(): void
+
   x: number
-  tx: number
   y: number
-  ty: number
   zoom: number
+
+  tx: number
+  ty: number
   tZoom: number
+
+  zoomToBbox(bbox: BBox): void
+  zoomToSelection(): void
 
   readonly: boolean
   setReadonly(readonly: boolean): void
@@ -30,27 +57,16 @@ export interface Canvas {
   getSelectionData(): SelectionData
   deselectAll(): void
 
-  getEdgesForNode(node: CanvasNode): CanvasEdge[]
-
+  dragTempNode(dragEvent: any, nodeSize: Size, onDropped: (position: Position) => void): void
   createTextNode(options: TextNodeOptions): CanvasNode
   createGroupNode(options: GroupNodeOptions): CanvasNode
   createFileNode(options: FileNodeOptions): CanvasNode
   removeNode(node: CanvasNode): void
 
-  dragTempNode(dragEvent: any, nodeSize: Size, onDropped: (position: Position) => void): void
-
-  setViewport(tx: number, ty: number, tZoom: number): void
-  markViewportChanged(): void
-
-  getViewportBBox(): BBox
-  zoomToBbox(bbox: BBox): void
-  zoomToSelection(): void
-
   undo(): void
   redo(): void
 
   handlePaste(): void
-  requestPushHistory(data: CanvasData): void
   requestSave(): void
 
   // Custom
@@ -70,28 +86,9 @@ export interface CanvasConfig {
   defaultTextNodeDimensions: Size
 }
 
-export interface CanvasView {
+export interface CanvasView extends View {
   file: TFile
 }
-
-export interface Size {
-  width: number
-  height: number
-}
-
-export interface Position {
-  x: number
-  y: number
-}
-
-export interface BBox {
-  minX: number
-  maxX: number
-  minY: number
-  maxY: number
-}
-
-type Side = 'top' | 'right' | 'bottom' | 'left'
 
 export interface NodeOptions {
   pos: Position
@@ -114,10 +111,11 @@ export interface FileNodeOptions extends NodeOptions {
 }
 
 export interface CanvasData {
-  nodes: CanvasNode[]
-  edges: CanvasEdge[]
+  nodes: CanvasNodeData[]
+  edges: CanvasEdgeData[]
 }
 
+export type CanvasNodeType = 'text' | 'group' | 'file' | 'link'
 export interface CanvasNodeData {
   type: CanvasNodeType
   shape: string
@@ -129,28 +127,24 @@ export interface CanvasNodeData {
 export interface CanvasNode {
   canvas: Canvas
   nodeEl: HTMLElement
-  bbox: BBox
   getBBox(): BBox
-  text?: string
+
   color: string
+
+  /** @deprecated Use `canvas.setNodeData` instead */
   setData(data: CanvasNodeData): void
   getData(): CanvasNodeData
 }
 
-export interface CanvasNodeUnknownData {
-}
-
-export type CanvasNodeType = 'text' | 'group' | 'file'
-
+type Side = 'top' | 'right' | 'bottom' | 'left'
 export interface CanvasEdgeData {
+  id: string
+
   fromNode: string
   toNode: string
 
   fromSide: Side
   toSide: Side
-
-  id: string
-  label?: string
 }
 
 export interface CanvasEdge {
@@ -172,11 +166,4 @@ export interface NodeInteractionLayer {
 export interface PopupMenu {
   menuEl: HTMLElement
   render(): void
-}
-
-export interface BBox {
-  minX: number
-  minY: number
-  maxX: number
-  maxY: number
 }

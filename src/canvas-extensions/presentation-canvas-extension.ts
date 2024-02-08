@@ -146,20 +146,20 @@ export default class PresentationCanvasExtension {
     if (animationDurationMs > 0 && fromNode) {
       const animationIntensity = this.plugin.settingsManager.getSetting('slideTransitionAnimationIntensity')
 
-      const currentNodeBBoxEnlarged = CanvasHelper.scaleBBox(fromNode.bbox, animationIntensity)
+      const currentNodeBBoxEnlarged = CanvasHelper.scaleBBox(fromNode.getBBox(), animationIntensity)
       if (useCustomZoomFunction) CanvasHelper.zoomToBBox(canvas, currentNodeBBoxEnlarged)
       else canvas.zoomToBbox(currentNodeBBoxEnlarged)
 
       await delay(animationDurationMs / 2)
 
-      const nextNodeBBoxEnlarged = CanvasHelper.scaleBBox(toNode.bbox, animationIntensity)
+      const nextNodeBBoxEnlarged = CanvasHelper.scaleBBox(toNode.getBBox(), animationIntensity)
       if (useCustomZoomFunction) CanvasHelper.zoomToBBox(canvas, nextNodeBBoxEnlarged)
       else canvas.zoomToBbox(nextNodeBBoxEnlarged)
 
       await delay(animationDurationMs / 2)
     }
 
-    let nodeBBox = toNode.bbox
+    let nodeBBox = toNode.getBBox()
     if (useCustomZoomFunction) CanvasHelper.zoomToBBox(canvas, nodeBBox)
     else canvas.zoomToBbox(nodeBBox)
   }
