@@ -74,6 +74,7 @@ export interface Canvas {
   lockedY: number
   lockedZoom: number
   setNodeData(node: CanvasNode, key: keyof CanvasNodeData, value: any): void
+  foreignCanvasData: { [key: string]: CanvasData }
 }
 
 export interface SelectionData {
@@ -120,6 +121,7 @@ export interface CanvasNodeData {
   type: CanvasNodeType
   shape: string
   isStartNode: boolean
+  isPortalOpen: boolean
 
   [key: string]: any
 }

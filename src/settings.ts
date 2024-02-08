@@ -27,6 +27,8 @@ export interface AdvancedCanvasPluginSettings {
   slideTransitionAnimationIntensity: number
 
   canvasEncapsulationEnabled: boolean
+
+  portalsFeatureEnabled: boolean
 }
 
 export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
@@ -50,6 +52,8 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   slideTransitionAnimationIntensity: 1.25,
 
   canvasEncapsulationEnabled: true,
+
+  portalsFeatureEnabled: true
 }
 
 export default class AdvancedCanvasSettingsManager {
@@ -241,6 +245,13 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       "Canvas encapsulation",
       "Encapsulate a selection of nodes and edges into a new canvas.",
       'canvasEncapsulationEnabled'
+    )
+
+    this.createFeatureHeading(
+      containerEl,
+      "Portals",
+      "Create portals to other canvases.",
+      'portalsFeatureEnabled'
     )
   }
 

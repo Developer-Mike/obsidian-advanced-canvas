@@ -202,6 +202,9 @@ Events:
 - `advanced-canvas:readonly-changed`
   - Fired when the readonly state of the canvas changes
   - Payload: `Canvas`, `boolean`
+- `advanced-canvas:canvas-saved:before` and `advanced-canvas:canvas-saved:after`
+  - Fired before and after the canvas gets saved
+  - Payload: `Canvas`
 
 ## Settings
 Every feature can be enabled/disabled in the settings. All features were made to be as customizable as possible.

@@ -18,6 +18,7 @@ export default class CanvasEventEmitter {
           ...node.getData(),
           [key]: value 
         })
+        this.requestSave()
 
         that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [node])
       },
@@ -31,6 +32,11 @@ export default class CanvasEventEmitter {
         that.triggerWorkspaceEvent(CanvasEvent.ZoomToBbox.Before, this, bbox)
         const result = next.call(this, bbox)
         that.triggerWorkspaceEvent(CanvasEvent.ZoomToBbox.After, this, bbox)
+        return result
+      },
+      setReadonly: (next: any) => function (readonly: boolean) {
+        const result = next.call(this, readonly)
+        that.triggerWorkspaceEvent(CanvasEvent.ReadonlyChanged, this, readonly)
         return result
       },
       undo: (next: any) => function (...args: any) {
@@ -48,9 +54,10 @@ export default class CanvasEventEmitter {
         that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()])
         return result
       },
-      setReadonly: (next: any) => function (readonly: boolean) {
-        const result = next.call(this, readonly)
-        that.triggerWorkspaceEvent(CanvasEvent.ReadonlyChanged, this, readonly)
+      requestSave: (next: any) => function (...args: any) {
+        that.triggerWorkspaceEvent(CanvasEvent.CanvasSaved.Before, this)
+        const result = next.call(this, ...args)
+        that.triggerWorkspaceEvent(CanvasEvent.CanvasSaved.After, this)
         return result
       }
     })
@@ -99,7 +106,6 @@ export default class CanvasEventEmitter {
   }
 
   private triggerWorkspaceEvent(event: string, ...args: any) {
-    if (event === CanvasEvent.CanvasChanged) console.log('Canvas changed')
     this.plugin.app.workspace.trigger(event, ...args)
   }
 }
