@@ -18,6 +18,7 @@ export default class CanvasEventEmitter {
           ...node.getData(),
           [key]: value 
         })
+        this.requestSave()
 
         that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [node])
       },
@@ -99,7 +100,6 @@ export default class CanvasEventEmitter {
   }
 
   private triggerWorkspaceEvent(event: string, ...args: any) {
-    if (event === CanvasEvent.CanvasChanged) console.log('Canvas changed')
     this.plugin.app.workspace.trigger(event, ...args)
   }
 }
