@@ -19,9 +19,9 @@ export default class InteractionTaggerCanvasExtension {
         if (!interactionEl) return
     
         for (const dataKey of EXPOSED_DATA) {
-          const datasetKey = TARGET_NODE_DATASET_PREFIX + dataKey.charAt(0).toUpperCase() + dataKey.slice(1)
+          const datasetKey = TARGET_NODE_DATASET_PREFIX + dataKey.toString().charAt(0).toUpperCase() + dataKey.toString().slice(1)
     
-          const dataValue = node?.unknownData[dataKey]
+          const dataValue = node?.getData()[dataKey]
           if (dataValue) interactionEl.dataset[datasetKey] = dataValue
         }
       }

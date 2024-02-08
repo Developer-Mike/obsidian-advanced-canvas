@@ -4,7 +4,6 @@ export interface Canvas {
   view: CanvasView
   config: CanvasConfig
 
-  data: CanvasData
   getData(): CanvasData
 
   nodes: Map<string, CanvasNode>
@@ -28,7 +27,7 @@ export interface Canvas {
   setReadonly(readonly: boolean): void
 
   selection: Set<CanvasNode>
-  getSelectionData(): { nodes: CanvasNodeData[], edges: CanvasEdgeData[], center: Position }
+  getSelectionData(): SelectionData
   deselectAll(): void
 
   getEdgesForNode(node: CanvasNode): CanvasEdge[]
@@ -58,7 +57,13 @@ export interface Canvas {
   lockedX: number
   lockedY: number
   lockedZoom: number
-  setNodeUnknownData(node: CanvasNode, key: keyof CanvasNodeUnknownData, value: any): void
+  setNodeData(node: CanvasNode, key: keyof CanvasNodeData, value: any): void
+}
+
+export interface SelectionData {
+  nodes: CanvasNodeData[]
+  edges: CanvasEdgeData[]
+  center: Position
 }
 
 export interface CanvasConfig {
@@ -113,7 +118,13 @@ export interface CanvasData {
   edges: CanvasEdge[]
 }
 
-export interface CanvasNodeData extends CanvasNodeUnknownData {}
+export interface CanvasNodeData {
+  type: CanvasNodeType
+  shape: string
+  isStartNode: boolean
+
+  [key: string]: any
+}
 
 export interface CanvasNode {
   canvas: Canvas
@@ -122,15 +133,11 @@ export interface CanvasNode {
   getBBox(): BBox
   text?: string
   color: string
-  unknownData: CanvasNodeUnknownData
+  setData(data: CanvasNodeData): void
+  getData(): CanvasNodeData
 }
 
 export interface CanvasNodeUnknownData {
-  type: CanvasNodeType
-  shape: string
-  isStartNode: boolean
-
-  [key: string]: any
 }
 
 export type CanvasNodeType = 'text' | 'group' | 'file'

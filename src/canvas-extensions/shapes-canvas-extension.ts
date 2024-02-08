@@ -141,7 +141,7 @@ export default class ShapesCanvasExtension {
     if (!selection) return false
 
     for (const node of selection) {
-      if (node.unknownData.type === 'text') return true
+      if (node.getData().type === 'text') return true
     }
     
     return false
@@ -149,9 +149,9 @@ export default class ShapesCanvasExtension {
 
   private setShapeForSelection(canvas: Canvas, shape: Shape) {  
     for (const node of canvas.selection) {
-      if (node.unknownData.type !== 'text') continue
+      if (node.getData().type !== 'text') continue
 
-      canvas.setNodeUnknownData(node, 'shape', shape.id)
+      canvas.setNodeData(node, 'shape', shape.id)
     }
   }
 }

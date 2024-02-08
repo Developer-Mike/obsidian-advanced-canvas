@@ -1,5 +1,5 @@
 import AdvancedCanvasPlugin from "src/main"
-import { BBox, CanvasNode } from "src/@types/Canvas"
+import { BBox, CanvasNode, SelectionData } from "src/@types/Canvas"
 import { patchWorkspaceFunction } from "src/utils/patch-helper"
 import { CanvasEvent } from "./events"
 
@@ -13,18 +13,13 @@ export default class CanvasEventEmitter {
     // Patch canvas
     patchWorkspaceFunction(this.plugin, () => this.plugin.getCurrentCanvas(), {
       // Add custom function
-      setNodeUnknownData: (_next: any) => function (node: CanvasNode, key: string, value: any) {
-        node.unknownData[key] = value
-        this.requestSave()
-  
+      setNodeData: (_next: any) => function (node: CanvasNode, key: string, value: any) {
+        node.setData({ 
+          ...node.getData(),
+          [key]: value 
+        })
+
         that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [node])
-      },
-      // Listen to canvas change
-      importData: (next: any) => function (...args: any) {
-        const result = next.call(this, ...args)
-        that.triggerWorkspaceEvent(CanvasEvent.CanvasChanged, this)
-        that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()])
-        return result
       },
       markViewportChanged: (next: any) => function (...args: any) {
         that.triggerWorkspaceEvent(CanvasEvent.ViewportChanged.Before, this)
@@ -48,9 +43,9 @@ export default class CanvasEventEmitter {
         that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()])
         return result
       },
-      addNode: (next: any) => function (node: CanvasNode) {
-        const result = next.call(this, node)
-        that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [node])
+      handlePaste: (next: any) => function (...args: any) {
+        const result = next.call(this, ...args)
+        that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()])
         return result
       },
       setReadonly: (next: any) => function (readonly: boolean) {
@@ -62,13 +57,15 @@ export default class CanvasEventEmitter {
 
     // Patch canvas popup menu
     patchWorkspaceFunction(this.plugin, () => this.plugin.getCurrentCanvas()?.menu, {
-      render: (next: any) => function (...args: any) {
-        const result = next.call(this, ...args)
+      render: (next: any) => function (visible: boolean) {
+        const result = next.call(this, visible)
 
-        that.triggerWorkspaceEvent(CanvasEvent.PopupMenuCreated, this.canvas)
+        if (visible) {
+          that.triggerWorkspaceEvent(CanvasEvent.PopupMenuCreated, this.canvas)
 
-        // Re-Center the popup menu
-        next.call(this)
+          // Re-Center the popup menu
+          next.call(this, false)
+        }
         
         return result
       }
@@ -85,8 +82,8 @@ export default class CanvasEventEmitter {
       }
     })
 
-    // Update current canvas on startup
-    const startupListener = this.plugin.app.workspace.on('active-leaf-change', () => {
+    // Listen to canvas changes
+    const onCanvasChangeListener = this.plugin.app.workspace.on('active-leaf-change', () => {
       const canvas = this.plugin.getCurrentCanvas()
       if (!canvas) return
 
@@ -94,16 +91,15 @@ export default class CanvasEventEmitter {
       this.triggerWorkspaceEvent(CanvasEvent.ViewportChanged.After, canvas)
       this.triggerWorkspaceEvent(CanvasEvent.ReadonlyChanged, canvas, canvas.readonly)
       this.triggerWorkspaceEvent(CanvasEvent.NodesChanged, canvas, [...canvas.nodes.values()])
-
-      this.plugin.app.workspace.offref(startupListener)
     })
-    this.plugin.registerEvent(startupListener)
+    this.plugin.registerEvent(onCanvasChangeListener)
 
     // Trigger instantly (Plugin reload)
-    startupListener.fn.call(this.plugin.app.workspace)
+    onCanvasChangeListener.fn.call(this.plugin.app.workspace)
   }
 
   private triggerWorkspaceEvent(event: string, ...args: any) {
+    if (event === CanvasEvent.CanvasChanged) console.log('Canvas changed')
     this.plugin.app.workspace.trigger(event, ...args)
   }
 }

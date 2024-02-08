@@ -1,8 +1,8 @@
-import { Canvas, CanvasNode } from "src/@types/Canvas"
+import { Canvas, CanvasNode, CanvasNodeData } from "src/@types/Canvas"
 import { CanvasEvent } from "src/events/events"
 import AdvancedCanvasPlugin from "src/main"
 
-export const EXPOSED_DATA = ["type", "isStartNode", "shape"]
+export const EXPOSED_DATA = ['type', 'isStartNode', 'shape'] as (keyof CanvasNodeData)[]
 
 export default class NodeDataTaggerCanvasExtension {
   plugin: AdvancedCanvasPlugin
@@ -14,7 +14,7 @@ export default class NodeDataTaggerCanvasExtension {
       CanvasEvent.NodesChanged,
       (_canvas: Canvas, nodes: CanvasNode[]) => {
         for (const node of nodes) {
-          const nodeData = node?.unknownData
+          const nodeData = node?.getData()
           if (!nodeData) continue
 
           for (const dataKey of EXPOSED_DATA) {

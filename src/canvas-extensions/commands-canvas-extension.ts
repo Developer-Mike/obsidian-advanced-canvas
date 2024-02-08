@@ -98,7 +98,7 @@ export default class CommandsCanvasExtension {
     })
 
     clonedNode.color = sourceNode.color
-    canvas.setNodeUnknownData(clonedNode, 'shape', sourceNodeData.shape)
+    canvas.setNodeData(clonedNode, 'shape', sourceNodeData.shape)
 
     if (this.plugin.settingsManager.getSetting('zoomToClonedNode'))
       canvas.zoomToBbox(clonedNode.getBBox())
