@@ -1,5 +1,5 @@
 import AdvancedCanvasPlugin from "src/main"
-import { BBox, CanvasNode, SelectionData } from "src/@types/Canvas"
+import { BBox, CanvasData, CanvasNode, SelectionData } from "src/@types/Canvas"
 import { patchWorkspaceFunction } from "src/utils/patch-helper"
 import { CanvasEvent } from "./events"
 
@@ -52,6 +52,17 @@ export default class CanvasEventEmitter {
       handlePaste: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
         that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()])
+        return result
+      },
+      getData: (next: any) => function (...args: any) {
+        const result = next.call(this, ...args)
+        that.triggerWorkspaceEvent(CanvasEvent.DataRequested, result)
+        return result
+      },
+      setData: (next: any) => function (data: CanvasData) {
+        that.triggerWorkspaceEvent(CanvasEvent.DataSet.Before, data)
+        const result = next.call(this, data)
+        that.triggerWorkspaceEvent(CanvasEvent.DataSet.After, data)
         return result
       },
       requestSave: (next: any) => function (...args: any) {

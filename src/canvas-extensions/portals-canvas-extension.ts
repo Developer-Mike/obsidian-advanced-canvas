@@ -1,4 +1,4 @@
-import { Canvas, CanvasNode } from "src/@types/Canvas"
+import { Canvas, CanvasData, CanvasNode } from "src/@types/Canvas"
 import { CanvasEvent } from "src/events/events"
 import AdvancedCanvasPlugin from "src/main"
 import * as CanvasHelper from "src/utils/canvas-helper"
@@ -17,18 +17,13 @@ export default class PortalsCanvasExtension {
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.NodesChanged,
-      (canvas: Canvas, nodes: CanvasNode[]) => this.onNodesChanged(canvas, nodes)
+      CanvasEvent.DataRequested,
+      (data: CanvasData) => this.removePortalCanvasData(data)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.CanvasSaved.Before,
-      (canvas: Canvas) => this.beforeCanvasSaved(canvas)
-    ))
-
-    this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.CanvasSaved.After,
-      (canvas: Canvas) => this.afterCanvasSaved(canvas)
+      CanvasEvent.DataSet.Before,
+      (data: CanvasData) => this.addPortalCanvasData(data)
     ))
   }
 
@@ -53,26 +48,15 @@ export default class PortalsCanvasExtension {
     )
   }
 
-  onNodesChanged(canvas: Canvas, nodes: CanvasNode[]) {
-    for (const node of nodes) {
-      const nodeData = node.getData()
-      if (nodeData.type !== 'file') continue
-
-      if (!nodeData.isPortalOpen) {
-        console.log(`Close portal for file: ${node.getData().file}`)
-      } else {
-        console.log(`Open portal for file: ${node.getData().file}`)
-      }
+  removePortalCanvasData(data: CanvasData) {
+    for (const node of data.nodes) {
+      // TODO: Remove node data that is related to portals
     }
   }
 
-  beforeCanvasSaved(canvas: Canvas) {
-    const canvasData = canvas.getData()
-    console.log('Canvas before saved', canvasData)
-  }
-
-  afterCanvasSaved(canvas: Canvas) {
-    const canvasData = canvas.getData()
-    console.log('Canvas after saved', canvasData)
+  addPortalCanvasData(data: CanvasData) {
+    for (const node of data.nodes) {
+      // TODO: Add node data that is related to portals
+    }
   }
 }

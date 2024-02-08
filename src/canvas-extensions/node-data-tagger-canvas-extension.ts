@@ -2,7 +2,7 @@ import { Canvas, CanvasNode, CanvasNodeData } from "src/@types/Canvas"
 import { CanvasEvent } from "src/events/events"
 import AdvancedCanvasPlugin from "src/main"
 
-export const EXPOSED_DATA = ['type', 'isStartNode', 'shape'] as (keyof CanvasNodeData)[]
+export const EXPOSED_DATA = ['type', 'shape', 'isStartNode', 'isPortalOpen'] as (keyof CanvasNodeData)[]
 
 export default class NodeDataTaggerCanvasExtension {
   plugin: AdvancedCanvasPlugin

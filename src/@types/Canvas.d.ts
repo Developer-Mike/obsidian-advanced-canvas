@@ -121,7 +121,13 @@ export interface CanvasNodeData {
   type: CanvasNodeType
   shape: string
   isStartNode: boolean
+
+  // For file node
   isPortalOpen: boolean
+  portalData: { nodeIds: string[], edgeIds: string[] }
+
+  // For any node that got created from a portal
+  portalId: string
 
   [key: string]: any
 }

@@ -1,0 +1,8 @@
+.canvas-node[data-is-portal-open='true'] .canvas-node-container {
+  background-color: transparent;
+  border-style: dashed;
+
+  .canvas-node-content {
+    display: none;
+  }
+}
