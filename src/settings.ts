@@ -98,27 +98,19 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
 
     containerEl.createEl('h1', { cls: 'main-header', text: 'Advanced Canvas' })
 
-    new Setting(containerEl)
-      .setHeading()
-      .setName("Shapes")
-      .setDesc("Shape your nodes for creating e.g. mind maps or flow charts.")
-      .addToggle((toggle) =>
-        toggle
-          .setTooltip("Requires a reload to take effect.")
-          .setValue(this.settingsManager.getSetting('shapesFeatureEnabled'))
-          .onChange(async (value) => await this.settingsManager.setSetting({ shapesFeatureEnabled: value }))
-      )
+    this.createFeatureHeading(
+      containerEl,
+      "Shapes",
+      "Shape your nodes for creating e.g. mind maps or flow charts.",
+      'shapesFeatureEnabled'
+    )
 
-    new Setting(containerEl)
-      .setHeading()
-      .setName("Extended Commands")
-      .setDesc("Add more commands to the canvas.")
-      .addToggle((toggle) =>
-        toggle
-          .setTooltip("Requires a reload to take effect.")
-          .setValue(this.settingsManager.getSetting('commandsFeatureEnabled'))
-          .onChange(async (value) => await this.settingsManager.setSetting({ commandsFeatureEnabled: value }))
-      )
+    this.createFeatureHeading(
+      containerEl,
+      "Extended Commands",
+      "Add more commands to the canvas.",
+      'commandsFeatureEnabled'
+    )
 
     new Setting(containerEl)
       .setName("Zoom to cloned node")
@@ -147,16 +139,12 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           .onChange(async (value) => await this.settingsManager.setSetting({ expandNodeStepSize: parseInt(value) }))
       )
 
-    new Setting(containerEl)
-      .setHeading()
-      .setName("Better readonly")
-      .setDesc("Improve the readonly mode.") 
-      .addToggle((toggle) =>
-        toggle
-          .setTooltip("Requires a reload to take effect.")
-          .setValue(this.settingsManager.getSetting('betterReadonlyEnabled'))
-          .onChange(async (value) => await this.settingsManager.setSetting({ betterReadonlyEnabled: value }))
-      )
+    this.createFeatureHeading(
+      containerEl,
+      "Better readonly",
+      "Improve the readonly mode.",
+      'betterReadonlyEnabled'
+    )
 
     /* Would require a solution to sync the settings with the canvas */
     /*new Setting(containerEl)
@@ -195,16 +183,12 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           .onChange(async (value) => await this.settingsManager.setSetting({ disablePan: value }))
       )*/
 
-    new Setting(containerEl)
-      .setHeading()
-      .setName("Presentations")
-      .setDesc("Create a presentation from your canvas.")
-      .addToggle((toggle) =>
-        toggle
-          .setTooltip("Requires a reload to take effect.")
-          .setValue(this.settingsManager.getSetting('presentationFeatureEnabled'))
-          .onChange(async (value) => await this.settingsManager.setSetting({ presentationFeatureEnabled: value }))
-      )
+    this.createFeatureHeading(
+      containerEl,
+      "Presentations",
+      "Create a presentation from your canvas.",
+      'presentationFeatureEnabled'
+    )
 
     new Setting(containerEl)
       .setName("Default slize ratio")
@@ -252,15 +236,24 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           .onChange(async (value) => await this.settingsManager.setSetting({ slideTransitionAnimationIntensity: parseFloat(value) }))
       )
 
-    new Setting(containerEl)
+    this.createFeatureHeading(
+      containerEl,
+      "Canvas encapsulation",
+      "Encapsulate a selection of nodes and edges into a new canvas.",
+      'canvasEncapsulationEnabled'
+    )
+  }
+
+  private createFeatureHeading(containerEl: HTMLElement, label: string, description: string, settingsKey: keyof AdvancedCanvasPluginSettings): Setting {
+    return new Setting(containerEl)
       .setHeading()
-      .setName("Canvas encapsulation")
-      .setDesc("Encapsulate a selection of nodes and edges into a new canvas.")
+      .setName(label)
+      .setDesc(description)
       .addToggle((toggle) =>
         toggle
           .setTooltip("Requires a reload to take effect.")
-          .setValue(this.settingsManager.getSetting('canvasEncapsulationEnabled'))
-          .onChange(async (value) => await this.settingsManager.setSetting({ canvasEncapsulationEnabled: value }))
+          .setValue(this.settingsManager.getSetting(settingsKey) as boolean)
+          .onChange(async (value) => await this.settingsManager.setSetting({ [settingsKey]: value }))
       )
   }
 }
