@@ -3,7 +3,7 @@ import AdvancedCanvasPlugin from "src/main"
 import * as CanvasHelper from "src/utils/canvas-helper"
 
 type Direction = 'up' | 'down' | 'left' | 'right'
-const DRIECTIONS = ['up', 'down', 'left', 'right'] as Direction[]
+const DIRECTIONS = ['up', 'down', 'left', 'right'] as Direction[]
 const DIRECTION_KEYS = {
   up: 'ArrowUp',
   down: 'ArrowDown',
@@ -39,7 +39,7 @@ export default class CommandsCanvasExtension {
       )
     })
 
-    for (const direction of DRIECTIONS) {
+    for (const direction of DIRECTIONS) {
       this.plugin.addCommand({
         id: `clone-node-${direction}`,
         name: `Clone node ${direction}`,

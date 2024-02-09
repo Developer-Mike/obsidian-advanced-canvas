@@ -1,4 +1,3 @@
-import delay from 'src/utils/delay-helper'
 import { Notice } from 'obsidian'
 import { Canvas, CanvasEdge, CanvasNode, Position, Size } from 'src/@types/Canvas'
 import AdvancedCanvasPlugin from 'src/main'
@@ -150,13 +149,13 @@ export default class PresentationCanvasExtension {
       if (useCustomZoomFunction) CanvasHelper.zoomToBBox(canvas, currentNodeBBoxEnlarged)
       else canvas.zoomToBbox(currentNodeBBoxEnlarged)
 
-      await delay(animationDurationMs / 2)
+      await sleep(animationDurationMs / 2)
 
       const nextNodeBBoxEnlarged = CanvasHelper.scaleBBox(toNode.getBBox(), animationIntensity)
       if (useCustomZoomFunction) CanvasHelper.zoomToBBox(canvas, nextNodeBBoxEnlarged)
       else canvas.zoomToBbox(nextNodeBBoxEnlarged)
 
-      await delay(animationDurationMs / 2)
+      await sleep(animationDurationMs / 2)
     }
 
     let nodeBBox = toNode.getBBox()
@@ -203,7 +202,7 @@ export default class PresentationCanvasExtension {
     this.isPresentationMode = true
 
     // Wait for fullscreen to be enabled
-    await delay(500)
+    await sleep(500)
 
     // Zoom to first node
     this.visitedNodes.push(startNode)
