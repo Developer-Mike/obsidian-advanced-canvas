@@ -204,10 +204,10 @@ Events:
   - Payload: `Canvas`, `boolean`
 - `advanced-canvas:data-requested`
   - Fired when the canvas data gets requested
-  - Payload: `CanvasData (Reference!)`
+  - Payload: `Canvas`, `CanvasData (Reference!)`
 - `advanced-canvas:load-data`
   - Fired when the canvas data gets set
-  - Payload: `CanvasData (Reference!)`, `setData: (CanvasData) => void`
+  - Payload: `Canvas`, `CanvasData (Reference!)`, `setData: (CanvasData) => void`
 - `advanced-canvas:canvas-saved:before` and `advanced-canvas:canvas-saved:after`
   - Fired before and after the canvas gets saved
   - Payload: `Canvas`

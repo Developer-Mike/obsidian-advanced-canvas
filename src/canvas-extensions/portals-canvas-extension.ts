@@ -25,12 +25,12 @@ export default class PortalsCanvasExtension {
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.DataRequested,
-      (data: CanvasData) => this.removePortalCanvasData(data)
+      (canvas: Canvas, data: CanvasData) => this.removePortalCanvasData(canvas, data)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.LoadData,
-      (data: CanvasData, setData: (data: CanvasData) => void) => this.addPortalCanvasData(data, setData)
+      (canvas: Canvas, data: CanvasData, setData: (data: CanvasData) => void) => this.addPortalCanvasData(canvas, data, setData)
     ))
   }
 
@@ -68,7 +68,7 @@ export default class PortalsCanvasExtension {
     }
   }
 
-  private removePortalCanvasData(data: CanvasData) {
+  private removePortalCanvasData(_canvas: Canvas, data: CanvasData) {
     for (const portalNodeData of data.nodes) {
       if (!portalNodeData.portalIdMaps) continue
 
@@ -88,7 +88,7 @@ export default class PortalsCanvasExtension {
   }
 
   // CAUSING NEWLINES IN THE CANVAS DATA
-  private async addPortalCanvasData(data: CanvasData, setData: (data: CanvasData) => void) {
+  private async addPortalCanvasData(canvas: Canvas, data: CanvasData, setData: (data: CanvasData) => void) {
     for (const portalNodeData of data.nodes) {
       if (portalNodeData.type !== 'file' || !portalNodeData.isPortalOpen) continue
 

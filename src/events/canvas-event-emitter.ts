@@ -68,17 +68,22 @@ export default class CanvasEventEmitter {
       },
       getData: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
-        that.triggerWorkspaceEvent(CanvasEvent.DataRequested, result)
+        that.triggerWorkspaceEvent(CanvasEvent.DataRequested, this, result)
         return result
       },
       setData: (next: any) => function (data: CanvasData) {
         const setData = (data: CanvasData) => {
+          // Maintain history
+          this.history.data.pop()
+
           next.call(this, data)
           that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()])
         }
 
-        that.triggerWorkspaceEvent(CanvasEvent.LoadData, data, setData)
-        return setData(data)
+        that.triggerWorkspaceEvent(CanvasEvent.LoadData, this, data, setData)
+        const result = next.call(this, data)
+        that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()])
+        return result
       },
       requestSave: (next: any) => function (...args: any) {
         that.triggerWorkspaceEvent(CanvasEvent.CanvasSaved.Before, this)

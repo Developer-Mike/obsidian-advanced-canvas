@@ -64,6 +64,7 @@ export interface Canvas {
   createFileNode(options: FileNodeOptions): CanvasNode
   removeNode(node: CanvasNode): void
 
+  history: CanvasHistory
   undo(): void
   redo(): void
 
@@ -76,6 +77,12 @@ export interface Canvas {
   lockedZoom: number
   setNodeData(node: CanvasNode, key: keyof CanvasNodeData, value: any): void
   foreignCanvasData: { [key: string]: CanvasData }
+}
+
+export interface CanvasHistory {
+  data: CanvasData[]
+  current: number
+  max: number
 }
 
 export interface SelectionData {
