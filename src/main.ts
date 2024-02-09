@@ -11,6 +11,7 @@ import ReadonlyCanvasExtension from './canvas-extensions/readonly-canvas-extensi
 import EncapsulateCanvasExtension from './canvas-extensions/encapsulate-canvas-extension'
 import CommandsCanvasExtension from './canvas-extensions/commands-canvas-extension'
 import PortalsCanvasExtension from './canvas-extensions/portals-canvas-extension'
+import IconsHelper from './utils/icons-helper'
 
 const CANVAS_EXTENSIONS: any[] = [
   NodeDataTaggerCanvasExtension,
@@ -30,6 +31,8 @@ export default class AdvancedCanvasPlugin extends Plugin {
   canvasExtensions: any[]
 
 	async onload() {
+    IconsHelper.addIcons()
+    
     this.settingsManager = new AdvancedCanvasSettingsManager(this)
     await this.settingsManager.loadSettings()
     this.settingsManager.addSettingsTab()

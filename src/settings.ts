@@ -100,8 +100,6 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
     let { containerEl } = this
     containerEl.empty()
 
-    containerEl.createEl('h1', { cls: 'main-header', text: 'Advanced Canvas' })
-
     this.createFeatureHeading(
       containerEl,
       "Shapes",
