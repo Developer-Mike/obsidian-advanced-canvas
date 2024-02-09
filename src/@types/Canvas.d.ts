@@ -22,6 +22,7 @@ export interface Canvas {
   config: CanvasConfig
 
   getData(): CanvasData
+  setData(data: CanvasData): void
 
   nodes: Map<string, CanvasNode>
   edges: Map<string, CanvasEdge>
@@ -122,12 +123,12 @@ export interface CanvasNodeData {
   shape: string
   isStartNode: boolean
 
-  // For file node
-  isPortalOpen: boolean
-  portalData: { nodeIds: string[], edgeIds: string[] }
-
-  // For any node that got created from a portal
-  portalId: string
+  isPortalOpen?: boolean
+  closedPortalSize?: Size
+  portalIdMaps?: { 
+    nodeIdMap: { [key: string]: string }
+    edgeIdMap: { [key: string]: string }
+  }
 
   [key: string]: any
 }
@@ -138,6 +139,7 @@ export interface CanvasNode {
   getBBox(): BBox
 
   color: string
+  zIndex: number
 
   /** @deprecated Use `canvas.setNodeData` instead */
   setData(data: CanvasNodeData): void

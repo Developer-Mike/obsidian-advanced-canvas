@@ -208,7 +208,7 @@ Events:
 - `advanced-canvas:data-set:before` and `advanced-canvas:data-set:after`
   - Fired when the canvas data gets set
   - Alter the data using the `before` event
-  - Payload: `CanvasData (Reference!)`
+  - Payload: `CanvasData (Reference!)`, `(CanvasData) => void`
 - `advanced-canvas:canvas-saved:before` and `advanced-canvas:canvas-saved:after`
   - Fired before and after the canvas gets saved
   - Payload: `Canvas`
