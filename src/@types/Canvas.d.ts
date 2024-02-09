@@ -124,7 +124,8 @@ export interface CanvasNodeData {
   isStartNode: boolean
 
   isPortalOpen?: boolean
-  closedPortalSize?: Size
+  closedPortalWidth?: number
+  closedPortalHeight?: number
   portalIdMaps?: { 
     nodeIdMap: { [key: string]: string }
     edgeIdMap: { [key: string]: string }

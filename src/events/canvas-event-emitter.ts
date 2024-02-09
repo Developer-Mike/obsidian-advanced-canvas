@@ -12,6 +12,9 @@ export default class CanvasEventEmitter {
 
     // Patch canvas view
     patchWorkspaceFunction(this.plugin, () => this.plugin.getCurrentCanvasView(), {
+      getViewData: (_next: any) => function (..._args: any) {
+        return JSON.stringify(this.canvas.getData(), null, 2)
+      },
       setViewData: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
         that.triggerCanvasChangedEvent(this.canvas)
@@ -71,14 +74,11 @@ export default class CanvasEventEmitter {
       setData: (next: any) => function (data: CanvasData) {
         const setData = (data: CanvasData) => {
           next.call(this, data)
-          this.requestSave()
           that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()])
         }
 
-        that.triggerWorkspaceEvent(CanvasEvent.DataSet.Before, data, setData)
-        const result = next.call(this, data)
-        that.triggerWorkspaceEvent(CanvasEvent.DataSet.After, data, setData)
-        return result
+        that.triggerWorkspaceEvent(CanvasEvent.LoadData, data, setData)
+        return setData(data)
       },
       requestSave: (next: any) => function (...args: any) {
         that.triggerWorkspaceEvent(CanvasEvent.CanvasSaved.Before, this)

@@ -29,7 +29,7 @@ export default class PortalsCanvasExtension {
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.DataSet.Before,
+      CanvasEvent.LoadData,
       (data: CanvasData, setData: (data: CanvasData) => void) => this.addPortalCanvasData(data, setData)
     ))
   }
@@ -73,8 +73,8 @@ export default class PortalsCanvasExtension {
       if (!portalNodeData.portalIdMaps) continue
 
       // Reset portal size
-      portalNodeData.width = portalNodeData.closedPortalSize?.width ?? portalNodeData.width
-      portalNodeData.height = portalNodeData.closedPortalSize?.height ?? portalNodeData.height
+      portalNodeData.width = portalNodeData.closedPortalWidth ?? portalNodeData.width
+      portalNodeData.height = portalNodeData.closedPortalHeight ?? portalNodeData.height
 
       // Remove portal nodes and edges
       const portalNodeIds = Array.from(Object.keys(portalNodeData.portalIdMaps.nodeIdMap))
@@ -87,6 +87,7 @@ export default class PortalsCanvasExtension {
     }
   }
 
+  // CAUSING NEWLINES IN THE CANVAS DATA
   private async addPortalCanvasData(data: CanvasData, setData: (data: CanvasData) => void) {
     for (const portalNodeData of data.nodes) {
       if (portalNodeData.type !== 'file' || !portalNodeData.isPortalOpen) continue
@@ -101,10 +102,11 @@ export default class PortalsCanvasExtension {
         height: sourceBBox.maxY - sourceBBox.minY
       }
 
-      portalNodeData.closedPortalSize = {
-        width: portalNodeData.width,
-        height: portalNodeData.height
-      }
+      // Save closed portal size
+      portalNodeData.closedPortalWidth = portalNodeData.width
+      portalNodeData.closedPortalHeight = portalNodeData.height
+
+      // Set open portal size
       portalNodeData.width = sourceSize.width + PORTAL_PADDING * 2
       portalNodeData.height = sourceSize.height + PORTAL_PADDING * 2
 

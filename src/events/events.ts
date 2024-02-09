@@ -15,10 +15,7 @@ export const CanvasEvent = {
   NodeInteraction: `${PLUGIN_EVENT_PREFIX}:node-interaction`,
   ReadonlyChanged: `${PLUGIN_EVENT_PREFIX}:readonly-changed`,
   DataRequested: `${PLUGIN_EVENT_PREFIX}:data-requested`,
-  DataSet: {
-    Before: `${PLUGIN_EVENT_PREFIX}:data-set:before`,
-    After: `${PLUGIN_EVENT_PREFIX}:data-set:after`
-  },
+  LoadData: `${PLUGIN_EVENT_PREFIX}:load-data`,
   CanvasSaved: {
     Before: `${PLUGIN_EVENT_PREFIX}:canvas-saved:before`,
     After: `${PLUGIN_EVENT_PREFIX}:canvas-saved:after`
