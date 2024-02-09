@@ -38,10 +38,13 @@ export default class AdvancedCanvasPlugin extends Plugin {
 
   onunload() {}
 
-  getCurrentCanvas(): Canvas|null {
+  getCurrentCanvasView(): any {
     const canvasView = this.app.workspace.getActiveViewOfType(ItemView)
+    if (canvasView?.getViewType() !== 'canvas') return null
+    return canvasView
+  }
 
-		if (canvasView?.getViewType() !== 'canvas') return null
-    return (canvasView as any).canvas
+  getCurrentCanvas(): Canvas|null {
+    return this.getCurrentCanvasView()?.canvas
   }
 }
