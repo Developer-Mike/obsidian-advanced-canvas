@@ -127,9 +127,12 @@ export interface CanvasData {
 export type CanvasNodeType = 'text' | 'group' | 'file' | 'link'
 export interface CanvasNodeData {
   type: CanvasNodeType
+
   shape: string
   isStartNode: boolean
+  edgesToNodeFromPortal?: { [key: string]: CanvasEdgeData[] }
 
+  // Portal node
   isPortalOpen?: boolean
   closedPortalWidth?: number
   closedPortalHeight?: number
@@ -137,6 +140,9 @@ export interface CanvasNodeData {
     nodeIdMap: { [key: string]: string }
     edgeIdMap: { [key: string]: string }
   }
+
+  // Node from portal
+  portalId?: string
 
   [key: string]: any
 }
@@ -146,10 +152,14 @@ export interface CanvasNode {
   nodeEl: HTMLElement
   getBBox(): BBox
 
+  x: number
+  y: number
+  width: number
+  height: number
+
   color: string
   zIndex: number
 
-  /** @deprecated Use `canvas.setNodeData` instead */
   setData(data: CanvasNodeData): void
   getData(): CanvasNodeData
 }
@@ -163,6 +173,8 @@ export interface CanvasEdgeData {
 
   fromSide: Side
   toSide: Side
+  
+  portalId?: string
 }
 
 export interface CanvasEdge {

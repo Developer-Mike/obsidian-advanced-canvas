@@ -40,6 +40,16 @@ export default class CanvasEventEmitter {
         that.triggerWorkspaceEvent(CanvasEvent.ViewportChanged.After, this)
         return result
       },
+      markMoved: (next: any) => function (node: CanvasNode) {
+        const result = next.call(this, node)
+        that.triggerWorkspaceEvent(CanvasEvent.NodeMoved, this, node)
+        return result
+      },
+      removeNode: (next: any) => function (node: CanvasNode) {
+        const result = next.call(this, node)
+        that.triggerWorkspaceEvent(CanvasEvent.NodeRemoved, this, node)
+        return result
+      },
       zoomToBbox: (next: any) => function (bbox: BBox) {
         that.triggerWorkspaceEvent(CanvasEvent.ZoomToBbox.Before, this, bbox)
         const result = next.call(this, bbox)

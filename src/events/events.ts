@@ -6,6 +6,8 @@ export const CanvasEvent = {
     Before: `${PLUGIN_EVENT_PREFIX}:viewport-changed:before`,
     After: `${PLUGIN_EVENT_PREFIX}:viewport-changed:after`
   },
+  NodeMoved: `${PLUGIN_EVENT_PREFIX}:node-moved`,
+  NodeRemoved: `${PLUGIN_EVENT_PREFIX}:node-removed`,
   ZoomToBbox: {
     Before: `${PLUGIN_EVENT_PREFIX}:zoom-to-bbox:before`,
     After: `${PLUGIN_EVENT_PREFIX}:zoom-to-bbox:after`

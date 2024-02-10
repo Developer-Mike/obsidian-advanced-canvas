@@ -187,6 +187,12 @@ Events:
 - `advanced-canvas:viewport-changed:before` and `advanced-canvas:viewport-changed:after`
   - Fired before and after the viewport gets changed
   - Payload: `Canvas`
+- `advanced-canvas:node-moved`
+  - Fired when a node gets moved
+  - Payload: `Canvas`, `Node`
+- `advanced-canvas:node-removed`
+  - Fired when a node gets removed
+  - Payload: `Canvas`, `Node`
 - `advanced-canvas:zoom-to-bbox:before` and `advanced-canvas:zoom-to-bbox:after`
   - Fired before and after the canvas gets zoomed to a bounding box (e.g. zoom to selection, zoom to fit all)
   - Payload: `Canvas`, `BBox`
