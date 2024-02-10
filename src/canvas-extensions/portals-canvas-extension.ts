@@ -4,6 +4,13 @@ import { CanvasEvent } from "src/events/events"
 import AdvancedCanvasPlugin from "src/main"
 import * as CanvasHelper from "src/utils/canvas-helper"
 
+/**
+ * TODO:
+ * - Save to portal file
+ * - Move buggy bc of aligning to nested nodes
+ * - Uncaught TypeError: Cannot read properties of null (reading 'path') -> Only if portal is open + focused and file gets switched
+ */
+
 const PORTAL_PADDING = 20
 
 export default class PortalsCanvasExtension {
@@ -154,17 +161,15 @@ export default class PortalsCanvasExtension {
     data.nodes = data.nodes.filter(nodeData => nodeData.portalId === undefined)
 
     for (const portalNodeData of data.nodes) {
-      if (portalNodeData.type !== 'file' || !portalNodeData.isPortalOpen)
+      if (portalNodeData.type !== 'file') continue
 
       // Reset portal size
       portalNodeData.width = portalNodeData.closedPortalWidth ?? portalNodeData.width
       portalNodeData.height = portalNodeData.closedPortalHeight ?? portalNodeData.height
 
-      // Remove portal offset
-      delete portalNodeData.portalOffsetX
-      delete portalNodeData.portalOffsetY
-
       // Remove references to portal nodes and edges
+      delete portalNodeData.closedPortalWidth
+      delete portalNodeData.closedPortalHeight
       delete portalNodeData.portalIdMaps
     }
   }

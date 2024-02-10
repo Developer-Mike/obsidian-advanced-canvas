@@ -41,8 +41,8 @@ export default class CanvasEventEmitter {
         return result
       },
       markMoved: (next: any) => function (node: CanvasNode) {
-        const result = next.call(this, node)
         that.triggerWorkspaceEvent(CanvasEvent.NodeMoved, this, node)
+        const result = next.call(this, node)
         return result
       },
       removeNode: (next: any) => function (node: CanvasNode) {
