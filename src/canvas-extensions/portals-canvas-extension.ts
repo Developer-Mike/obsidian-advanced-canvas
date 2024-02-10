@@ -1,3 +1,4 @@
+import { TFile } from "obsidian"
 import { Canvas, CanvasData, CanvasEdgeData, CanvasNode } from "src/@types/Canvas"
 import { CanvasEvent } from "src/events/events"
 import AdvancedCanvasPlugin from "src/main"
@@ -78,31 +79,33 @@ export default class PortalsCanvasExtension {
     }
   }
 
-  private onNodeMoved(canvas: Canvas, node: CanvasNode) {
-    const nodeData = node.getData()
-    if (nodeData.type !== 'file' || !nodeData.isPortalOpen) return
+  private onNodeMoved(canvas: Canvas, portalNode: CanvasNode) {
+    const portalNodeData = portalNode.getData()
+    if (portalNodeData.type !== 'file' || !portalNodeData.isPortalOpen) return
 
     // Update nested nodes positions
-    const nestedNodesIdMap = node.getData().portalIdMaps?.nodeIdMap
+    const nestedNodesIdMap = portalNode.getData().portalIdMaps?.nodeIdMap
     if (!nestedNodesIdMap) return
 
     const nestedNodes = Object.keys(nestedNodesIdMap).map(refNodeId => canvas.nodes.get(refNodeId))
       .filter(node => node !== undefined) as CanvasNode[]
     const sourceBBox = CanvasHelper.getBBox(nestedNodes)
 
-    /*
-    // Calculate new node position offset
+    // Move nested nodes
     const portalOffset = {
-      x: node.x - sourceBBox.minX + PORTAL_PADDING,
-      y: node.y - sourceBBox.minY + PORTAL_PADDING
+      x: portalNodeData.x - sourceBBox.minX + PORTAL_PADDING,
+      y: portalNodeData.y - sourceBBox.minY + PORTAL_PADDING
     }
 
     for (const nestedNode of nestedNodes) {
-      const targetPosition = {
-        x: nestedNode.x + portalOffset.x,
-        y: nestedNode.y + portalOffset.y
-      }
-    }*/
+      const nestedNodeData = nestedNode.getData()
+
+      nestedNode.setData({
+        ...nestedNodeData,
+        x: nestedNodeData.x + portalOffset.x,
+        y: nestedNodeData.y + portalOffset.y
+      })
+    }
 
     // Resize portal
     const nestedNodesSize = {
@@ -114,9 +117,12 @@ export default class PortalsCanvasExtension {
       height: nestedNodesSize.height + PORTAL_PADDING * 2
     }
 
-    if (nodeData.width !== targetSize.width || nodeData.height !== targetSize.height) {
-      node.width = targetSize.width
-      node.height = targetSize.height
+    if (portalNodeData.width !== targetSize.width || portalNodeData.height !== targetSize.height) {
+      portalNode.setData({
+        ...portalNodeData,
+        width: targetSize.width,
+        height: targetSize.height
+      })
     }
   }
 
@@ -154,6 +160,10 @@ export default class PortalsCanvasExtension {
       portalNodeData.width = portalNodeData.closedPortalWidth ?? portalNodeData.width
       portalNodeData.height = portalNodeData.closedPortalHeight ?? portalNodeData.height
 
+      // Remove portal offset
+      delete portalNodeData.portalOffsetX
+      delete portalNodeData.portalOffsetY
+
       // Remove references to portal nodes and edges
       delete portalNodeData.portalIdMaps
     }
@@ -163,7 +173,10 @@ export default class PortalsCanvasExtension {
     for (const portalNodeData of data.nodes) {
       if (portalNodeData.type !== 'file' || !portalNodeData.isPortalOpen) continue
 
-      const portalData = JSON.parse(await this.plugin.app.vault.adapter.read(portalNodeData.file))
+      const portalFile = this.plugin.app.vault.getAbstractFileByPath(portalNodeData.file!)
+      if (!(portalFile instanceof TFile)) continue
+
+      const portalData = JSON.parse(await this.plugin.app.vault.cachedRead(portalFile))
       if (!portalData) continue
 
       // Resize portal

@@ -134,6 +134,7 @@ export default class CanvasEventEmitter {
       if (!canvas) return
 
       this.triggerCanvasChangedEvent(canvas)
+      canvas.setData(canvas.getData())
       this.plugin.app.workspace.offref(onCanvasChangeListener)
     })
     this.plugin.registerEvent(onCanvasChangeListener)

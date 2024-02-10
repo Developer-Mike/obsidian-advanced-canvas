@@ -55,7 +55,7 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   canvasEncapsulationEnabled: true,
 
   portalsFeatureEnabled: true,
-  showEdgesIntoDisabledPortals: false
+  showEdgesIntoDisabledPortals: true
 }
 
 export default class AdvancedCanvasSettingsManager {

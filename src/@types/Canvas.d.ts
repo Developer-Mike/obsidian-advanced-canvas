@@ -127,6 +127,9 @@ export interface CanvasData {
 export type CanvasNodeType = 'text' | 'group' | 'file' | 'link'
 export interface CanvasNodeData {
   type: CanvasNodeType
+  text?: string
+  label?: string
+  file?: string
 
   shape: string
   isStartNode: boolean
