@@ -7,7 +7,6 @@ import * as CanvasHelper from "src/utils/canvas-helper"
 /**
  * TODO:
  * - Save to portal file
- * - Move buggy bc of aligning to nested nodes
  * - Uncaught TypeError: Cannot read properties of null (reading 'path') -> Only if portal is open + focused and file gets switched
  */
 
@@ -39,6 +38,11 @@ export default class PortalsCanvasExtension {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.NodeMoved,
       (canvas: Canvas, node: CanvasNode) => this.onNodeMoved(canvas, node)
+    ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.DraggingStateChanged,
+      (canvas: Canvas, startedDragging: boolean) => this.onDraggingStateChanged(canvas, startedDragging)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
@@ -84,6 +88,20 @@ export default class PortalsCanvasExtension {
       // Move portal to back
       node.zIndex = -1
     }
+  }
+
+  restoreObjectSnappingState: () => void
+  private onDraggingStateChanged(canvas: Canvas, startedDragging: boolean) {
+    // If no open portal gets dragged, return
+    if (!canvas.getSelectionData().nodes.some(node => node.type === 'file' && node.isPortalOpen)) return
+
+    // Disable object snapping to fix self-aligning
+    if (startedDragging) {
+      const objectSnappingEnabled = canvas.options.snapToObjects
+      this.restoreObjectSnappingState = () => canvas.toggleObjectSnapping(objectSnappingEnabled)
+
+      if (objectSnappingEnabled) canvas.toggleObjectSnapping(false)
+    } else this.restoreObjectSnappingState?.()
   }
 
   private onNodeMoved(canvas: Canvas, portalNode: CanvasNode) {
@@ -168,7 +186,7 @@ export default class PortalsCanvasExtension {
         portalNodeData.width = portalNodeData.closedPortalWidth ?? portalNodeData.width
         portalNodeData.height = portalNodeData.closedPortalHeight ?? portalNodeData.height
       }
-      
+
       // Remove references to portal nodes and edges
       delete portalNodeData.closedPortalWidth
       delete portalNodeData.closedPortalHeight

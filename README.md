@@ -190,6 +190,9 @@ Events:
 - `advanced-canvas:node-moved`
   - Fired when a node gets moved
   - Payload: `Canvas`, `Node`
+- `advanced-canvas:dragging-state-changed`
+  - Fired when the dragging state of the canvas changes
+  - Payload: `Canvas`, `boolean`
 - `advanced-canvas:node-removed`
   - Fired when a node gets removed
   - Payload: `Canvas`, `Node`

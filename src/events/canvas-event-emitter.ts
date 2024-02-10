@@ -45,6 +45,11 @@ export default class CanvasEventEmitter {
         const result = next.call(this, node)
         return result
       },
+      setDragging: (next: any) => function (dragging: boolean) {
+        const result = next.call(this, dragging)
+        that.triggerWorkspaceEvent(CanvasEvent.DraggingStateChanged, this, dragging)
+        return result
+      },
       removeNode: (next: any) => function (node: CanvasNode) {
         const result = next.call(this, node)
         that.triggerWorkspaceEvent(CanvasEvent.NodeRemoved, this, node)

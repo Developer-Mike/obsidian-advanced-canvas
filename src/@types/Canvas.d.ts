@@ -20,6 +20,7 @@ export interface BBox {
 export interface Canvas {
   view: CanvasView
   config: CanvasConfig
+  options: CanvasOptions
 
   getData(): CanvasData
   setData(data: CanvasData): void
@@ -48,6 +49,9 @@ export interface Canvas {
   ty: number
   tZoom: number
 
+  isDragging: boolean
+  setDragging(dragging: boolean): void
+  
   zoomToBbox(bbox: BBox): void
   zoomToSelection(): void
 
@@ -58,7 +62,9 @@ export interface Canvas {
   getSelectionData(): SelectionData
   deselectAll(): void
 
+  toggleObjectSnapping(enabled: boolean): void
   dragTempNode(dragEvent: any, nodeSize: Size, onDropped: (position: Position) => void): void
+
   createTextNode(options: TextNodeOptions): CanvasNode
   createGroupNode(options: GroupNodeOptions): CanvasNode
   createFileNode(options: FileNodeOptions): CanvasNode
@@ -77,6 +83,11 @@ export interface Canvas {
   lockedZoom: number
   setNodeData(node: CanvasNode, key: keyof CanvasNodeData, value: any): void
   foreignCanvasData: { [key: string]: CanvasData }
+}
+
+export interface CanvasOptions {
+  snapToObjects: boolean
+  snapToGrid: boolean
 }
 
 export interface CanvasHistory {
