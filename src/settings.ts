@@ -29,6 +29,7 @@ export interface AdvancedCanvasPluginSettings {
   canvasEncapsulationEnabled: boolean
 
   portalsFeatureEnabled: boolean
+  showEdgesIntoDisabledPortals: boolean
 }
 
 export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
@@ -53,7 +54,8 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
 
   canvasEncapsulationEnabled: true,
 
-  portalsFeatureEnabled: true
+  portalsFeatureEnabled: true,
+  showEdgesIntoDisabledPortals: false
 }
 
 export default class AdvancedCanvasSettingsManager {
@@ -251,6 +253,15 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       "Create portals to other canvases.",
       'portalsFeatureEnabled'
     )
+
+    new Setting(containerEl)
+      .setName("Show edges into disabled portals")
+      .setDesc("When enabled, edges into disabled portals will be shown by an edge to the portal node.")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.settingsManager.getSetting('showEdgesIntoDisabledPortals'))
+          .onChange(async (value) => await this.settingsManager.setSetting({ showEdgesIntoDisabledPortals: value }))
+      )
   }
 
   private createFeatureHeading(containerEl: HTMLElement, label: string, description: string, settingsKey: keyof AdvancedCanvasPluginSettings): Setting {

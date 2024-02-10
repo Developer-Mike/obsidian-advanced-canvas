@@ -237,9 +237,14 @@ export default class PortalsCanvasExtension {
           continue
         }
 
+        if (portalNodeData.isPortalOpen) { // If portal is open, add edges
+          data.edges.push(...edges)
+          delete nodeData.edgesToNodeFromPortal![portalId]
+        }
+
         // If portal is closed, add alternative edges directly to portal
         // But don't delete the edges
-        if (!portalNodeData.isPortalOpen) {
+        if (!portalNodeData.isPortalOpen && this.plugin.settingsManager.getSetting('showEdgesIntoDisabledPortals')) {
           data.edges.push(...edges.map(edge => (
             {
               ...edge,
@@ -247,9 +252,6 @@ export default class PortalsCanvasExtension {
               portalId: portalId // Mark it as temporary
             }
           )))
-        } else { // If portal is open, add edges
-          data.edges.push(...edges)
-          delete nodeData.edgesToNodeFromPortal![portalId]
         }
       }
 
