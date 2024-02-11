@@ -18,12 +18,7 @@ export default class CanvasEventEmitter {
       },
       setViewData: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
-
         that.triggerWorkspaceEvent(CanvasEvent.CanvasChanged, this.canvas)
-        that.triggerWorkspaceEvent(CanvasEvent.ViewportChanged.After, this.canvas)
-        that.triggerWorkspaceEvent(CanvasEvent.ReadonlyChanged, this.canvas, this.canvas.readonly)
-        that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this.canvas, [...this.canvas.nodes.values()])
-
         return result
       }
     })
@@ -97,9 +92,10 @@ export default class CanvasEventEmitter {
         return result
       },
       setData: (next: any) => function (data: CanvasData) {
+        const targetFilePath = this.view.file.path
         const setData = (data: CanvasData) => {
-          // Skip if the canvas got unloaded or another canvas got loaded
-          if (!this.view.file) return
+          // Skip if the canvas got unloaded or the file changed
+          if (!this.view.file || this.view.file.path !== targetFilePath) return
 
           // Maintain history
           this.history.data.pop()

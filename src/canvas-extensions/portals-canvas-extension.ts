@@ -21,7 +21,7 @@ export default class PortalsCanvasExtension {
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.NodeRemoved,
-      (canvas: Canvas, _node: CanvasNode) => canvas.setData(canvas.getData())
+      (canvas: Canvas, node: CanvasNode) => this.onNodeRemoved(canvas, node)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
@@ -64,14 +64,32 @@ export default class PortalsCanvasExtension {
         isPortalOpen ? 'Close portal' : 'Open portal',
         isPortalOpen ? 'door-open' : 'door-closed',
         () => {
-          canvas.setNodeData(fileNode, 'isPortalOpen', !isPortalOpen)
+          fileNode.setData({
+            ...fileNode.getData(),
+            isPortalOpen: !isPortalOpen
+          })
+
           this.updatePopupMenu(canvas)
 
-          // Update canvas data
+          // Update whole canvas data
           canvas.setData(canvas.getData())
         }
       )
     )
+  }
+
+  private onNodeRemoved(canvas: Canvas, node: CanvasNode) {
+    const nodeData = node.getData()
+    if (nodeData.type !== 'file' || !nodeData.isPortalOpen) return
+
+    // Remove nested nodes and edges
+    Object.keys(nodeData.portalIdMaps?.nodeIdMap ?? {}).map(refNodeId => canvas.nodes.get(refNodeId))
+      .filter(node => node !== undefined)
+      .forEach(node => canvas.removeNode(node!))
+
+    Object.keys(nodeData.portalIdMaps?.edgeIdMap ?? {}).map(refEdgeId => canvas.edges.get(refEdgeId))
+      .filter(edge => edge !== undefined)
+      .forEach(edge => canvas.removeEdge(edge!))
   }
 
   private onSelectionChanged(canvas: Canvas, updateSelection: (update: () => void) => void) {
@@ -193,7 +211,10 @@ export default class PortalsCanvasExtension {
   }
 
   private async addPortalCanvasData(_canvas: Canvas, data: CanvasData, setData: (data: CanvasData) => void) {
-    for (const portalNodeData of data.nodes) {
+    // Deep copy data - If another file gets opened in the same view, the data would get overwritten
+    const dataCopy = JSON.parse(JSON.stringify(data)) as CanvasData
+
+    for (const portalNodeData of dataCopy.nodes) {
       if (portalNodeData.type !== 'file' || !portalNodeData.isPortalOpen) continue
 
       const portalFile = this.plugin.app.vault.getAbstractFileByPath(portalNodeData.file!)
@@ -239,7 +260,7 @@ export default class PortalsCanvasExtension {
         const refNodeId = `${nodeDataFromPortal.id}-${nodeDataFromPortal.id}`
         portalNodeData.portalIdMaps.nodeIdMap[refNodeId] = nodeDataFromPortal.id
         
-        data.nodes.push({
+        dataCopy.nodes.push({
           ...nodeDataFromPortal,
           id: refNodeId,
           x: nodeDataFromPortal.x + portalOffset.x,
@@ -257,7 +278,7 @@ export default class PortalsCanvasExtension {
         const toRefNode = Object.entries(portalNodeData.portalIdMaps.nodeIdMap)
           .find(([_refNodeId, nodeId]) => nodeId === edgeDataFromPortal.toNode)?.[0]
 
-        data.edges.push({
+        dataCopy.edges.push({
           ...edgeDataFromPortal,
           id: refEdgeId,
           fromNode: fromRefNode,
@@ -268,26 +289,26 @@ export default class PortalsCanvasExtension {
     }
 
     // Create edges between portal nodes and non-portal nodes
-    for (const nodeData of data.nodes) {
+    for (const nodeData of dataCopy.nodes) {
       if (nodeData.edgesToNodeFromPortal === undefined) continue
 
       for (const [portalId, edges] of Object.entries(nodeData.edgesToNodeFromPortal)) {
         // If portal is deleted, delete edges
-        const portalNodeData = data.nodes.find(nodeData => nodeData.id === portalId)
+        const portalNodeData = dataCopy.nodes.find(nodeData => nodeData.id === portalId)
         if (!portalNodeData) {
           delete nodeData.edgesToNodeFromPortal![portalId]
           continue
         }
 
         if (portalNodeData.isPortalOpen) { // If portal is open, add edges
-          data.edges.push(...edges)
+          dataCopy.edges.push(...edges)
           delete nodeData.edgesToNodeFromPortal![portalId]
         }
 
         // If portal is closed, add alternative edges directly to portal
         // But don't delete the edges
         if (!portalNodeData.isPortalOpen && this.plugin.settingsManager.getSetting('showEdgesIntoDisabledPortals')) {
-          data.edges.push(...edges.map(edge => (
+          dataCopy.edges.push(...edges.map(edge => (
             {
               ...edge,
               toNode: portalId,
@@ -303,6 +324,6 @@ export default class PortalsCanvasExtension {
       }
     }
 
-    setData(data)
+    setData(dataCopy)
   }
 }

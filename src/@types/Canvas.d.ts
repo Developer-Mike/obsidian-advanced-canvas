@@ -1,4 +1,4 @@
-import { TFile, View } from "obsidian"
+import { TFile, View, WorkspaceLeaf } from "obsidian"
 
 export interface Size {
   width: number
@@ -68,7 +68,9 @@ export interface Canvas {
   createTextNode(options: TextNodeOptions): CanvasNode
   createGroupNode(options: GroupNodeOptions): CanvasNode
   createFileNode(options: FileNodeOptions): CanvasNode
+  
   removeNode(node: CanvasNode): void
+  removeEdge(edge: CanvasEdge): void
 
   history: CanvasHistory
   undo(): void
@@ -110,9 +112,14 @@ export interface CanvasView extends View {
   _loaded: boolean
   file: TFile
   canvas: Canvas
+  leaf: CanvasWorkspaceLeaf
 
   getViewData(): string
   setViewData(data: string): void
+}
+
+export interface CanvasWorkspaceLeaf extends WorkspaceLeaf {
+  id: string
 }
 
 export interface NodeOptions {
