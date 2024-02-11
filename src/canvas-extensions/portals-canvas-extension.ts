@@ -1,10 +1,11 @@
 import { TFile } from "obsidian"
-import { Canvas, CanvasData, CanvasNode } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasData, CanvasNode } from "src/@types/Canvas"
 import { CanvasEvent } from "src/events/events"
 import AdvancedCanvasPlugin from "src/main"
 import * as CanvasHelper from "src/utils/canvas-helper"
 
 const PORTAL_PADDING = 50
+const MIN_OPEN_PORTAL_SIZE = { width: 200, height: 200 }
 
 export default class PortalsCanvasExtension {
   plugin: AdvancedCanvasPlugin
@@ -132,6 +133,16 @@ export default class PortalsCanvasExtension {
       .filter(node => node !== undefined) as CanvasNode[]
     const sourceBBox = CanvasHelper.getBBox(nestedNodes)
 
+    // Resize portal
+    const targetSize = this.getPortalSize(sourceBBox)
+    if (portalNodeData.width !== targetSize.width || portalNodeData.height !== targetSize.height) {
+      portalNode.setData({
+        ...portalNodeData,
+        width: targetSize.width,
+        height: targetSize.height
+      })
+    }
+
     // Move nested nodes
     const portalOffset = {
       x: portalNodeData.x - sourceBBox.minX + PORTAL_PADDING,
@@ -145,24 +156,6 @@ export default class PortalsCanvasExtension {
         ...nestedNodeData,
         x: nestedNodeData.x + portalOffset.x,
         y: nestedNodeData.y + portalOffset.y
-      })
-    }
-
-    // Resize portal
-    const nestedNodesSize = {
-      width: sourceBBox.maxX - sourceBBox.minX,
-      height: sourceBBox.maxY - sourceBBox.minY
-    }
-    const targetSize = {
-      width: nestedNodesSize.width + PORTAL_PADDING * 2,
-      height: nestedNodesSize.height + PORTAL_PADDING * 2
-    }
-
-    if (portalNodeData.width !== targetSize.width || portalNodeData.height !== targetSize.height) {
-      portalNode.setData({
-        ...portalNodeData,
-        width: targetSize.width,
-        height: targetSize.height
       })
     }
   }
@@ -231,18 +224,15 @@ export default class PortalsCanvasExtension {
 
       // Resize portal
       const sourceBBox = CanvasHelper.getBBox(portalData.nodes)
-      const sourceSize = {
-        width: sourceBBox.maxX - sourceBBox.minX,
-        height: sourceBBox.maxY - sourceBBox.minY
-      }
+      const targetSize = this.getPortalSize(sourceBBox)
 
       // Save closed portal size
       portalNodeData.closedPortalWidth = portalNodeData.width
       portalNodeData.closedPortalHeight = portalNodeData.height
 
       // Set open portal size
-      portalNodeData.width = sourceSize.width + PORTAL_PADDING * 2
-      portalNodeData.height = sourceSize.height + PORTAL_PADDING * 2
+      portalNodeData.width = targetSize.width
+      portalNodeData.height = targetSize.height
 
       // Calculate new node positions
       const portalOffset = {
@@ -325,5 +315,17 @@ export default class PortalsCanvasExtension {
     }
 
     setData(dataCopy)
+  }
+
+  private getPortalSize(sourceBBox: BBox) {
+    const sourceSize = {
+      width: sourceBBox.maxX - sourceBBox.minX,
+      height: sourceBBox.maxY - sourceBBox.minY
+    }
+
+    return {
+      width: Math.max(sourceSize.width + PORTAL_PADDING * 2, MIN_OPEN_PORTAL_SIZE.width),
+      height: Math.max(sourceSize.height + PORTAL_PADDING * 2, MIN_OPEN_PORTAL_SIZE.height)
+    }
   }
 }
