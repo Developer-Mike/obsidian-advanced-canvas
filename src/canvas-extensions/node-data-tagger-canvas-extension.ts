@@ -19,7 +19,9 @@ export default class NodeDataTaggerCanvasExtension {
 
           for (const dataKey of EXPOSED_DATA) {
             const dataValue = nodeData[dataKey]
-            node.nodeEl.dataset[dataKey] = dataValue
+            
+            if (dataValue === undefined) delete node.nodeEl.dataset[dataKey]
+            else node.nodeEl.dataset[dataKey] = dataValue
           }
         }
       }

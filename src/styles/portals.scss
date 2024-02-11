@@ -7,10 +7,10 @@
   }
 }
 
-.canvas-node:not([data-portal-id='undefined']) {
+.canvas-node[data-portal-id] {
   pointer-events: none;
 
-  @at-root .canvas-node-interaction-layer:not([data-target-portal-id='undefined']) {
+  @at-root .canvas-node-interaction-layer[data-target-portal-id] {
     display: none;
   }
 }

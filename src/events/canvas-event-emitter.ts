@@ -1,5 +1,5 @@
 import AdvancedCanvasPlugin from "src/main"
-import { BBox, Canvas, CanvasData, CanvasNode, CanvasView } from "src/@types/Canvas"
+import { BBox, CanvasData, CanvasNode, CanvasView } from "src/@types/Canvas"
 import { patchWorkspaceFunction as patchWorkspaceObject } from "src/utils/patch-helper"
 import { CanvasEvent } from "./events"
 import { WorkspaceLeaf } from "obsidian"
@@ -13,8 +13,7 @@ export default class CanvasEventEmitter {
 
     // Patch canvas view
     patchWorkspaceObject(this.plugin, () => this.plugin.getCurrentCanvasView(), {
-      getViewData: (next: any) => function (..._args: any) {
-        next.call(this) // For some reason, save data would bleed into other canvases if we don't call this first
+      getViewData: (_next: any) => function (..._args: any) {
         return JSON.stringify(this.canvas.getData(), null, 2)
       },
       setViewData: (next: any) => function (...args: any) {
@@ -99,8 +98,8 @@ export default class CanvasEventEmitter {
       },
       setData: (next: any) => function (data: CanvasData) {
         const setData = (data: CanvasData) => {
-          // Skip if the canvas got unloaded
-          if (!this.view._loaded) return
+          // Skip if the canvas got unloaded or another canvas got loaded
+          if (!this.view.file) return
 
           // Maintain history
           this.history.data.pop()
