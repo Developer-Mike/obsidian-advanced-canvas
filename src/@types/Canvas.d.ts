@@ -68,7 +68,7 @@ export interface Canvas {
   createTextNode(options: TextNodeOptions): CanvasNode
   createGroupNode(options: GroupNodeOptions): CanvasNode
   createFileNode(options: FileNodeOptions): CanvasNode
-  
+
   removeNode(node: CanvasNode): void
   removeEdge(edge: CanvasEdge): void
 
@@ -177,6 +177,8 @@ export interface CanvasNode {
   canvas: Canvas
   nodeEl: HTMLElement
   getBBox(): BBox
+
+  file?: TFile
 
   x: number
   y: number

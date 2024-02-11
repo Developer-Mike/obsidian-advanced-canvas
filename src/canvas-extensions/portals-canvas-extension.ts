@@ -52,7 +52,8 @@ export default class PortalsCanvasExtension {
   }
 
   private updatePopupMenu(canvas: Canvas) {
-    const selectedFileNodes = Array.from(canvas.selection).filter(node => node.getData().type === 'file')
+    const selectedFileNodes = Array.from(canvas.selection)
+      .filter(node => node.getData().type === 'file' && node.file?.extension === 'canvas')
     if (canvas.readonly || selectedFileNodes.length !== 1) return
 
     const fileNode = selectedFileNodes[0]
