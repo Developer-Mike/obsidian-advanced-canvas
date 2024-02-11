@@ -323,9 +323,14 @@ export default class PortalsCanvasExtension {
       height: sourceBBox.maxY - sourceBBox.minY
     }
 
-    return {
+    const targetSize = {
       width: Math.max(sourceSize.width + PORTAL_PADDING * 2, MIN_OPEN_PORTAL_SIZE.width),
       height: Math.max(sourceSize.height + PORTAL_PADDING * 2, MIN_OPEN_PORTAL_SIZE.height)
     }
+
+    if (!Number.isFinite(targetSize.width)) targetSize.width = MIN_OPEN_PORTAL_SIZE.width
+    if (!Number.isFinite(targetSize.height)) targetSize.height = MIN_OPEN_PORTAL_SIZE.height
+
+    return targetSize
   }
 }
