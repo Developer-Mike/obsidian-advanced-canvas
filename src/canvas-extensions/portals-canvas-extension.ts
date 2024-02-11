@@ -35,6 +35,11 @@ export default class PortalsCanvasExtension {
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.SelectionChanged,
+      (canvas: Canvas, updateSelection: (update: () => void) => void) => this.onSelectionChanged(canvas, updateSelection)
+    ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.DataRequested,
       (canvas: Canvas, data: CanvasData) => this.removePortalCanvasData(canvas, data)
     ))
@@ -67,6 +72,14 @@ export default class PortalsCanvasExtension {
         }
       )
     )
+  }
+
+  private onSelectionChanged(canvas: Canvas, updateSelection: (update: () => void) => void) {
+    updateSelection(() => {
+      const updatedSelection = Array.from(canvas.selection)
+        .filter(node => node.getData().portalId === undefined)
+      canvas.selection = new Set(updatedSelection)
+    })
   }
 
   restoreObjectSnappingState: () => void
