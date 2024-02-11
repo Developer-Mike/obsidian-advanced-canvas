@@ -33,11 +33,26 @@ export default class CanvasEventEmitter {
       setNodeData: (_next: any) => function (node: CanvasNode, key: string, value: any) {
         node.setData({ 
           ...node.getData(),
-          [key]: value 
+          [key]: value
         })
         this.requestSave()
 
         that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [node])
+      },
+      undo: (next: any) => function (...args: any) {
+        const result = next.call(this, ...args)
+        that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()])
+        return result
+      },
+      redo: (next: any) => function (...args: any) {
+        const result = next.call(this, ...args)
+        that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()])
+        return result
+      },
+      handlePaste: (next: any) => function (...args: any) {
+        const result = next.call(this, ...args)
+        that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()])
+        return result
       },
       markViewportChanged: (next: any) => function (...args: any) {
         that.triggerWorkspaceEvent(CanvasEvent.ViewportChanged.Before, this)
@@ -68,21 +83,6 @@ export default class CanvasEventEmitter {
       setReadonly: (next: any) => function (readonly: boolean) {
         const result = next.call(this, readonly)
         that.triggerWorkspaceEvent(CanvasEvent.ReadonlyChanged, this, readonly)
-        return result
-      },
-      undo: (next: any) => function (...args: any) {
-        const result = next.call(this, ...args)
-        that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()])
-        return result
-      },
-      redo: (next: any) => function (...args: any) {
-        const result = next.call(this, ...args)
-        that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()])
-        return result
-      },
-      handlePaste: (next: any) => function (...args: any) {
-        const result = next.call(this, ...args)
-        that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()])
         return result
       },
       getData: (next: any) => function (...args: any) {
