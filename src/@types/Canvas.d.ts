@@ -107,6 +107,7 @@ export interface CanvasConfig {
 }
 
 export interface CanvasView extends View {
+  _loaded: boolean
   file: TFile
 
   getViewData(): string

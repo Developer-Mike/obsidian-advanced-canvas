@@ -92,6 +92,9 @@ export default class CanvasEventEmitter {
       },
       setData: (next: any) => function (data: CanvasData) {
         const setData = (data: CanvasData) => {
+          // Skip if the canvas got unloaded
+          if (!this.view._loaded) return
+
           // Maintain history
           this.history.data.pop()
 
