@@ -184,10 +184,16 @@ export default class PortalsCanvasExtension {
       if (portalNodeData.type !== 'file' || !portalNodeData.isPortalOpen) continue
 
       const portalFile = this.plugin.app.vault.getAbstractFileByPath(portalNodeData.file!)
-      if (!(portalFile instanceof TFile)) continue
+      if (!(portalFile instanceof TFile)) {
+        portalNodeData.isPortalOpen = false
+        continue
+      }
 
       const portalData = JSON.parse(await this.plugin.app.vault.cachedRead(portalFile))
-      if (!portalData) continue
+      if (!portalData) {
+        portalNodeData.isPortalOpen = false
+        continue
+      }
 
       // Resize portal
       const sourceBBox = CanvasHelper.getBBox(portalData.nodes)
