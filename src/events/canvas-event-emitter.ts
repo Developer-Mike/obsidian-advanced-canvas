@@ -1,7 +1,8 @@
 import AdvancedCanvasPlugin from "src/main"
-import { BBox, Canvas, CanvasData, CanvasNode } from "src/@types/Canvas"
-import { patchWorkspaceFunction } from "src/utils/patch-helper"
+import { BBox, Canvas, CanvasData, CanvasNode, CanvasView } from "src/@types/Canvas"
+import { patchWorkspaceFunction as patchWorkspaceObject } from "src/utils/patch-helper"
 import { CanvasEvent } from "./events"
+import { WorkspaceLeaf } from "obsidian"
 
 export default class CanvasEventEmitter {
   plugin: AdvancedCanvasPlugin
@@ -11,7 +12,7 @@ export default class CanvasEventEmitter {
     const that = this
 
     // Patch canvas view
-    patchWorkspaceFunction(this.plugin, () => this.plugin.getCurrentCanvasView(), {
+    patchWorkspaceObject(this.plugin, () => this.plugin.getCurrentCanvasView(), {
       getViewData: (_next: any) => function (..._args: any) {
         return JSON.stringify(this.canvas.getData(), null, 2)
       },
@@ -28,7 +29,7 @@ export default class CanvasEventEmitter {
     })
 
     // Patch canvas
-    patchWorkspaceFunction(this.plugin, () => this.plugin.getCurrentCanvas(), {
+    patchWorkspaceObject(this.plugin, () => this.plugin.getCurrentCanvas(), {
       // Add custom function
       setNodeData: (_next: any) => function (node: CanvasNode, key: string, value: any) {
         node.setData({ 
@@ -116,7 +117,7 @@ export default class CanvasEventEmitter {
     })
 
     // Patch canvas popup menu
-    patchWorkspaceFunction(this.plugin, () => this.plugin.getCurrentCanvas()?.menu, {
+    patchWorkspaceObject(this.plugin, () => this.plugin.getCurrentCanvas()?.menu, {
       render: (next: any) => function (visible: boolean) {
         const result = next.call(this, visible)
 
@@ -132,7 +133,7 @@ export default class CanvasEventEmitter {
     })
 
     // Patch interaction layer
-    patchWorkspaceFunction(this.plugin, () => this.plugin.getCurrentCanvas()?.nodeInteractionLayer, {
+    patchWorkspaceObject(this.plugin, () => this.plugin.getCurrentCanvas()?.nodeInteractionLayer, {
       setTarget: (next: any) => function (node: CanvasNode) {
         const result = next.call(this, node)
         that.triggerWorkspaceEvent(CanvasEvent.NodeInteraction, this.canvas, node)
@@ -142,12 +143,18 @@ export default class CanvasEventEmitter {
 
     // Listen to canvas changes
     const onCanvasChangeListener = this.plugin.app.workspace.on('layout-change', () => {
-      const canvas = this.plugin.getCurrentCanvas()
-      if (!canvas) return
+      let canvasPatched = false
 
-      // Re-open the canvas
-      canvas.view.setViewData(canvas.view.getViewData())
+      this.plugin.app.workspace.iterateAllLeaves((leaf: WorkspaceLeaf) => {
+        if (leaf.view.getViewType() !== 'canvas') return
+        canvasPatched = true
 
+        // Re-init the canvas with the patched canvas object
+        const canvasView = leaf.view as CanvasView
+        canvasView.setViewData(canvasView.getViewData())
+      })
+
+      if (!canvasPatched) return
       this.plugin.app.workspace.offref(onCanvasChangeListener)
     })
     this.plugin.registerEvent(onCanvasChangeListener)
