@@ -13,10 +13,8 @@ export default class CanvasEventEmitter {
 
     // Patch canvas view
     patchWorkspaceObject(this.plugin, () => this.plugin.getCurrentCanvasView(), {
-      getViewData: (_next: any) => function (..._args: any) {
-        console.log("Would save:", _next.call(this))
-        console.log("Does save:", JSON.stringify(this.canvas.getData()))
-
+      getViewData: (next: any) => function (..._args: any) {
+        next.call(this) // For some reason, save data would bleed into other canvases if we don't call this first
         return JSON.stringify(this.canvas.getData(), null, 2)
       },
       setViewData: (next: any) => function (...args: any) {

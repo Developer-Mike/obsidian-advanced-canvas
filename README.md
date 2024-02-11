@@ -238,3 +238,4 @@ All contributions are welcome! Here's how you can help:
 
 ## Known Issues - Create an issue if you find any!
 - [ ] Shapes are not shown in the preview
+- [ ] When cloning a node by `Ctrl` + dragging, the node changed event is not fired
