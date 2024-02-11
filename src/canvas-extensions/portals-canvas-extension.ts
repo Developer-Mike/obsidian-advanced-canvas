@@ -4,7 +4,7 @@ import { CanvasEvent } from "src/events/events"
 import AdvancedCanvasPlugin from "src/main"
 import * as CanvasHelper from "src/utils/canvas-helper"
 
-const PORTAL_PADDING = 20
+const PORTAL_PADDING = 50
 
 export default class PortalsCanvasExtension {
   plugin: AdvancedCanvasPlugin
@@ -17,11 +17,6 @@ export default class PortalsCanvasExtension {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.PopupMenuCreated,
       (canvas: Canvas) => this.updatePopupMenu(canvas)
-    ))
-
-    this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.NodesChanged,
-      (canvas: Canvas, nodes: CanvasNode[]) => this.onNodesChanged(canvas, nodes)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
@@ -74,16 +69,6 @@ export default class PortalsCanvasExtension {
     )
   }
 
-  private onNodesChanged(_canvas: Canvas, nodes: CanvasNode[]) {
-    for (const node of nodes) {
-      const nodeData = node.getData()
-      if (nodeData.type !== 'file' || !nodeData.isPortalOpen) continue
-
-      // Move portal to back
-      node.zIndex = -1
-    }
-  }
-
   restoreObjectSnappingState: () => void
   private onDraggingStateChanged(canvas: Canvas, startedDragging: boolean) {
     // If no open portal gets dragged, return
@@ -98,9 +83,15 @@ export default class PortalsCanvasExtension {
     } else this.restoreObjectSnappingState?.()
   }
 
-  private onNodeMoved(canvas: Canvas, portalNode: CanvasNode) {
+  private onNodeMoved(canvas: Canvas, node: CanvasNode) {
+    const nodeData = node.getData()
+    if (nodeData.type !== 'file' || !nodeData.isPortalOpen) return
+
+    this.onOpenPortalMoved(canvas, node)
+  }
+
+  private onOpenPortalMoved(canvas: Canvas, portalNode: CanvasNode) {
     const portalNodeData = portalNode.getData()
-    if (portalNodeData.type !== 'file' || !portalNodeData.isPortalOpen) return
 
     // Update nested nodes positions
     const nestedNodesIdMap = portalNode.getData().portalIdMaps?.nodeIdMap
@@ -156,7 +147,7 @@ export default class PortalsCanvasExtension {
       if (fromNodeData.portalId === undefined && toNodeData.portalId === undefined) { // Normal edge
         return true 
       } else if (fromNodeData.portalId !== undefined && toNodeData.portalId !== undefined) { // Completely from portal
-        // TODO: Save to portal file
+        // Save to portal file? OR delete!
         return false
       } else { // Partially from portal
         const fromPortalNodeData = fromNodeData.portalId !== undefined ? fromNodeData : toNodeData
