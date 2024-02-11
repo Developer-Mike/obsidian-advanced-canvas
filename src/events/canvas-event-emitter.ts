@@ -17,7 +17,12 @@ export default class CanvasEventEmitter {
       },
       setViewData: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
-        that.triggerCanvasChangedEvent(this.canvas)
+
+        that.triggerWorkspaceEvent(CanvasEvent.CanvasChanged, this.canvas)
+        that.triggerWorkspaceEvent(CanvasEvent.ViewportChanged.After, this.canvas)
+        that.triggerWorkspaceEvent(CanvasEvent.ReadonlyChanged, this.canvas, this.canvas.readonly)
+        that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this.canvas, [...this.canvas.nodes.values()])
+
         return result
       }
     })
@@ -42,8 +47,7 @@ export default class CanvasEventEmitter {
       },
       markMoved: (next: any) => function (node: CanvasNode) {
         that.triggerWorkspaceEvent(CanvasEvent.NodeMoved, this, node)
-        const result = next.call(this, node)
-        return result
+        return next.call(this, node)
       },
       setDragging: (next: any) => function (dragging: boolean) {
         const result = next.call(this, dragging)
@@ -138,21 +142,15 @@ export default class CanvasEventEmitter {
       const canvas = this.plugin.getCurrentCanvas()
       if (!canvas) return
 
-      this.triggerCanvasChangedEvent(canvas)
-      canvas.setData(canvas.getData())
+      // Re-open the canvas
+      canvas.view.setViewData(canvas.view.getViewData())
+
       this.plugin.app.workspace.offref(onCanvasChangeListener)
     })
     this.plugin.registerEvent(onCanvasChangeListener)
 
     // Trigger instantly (Plugin reload)
     onCanvasChangeListener.fn.call(this.plugin.app.workspace)
-  }
-
-  private triggerCanvasChangedEvent(canvas: Canvas) {
-    this.triggerWorkspaceEvent(CanvasEvent.CanvasChanged, canvas)
-    this.triggerWorkspaceEvent(CanvasEvent.ViewportChanged.After, canvas)
-    this.triggerWorkspaceEvent(CanvasEvent.ReadonlyChanged, canvas, canvas.readonly)
-    this.triggerWorkspaceEvent(CanvasEvent.NodesChanged, canvas, [...canvas.nodes.values()])
   }
 
   private triggerWorkspaceEvent(event: string, ...args: any) {

@@ -1,14 +1,8 @@
 import { TFile } from "obsidian"
-import { Canvas, CanvasData, CanvasEdgeData, CanvasNode } from "src/@types/Canvas"
+import { Canvas, CanvasData, CanvasNode } from "src/@types/Canvas"
 import { CanvasEvent } from "src/events/events"
 import AdvancedCanvasPlugin from "src/main"
 import * as CanvasHelper from "src/utils/canvas-helper"
-
-/**
- * TODO:
- * - Save to portal file
- * - Uncaught TypeError: Cannot read properties of null (reading 'path') -> Only if portal is open + focused and file gets switched
- */
 
 const PORTAL_PADDING = 20
 
