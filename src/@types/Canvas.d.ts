@@ -1,4 +1,4 @@
-import { TFile, View } from "obsidian"
+import { TFile, View, WorkspaceLeaf } from "obsidian"
 
 export interface Size {
   width: number
@@ -20,8 +20,13 @@ export interface BBox {
 export interface Canvas {
   view: CanvasView
   config: CanvasConfig
+  options: CanvasOptions
 
   getData(): CanvasData
+  setData(data: CanvasData): void
+
+  /** Basically setData, but without modifying the history */
+  importData(data: CanvasData): void
 
   nodes: Map<string, CanvasNode>
   edges: Map<string, CanvasEdge>
@@ -47,6 +52,9 @@ export interface Canvas {
   ty: number
   tZoom: number
 
+  isDragging: boolean
+  setDragging(dragging: boolean): void
+  
   zoomToBbox(bbox: BBox): void
   zoomToSelection(): void
 
@@ -57,12 +65,17 @@ export interface Canvas {
   getSelectionData(): SelectionData
   deselectAll(): void
 
+  toggleObjectSnapping(enabled: boolean): void
   dragTempNode(dragEvent: any, nodeSize: Size, onDropped: (position: Position) => void): void
+
   createTextNode(options: TextNodeOptions): CanvasNode
   createGroupNode(options: GroupNodeOptions): CanvasNode
   createFileNode(options: FileNodeOptions): CanvasNode
-  removeNode(node: CanvasNode): void
 
+  removeNode(node: CanvasNode): void
+  removeEdge(edge: CanvasEdge): void
+
+  history: CanvasHistory
   undo(): void
   redo(): void
 
@@ -74,6 +87,24 @@ export interface Canvas {
   lockedY: number
   lockedZoom: number
   setNodeData(node: CanvasNode, key: keyof CanvasNodeData, value: any): void
+  foreignCanvasData: { [key: string]: CanvasData }
+}
+
+export interface CanvasOptions {
+  snapToObjects: boolean
+  snapToGrid: boolean
+}
+
+export interface CanvasHistory {
+  data: CanvasData[]
+  current: number
+  max: number
+
+  applyHistory: (data: CanvasData) => void
+  canUndo: () => boolean
+  undo: () => CanvasData|null
+  canRedo: () => boolean
+  redo: () => CanvasData|null
 }
 
 export interface SelectionData {
@@ -87,7 +118,17 @@ export interface CanvasConfig {
 }
 
 export interface CanvasView extends View {
+  _loaded: boolean
   file: TFile
+  canvas: Canvas
+  leaf: CanvasWorkspaceLeaf
+
+  getViewData(): string
+  setViewData(data: string): void
+}
+
+export interface CanvasWorkspaceLeaf extends WorkspaceLeaf {
+  id: string
 }
 
 export interface NodeOptions {
@@ -118,8 +159,25 @@ export interface CanvasData {
 export type CanvasNodeType = 'text' | 'group' | 'file' | 'link'
 export interface CanvasNodeData {
   type: CanvasNodeType
+  text?: string
+  label?: string
+  file?: string
+
   shape: string
   isStartNode: boolean
+  edgesToNodeFromPortal?: { [key: string]: CanvasEdgeData[] }
+
+  // Portal node
+  portalToFile?: string
+  closedPortalWidth?: number
+  closedPortalHeight?: number
+  portalIdMaps?: { 
+    nodeIdMap: { [key: string]: string }
+    edgeIdMap: { [key: string]: string }
+  }
+
+  // Node from portal
+  portalId?: string
 
   [key: string]: any
 }
@@ -129,9 +187,16 @@ export interface CanvasNode {
   nodeEl: HTMLElement
   getBBox(): BBox
 
-  color: string
+  file?: TFile
 
-  /** @deprecated Use `canvas.setNodeData` instead */
+  x: number
+  y: number
+  width: number
+  height: number
+
+  color: string
+  zIndex: number
+
   setData(data: CanvasNodeData): void
   getData(): CanvasNodeData
 }
@@ -145,6 +210,8 @@ export interface CanvasEdgeData {
 
   fromSide: Side
   toSide: Side
+  
+  portalId?: string
 }
 
 export interface CanvasEdge {

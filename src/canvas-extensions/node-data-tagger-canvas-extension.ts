@@ -2,7 +2,7 @@ import { Canvas, CanvasNode, CanvasNodeData } from "src/@types/Canvas"
 import { CanvasEvent } from "src/events/events"
 import AdvancedCanvasPlugin from "src/main"
 
-export const EXPOSED_DATA = ['type', 'isStartNode', 'shape'] as (keyof CanvasNodeData)[]
+export const EXPOSED_DATA = ['type', 'shape', 'isStartNode', 'portalToFile', 'portalId'] as (keyof CanvasNodeData)[]
 
 export default class NodeDataTaggerCanvasExtension {
   plugin: AdvancedCanvasPlugin
@@ -19,7 +19,9 @@ export default class NodeDataTaggerCanvasExtension {
 
           for (const dataKey of EXPOSED_DATA) {
             const dataValue = nodeData[dataKey]
-            node.nodeEl.dataset[dataKey] = dataValue
+            
+            if (dataValue === undefined) delete node.nodeEl.dataset[dataKey]
+            else node.nodeEl.dataset[dataKey] = dataValue
           }
         }
       }

@@ -27,6 +27,10 @@ export interface AdvancedCanvasPluginSettings {
   slideTransitionAnimationIntensity: number
 
   canvasEncapsulationEnabled: boolean
+
+  portalsFeatureEnabled: boolean
+  maintainClosedPortalSize: boolean
+  showEdgesIntoDisabledPortals: boolean
 }
 
 export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
@@ -50,6 +54,10 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   slideTransitionAnimationIntensity: 1.25,
 
   canvasEncapsulationEnabled: true,
+
+  portalsFeatureEnabled: true,
+  maintainClosedPortalSize: true,
+  showEdgesIntoDisabledPortals: true
 }
 
 export default class AdvancedCanvasSettingsManager {
@@ -240,6 +248,31 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       "Encapsulate a selection of nodes and edges into a new canvas.",
       'canvasEncapsulationEnabled'
     )
+
+    this.createFeatureHeading(
+      containerEl,
+      "Portals",
+      "Create portals to other canvases.",
+      'portalsFeatureEnabled'
+    )
+
+    new Setting(containerEl)
+      .setName("Maintain closed portal size")
+      .setDesc("When enabled, closing a portal will change the size of the portal to the original, closed size.")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.settingsManager.getSetting('maintainClosedPortalSize'))
+          .onChange(async (value) => await this.settingsManager.setSetting({ maintainClosedPortalSize: value }))
+      )
+
+    new Setting(containerEl)
+      .setName("Show edges into disabled portals")
+      .setDesc("When enabled, edges into disabled portals will be shown by an edge to the portal node.")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.settingsManager.getSetting('showEdgesIntoDisabledPortals'))
+          .onChange(async (value) => await this.settingsManager.setSetting({ showEdgesIntoDisabledPortals: value }))
+      )
   }
 
   private createFeatureHeading(containerEl: HTMLElement, label: string, description: string, settingsKey: keyof AdvancedCanvasPluginSettings): Setting {

@@ -22,7 +22,9 @@ export default class InteractionTaggerCanvasExtension {
           const datasetKey = TARGET_NODE_DATASET_PREFIX + dataKey.toString().charAt(0).toUpperCase() + dataKey.toString().slice(1)
     
           const dataValue = node?.getData()[dataKey]
-          if (dataValue) interactionEl.dataset[datasetKey] = dataValue
+
+          if (dataValue === undefined) delete interactionEl.dataset[datasetKey]
+          else interactionEl.dataset[datasetKey] = dataValue
         }
       }
     ))

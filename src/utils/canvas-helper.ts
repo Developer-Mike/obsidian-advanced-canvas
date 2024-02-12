@@ -1,5 +1,5 @@
 import { setIcon, setTooltip } from "obsidian"
-import { BBox, Canvas, Position, Size } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasNode, CanvasNodeData, Position, Size } from "src/@types/Canvas"
 import AdvancedCanvasPlugin from "src/main"
 
 export function scaleBBox(bbox: BBox, scale: number): BBox {
@@ -12,6 +12,24 @@ export function scaleBBox(bbox: BBox, scale: number): BBox {
     minY: bbox.minY - diffY / 2,
     maxY: bbox.maxY + diffY / 2
   }
+}
+
+export function getBBox(canvasNodes: (CanvasNode|CanvasNodeData)[]) {
+  let minX = Infinity
+  let minY = Infinity
+  let maxX = -Infinity
+  let maxY = -Infinity
+
+  for (const node of canvasNodes) {
+    const nodeData = node.getData ? node.getData() : node
+
+    minX = Math.min(minX, nodeData.x)
+    minY = Math.min(minY, nodeData.y)
+    maxX = Math.max(maxX, nodeData.x + nodeData.width)
+    maxY = Math.max(maxY, nodeData.y + nodeData.height)
+  }
+
+  return { minX, minY, maxX, maxY }
 }
 
 export function canvasCommand(plugin: AdvancedCanvasPlugin, check: (canvas: Canvas) => boolean, run: (canvas: Canvas) => void): (checking: boolean) => boolean {

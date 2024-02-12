@@ -1,0 +1,16 @@
+.canvas-node[data-portal-to-file] .canvas-node-container {
+  background-color: transparent;
+  border-style: dashed;
+
+  .canvas-node-content {
+    display: none;
+  }
+}
+
+.canvas-node[data-portal-id] {
+  pointer-events: none;
+
+  @at-root .canvas-node-interaction-layer[data-target-portal-id] {
+    display: none;
+  }
+}

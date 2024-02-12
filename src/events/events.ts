@@ -6,6 +6,10 @@ export const CanvasEvent = {
     Before: `${PLUGIN_EVENT_PREFIX}:viewport-changed:before`,
     After: `${PLUGIN_EVENT_PREFIX}:viewport-changed:after`
   },
+  NodeMoved: `${PLUGIN_EVENT_PREFIX}:node-moved`,
+  DraggingStateChanged: `${PLUGIN_EVENT_PREFIX}:dragging-state-changed`,
+  NodeRemoved: `${PLUGIN_EVENT_PREFIX}:node-removed`,
+  SelectionChanged: `${PLUGIN_EVENT_PREFIX}:selection-changed`,
   ZoomToBbox: {
     Before: `${PLUGIN_EVENT_PREFIX}:zoom-to-bbox:before`,
     After: `${PLUGIN_EVENT_PREFIX}:zoom-to-bbox:after`
@@ -13,5 +17,13 @@ export const CanvasEvent = {
   PopupMenuCreated: `${PLUGIN_EVENT_PREFIX}:popup-menu-created`,
   NodesChanged: `${PLUGIN_EVENT_PREFIX}:nodes-changed`,
   NodeInteraction: `${PLUGIN_EVENT_PREFIX}:node-interaction`,
-  ReadonlyChanged: `${PLUGIN_EVENT_PREFIX}:readonly-changed`
+  Undo: `${PLUGIN_EVENT_PREFIX}:undo`,
+  Redo: `${PLUGIN_EVENT_PREFIX}:redo`,
+  ReadonlyChanged: `${PLUGIN_EVENT_PREFIX}:readonly-changed`,
+  DataRequested: `${PLUGIN_EVENT_PREFIX}:data-requested`,
+  LoadData: `${PLUGIN_EVENT_PREFIX}:load-data`,
+  CanvasSaved: {
+    Before: `${PLUGIN_EVENT_PREFIX}:canvas-saved:before`,
+    After: `${PLUGIN_EVENT_PREFIX}:canvas-saved:after`
+  }
 }
