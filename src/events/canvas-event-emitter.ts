@@ -102,9 +102,6 @@ export default class CanvasEventEmitter {
           // Skip if the canvas got unloaded or the file changed
           if (!this.view.file || this.view.file.path !== targetFilePath) return
 
-          // Maintain history
-          this.history.data.pop()
-
           this.importData(data)
           that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()])
         }

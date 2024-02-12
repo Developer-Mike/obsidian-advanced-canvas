@@ -231,7 +231,7 @@ export default class PortalsCanvasExtension {
       if (portalNodeData.type !== 'file' || !portalNodeData.isPortalOpen) continue
 
       const portalFile = this.plugin.app.vault.getAbstractFileByPath(portalNodeData.file!)
-      if (!(portalFile instanceof TFile)) {
+      if (!(portalFile instanceof TFile) || portalFile.extension !== 'canvas') {
         portalNodeData.isPortalOpen = false
         continue
       }
