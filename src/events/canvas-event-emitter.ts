@@ -81,6 +81,16 @@ export default class CanvasEventEmitter {
         that.triggerWorkspaceEvent(CanvasEvent.ReadonlyChanged, this, readonly)
         return result
       },
+      undo: (next: any) => function (...args: any) {
+        const result = next.call(this, ...args)
+        that.triggerWorkspaceEvent(CanvasEvent.Undo, this)
+        return result
+      },
+      redo: (next: any) => function (...args: any) {
+        const result = next.call(this, ...args)
+        that.triggerWorkspaceEvent(CanvasEvent.Redo, this)
+        return result
+      },
       getData: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
         that.triggerWorkspaceEvent(CanvasEvent.DataRequested, this, result)
@@ -95,7 +105,7 @@ export default class CanvasEventEmitter {
           // Maintain history
           this.history.data.pop()
 
-          next.call(this, data)
+          this.importData(data)
           that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()])
         }
 

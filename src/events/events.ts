@@ -17,6 +17,8 @@ export const CanvasEvent = {
   PopupMenuCreated: `${PLUGIN_EVENT_PREFIX}:popup-menu-created`,
   NodesChanged: `${PLUGIN_EVENT_PREFIX}:nodes-changed`,
   NodeInteraction: `${PLUGIN_EVENT_PREFIX}:node-interaction`,
+  Undo: `${PLUGIN_EVENT_PREFIX}:undo`,
+  Redo: `${PLUGIN_EVENT_PREFIX}:redo`,
   ReadonlyChanged: `${PLUGIN_EVENT_PREFIX}:readonly-changed`,
   DataRequested: `${PLUGIN_EVENT_PREFIX}:data-requested`,
   LoadData: `${PLUGIN_EVENT_PREFIX}:load-data`,

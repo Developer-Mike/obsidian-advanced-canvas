@@ -25,6 +25,11 @@ export interface Canvas {
   getData(): CanvasData
   setData(data: CanvasData): void
 
+  /**
+   * Basically setData, but without modifying the history
+   */
+  importData(data: CanvasData): void
+
   nodes: Map<string, CanvasNode>
   edges: Map<string, CanvasEdge>
   getEdgesForNode(node: CanvasNode): CanvasEdge[]

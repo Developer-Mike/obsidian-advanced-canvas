@@ -41,13 +41,32 @@ export default class PortalsCanvasExtension {
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.Undo,
+      (canvas: Canvas) => {
+        this.getCanvasDataWithPortals(canvas.getData())
+          .then((data: CanvasData) => canvas.importData(data))
+      }
+    ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.Redo,
+      (canvas: Canvas) => {
+        this.getCanvasDataWithPortals(canvas.getData())
+          .then((data: CanvasData) => canvas.importData(data))
+      }
+    ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.DataRequested,
       (canvas: Canvas, data: CanvasData) => this.removePortalCanvasData(canvas, data)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.LoadData,
-      (canvas: Canvas, data: CanvasData, setData: (data: CanvasData) => void) => this.addPortalCanvasData(canvas, data, setData)
+      (_canvas: Canvas, data: CanvasData, setData: (data: CanvasData) => void) => {
+        this.getCanvasDataWithPortals(data)
+          .then((data: CanvasData) => setData(data))
+      }
     ))
   }
 
@@ -204,7 +223,7 @@ export default class PortalsCanvasExtension {
     }
   }
 
-  private async addPortalCanvasData(_canvas: Canvas, data: CanvasData, setData: (data: CanvasData) => void) {
+  private async getCanvasDataWithPortals(data: CanvasData): Promise<CanvasData> {
     // Deep copy data - If another file gets opened in the same view, the data would get overwritten
     const dataCopy = JSON.parse(JSON.stringify(data)) as CanvasData
 
@@ -315,7 +334,7 @@ export default class PortalsCanvasExtension {
       }
     }
 
-    setData(dataCopy)
+    return dataCopy
   }
 
   private getPortalSize(sourceBBox: BBox) {
