@@ -166,7 +166,7 @@ In presentation mode, you can navigate through the nodes using the arrow keys. T
 ## Portals
 Embed other canvases inside your canvas and create edges (arrows) to the embedded canvas.
 
-<img src="./assets/portal.png" alt="Portal example"/>
+<img src="./assets/sample-portal-usage.png" alt="Portal example"/>
 
 ### Usage
 - Embed a canvas file and click on the door icon of the popup menu to open a portal
