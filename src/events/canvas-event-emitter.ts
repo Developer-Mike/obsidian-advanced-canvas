@@ -84,11 +84,13 @@ export default class CanvasEventEmitter {
       undo: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
         that.triggerWorkspaceEvent(CanvasEvent.Undo, this)
+        that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()]) // If node data changed
         return result
       },
       redo: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
         that.triggerWorkspaceEvent(CanvasEvent.Redo, this)
+        that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()]) // If node data changed
         return result
       },
       getData: (next: any) => function (...args: any) {
@@ -103,12 +105,12 @@ export default class CanvasEventEmitter {
           if (!this.view.file || this.view.file.path !== targetFilePath) return
 
           this.importData(data)
-          that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()])
+          that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()]) // If node data changed
         }
 
         that.triggerWorkspaceEvent(CanvasEvent.LoadData, this, data, setData)
         const result = next.call(this, data)
-        that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()])
+        that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()]) // If node data changed
         return result
       },
       requestSave: (next: any) => function (...args: any) {

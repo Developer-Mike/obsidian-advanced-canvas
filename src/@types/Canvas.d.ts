@@ -25,9 +25,7 @@ export interface Canvas {
   getData(): CanvasData
   setData(data: CanvasData): void
 
-  /**
-   * Basically setData, but without modifying the history
-   */
+  /** Basically setData, but without modifying the history */
   importData(data: CanvasData): void
 
   nodes: Map<string, CanvasNode>
@@ -101,6 +99,12 @@ export interface CanvasHistory {
   data: CanvasData[]
   current: number
   max: number
+
+  applyHistory: (data: CanvasData) => void
+  canUndo: () => boolean
+  undo: () => CanvasData|null
+  canRedo: () => boolean
+  redo: () => CanvasData|null
 }
 
 export interface SelectionData {
@@ -164,7 +168,7 @@ export interface CanvasNodeData {
   edgesToNodeFromPortal?: { [key: string]: CanvasEdgeData[] }
 
   // Portal node
-  isPortalOpen?: boolean
+  portalToFile?: string
   closedPortalWidth?: number
   closedPortalHeight?: number
   portalIdMaps?: { 
