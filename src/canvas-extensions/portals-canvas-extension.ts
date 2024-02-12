@@ -43,7 +43,7 @@ export default class PortalsCanvasExtension {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.Undo,
       (canvas: Canvas) => {
-        this.getCanvasDataWithPortals(canvas.getData())
+        this.getCanvasDataWithPortals(canvas, canvas.getData())
           .then((data: CanvasData) => canvas.importData(data))
       }
     ))
@@ -51,7 +51,7 @@ export default class PortalsCanvasExtension {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.Redo,
       (canvas: Canvas) => {
-        this.getCanvasDataWithPortals(canvas.getData())
+        this.getCanvasDataWithPortals(canvas, canvas.getData())
           .then((data: CanvasData) => canvas.importData(data))
       }
     ))
@@ -63,8 +63,8 @@ export default class PortalsCanvasExtension {
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.LoadData,
-      (_canvas: Canvas, data: CanvasData, setData: (data: CanvasData) => void) => {
-        this.getCanvasDataWithPortals(data)
+      (canvas: Canvas, data: CanvasData, setData: (data: CanvasData) => void) => {
+        this.getCanvasDataWithPortals(canvas, data)
           .then((data: CanvasData) => setData(data))
       }
     ))
@@ -77,19 +77,12 @@ export default class PortalsCanvasExtension {
     const selectedFileNodes = Array.from(canvas.selection).filter(node => {
       const nodeData = node.getData()
       if (nodeData.type !== 'file') return false
+      if (node.file?.extension === 'canvas') return true
+      
+      // Close portal of non-canvas file
+      if (nodeData.portalToFile) this.setPortalOpen(canvas, node, false)
 
-      if (node.file?.extension === 'canvas') {
-        // No recursive portals
-        const recursive = node.file.path === canvas.view.file.path
-        if (recursive) this.setPortalOpen(canvas, node, false)
-
-        return !recursive
-      } else {
-        // Close portal of non-canvas file
-        if (nodeData.portalToFile) this.setPortalOpen(canvas, node, false)
-
-        return false
-      }
+      return false
     })
     if (selectedFileNodes.length !== 1) return
 
@@ -251,12 +244,21 @@ export default class PortalsCanvasExtension {
     }
   }
 
-  private async getCanvasDataWithPortals(data: CanvasData): Promise<CanvasData> {
+  private async getCanvasDataWithPortals(canvas: Canvas, data: CanvasData): Promise<CanvasData> {
     // Deep copy data - If another file gets opened in the same view, the data would get overwritten
     const dataCopy = JSON.parse(JSON.stringify(data)) as CanvasData
 
     for (const portalNodeData of dataCopy.nodes) {
       if (portalNodeData.type !== 'file' || !portalNodeData.portalToFile) continue
+
+      // Update portal file
+      portalNodeData.portalToFile = portalNodeData.file
+
+      // Fix recursive portals
+      if (portalNodeData.portalToFile === canvas.view.file.path) {
+        portalNodeData.portalToFile = undefined
+        continue
+      }
 
       const portalFile = this.plugin.app.vault.getAbstractFileByPath(portalNodeData.file!)
       if (!(portalFile instanceof TFile) || portalFile.extension !== 'canvas') {
@@ -269,9 +271,6 @@ export default class PortalsCanvasExtension {
         portalNodeData.portalToFile = undefined
         continue
       }
-
-      // Set portal file
-      portalNodeData.portalToFile = portalNodeData.file
 
       // Resize portal
       const sourceBBox = CanvasHelper.getBBox(portalData.nodes)
