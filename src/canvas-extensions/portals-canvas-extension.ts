@@ -77,12 +77,19 @@ export default class PortalsCanvasExtension {
     const selectedFileNodes = Array.from(canvas.selection).filter(node => {
       const nodeData = node.getData()
       if (nodeData.type !== 'file') return false
-      if (node.file?.extension === 'canvas') return true
 
-      // Close portal of non-canvas file
-      if (nodeData.portalToFile) this.setPortalOpen(canvas, node, false)
+      if (node.file?.extension === 'canvas') {
+        // No recursive portals
+        const recursive = node.file.path === canvas.view.file.path
+        if (recursive) this.setPortalOpen(canvas, node, false)
 
-      return false
+        return !recursive
+      } else {
+        // Close portal of non-canvas file
+        if (nodeData.portalToFile) this.setPortalOpen(canvas, node, false)
+
+        return false
+      }
     })
     if (selectedFileNodes.length !== 1) return
 
