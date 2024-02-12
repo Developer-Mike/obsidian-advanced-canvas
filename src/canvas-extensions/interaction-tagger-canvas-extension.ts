@@ -1,5 +1,5 @@
 import { Canvas, CanvasNode } from "src/@types/Canvas"
-import { EXPOSED_DATA } from "./node-data-tagger-canvas-extension"
+import { getExposedNodeData } from "./node-data-tagger-canvas-extension"
 import AdvancedCanvasPlugin from "src/main"
 import { CanvasEvent } from "src/events/events"
 
@@ -18,7 +18,7 @@ export default class InteractionTaggerCanvasExtension {
         const interactionEl = canvas.nodeInteractionLayer.interactionEl
         if (!interactionEl) return
     
-        for (const dataKey of EXPOSED_DATA) {
+        for (const dataKey of getExposedNodeData(this.plugin.settingsManager)) {
           const datasetKey = TARGET_NODE_DATASET_PREFIX + dataKey.toString().charAt(0).toUpperCase() + dataKey.toString().slice(1)
     
           const dataValue = node?.getData()[dataKey]

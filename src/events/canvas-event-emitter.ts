@@ -157,6 +157,9 @@ export default class CanvasEventEmitter {
         // Re-init the canvas with the patched canvas object
         const canvasView = leaf.view as CanvasView
         canvasView.setViewData(canvasView.getViewData())
+
+        // Trigger popup menu changed event
+        this.triggerWorkspaceEvent(CanvasEvent.PopupMenuCreated, canvasView.canvas)
       })
 
       if (!canvasPatched) return
