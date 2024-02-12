@@ -1,5 +1,5 @@
 import { TFile } from "obsidian"
-import { BBox, Canvas, CanvasData, CanvasNode } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasData, CanvasNode, CanvasNodeData } from "src/@types/Canvas"
 import { CanvasEvent } from "src/events/events"
 import AdvancedCanvasPlugin from "src/main"
 import * as CanvasHelper from "src/utils/canvas-helper"
@@ -244,127 +244,161 @@ export default class PortalsCanvasExtension {
     }
   }
 
-  private async getCanvasDataWithPortals(canvas: Canvas, data: CanvasData): Promise<CanvasData> {
+  private async getCanvasDataWithPortals(canvas: Canvas, dataRef: CanvasData): Promise<CanvasData> {
     // Deep copy data - If another file gets opened in the same view, the data would get overwritten
-    const dataCopy = JSON.parse(JSON.stringify(data)) as CanvasData
+    const data = JSON.parse(JSON.stringify(dataRef)) as CanvasData
 
-    for (const portalNodeData of dataCopy.nodes) {
-      if (portalNodeData.type !== 'file' || !portalNodeData.portalToFile) continue
-
-      // Update portal file
-      portalNodeData.portalToFile = portalNodeData.file
-
-      // Fix recursive portals
-      if (portalNodeData.portalToFile === canvas.view.file.path) {
-        portalNodeData.portalToFile = undefined
-        continue
-      }
-
-      const portalFile = this.plugin.app.vault.getAbstractFileByPath(portalNodeData.file!)
-      if (!(portalFile instanceof TFile) || portalFile.extension !== 'canvas') {
-        portalNodeData.portalToFile = undefined
-        continue
-      }
-
-      const portalData = JSON.parse(await this.plugin.app.vault.cachedRead(portalFile))
-      if (!portalData) {
-        portalNodeData.portalToFile = undefined
-        continue
-      }
-
-      // Resize portal
-      const sourceBBox = CanvasHelper.getBBox(portalData.nodes)
-      const targetSize = this.getPortalSize(sourceBBox)
-
-      // Save closed portal size
-      portalNodeData.closedPortalWidth = portalNodeData.width
-      portalNodeData.closedPortalHeight = portalNodeData.height
-
-      // Set open portal size
-      portalNodeData.width = targetSize.width
-      portalNodeData.height = targetSize.height
-
-      // Calculate new node positions
-      const portalOffset = {
-        x: portalNodeData.x - sourceBBox.minX + PORTAL_PADDING,
-        y: portalNodeData.y - sourceBBox.minY + PORTAL_PADDING
-      }
-
-      // Add portal nodes and edges
-      portalNodeData.portalIdMaps = {
-        nodeIdMap: {},
-        edgeIdMap: {}
-      }
-
-      for (const nodeDataFromPortal of portalData.nodes) {
-        const refNodeId = `${nodeDataFromPortal.id}-${nodeDataFromPortal.id}`
-        portalNodeData.portalIdMaps.nodeIdMap[refNodeId] = nodeDataFromPortal.id
-        
-        dataCopy.nodes.push({
-          ...nodeDataFromPortal,
-          id: refNodeId,
-          x: nodeDataFromPortal.x + portalOffset.x,
-          y: nodeDataFromPortal.y + portalOffset.y,
-          portalId: portalNodeData.id
-        })
-      }
-
-      for (const edgeDataFromPortal of portalData.edges) {
-        const refEdgeId = `${portalNodeData.id}-${edgeDataFromPortal.id}`
-        portalNodeData.portalIdMaps.edgeIdMap[refEdgeId] = edgeDataFromPortal.id
-
-        const fromRefNode = Object.entries(portalNodeData.portalIdMaps.nodeIdMap)
-          .find(([_refNodeId, nodeId]) => nodeId === edgeDataFromPortal.fromNode)?.[0]
-        const toRefNode = Object.entries(portalNodeData.portalIdMaps.nodeIdMap)
-          .find(([_refNodeId, nodeId]) => nodeId === edgeDataFromPortal.toNode)?.[0]
-
-        dataCopy.edges.push({
-          ...edgeDataFromPortal,
-          id: refEdgeId,
-          fromNode: fromRefNode,
-          toNode: toRefNode,
-          portalId: portalNodeData.id
-        })
-      }
+    // Open portals
+    const addedData = await Promise.all(data.nodes.map(nodeData => this.tryOpenPortal(canvas, nodeData)))
+    for (const newData of addedData) {
+      data.nodes.push(...newData.nodes)
+      data.edges.push(...newData.edges)
     }
 
-    // Create edges between portal nodes and non-portal nodes
-    for (const nodeData of dataCopy.nodes) {
-      if (nodeData.edgesToNodeFromPortal === undefined) continue
+    // Add cross-portal edges
+    for (const originNodeData of data.nodes) {
+      if (originNodeData.edgesToNodeFromPortal === undefined) continue
 
-      for (const [portalId, edges] of Object.entries(nodeData.edgesToNodeFromPortal)) {
-        // If portal is deleted, delete edges
-        const portalNodeData = dataCopy.nodes.find(nodeData => nodeData.id === portalId)
-        if (!portalNodeData) {
-          delete nodeData.edgesToNodeFromPortal![portalId]
+      for (const [relativePortalId, edges] of Object.entries(originNodeData.edgesToNodeFromPortal)) {
+        const idPrefix = originNodeData.portalId ? `${originNodeData.portalId}-` : ''
+
+        const portalId = `${idPrefix}${relativePortalId}`
+        const targetPortalData = data.nodes.find(nodeData => nodeData.id === portalId)
+
+        // If target portal is deleted, remove edges
+        if (!targetPortalData) {
+          delete originNodeData.edgesToNodeFromPortal![portalId]
           continue
         }
 
-        if (portalNodeData.portalToFile) { // If portal is open, add edges
-          dataCopy.edges.push(...edges)
-          delete nodeData.edgesToNodeFromPortal![portalId]
-        }
+        // If portal is open, add edges
+        if (targetPortalData.portalToFile) {
+          // Push edges with updated from and to ids
+          data.edges.push(...edges.map(edge => ({
+            ...edge,
+            fromNode: `${idPrefix}${edge.fromNode}`,
+            toNode: `${idPrefix}${edge.toNode}`
+          })))
 
-        // If portal is closed, add alternative edges directly to portal
-        // But don't delete the edges
-        if (!portalNodeData.portalToFile && this.plugin.settingsManager.getSetting('showEdgesIntoDisabledPortals')) {
-          dataCopy.edges.push(...edges.map(edge => (
-            {
+          delete originNodeData.edgesToNodeFromPortal![portalId]
+        } else if (this.plugin.settingsManager.getSetting('showEdgesIntoDisabledPortals')) {
+          // If portal is closed, add alternative edges directly to portal
+          // But don't delete the edges
+
+          data.edges.push(...edges.map(edge => {
+            // Which end is from portal?
+            const fromNodeId = `${idPrefix}${edge.fromNode}`
+            const fromNode = data.nodes.find(nodeData => nodeData.id === fromNodeId)
+            const toNodeId = `${idPrefix}${edge.toNode}`
+
+            return {
               ...edge,
-              toNode: portalId,
+              fromNode: fromNode ? fromNodeId : portalId,
+              toNode: fromNode ? portalId : toNodeId,
               portalId: portalId // Mark it as temporary
             }
-          )))
+          }))
         }
       }
 
       // If no more edges, delete the property
-      if (Object.keys(nodeData.edgesToNodeFromPortal!).length === 0) {
-        delete nodeData.edgesToNodeFromPortal
-      }
+      if (Object.keys(originNodeData.edgesToNodeFromPortal!).length === 0)
+        delete originNodeData.edgesToNodeFromPortal
     }
 
-    return dataCopy
+    return data
+  }
+
+  private async tryOpenPortal(canvas: Canvas, portalNodeData: CanvasNodeData): Promise<CanvasData> {
+    const addedData: CanvasData = { nodes: [], edges: [] }
+    if (portalNodeData.type !== 'file' || !portalNodeData.portalToFile) return addedData
+
+    // Update portal file
+    portalNodeData.portalToFile = portalNodeData.file
+
+    // Fix recursive portals
+    if (portalNodeData.portalToFile === canvas.view.file.path) {
+      portalNodeData.portalToFile = undefined
+      return addedData
+    }
+
+    const portalFile = this.plugin.app.vault.getAbstractFileByPath(portalNodeData.file!)
+    if (!(portalFile instanceof TFile) || portalFile.extension !== 'canvas') {
+      portalNodeData.portalToFile = undefined
+      return addedData
+    }
+
+    const portalFileData = JSON.parse(await this.plugin.app.vault.cachedRead(portalFile))
+    if (!portalFileData) {
+      portalNodeData.portalToFile = undefined
+      return addedData
+    }
+
+    // Add portal nodes and edges id map
+    portalNodeData.portalIdMaps = {
+      nodeIdMap: {},
+      edgeIdMap: {}
+    }
+
+    // Calculate nested node offset
+    const sourceMinCoordinates = CanvasHelper.getBBox(portalFileData.nodes)
+    const portalOffset = {
+      x: portalNodeData.x - sourceMinCoordinates.minX + PORTAL_PADDING,
+      y: portalNodeData.y - sourceMinCoordinates.minY + PORTAL_PADDING
+    }
+
+    // Add nodes from portal
+    for (const nodeDataFromPortal of portalFileData.nodes) {
+      const refNodeId = `${portalNodeData.id}-${nodeDataFromPortal.id}`
+      portalNodeData.portalIdMaps.nodeIdMap[refNodeId] = nodeDataFromPortal.id
+      
+      const addedNode = {
+        ...nodeDataFromPortal,
+        id: refNodeId,
+        x: nodeDataFromPortal.x + portalOffset.x,
+        y: nodeDataFromPortal.y + portalOffset.y,
+        portalId: portalNodeData.id
+      }
+
+      addedData.nodes.push(addedNode)
+
+      const nestedNodes = await this.tryOpenPortal(canvas, addedNode)
+      addedData.nodes.push(...nestedNodes.nodes)
+      addedData.edges.push(...nestedNodes.edges)
+    }
+
+    // Add edges from portal
+    for (const edgeDataFromPortal of portalFileData.edges) {
+      const refEdgeId = `${portalNodeData.id}-${edgeDataFromPortal.id}`
+      portalNodeData.portalIdMaps.edgeIdMap[refEdgeId] = edgeDataFromPortal.id
+
+      const fromRefNode = Object.entries(portalNodeData.portalIdMaps.nodeIdMap)
+        .find(([_refNodeId, nodeId]) => nodeId === edgeDataFromPortal.fromNode)?.[0]
+      const toRefNode = Object.entries(portalNodeData.portalIdMaps.nodeIdMap)
+        .find(([_refNodeId, nodeId]) => nodeId === edgeDataFromPortal.toNode)?.[0]
+
+      addedData.edges.push({
+        ...edgeDataFromPortal,
+        id: refEdgeId,
+        fromNode: fromRefNode,
+        toNode: toRefNode,
+        portalId: portalNodeData.id
+      })
+    }
+
+    // Resize portal
+    const nestedNodesBBox = CanvasHelper.getBBox(addedData.nodes)
+    const targetSize = this.getPortalSize(nestedNodesBBox)
+
+    // Save closed portal size
+    portalNodeData.closedPortalWidth = portalNodeData.width
+    portalNodeData.closedPortalHeight = portalNodeData.height
+
+    // Set open portal size
+    portalNodeData.width = targetSize.width
+    portalNodeData.height = targetSize.height
+
+    return addedData
   }
 
   private getPortalSize(sourceBBox: BBox) {

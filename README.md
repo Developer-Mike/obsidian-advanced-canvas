@@ -38,6 +38,9 @@ All features can be enabled/disabled in the settings.
   - Database shape
 - [Presentation mode](#presentation)
   - Create presentations by connecting nodes with arrows
+- [Portals](#portals)
+  - Embed other canvases inside your canvas
+  - Create edges (arrows) to the embedded canvas
 - [Better readonly](#better-readonly)
   - Disable node popup menus
   - Lock the canvas' position
@@ -160,6 +163,14 @@ In presentation mode, you can navigate through the nodes using the arrow keys. T
   - Change slides using the arrow keys
   - Exit the presentation using the `ESC` key
 
+## Portals
+Embed other canvases inside your canvas and create edges (arrows) to the embedded canvas.
+
+<img src="./assets/portal.png" alt="Portal example"/>
+
+### Usage
+- Embed a canvas file and click on the door icon of the popup menu to open a portal
+
 ## Better Readonly
 - Disable node popup menus
 - Lock the canvas' position
@@ -180,55 +191,60 @@ Move the current selection to a new canvas and create a link in the current canv
 ## Canvas Events
 All custom events are prefixed with `advanced-canvas:` and can be listened to using `app.workspace.on` (Just like the default events).
 
-Events:
-- `advanced-canvas:canvas-changed`
-  - Fired when a new canvas gets loaded
-  - Payload: `Canvas`
-- `advanced-canvas:viewport-changed:before` and `advanced-canvas:viewport-changed:after`
-  - Fired before and after the viewport gets changed
-  - Payload: `Canvas`
-- `advanced-canvas:node-moved`
-  - Fired when a node gets moved
-  - Payload: `Canvas`, `Node`
-- `advanced-canvas:dragging-state-changed`
-  - Fired when the dragging state of the canvas changes
-  - Payload: `Canvas`, `boolean`
-- `advanced-canvas:node-removed`
-  - Fired when a node gets removed
-  - Payload: `Canvas`, `Node`
-- `advanced-canvas:selection-changed`
-  - Fired when the selection of the canvas changes
-  - Payload: `Canvas`, `updateSelection: (() => void) => void`
-- `advanced-canvas:zoom-to-bbox:before` and `advanced-canvas:zoom-to-bbox:after`
-  - Fired before and after the canvas gets zoomed to a bounding box (e.g. zoom to selection, zoom to fit all)
-  - Payload: `Canvas`, `BBox`
-- `advanced-canvas:popup-menu-created`
-  - Fired when the a node popup menu gets created (Not firing multiple times if it gets moved between nodes of the same type)
-  - Payload: `Canvas`, `Node`
-- `advanced-canvas:nodes-changed`
-  - Fired when any node gets changed
-  - Payload: `Canvas`, `Node[]`
-- `advanced-canvas:node-interaction`
-  - Fired when a node gets hovered over
-  - Payload: `Canvas`, `Node`
-- `advanced-canvas:undo`
-  - Fired when undo gets called
-  - Payload: `Canvas`
-- `advanced-canvas:redo`
-  - Fired when redo gets called
-  - Payload: `Canvas`
-- `advanced-canvas:readonly-changed`
-  - Fired when the readonly state of the canvas changes
-  - Payload: `Canvas`, `boolean`
-- `advanced-canvas:data-requested`
-  - Fired when the canvas data gets requested
-  - Payload: `Canvas`, `CanvasData (Reference!)`
-- `advanced-canvas:load-data`
-  - Fired when the canvas data gets set
-  - Payload: `Canvas`, `CanvasData (Reference!)`, `setData: (CanvasData) => void`
-- `advanced-canvas:canvas-saved:before` and `advanced-canvas:canvas-saved:after`
-  - Fired before and after the canvas gets saved
-  - Payload: `Canvas`
+<details>
+    <summary>
+        All Events (19)
+    </summary>
+
+  - `advanced-canvas:canvas-changed`
+    - Fired when a new canvas gets loaded
+    - Payload: `Canvas`
+  - `advanced-canvas:viewport-changed:before` and `advanced-canvas:viewport-changed:after`
+    - Fired before and after the viewport gets changed
+    - Payload: `Canvas`
+  - `advanced-canvas:node-moved`
+    - Fired when a node gets moved
+    - Payload: `Canvas`, `Node`
+  - `advanced-canvas:dragging-state-changed`
+    - Fired when the dragging state of the canvas changes
+    - Payload: `Canvas`, `boolean`
+  - `advanced-canvas:node-removed`
+    - Fired when a node gets removed
+    - Payload: `Canvas`, `Node`
+  - `advanced-canvas:selection-changed`
+    - Fired when the selection of the canvas changes
+    - Payload: `Canvas`, `updateSelection: (() => void) => void`
+  - `advanced-canvas:zoom-to-bbox:before` and `advanced-canvas:zoom-to-bbox:after`
+    - Fired before and after the canvas gets zoomed to a bounding box (e.g. zoom to selection, zoom to fit all)
+    - Payload: `Canvas`, `BBox`
+  - `advanced-canvas:popup-menu-created`
+    - Fired when the a node popup menu gets created (Not firing multiple times if it gets moved between nodes of the same type)
+    - Payload: `Canvas`, `Node`
+  - `advanced-canvas:nodes-changed`
+    - Fired when any node gets changed
+    - Payload: `Canvas`, `Node[]`
+  - `advanced-canvas:node-interaction`
+    - Fired when a node gets hovered over
+    - Payload: `Canvas`, `Node`
+  - `advanced-canvas:undo`
+    - Fired when undo gets called
+    - Payload: `Canvas`
+  - `advanced-canvas:redo`
+    - Fired when redo gets called
+    - Payload: `Canvas`
+  - `advanced-canvas:readonly-changed`
+    - Fired when the readonly state of the canvas changes
+    - Payload: `Canvas`, `boolean`
+  - `advanced-canvas:data-requested`
+    - Fired when the canvas data gets requested
+    - Payload: `Canvas`, `CanvasData (Reference!)`
+  - `advanced-canvas:load-data`
+    - Fired when the canvas data gets set
+    - Payload: `Canvas`, `CanvasData (Reference!)`, `setData: (CanvasData) => void`
+  - `advanced-canvas:canvas-saved:before` and `advanced-canvas:canvas-saved:after`
+    - Fired before and after the canvas gets saved
+    - Payload: `Canvas`
+</details>
 
 ## Settings
 Every feature can be enabled/disabled in the settings. All features were made to be as customizable as possible.
