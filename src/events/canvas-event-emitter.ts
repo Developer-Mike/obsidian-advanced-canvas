@@ -35,21 +35,6 @@ export default class CanvasEventEmitter {
 
         that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [node])
       },
-      undo: (next: any) => function (...args: any) {
-        const result = next.call(this, ...args)
-        that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()])
-        return result
-      },
-      redo: (next: any) => function (...args: any) {
-        const result = next.call(this, ...args)
-        that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()])
-        return result
-      },
-      handlePaste: (next: any) => function (...args: any) {
-        const result = next.call(this, ...args)
-        that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()])
-        return result
-      },
       markViewportChanged: (next: any) => function (...args: any) {
         that.triggerWorkspaceEvent(CanvasEvent.ViewportChanged.Before, this)
         const result = next.call(this, ...args)
@@ -68,6 +53,16 @@ export default class CanvasEventEmitter {
       updateSelection: (next: any) => function (update: () => void) {
         const result = next.call(this, update)
         that.triggerWorkspaceEvent(CanvasEvent.SelectionChanged, this, ((update: () => void) => next.call(this, update)))
+        return result
+      },
+      addNode: (next: any) => function (node: CanvasNode) {
+        const result = next.call(this, node)
+
+        ;(async () => {
+          await sleep(1) // Fix obsidian bug where the unknownData doesn't get set
+          that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [node])
+        })()
+
         return result
       },
       removeNode: (next: any) => function (node: CanvasNode) {
