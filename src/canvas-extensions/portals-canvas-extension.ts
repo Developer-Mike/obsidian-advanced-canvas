@@ -71,9 +71,20 @@ export default class PortalsCanvasExtension {
   }
 
   private updatePopupMenu(canvas: Canvas) {
-    const selectedFileNodes = Array.from(canvas.selection)
-      .filter(node => node.getData().type === 'file' && node.file?.extension === 'canvas')
-    if (canvas.readonly || selectedFileNodes.length !== 1) return
+    if (canvas.readonly) return
+
+    // Only search for valid nodes
+    const selectedFileNodes = Array.from(canvas.selection).filter(node => {
+      const nodeData = node.getData()
+      if (nodeData.type !== 'file') return false
+      if (node.file?.extension === 'canvas') return true
+
+      // Close portal of non-canvas file
+      if (nodeData.isPortalOpen) canvas.setNodeData(node, 'isPortalOpen', false)
+
+      return false
+    })
+    if (selectedFileNodes.length !== 1) return
 
     const fileNode = selectedFileNodes[0]
     const isPortalOpen = fileNode.getData().isPortalOpen
