@@ -113,7 +113,7 @@ export default class PresentationCanvasExtension {
     const startNode = this.getStartNode(canvas)
     if (startNode) canvas.setNodeData(startNode, 'isStartNode', false)
 
-    canvas.setNodeData(node, 'isStartNode', true)
+    if (node !== startNode) canvas.setNodeData(node, 'isStartNode', true)
   }
 
   private getSlideSize(): Size {
@@ -193,9 +193,25 @@ export default class PresentationCanvasExtension {
       }
     }
 
+    // Keep modals while in fullscreen mode
+    const fullscreenModalObserver = new MutationObserver((mutationRecords) => {
+      mutationRecords.forEach((mutationRecord) => {
+        mutationRecord.addedNodes.forEach((node) => {
+          document.body.removeChild(node)
+          document.fullscreenElement?.appendChild(node)
+        })
+      })
+
+      const inputField = document.querySelector(".prompt-input") as HTMLInputElement|null
+      if (inputField) inputField.focus()
+    })
+    fullscreenModalObserver.observe(document.body, { childList: true })
+
     // Register event handler for exiting presentation mode
     canvas.wrapperEl.onfullscreenchange = (_e: any) => {
       if (document.fullscreenElement) return
+
+      fullscreenModalObserver.disconnect()
       this.endPresentation(canvas)
     }
 
