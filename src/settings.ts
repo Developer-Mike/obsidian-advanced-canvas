@@ -1,4 +1,4 @@
-import { PluginSettingTab, Setting } from "obsidian"
+import { Notice, PluginSettingTab, Setting } from "obsidian"
 import AdvancedCanvasPlugin from "./main"
 
 const SLIDE_SIZE_OPTIONS: { [key: string]: string } = {
@@ -117,7 +117,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
 
     this.createFeatureHeading(
       containerEl,
-      "Extended Commands",
+      "Extended commands",
       "Add more commands to the canvas.",
       'commandsFeatureEnabled'
     )
@@ -295,7 +295,10 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
         toggle
           .setTooltip("Requires a reload to take effect.")
           .setValue(this.settingsManager.getSetting(settingsKey) as boolean)
-          .onChange(async (value) => await this.settingsManager.setSetting({ [settingsKey]: value }))
+          .onChange(async (value) => {
+            await this.settingsManager.setSetting({ [settingsKey]: value })
+            new Notice("Reload obsidian to apply the changes.")
+          })
       )
   }
 }
