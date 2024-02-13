@@ -32,7 +32,7 @@ export default class PresentationCanvasExtension {
 			id: 'start-presentation',
       name: 'Start presentation',
       checkCallback: CanvasHelper.canvasCommand(
-        this.plugin, 
+        this.plugin,
         (_canvas: Canvas) => !this.isPresentationMode,
         (canvas: Canvas) => this.startPresentation(canvas)
       )
@@ -85,8 +85,11 @@ export default class PresentationCanvasExtension {
   }
 
   onPopupMenuCreated(canvas: Canvas): void {
-    // If the canvas is readonly or there are multiple nodes selected, return
-    if (canvas.readonly || canvas.selection.size > 1) return
+    // If the canvas is readonly or there are multiple/no nodes selected, return
+    if (canvas.readonly || canvas.getSelectionData().nodes.length !== 1) return
+    const selectedNode = [...canvas.selection]
+      .filter((node) => node.nodeEl !== undefined) // Ignore edges
+      .first()
     
     CanvasHelper.addPopupMenuOption(
       canvas,
@@ -94,7 +97,7 @@ export default class PresentationCanvasExtension {
         'start-node', 
         'Set as start slide', 
         'play', 
-        () => this.setStartNode(canvas, [...canvas.selection].first())
+        () => this.setStartNode(canvas, selectedNode)
       )
     )
   }
