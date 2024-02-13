@@ -7,6 +7,7 @@ export function getExposedNodeData(settings: AdvancedCanvasSettingsManager): (ke
   const exposedData: (keyof CanvasNodeData)[] = []
 
   exposedData.push('type')
+  if (settings.getSetting('stickersFeatureEnabled')) exposedData.push('isSticker')
   if (settings.getSetting('shapesFeatureEnabled')) exposedData.push('shape')
   if (settings.getSetting('presentationFeatureEnabled')) exposedData.push('isStartNode')
   if (settings.getSetting('portalsFeatureEnabled')) exposedData.push('portalToFile', 'portalId')

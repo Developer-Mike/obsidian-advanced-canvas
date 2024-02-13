@@ -163,6 +163,7 @@ export interface CanvasNodeData {
   label?: string
   file?: string
 
+  isSticker: boolean
   shape: string
   isStartNode: boolean
   edgesToNodeFromPortal?: { [key: string]: CanvasEdgeData[] }
