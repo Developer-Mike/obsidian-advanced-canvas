@@ -36,6 +36,8 @@ All features can be enabled/disabled in the settings.
   - Predefined Process shape
   - Document shape
   - Database shape
+- [Stickers](#stickers)
+  - Convert image nodes to stickers (transparent background and no border)
 - [Presentation mode](#presentation)
   - Create presentations by connecting nodes with arrows
 - [Portals](#portals)
@@ -130,6 +132,14 @@ All features can be enabled/disabled in the settings.
 <details>
     <summary>Database Shape</summary>
     <img src="./assets/flowchart-nodes/database.png" alt="Database Shape"/>
+</details>
+
+## Stickers
+Convert image nodes to stickers. Stickers have a transparent background and no border.
+
+<details>
+    <summary>Sticker Example</summary>
+    <img src="./assets/stickers.png" alt="Sticker Example"/>
 </details>
 
 ## Presentation Mode
