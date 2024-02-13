@@ -11,12 +11,14 @@ import ReadonlyCanvasExtension from './canvas-extensions/readonly-canvas-extensi
 import EncapsulateCanvasExtension from './canvas-extensions/encapsulate-canvas-extension'
 import CommandsCanvasExtension from './canvas-extensions/commands-canvas-extension'
 import PortalsCanvasExtension from './canvas-extensions/portals-canvas-extension'
+import ExportCanvasExtension from './canvas-extensions/export-canvas-extension'
 import IconsHelper from './utils/icons-helper'
 
 const CANVAS_EXTENSIONS: any[] = [
   NodeDataTaggerCanvasExtension,
   InteractionTaggerCanvasExtension,
   CommandsCanvasExtension,
+  ExportCanvasExtension,
   ReadonlyCanvasExtension,
   GroupCanvasExtension,
   EncapsulateCanvasExtension,

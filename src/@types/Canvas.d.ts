@@ -107,9 +107,7 @@ export interface CanvasHistory {
   redo: () => CanvasData|null
 }
 
-export interface SelectionData {
-  nodes: CanvasNodeData[]
-  edges: CanvasEdgeData[]
+export interface SelectionData extends CanvasData {
   center: Position
 }
 

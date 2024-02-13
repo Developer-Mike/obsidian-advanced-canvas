@@ -14,6 +14,8 @@ export interface AdvancedCanvasPluginSettings {
   cloneNodeMargin: number
   expandNodeStepSize: number
 
+  betterExportFeatureEnabled: boolean
+
   betterReadonlyEnabled: boolean
   disableNodePopup: boolean
   disableZoom: boolean
@@ -40,6 +42,8 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   zoomToClonedNode: true,
   cloneNodeMargin: 25,
   expandNodeStepSize: 25,
+
+  betterExportFeatureEnabled: true,
 
   betterReadonlyEnabled: true,
   disableNodePopup: false,
@@ -144,6 +148,13 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           .setValue(this.settingsManager.getSetting('expandNodeStepSize').toString())
           .onChange(async (value) => await this.settingsManager.setSetting({ expandNodeStepSize: parseInt(value) }))
       )
+
+    this.createFeatureHeading(
+      containerEl,
+      "Better export",
+      "Export your canvas/selection to more formats.",
+      'betterExportFeatureEnabled'
+    )
 
     this.createFeatureHeading(
       containerEl,
