@@ -36,6 +36,10 @@ All features can be enabled/disabled in the settings.
   - Predefined Process shape
   - Document shape
   - Database shape
+- [Edge Styles](#edge-styles)
+  - Dotted
+  - Short-dashed
+  - Long-dashed
 - [Stickers](#stickers)
   - Convert image nodes to stickers (transparent background and no border)
 - [Presentation mode](#presentation)
@@ -134,6 +138,14 @@ All features can be enabled/disabled in the settings.
     <img src="./assets/flowchart-nodes/database.png" alt="Database Shape"/>
 </details>
 
+## Edge Styles
+Set the style of the edges (arrows) to dotted, short-dashed or long-dashed.
+
+<details>
+    <summary>Edge Styles Example</summary>
+    <img src="./assets/edge-styles.png" alt="Edge Styles Example"/>
+</details>
+
 ## Stickers
 Convert image nodes to stickers. Stickers have a transparent background and no border.
 
@@ -203,7 +215,7 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
 
 <details>
     <summary>
-        All Events (19)
+        All Events (23)
     </summary>
 
   - `advanced-canvas:canvas-changed`
@@ -218,9 +230,24 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
   - `advanced-canvas:dragging-state-changed`
     - Fired when the dragging state of the canvas changes
     - Payload: `Canvas`, `boolean`
+  - `advanced-canvas:node-added`
+    - Fired when a new node gets added
+    - Payload: `Canvas`, `Node`
+  - `advanced-canvas:edge-added`
+    - Fired when a new edge gets added
+    - Payload: `Canvas`, `Edge`
   - `advanced-canvas:node-removed`
     - Fired when a node gets removed
     - Payload: `Canvas`, `Node`
+  - `advanced-canvas:edge-removed`
+    - Fired when an edge gets removed
+    - Payload: `Canvas`, `Edge`
+  - `advanced-canvas:nodes-changed`
+    - Fired when any node gets changed
+    - Payload: `Canvas`, `Node[]`
+  - `advanced-canvas:edge-changed`
+    - Fired when any edge gets changed
+    - Payload: `Canvas`, `Edge`
   - `advanced-canvas:selection-changed`
     - Fired when the selection of the canvas changes
     - Payload: `Canvas`, `updateSelection: (() => void) => void`
@@ -230,9 +257,6 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
   - `advanced-canvas:popup-menu-created`
     - Fired when the a node popup menu gets created (Not firing multiple times if it gets moved between nodes of the same type)
     - Payload: `Canvas`, `Node`
-  - `advanced-canvas:nodes-changed`
-    - Fired when any node gets changed
-    - Payload: `Canvas`, `Node[]`
   - `advanced-canvas:node-interaction`
     - Fired when a node gets hovered over
     - Payload: `Canvas`, `Node`

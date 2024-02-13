@@ -74,16 +74,19 @@ export default class PortalsCanvasExtension {
     if (canvas.readonly) return
 
     // Only search for valid nodes
-    const selectedFileNodes = Array.from(canvas.selection).filter(node => {
-      const nodeData = node.getData()
-      if (nodeData.type !== 'file') return false
-      if (node.file?.extension === 'canvas') return true
+    const selectedFileNodes = canvas.getSelectionData().nodes.map(nodeData => {
+      const node = canvas.nodes.get(nodeData.id)
+      if (!node) return null
+
+      if (nodeData.type !== 'file') return null
+      if (node.file?.extension === 'canvas') return node
       
       // Close portal of non-canvas file
       if (nodeData.portalToFile) this.setPortalOpen(canvas, node, false)
 
-      return false
-    })
+      return null
+    }).filter(node => node !== null) as CanvasNode[]
+    
     if (selectedFileNodes.length !== 1) return
 
     const portalNode = selectedFileNodes[0]
@@ -96,15 +99,15 @@ export default class PortalsCanvasExtension {
 
     CanvasHelper.addPopupMenuOption(
       canvas,
-      CanvasHelper.createPopupMenuOption(
-        'toggle-portal',
-        portalNodeData.portalToFile ? 'Close portal' : 'Open portal',
-        portalNodeData.portalToFile ? 'door-open' : 'door-closed',
-        () => {
+      CanvasHelper.createPopupMenuOption({
+        id: 'toggle-portal',
+        label: portalNodeData.portalToFile ? 'Close portal' : 'Open portal',
+        icon: portalNodeData.portalToFile ? 'door-open' : 'door-closed',
+        callback: () => {
           this.setPortalOpen(canvas, portalNode, portalNodeData.portalToFile === undefined)
           this.updatePopupMenu(canvas)
         }
-      )
+      })
     )
   }
 

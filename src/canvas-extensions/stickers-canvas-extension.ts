@@ -1,4 +1,4 @@
-import { Canvas, CanvasNode } from "src/@types/Canvas"
+import { Canvas, CanvasEdge, CanvasNode } from "src/@types/Canvas"
 import AdvancedCanvasPlugin from "src/main"
 import * as CanvasHelper from "src/utils/canvas-helper"
 import { CanvasEvent } from "src/events/events"
@@ -19,33 +19,38 @@ export default class StickersCanvasExtension {
 
   onPopupMenuCreated(canvas: Canvas): void {
     // If the canvas is readonly or there is no valid shape in the selection, return
-    if (canvas.readonly || !this.hasValidShapeInSelection(canvas.selection))
+    if (canvas.readonly || !this.hasValidNodeInSelection(canvas))
       return
 
     CanvasHelper.addPopupMenuOption(
       canvas,
-      CanvasHelper.createPopupMenuOption(
-        'sticker-option',
-        'Toggle sticker',
-        'badge', 
-        () => this.toggleStickerForSelection(canvas)
-      )
+      CanvasHelper.createPopupMenuOption({
+        id: 'sticker-option',
+        label: 'Toggle sticker',
+        icon: 'badge', 
+        callback: () => this.toggleStickerForSelection(canvas)
+      })
     )
   }
 
-  private hasValidShapeInSelection(selection: Set<CanvasNode>): boolean {
-    if (!selection) return false
+  private hasValidNodeInSelection(canvas: Canvas): boolean {
+    const selectedNodesData = canvas.getSelectionData().nodes
 
-    for (const node of selection) {
-      if (node.getData().type === 'file') return true
+    for (const nodeData of selectedNodesData) {
+      if (nodeData.type === 'file') return true
     }
     
     return false
   }
 
   private toggleStickerForSelection(canvas: Canvas): void {
-    for (const node of canvas.selection) {
-      if (node.getData().type !== 'file') continue
+    const selectedNodesData = canvas.getSelectionData().nodes
+
+    for (const nodeData of selectedNodesData) {
+      if (nodeData.type !== 'file') continue
+
+      const node = canvas.nodes.get(nodeData.id)
+      if (!node) continue
       
       const wasSticker = node.getData().isSticker
       canvas.setNodeData(node, 'isSticker', wasSticker ? undefined : true)

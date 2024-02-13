@@ -1,8 +1,9 @@
 import AdvancedCanvasPlugin from "src/main"
-import { BBox, CanvasData, CanvasNode, CanvasView } from "src/@types/Canvas"
+import { BBox, CanvasData, CanvasEdge, CanvasEdgeData, CanvasNode, CanvasNodeData, CanvasView } from "src/@types/Canvas"
 import { patchWorkspaceFunction as patchWorkspaceObject } from "src/utils/patch-helper"
 import { CanvasEvent } from "./events"
 import { WorkspaceLeaf } from "obsidian"
+import { around, dedupe } from "monkey-around"
 
 export default class CanvasEventEmitter {
   plugin: AdvancedCanvasPlugin
@@ -26,7 +27,7 @@ export default class CanvasEventEmitter {
     // Patch canvas
     patchWorkspaceObject(this.plugin, () => this.plugin.getCurrentCanvas(), {
       // Add custom function
-      setNodeData: (_next: any) => function (node: CanvasNode, key: string, value: any) {
+      setNodeData: (_next: any) => function (node: CanvasNode, key: keyof CanvasNodeData, value: any) {
         node.setData({ 
           ...node.getData(),
           [key]: value
@@ -34,6 +35,15 @@ export default class CanvasEventEmitter {
         this.requestSave()
 
         that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [node])
+      },
+      setEdgeData: (_next: any) => function (edge: CanvasEdge, key: keyof CanvasEdgeData, value: any) {
+        edge.setData({ 
+          ...edge.getData(),
+          [key]: value
+        })
+        this.requestSave()
+
+        that.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, this, edge)
       },
       markViewportChanged: (next: any) => function (...args: any) {
         that.triggerWorkspaceEvent(CanvasEvent.ViewportChanged.Before, this)
@@ -60,14 +70,28 @@ export default class CanvasEventEmitter {
 
         ;(async () => {
           await sleep(1) // Fix obsidian bug where the unknownData doesn't get set
+          that.triggerWorkspaceEvent(CanvasEvent.NodeAdded, this, node)
           that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [node])
         })()
 
         return result
       },
+      addEdge: (next: any) => function (edge: CanvasEdge) {
+        that.triggerEdgeRelatedEvent(edge, () => {
+          that.triggerWorkspaceEvent(CanvasEvent.EdgeAdded, this.canvas, edge)
+          that.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, this.canvas, edge)
+        })
+
+        return next.call(this, edge)
+      },
       removeNode: (next: any) => function (node: CanvasNode) {
         const result = next.call(this, node)
         that.triggerWorkspaceEvent(CanvasEvent.NodeRemoved, this, node)
+        return result
+      },
+      removeEdge: (next: any) => function (edge: CanvasEdge) {
+        const result = next.call(this, edge)
+        that.triggerWorkspaceEvent(CanvasEvent.EdgeRemoved, this, edge)
         return result
       },
       zoomToBbox: (next: any) => function (bbox: BBox) {
@@ -106,11 +130,19 @@ export default class CanvasEventEmitter {
 
           this.importData(data)
           that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()]) // If node data changed
+          ;[...this.edges.values()].forEach(edge => that.triggerEdgeRelatedEvent(edge, () => // If edge data changed
+            that.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, this, edge)
+          ))
         }
 
         that.triggerWorkspaceEvent(CanvasEvent.LoadData, this, data, setData)
         const result = next.call(this, data)
+
         that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()]) // If node data changed
+        ;[...this.edges.values()].forEach(edge => that.triggerEdgeRelatedEvent(edge, () => // If edge data changed
+          that.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, this, edge)
+        ))
+
         return result
       },
       requestSave: (next: any) => function (...args: any) {
@@ -169,6 +201,29 @@ export default class CanvasEventEmitter {
 
     // Trigger instantly (Plugin reload)
     onCanvasChangeListener.fn.call(this.plugin.app.workspace)
+  }
+  
+  private triggerEdgeRelatedEvent(edge: CanvasEdge, onReady: () => void) {
+    if (edge.initialized) {
+      onReady()
+      return
+    }
+
+    const that = this
+
+    // Patch edge object
+    const uninstaller = around(edge, {
+      initialize: (next: any) => function (...args: any) {
+        const result = next.call(this, ...args)
+
+        onReady()
+        uninstaller() // Uninstall the patch
+
+        return result
+      }
+    })
+
+    that.plugin.register(uninstaller)
   }
 
   private triggerWorkspaceEvent(event: string, ...args: any) {

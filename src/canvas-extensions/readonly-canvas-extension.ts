@@ -80,51 +80,46 @@ export default class ReadonlyCanvasExtension {
 
     CanvasHelper.addQuickSettingsButton(
       settingsContainer,
-      this.createToggle(
-        'disable-node-popup',
-        'Disable node popup',
-        'arrow-up-right-from-circle',
-        'disableNodePopup',
-        () => this.updatePopupMenu(canvas)
-      )
+      this.createToggle({
+        id: 'disable-node-popup',
+        label: 'Disable node popup',
+        icon: 'arrow-up-right-from-circle',
+        callback: () => this.updatePopupMenu(canvas)
+      }, 'disableNodePopup')
     )
 
     CanvasHelper.addQuickSettingsButton(
       settingsContainer,
-      this.createToggle(
-        'disable-zoom', 
-        'Disable zoom', 
-        'zoom-in', 
-        'disableZoom',
-        () => this.updateLockedZoom(canvas)
-      )
+      this.createToggle({
+        id: 'disable-zoom',
+        label: 'Disable zoom',
+        icon: 'zoom-in',
+        callback: () => this.updateLockedZoom(canvas)
+      }, 'disableZoom')
     )
 
     CanvasHelper.addQuickSettingsButton(
       settingsContainer,
-      this.createToggle(
-        'disable-pan', 
-        'Disable pan', 
-        'move', 
-        'disablePan',
-        () => this.updateLockedPan(canvas)
-      )
+      this.createToggle({
+        id: 'disable-pan',
+        label: 'Disable pan',
+        icon: 'move',
+        callback: () => this.updateLockedPan(canvas)
+      }, 'disablePan')
     )
   }
 
-  private createToggle(id: string, text: string, icon: string, settingKey: keyof AdvancedCanvasPluginSettings, callback?: () => void): HTMLElement {
-    const toggle = CanvasHelper.createQuickSettingsButton(
-      id,
-      text,
-      icon,
-      () => { (async () => {
+  private createToggle(menuOption: CanvasHelper.MenuOption, settingKey: keyof AdvancedCanvasPluginSettings): HTMLElement {
+    const toggle = CanvasHelper.createQuickSettingsButton({
+      ...menuOption,
+      callback: () => (async () => {
         const newValue = !this.plugin.settingsManager.getSetting(settingKey)
         await this.plugin.settingsManager.setSetting({ [settingKey]: newValue })
 
         toggle.dataset.toggled = this.plugin.settingsManager.getSetting(settingKey).toString()
-        callback?.call(this)
-      })() }
-    )
+        menuOption.callback?.call(this)
+      })()
+    })
     toggle.classList.add('show-while-readonly')
 
     toggle.dataset.toggled = this.plugin.settingsManager.getSetting(settingKey).toString()

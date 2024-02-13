@@ -61,7 +61,7 @@ export interface Canvas {
   readonly: boolean
   setReadonly(readonly: boolean): void
 
-  selection: Set<CanvasNode>
+  selection: Set<CanvasNode|CanvasEdge>
   getSelectionData(): SelectionData
   deselectAll(): void
 
@@ -72,7 +72,9 @@ export interface Canvas {
   createGroupNode(options: GroupNodeOptions): CanvasNode
   createFileNode(options: FileNodeOptions): CanvasNode
 
+  addNode(node: CanvasNode): void
   removeNode(node: CanvasNode): void
+  addEdge(edge: CanvasEdge): void
   removeEdge(edge: CanvasEdge): void
 
   history: CanvasHistory
@@ -87,7 +89,7 @@ export interface Canvas {
   lockedY: number
   lockedZoom: number
   setNodeData(node: CanvasNode, key: keyof CanvasNodeData, value: any): void
-  foreignCanvasData: { [key: string]: CanvasData }
+  setEdgeData(edge: CanvasEdge, key: keyof CanvasEdgeData, value: any): void
 }
 
 export interface CanvasOptions {
@@ -212,6 +214,7 @@ export interface CanvasEdgeData {
   fromSide: Side
   toSide: Side
   
+  edgeStyle?: string
   portalId?: string
 }
 
@@ -224,6 +227,17 @@ export interface CanvasEdge {
   to: {
     node: CanvasNode
   }
+
+  path: {
+    interaction: HTMLElement
+    display: HTMLElement
+  }
+
+  initialized: boolean
+  initialize(): void
+  
+  setData(data: CanvasEdgeData): void
+  getData(): CanvasEdgeData
 }
 
 export interface NodeInteractionLayer {

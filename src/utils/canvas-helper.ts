@@ -43,13 +43,20 @@ export function canvasCommand(plugin: AdvancedCanvasPlugin, check: (canvas: Canv
   }
 }
 
-export function createQuickSettingsButton(id: string, label: string, icon: string, callback?: () => void): HTMLElement {
+export interface MenuOption {
+  id: string
+  label: string
+  icon: string
+  callback?: () => void
+}
+
+export function createQuickSettingsButton(menuOption: MenuOption): HTMLElement {
   const quickSetting = document.createElement('div')
-  quickSetting.id = id
+  quickSetting.id = menuOption.id
   quickSetting.classList.add('canvas-control-item')
-  setIcon(quickSetting, icon)
-  setTooltip(quickSetting, label, { placement: 'left' })
-  quickSetting.addEventListener('click', () => callback?.())
+  setIcon(quickSetting, menuOption.icon)
+  setTooltip(quickSetting, menuOption.label, { placement: 'left' })
+  quickSetting.addEventListener('click', () => menuOption.callback?.())
 
   return quickSetting
 }
@@ -59,26 +66,26 @@ export function addQuickSettingsButton(controlGroup: HTMLElement, element: HTMLE
   controlGroup.appendChild(element)
 }
 
-export function createCardMenuOption(canvas: Canvas, id: string, label: string, icon: string, previewNodeSize: () => Size, onPlaced: (canvas: Canvas, pos: Position) => void): HTMLElement {
-  const menuOption = document.createElement('div')
-  menuOption.id = id
-  menuOption.classList.add('canvas-card-menu-button')
-  menuOption.classList.add('mod-draggable')
-  setIcon(menuOption, icon)
-  setTooltip(menuOption, label, { placement: 'top' })
+export function createCardMenuOption(canvas: Canvas, menuOption: MenuOption, previewNodeSize: () => Size, onPlaced: (canvas: Canvas, pos: Position) => void): HTMLElement {
+  const menuOptionElement = document.createElement('div')
+  menuOptionElement.id = menuOption.id
+  menuOptionElement.classList.add('canvas-card-menu-button')
+  menuOptionElement.classList.add('mod-draggable')
+  setIcon(menuOptionElement, menuOption.icon)
+  setTooltip(menuOptionElement, menuOption.label, { placement: 'top' })
 
-  menuOption.addEventListener('click', (_e) => {
+  menuOptionElement.addEventListener('click', (_e) => {
     onPlaced(canvas, getCenterCoordinates(canvas, previewNodeSize()))
   })
 
-  menuOption.addEventListener('pointerdown', (e) => {
+  menuOptionElement.addEventListener('pointerdown', (e) => {
     canvas.dragTempNode(e, previewNodeSize(), (pos: Position) => {
       canvas.deselectAll()
       onPlaced(canvas, pos)
     })
   })
 
-  return menuOption
+  return menuOptionElement
 }
 
 export function addCardMenuOption(canvas: Canvas, element: HTMLElement) {
@@ -86,15 +93,36 @@ export function addCardMenuOption(canvas: Canvas, element: HTMLElement) {
   canvas?.cardMenuEl.appendChild(element)
 }
 
-export function createPopupMenuOption(id: string, label: string, icon: string, callback?: () => void): HTMLElement {
-  const menuOption = document.createElement('button')
-  menuOption.id = id
-  menuOption.classList.add('clickable-icon')
-  setIcon(menuOption, icon)
-  setTooltip(menuOption, label, { placement: 'top' })
-  menuOption.addEventListener('click', () => callback?.())
+export function createPopupMenuOption(menuOption: MenuOption): HTMLElement {
+  const menuOptionElement = document.createElement('button')
+  menuOptionElement.id = menuOption.id
+  menuOptionElement.classList.add('clickable-icon')
+  setIcon(menuOptionElement, menuOption.icon)
+  setTooltip(menuOptionElement, menuOption.label, { placement: 'top' })
+  menuOptionElement.addEventListener('click', () => menuOption.callback?.())
 
-  return menuOption
+  return menuOptionElement
+}
+
+export function createExpandablePopupMenuOption(menuOption: MenuOption, subMenuOptions: MenuOption[]): HTMLElement {
+  const menuOptionElement = createPopupMenuOption({
+    ...menuOption,
+    callback: () => menuOptionElement.classList.toggle('expanded')
+  })
+  menuOptionElement.classList.add('expandable-menu-option')
+
+  // Add popup menu
+  const expandMenu = document.createElement('div')
+  expandMenu.classList.add('expand-menu')
+  menuOptionElement.appendChild(expandMenu)
+
+  // Add nested options
+  for (const subMenuOption of subMenuOptions) {
+    const subMenuOptionElement = createPopupMenuOption(subMenuOption)
+    expandMenu.appendChild(subMenuOptionElement)
+  }
+
+  return menuOptionElement
 }
 
 export function addPopupMenuOption(canvas: Canvas, element: HTMLElement) {

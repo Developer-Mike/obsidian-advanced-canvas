@@ -1,0 +1,12 @@
+.canvas-edges [data-edge-style="dotted"] {
+  // Selected: 5.5px
+  stroke-dasharray: calc(3px * var(--zoom-multiplier));
+}
+
+.canvas-edges [data-edge-style="short-dashed"] {
+  stroke-dasharray: 9px;
+}
+
+.canvas-edges [data-edge-style="long-dashed"] {
+  stroke-dasharray: 18px;
+}
