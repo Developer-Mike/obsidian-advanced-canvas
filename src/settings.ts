@@ -21,6 +21,8 @@ export interface AdvancedCanvasPluginSettings {
   disableZoom: boolean
   disablePan: boolean
 
+  stickersFeatureEnabled: boolean
+
   presentationFeatureEnabled: boolean
   defaultSlideSize: string
   useArrowKeysToChangeSlides: boolean
@@ -49,6 +51,8 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   disableNodePopup: false,
   disableZoom: false,
   disablePan: false,
+
+  stickersFeatureEnabled: true,
 
   presentationFeatureEnabled: true,
   defaultSlideSize: Object.values(SLIDE_SIZE_OPTIONS).first(),
@@ -199,6 +203,13 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           .setValue(this.settingsManager.settings.disablePan)
           .onChange(async (value) => await this.settingsManager.setSetting({ disablePan: value }))
       )*/
+
+    this.createFeatureHeading(
+      containerEl,
+      "Stickers",
+      "Convert an image node to a sticker by supporting transparency and removing the border.",
+      'stickersFeatureEnabled'
+    )
 
     this.createFeatureHeading(
       containerEl,
