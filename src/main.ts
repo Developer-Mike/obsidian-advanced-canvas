@@ -13,6 +13,7 @@ import CommandsCanvasExtension from './canvas-extensions/commands-canvas-extensi
 import PortalsCanvasExtension from './canvas-extensions/portals-canvas-extension'
 import IconsHelper from './utils/icons-helper'
 import StickersCanvasExtension from './canvas-extensions/stickers-canvas-extension'
+import EdgesStyleCanvasExtension from './canvas-extensions/edges-style-canvas-extension'
 
 const CANVAS_EXTENSIONS: any[] = [
   NodeDataTaggerCanvasExtension,
@@ -23,6 +24,7 @@ const CANVAS_EXTENSIONS: any[] = [
   EncapsulateCanvasExtension,
   StickersCanvasExtension,
   ShapesCanvasExtension,
+  EdgesStyleCanvasExtension,
   PresentationCanvasExtension,
   PortalsCanvasExtension
 ]

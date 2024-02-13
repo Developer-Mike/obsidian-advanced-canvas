@@ -61,7 +61,7 @@ export interface Canvas {
   readonly: boolean
   setReadonly(readonly: boolean): void
 
-  selection: Set<CanvasNode>
+  selection: Set<CanvasNode|CanvasEdge>
   getSelectionData(): SelectionData
   deselectAll(): void
 
@@ -87,7 +87,7 @@ export interface Canvas {
   lockedY: number
   lockedZoom: number
   setNodeData(node: CanvasNode, key: keyof CanvasNodeData, value: any): void
-  foreignCanvasData: { [key: string]: CanvasData }
+  setEdgeData(edge: CanvasEdge, key: keyof CanvasEdgeData, value: any): void
 }
 
 export interface CanvasOptions {
@@ -212,6 +212,7 @@ export interface CanvasEdgeData {
   fromSide: Side
   toSide: Side
   
+  lineStyle?: string
   portalId?: string
 }
 
@@ -224,6 +225,14 @@ export interface CanvasEdge {
   to: {
     node: CanvasNode
   }
+
+  path: {
+    interaction: HTMLElement
+    display: HTMLElement
+  }
+
+  setData(data: CanvasEdgeData): void
+  getData(): CanvasEdgeData
 }
 
 export interface NodeInteractionLayer {

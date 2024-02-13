@@ -9,6 +9,8 @@ const SLIDE_SIZE_OPTIONS: { [key: string]: string } = {
 export interface AdvancedCanvasPluginSettings {
   shapesFeatureEnabled: boolean
 
+  edgesStylingFeatureEnabled: boolean
+
   commandsFeatureEnabled: boolean
   zoomToClonedNode: boolean
   cloneNodeMargin: number
@@ -37,6 +39,8 @@ export interface AdvancedCanvasPluginSettings {
 
 export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   shapesFeatureEnabled: true,
+
+  edgesStylingFeatureEnabled: true,
 
   commandsFeatureEnabled: true,
   zoomToClonedNode: true,
@@ -113,6 +117,13 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       "Shapes",
       "Shape your nodes for creating e.g. mind maps or flow charts.",
       'shapesFeatureEnabled'
+    )
+
+    this.createFeatureHeading(
+      containerEl,
+      "Edges styling",
+      "Style your edges with different path styles.",
+      'edgesStylingFeatureEnabled'
     )
 
     this.createFeatureHeading(

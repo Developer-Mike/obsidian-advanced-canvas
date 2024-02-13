@@ -1,4 +1,4 @@
-import { Canvas, CanvasNode } from "src/@types/Canvas"
+import { Canvas, CanvasNode, CanvasNodeData } from "src/@types/Canvas"
 import AdvancedCanvasPlugin from "src/main"
 import * as CanvasHelper from "src/utils/canvas-helper"
 import { CanvasEvent } from "src/events/events"
@@ -73,51 +73,45 @@ export default class ShapesCanvasExtension {
 
   onPopupMenuCreated(canvas: Canvas): void {
     // If the canvas is readonly or there is no valid shape in the selection, return
-    if (canvas.readonly || !this.hasValidShapeInSelection(canvas.selection))
+    if (canvas.readonly || !this.hasValidNodeInSelection(canvas))
       return
 
-    let menuOption = CanvasHelper.createPopupMenuOption(
-      'node-shape-option',
-      'Node shape',
-      'shapes', 
-      () => menuOption.classList.toggle('expanded')
-    )
+    const nestedMenuOptions = SHAPES.map((shape) => ({
+      id: '',
+      label: shape.menuName,
+      icon: shape.icon,
+      callback: () => this.setShapeForSelection(canvas, shape)
+    }))
 
-    // Add popup menu
-    const shapesMenu = document.createElement('div')
-    shapesMenu.classList.add('shapes-menu')
-    menuOption.appendChild(shapesMenu)
-
-    // Add custom nodes
-    for (const shape of SHAPES) {
-      const shapeButton = CanvasHelper.createPopupMenuOption(
-        '',
-        shape.menuName,
-        shape.icon,
-        () => this.setShapeForSelection(canvas, shape)
-      )
-
-      shapesMenu.appendChild(shapeButton)
-    }
+    const menuOption = CanvasHelper.createExpandablePopupMenuOption({
+      id: 'node-shape-option',
+      label: 'Node shape',
+      icon: 'shapes'
+    }, nestedMenuOptions)
 
     // Add menu option to menu bar
     CanvasHelper.addPopupMenuOption(canvas, menuOption)
   }
 
-  private hasValidShapeInSelection(selection: Set<CanvasNode>): boolean {
-    if (!selection) return false
+  private hasValidNodeInSelection(canvas: Canvas): boolean {
+    const selectedNodesData = canvas.getSelectionData().nodes
 
-    for (const node of selection) {
-      if (node.getData().type === 'text') return true
+    for (const nodeData of selectedNodesData) {
+      if (nodeData.type === 'text') return true
     }
     
     return false
   }
 
   private setShapeForSelection(canvas: Canvas, shape: Shape) {  
-    for (const node of canvas.selection) {
-      if (node.getData().type !== 'text') continue
+    const selectedNodesData = canvas.getSelectionData().nodes
 
+    for (const nodeData of selectedNodesData) {
+      if (nodeData.type !== 'text') continue
+
+      const node = canvas.nodes.get(nodeData.id)
+      if (!node) continue
+      
       canvas.setNodeData(node, 'shape', shape.id)
     }
   }

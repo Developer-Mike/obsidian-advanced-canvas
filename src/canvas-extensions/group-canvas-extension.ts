@@ -18,9 +18,11 @@ export default class GroupCanvasExtension {
           canvas,
           CanvasHelper.createCardMenuOption(
             canvas,
-            'create-group',
-            'Drag to add group',
-            'group',
+            {
+              id: 'create-group',
+              label: 'Drag to add group',
+              icon: 'group'
+            },
             () => GROUP_NODE_SIZE,
             (canvas: Canvas, pos: Position) => {
               canvas.createGroupNode({

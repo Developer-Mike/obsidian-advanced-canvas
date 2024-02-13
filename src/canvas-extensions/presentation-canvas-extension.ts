@@ -75,9 +75,11 @@ export default class PresentationCanvasExtension {
       canvas,
       CanvasHelper.createCardMenuOption(
         canvas,
-        'new-slide',
-        'Drag to add slide',
-        'gallery-vertical',
+        {
+          id: 'new-slide',
+          label: 'Drag to add slide',
+          icon: 'gallery-vertical'
+        },
         () => this.getSlideSize(),
         (canvas: Canvas, pos: Position) => this.addSlide(canvas, pos)
       )
@@ -86,19 +88,20 @@ export default class PresentationCanvasExtension {
 
   onPopupMenuCreated(canvas: Canvas): void {
     // If the canvas is readonly or there are multiple/no nodes selected, return
-    if (canvas.readonly || canvas.getSelectionData().nodes.length !== 1) return
-    const selectedNode = [...canvas.selection]
-      .filter((node) => node.nodeEl !== undefined) // Ignore edges
-      .first()
+    const selectedNodeData = canvas.getSelectionData().nodes
+    if (canvas.readonly || selectedNodeData.length !== 1) return
+    
+    const selectedNode = canvas.nodes.get(selectedNodeData[0].id)
+    if (!selectedNode) return
     
     CanvasHelper.addPopupMenuOption(
       canvas,
-      CanvasHelper.createPopupMenuOption(
-        'start-node', 
-        'Set as start slide', 
-        'play', 
-        () => this.setStartNode(canvas, selectedNode)
-      )
+      CanvasHelper.createPopupMenuOption({
+        id: 'start-node', 
+        label: 'Set as start slide', 
+        icon: 'play', 
+        callback: () => this.setStartNode(canvas, selectedNode)
+      })
     )
   }
   
