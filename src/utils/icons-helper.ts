@@ -16,7 +16,10 @@ const CUSTOM_ICONS = {
       <path d="M 1 51 L 1 11 C 1 5.48 14.43 1 31 1 C 47.57 1 61 5.48 61 11 L 61 51 C 61 56.52 47.57 61 31 61 C 14.43 61 1 56.52 1 51 Z"/>
       <path d="M 1 11 C 1 16.52 14.43 21 31 21 C 47.57 21 61 16.52 61 11"/>
     </g>
-  `
+  `,
+  'dotted-line': `<path stroke="currentColor" fill="none" stroke-width="8.5" stroke-dasharray="8.5" d="M20.85 50h58.5"/>`,
+  'short-dashed-line': `<path stroke="currentColor" fill="none" stroke-width="8.5" stroke-dasharray="10" d="M20.85 50h58.5"/>`,
+  'long-dashed-line': `<path stroke="currentColor" fill="none" stroke-width="8.5" stroke-dasharray="20" d="M20.85 50h58.5"/>`
 }
 
 export default class IconsHelper {

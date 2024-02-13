@@ -1,4 +1,4 @@
-import { Canvas, CanvasEdge, CanvasNode } from "src/@types/Canvas"
+import { Canvas, CanvasEdge } from "src/@types/Canvas"
 import AdvancedCanvasPlugin from "src/main"
 import * as CanvasHelper from "src/utils/canvas-helper"
 import { CanvasEvent } from "src/events/events"
@@ -16,19 +16,19 @@ const STYLES: EdgeStyle[] = [
     icon: 'minus'
   },
   {
-    id: 'dotted',
-    menuName: 'Dotted',
-    icon: 'circle'
+    id: 'long-dashed',
+    menuName: 'Dashed (long)',
+    icon: 'long-dashed-line'
   },
   {
     id: 'short-dashed',
     menuName: 'Dashed',
-    icon: 'oval'
+    icon: 'short-dashed-line'
   },
   {
-    id: 'long-dashed',
-    menuName: 'Dashed (long)',
-    icon: 'rectangle-horizontal'
+    id: 'dotted',
+    menuName: 'Dotted',
+    icon: 'dotted-line'
   }
 ]
 
