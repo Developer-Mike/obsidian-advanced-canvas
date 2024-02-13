@@ -85,8 +85,8 @@ export default class PresentationCanvasExtension {
   }
 
   onPopupMenuCreated(canvas: Canvas): void {
-    // If the canvas is readonly, return
-    if (canvas.readonly) return
+    // If the canvas is readonly or there are multiple nodes selected, return
+    if (canvas.readonly || canvas.selection.size > 1) return
     
     CanvasHelper.addPopupMenuOption(
       canvas,
