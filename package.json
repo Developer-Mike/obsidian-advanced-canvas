@@ -23,6 +23,7 @@
 	},
 	"dependencies": {
 		"esbuild-sass-plugin": "^2.6.0",
+		"html-to-image": "^1.11.11",
 		"monkey-around": "^2.3.0",
 		"sass": "^1.70.0"
 	}

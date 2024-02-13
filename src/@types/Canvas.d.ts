@@ -32,6 +32,7 @@ export interface Canvas {
   edges: Map<string, CanvasEdge>
   getEdgesForNode(node: CanvasNode): CanvasEdge[]
 
+  canvasEl: HTMLElement
   wrapperEl: HTMLElement
   menu: PopupMenu
   cardMenuEl: HTMLElement
@@ -62,6 +63,7 @@ export interface Canvas {
   setReadonly(readonly: boolean): void
 
   selection: Set<CanvasNode>
+  updateSelection(update: () => void): void
   getSelectionData(): SelectionData
   deselectAll(): void
 
@@ -220,6 +222,11 @@ export interface CanvasEdge {
   }
   to: {
     node: CanvasNode
+  }
+
+  path: {
+    display: HTMLElement
+    interaction: HTMLElement
   }
 }
 
