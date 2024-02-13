@@ -36,6 +36,10 @@ All features can be enabled/disabled in the settings.
   - Predefined Process shape
   - Document shape
   - Database shape
+- [Edge Styles](#edge-styles)
+  - Dotted
+  - Short-dashed
+  - Long-dashed
 - [Stickers](#stickers)
   - Convert image nodes to stickers (transparent background and no border)
 - [Presentation mode](#presentation)
@@ -132,6 +136,14 @@ All features can be enabled/disabled in the settings.
 <details>
     <summary>Database Shape</summary>
     <img src="./assets/flowchart-nodes/database.png" alt="Database Shape"/>
+</details>
+
+## Edge Styles
+Set the style of the edges (arrows) to dotted, short-dashed or long-dashed.
+
+<details>
+    <summary>Edge Styles Example</summary>
+    <img src="./assets/edge-styles.png" alt="Edge Styles Example"/>
 </details>
 
 ## Stickers
