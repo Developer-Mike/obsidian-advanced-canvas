@@ -215,7 +215,7 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
 
 <details>
     <summary>
-        All Events (25)
+        All Events (23)
     </summary>
 
   - `advanced-canvas:canvas-changed`
