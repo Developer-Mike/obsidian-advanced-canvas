@@ -72,7 +72,9 @@ export interface Canvas {
   createGroupNode(options: GroupNodeOptions): CanvasNode
   createFileNode(options: FileNodeOptions): CanvasNode
 
+  addNode(node: CanvasNode): void
   removeNode(node: CanvasNode): void
+  addEdge(edge: CanvasEdge): void
   removeEdge(edge: CanvasEdge): void
 
   history: CanvasHistory
@@ -212,7 +214,7 @@ export interface CanvasEdgeData {
   fromSide: Side
   toSide: Side
   
-  lineStyle?: string
+  edgeStyle?: string
   portalId?: string
 }
 
@@ -231,6 +233,9 @@ export interface CanvasEdge {
     display: HTMLElement
   }
 
+  initialized: boolean
+  initialize(): void
+  
   setData(data: CanvasEdgeData): void
   getData(): CanvasEdgeData
 }

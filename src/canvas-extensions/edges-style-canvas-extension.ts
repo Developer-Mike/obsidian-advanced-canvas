@@ -48,14 +48,15 @@ export default class EdgesStyleCanvasExtension {
 
   onPopupMenuCreated(canvas: Canvas): void {
     // If the canvas is readonly or there is no edge in the selection, return
-    if (canvas.readonly || canvas.getSelectionData().edges.length === 0)
+    const selectedEdges = [...canvas.selection].filter((item: any) => item.path !== undefined) as CanvasEdge[]
+    if (canvas.readonly || selectedEdges.length === 0)
       return
 
     const nestedMenuOptions = STYLES.map((style) => ({
       id: '',
       label: style.menuName,
       icon: style.icon,
-      callback: () => this.setStyleForSelection(canvas, style)
+      callback: () => this.setStyleForSelection(canvas, selectedEdges, style)
     }))
 
     const menuOption = CanvasHelper.createExpandablePopupMenuOption({
@@ -68,12 +69,9 @@ export default class EdgesStyleCanvasExtension {
     CanvasHelper.addPopupMenuOption(canvas, menuOption)
   }
 
-  private setStyleForSelection(canvas: Canvas, style: EdgeStyle) {  
-    for (const edgeData of canvas.getSelectionData().edges) {
-      const edge = canvas.edges.get(edgeData.id)
-      if (!edge) continue
-
-      canvas.setEdgeData(edge, 'lineStyle', style.id)
+  private setStyleForSelection(canvas: Canvas, selectedEdges: CanvasEdge[], style: EdgeStyle) {
+    for (const edge of selectedEdges) {
+      canvas.setEdgeData(edge, 'edgeStyle', style.id)
     }
   }
 }

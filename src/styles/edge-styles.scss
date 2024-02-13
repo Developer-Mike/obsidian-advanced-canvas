@@ -1,11 +1,11 @@
 .canvas-edges [data-edge-style="dotted"] {
-  stroke-dasharray: 1px;
-}
-
-.canvas-edges [data-edge-style="short-dashed"] {
   stroke-dasharray: 5px;
 }
 
-.canvas-edges [data-edge-style="long-dashed"] {
+.canvas-edges [data-edge-style="short-dashed"] {
   stroke-dasharray: 10px;
+}
+
+.canvas-edges [data-edge-style="long-dashed"] {
+  stroke-dasharray: 20px;
 }
