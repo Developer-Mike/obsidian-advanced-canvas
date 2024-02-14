@@ -1,19 +1,42 @@
 import AdvancedCanvasPlugin from "src/main"
-import { BBox, CanvasData, CanvasEdge, CanvasEdgeData, CanvasNode, CanvasNodeData, CanvasView } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasData, CanvasEdge, CanvasEdgeData, CanvasNode, CanvasNodeData, CanvasView } from "src/@types/Canvas"
 import { patchWorkspaceFunction as patchWorkspaceObject } from "src/utils/patch-helper"
 import { CanvasEvent } from "./events"
 import { WorkspaceLeaf } from "obsidian"
-import { around, dedupe } from "monkey-around"
+import { around } from "monkey-around"
 
 export default class CanvasEventEmitter {
   plugin: AdvancedCanvasPlugin
 
   constructor(plugin: AdvancedCanvasPlugin) {
     this.plugin = plugin
+    this.applyPatches()
+  }
+
+  private async applyPatches() {
     const that = this
+    
+    // Patch canvas popup menu
+    patchWorkspaceObject(this.plugin, () => this.plugin.getCurrentCanvas()?.menu, {
+      render: (next: any) => function (...args: any) {
+        const result = next.call(this, ...args)
+        that.triggerWorkspaceEvent(CanvasEvent.PopupMenuCreated, this.canvas)
+        next.call(this) // Re-Center the popup menu
+        return result
+      }
+    })
+
+    // Patch interaction layer
+    patchWorkspaceObject(this.plugin, () => this.plugin.getCurrentCanvas()?.nodeInteractionLayer, {
+      setTarget: (next: any) => function (node: CanvasNode) {
+        const result = next.call(this, node)
+        that.triggerWorkspaceEvent(CanvasEvent.NodeInteraction, this.canvas, node)
+        return result
+      }
+    })
 
     // Patch canvas view
-    patchWorkspaceObject(this.plugin, () => this.plugin.getCurrentCanvasView(), {
+    const canvasView = await patchWorkspaceObject(this.plugin, () => this.plugin.getCurrentCanvasView(), {
       getViewData: (_next: any) => function (..._args: any) {
         return JSON.stringify(this.canvas.getData(), null, 2)
       },
@@ -24,8 +47,8 @@ export default class CanvasEventEmitter {
       }
     })
 
-    // Patch canvas
-    patchWorkspaceObject(this.plugin, () => this.plugin.getCurrentCanvas(), {
+    // Patch canvas after patching the canvas view using the non-null canvas view
+    await patchWorkspaceObject(this.plugin, () => canvasView?.canvas, {
       // Add custom function
       setNodeData: (_next: any) => function (node: CanvasNode, key: keyof CanvasNodeData, value: any) {
         node.setData({ 
@@ -77,9 +100,11 @@ export default class CanvasEventEmitter {
         return result
       },
       addEdge: (next: any) => function (edge: CanvasEdge) {
+        that.patchEdge(edge)
+
         that.triggerEdgeRelatedEvent(edge, () => {
-          that.triggerWorkspaceEvent(CanvasEvent.EdgeAdded, this.canvas, edge)
-          that.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, this.canvas, edge)
+          that.triggerWorkspaceEvent(CanvasEvent.EdgeAdded, this, edge)
+          that.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, this, edge)
         })
 
         return next.call(this, edge)
@@ -153,54 +178,40 @@ export default class CanvasEventEmitter {
       }
     })
 
-    // Patch canvas popup menu
-    patchWorkspaceObject(this.plugin, () => this.plugin.getCurrentCanvas()?.menu, {
-      render: (next: any) => function (visible: boolean) {
-        const result = next.call(this, visible)
+    // Canvas is now patched - update all open canvases
+    this.plugin.app.workspace.iterateAllLeaves((leaf: WorkspaceLeaf) => {
+      if (leaf.view.getViewType() !== 'canvas') return
 
-        if (visible) {
-          that.triggerWorkspaceEvent(CanvasEvent.PopupMenuCreated, this.canvas)
+      const canvasView = leaf.view as CanvasView
 
-          // Re-Center the popup menu
-          next.call(this, false)
-        }
-        
+      // Patch edges
+      canvasView.canvas.edges.forEach(edge => this.patchEdge(edge))
+
+      // Trigger nodes/edges added event
+      that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, canvasView.canvas, [...canvasView.canvas.nodes.values()])
+      canvasView.canvas.edges.forEach(edge => that.triggerWorkspaceEvent(CanvasEvent.EdgeAdded, canvasView.canvas, edge))
+
+      // Re-init the canvas with the patched canvas object
+      canvasView.setViewData(canvasView.getViewData())
+
+      // Trigger popup menu changed event
+      this.triggerWorkspaceEvent(CanvasEvent.PopupMenuCreated, canvasView.canvas)
+    })
+  }
+
+  private patchEdge(edge: CanvasEdge) {
+    const that = this
+
+    // Patch edge
+    const uninstall = around(edge, {
+      updatePath: (next: any) => function (...args: any) {
+        const result = next.call(this, ...args)
+        that.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, this.canvas, edge)
         return result
       }
     })
 
-    // Patch interaction layer
-    patchWorkspaceObject(this.plugin, () => this.plugin.getCurrentCanvas()?.nodeInteractionLayer, {
-      setTarget: (next: any) => function (node: CanvasNode) {
-        const result = next.call(this, node)
-        that.triggerWorkspaceEvent(CanvasEvent.NodeInteraction, this.canvas, node)
-        return result
-      }
-    })
-
-    // Listen to canvas changes
-    const onCanvasChangeListener = this.plugin.app.workspace.on('layout-change', () => {
-      let canvasPatched = false
-
-      this.plugin.app.workspace.iterateAllLeaves((leaf: WorkspaceLeaf) => {
-        if (leaf.view.getViewType() !== 'canvas') return
-        canvasPatched = true
-
-        // Re-init the canvas with the patched canvas object
-        const canvasView = leaf.view as CanvasView
-        canvasView.setViewData(canvasView.getViewData())
-
-        // Trigger popup menu changed event
-        this.triggerWorkspaceEvent(CanvasEvent.PopupMenuCreated, canvasView.canvas)
-      })
-
-      if (!canvasPatched) return
-      this.plugin.app.workspace.offref(onCanvasChangeListener)
-    })
-    this.plugin.registerEvent(onCanvasChangeListener)
-
-    // Trigger instantly (Plugin reload)
-    onCanvasChangeListener.fn.call(this.plugin.app.workspace)
+    that.plugin.register(uninstall)
   }
   
   private triggerEdgeRelatedEvent(edge: CanvasEdge, onReady: () => void) {
@@ -212,18 +223,18 @@ export default class CanvasEventEmitter {
     const that = this
 
     // Patch edge object
-    const uninstaller = around(edge, {
+    const uninstall = around(edge, {
       initialize: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
 
         onReady()
-        uninstaller() // Uninstall the patch
+        uninstall() // Uninstall the patch
 
         return result
       }
     })
 
-    that.plugin.register(uninstaller)
+    that.plugin.register(uninstall)
   }
 
   private triggerWorkspaceEvent(event: string, ...args: any) {

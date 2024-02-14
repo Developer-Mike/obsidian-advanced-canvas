@@ -1,24 +1,33 @@
 import { around } from "monkey-around"
 import { Plugin } from "obsidian"
 
-export function patchWorkspaceFunction(plugin: Plugin, getTarget: () => any, functions: { [key: string]: (next: any) => (...args: any) => any }) {
-  const tryPatch = () => {
-    const target = getTarget()
-    if (!target) return false
+export function patchWorkspaceFunction<T>(plugin: Plugin, getTarget: () => T|undefined, functions: { [key: string]: (next: any) => (...args: any) => any }): Promise<T> {
+  return new Promise((resolve) => {
+    const tryPatch = () => {
+      const target = getTarget()
+      if (!target) return null
 
-    const uninstaller = around(target.constructor.prototype, functions)
-    plugin.register(uninstaller)
+      const uninstaller = around(target.constructor.prototype, functions)
+      plugin.register(uninstaller)
 
-    return true
-  }
+      return target
+    }
 
-  const successful = tryPatch()
-  if (successful) return
+    const result = tryPatch()
+    if (result) {
+      resolve(result)
+      return
+    }
 
-  const listener = plugin.app.workspace.on('layout-change', () => {
-    const successful = tryPatch()
-    if (successful) plugin.app.workspace.offref(listener)
+    const listener = plugin.app.workspace.on('layout-change', () => {
+      const result = tryPatch()
+
+      if (result) {
+        plugin.app.workspace.offref(listener)
+        resolve(result)
+      }
+    })
+
+    plugin.registerEvent(listener)
   })
-
-  plugin.registerEvent(listener)
 }

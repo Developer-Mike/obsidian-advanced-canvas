@@ -1,4 +1,4 @@
-import { TFile, View, WorkspaceLeaf } from "obsidian"
+import { ItemView, TFile, View, WorkspaceLeaf } from "obsidian"
 
 export interface Size {
   width: number
@@ -119,7 +119,7 @@ export interface CanvasConfig {
   defaultTextNodeDimensions: Size
 }
 
-export interface CanvasView extends View {
+export interface CanvasView extends ItemView {
   _loaded: boolean
   file: TFile
   canvas: Canvas
@@ -214,7 +214,8 @@ export interface CanvasEdgeData {
   fromSide: Side
   toSide: Side
   
-  edgeStyle?: string
+  edgeStyle?: undefined | 'long-dashed' | 'short-dashed' | 'dotted'
+  edgePathRoute?: undefined | 'direct' | 'a-star'
   portalId?: string
 }
 
@@ -228,6 +229,14 @@ export interface CanvasEdge {
     node: CanvasNode
   }
 
+  bezier: {
+    from: Position
+    to: Position
+    cp1: Position
+    cp2: Position
+    path: string
+  }
+
   path: {
     interaction: HTMLElement
     display: HTMLElement
@@ -235,6 +244,8 @@ export interface CanvasEdge {
 
   initialized: boolean
   initialize(): void
+
+  updatePath(): void
   
   setData(data: CanvasEdgeData): void
   getData(): CanvasEdgeData

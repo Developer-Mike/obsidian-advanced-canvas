@@ -1,7 +1,7 @@
 import { ItemView, Plugin } from 'obsidian'
 import AdvancedCanvasSettingsManager from './settings'
 import ShapesCanvasExtension from './canvas-extensions/shapes-canvas-extension'
-import { Canvas } from './@types/Canvas'
+import { Canvas, CanvasView } from './@types/Canvas'
 import CanvasEventEmitter from './events/canvas-event-emitter'
 import GroupCanvasExtension from './canvas-extensions/group-canvas-extension'
 import PresentationCanvasExtension from './canvas-extensions/presentation-canvas-extension'
@@ -49,13 +49,13 @@ export default class AdvancedCanvasPlugin extends Plugin {
 
   onunload() {}
 
-  getCurrentCanvasView(): any {
+  getCurrentCanvasView(): CanvasView|null {
     const canvasView = this.app.workspace.getActiveViewOfType(ItemView)
     if (canvasView?.getViewType() !== 'canvas') return null
-    return canvasView
+    return canvasView as CanvasView
   }
 
   getCurrentCanvas(): Canvas|null {
-    return this.getCurrentCanvasView()?.canvas
+    return this.getCurrentCanvasView()?.canvas || null
   }
 }
