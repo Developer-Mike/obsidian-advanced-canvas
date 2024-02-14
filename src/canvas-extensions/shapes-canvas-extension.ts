@@ -77,7 +77,6 @@ export default class ShapesCanvasExtension {
       return
 
     const nestedMenuOptions = SHAPES.map((shape) => ({
-      id: '',
       label: shape.menuName,
       icon: shape.icon,
       callback: () => this.setShapeForSelection(canvas, shape)

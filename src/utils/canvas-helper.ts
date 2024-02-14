@@ -14,7 +14,7 @@ export function canvasCommand(plugin: AdvancedCanvasPlugin, check: (canvas: Canv
 }
 
 export interface MenuOption {
-  id: string
+  id?: string
   label: string
   icon: string
   callback?: () => void
@@ -22,7 +22,7 @@ export interface MenuOption {
 
 export function createQuickSettingsButton(menuOption: MenuOption): HTMLElement {
   const quickSetting = document.createElement('div')
-  quickSetting.id = menuOption.id
+  if (menuOption.id) quickSetting.id = menuOption.id
   quickSetting.classList.add('canvas-control-item')
   setIcon(quickSetting, menuOption.icon)
   setTooltip(quickSetting, menuOption.label, { placement: 'left' })
@@ -32,13 +32,13 @@ export function createQuickSettingsButton(menuOption: MenuOption): HTMLElement {
 }
 
 export function addQuickSettingsButton(controlGroup: HTMLElement, element: HTMLElement) {
-  controlGroup.querySelector(`#${element.id}`)?.remove()
+  if (element.id) controlGroup.querySelector(`#${element.id}`)?.remove()
   controlGroup.appendChild(element)
 }
 
 export function createCardMenuOption(canvas: Canvas, menuOption: MenuOption, previewNodeSize: () => Size, onPlaced: (canvas: Canvas, pos: Position) => void): HTMLElement {
   const menuOptionElement = document.createElement('div')
-  menuOptionElement.id = menuOption.id
+  if (menuOption.id) menuOptionElement.id = menuOption.id
   menuOptionElement.classList.add('canvas-card-menu-button')
   menuOptionElement.classList.add('mod-draggable')
   setIcon(menuOptionElement, menuOption.icon)
@@ -59,13 +59,13 @@ export function createCardMenuOption(canvas: Canvas, menuOption: MenuOption, pre
 }
 
 export function addCardMenuOption(canvas: Canvas, element: HTMLElement) {
-  canvas?.cardMenuEl.querySelector(`#${element.id}`)?.remove()
+  if (element.id) canvas?.cardMenuEl.querySelector(`#${element.id}`)?.remove()
   canvas?.cardMenuEl.appendChild(element)
 }
 
 export function createPopupMenuOption(menuOption: MenuOption): HTMLElement {
   const menuOptionElement = document.createElement('button')
-  menuOptionElement.id = menuOption.id
+  if (menuOption.id) menuOptionElement.id = menuOption.id
   menuOptionElement.classList.add('clickable-icon')
   setIcon(menuOptionElement, menuOption.icon)
   setTooltip(menuOptionElement, menuOption.label, { placement: 'top' })
@@ -76,7 +76,7 @@ export function createPopupMenuOption(menuOption: MenuOption): HTMLElement {
 
 export function createExpandablePopupMenuOption(menuOption: MenuOption, subMenuOptions: MenuOption[]): HTMLElement {
   const menuOptionContainer = document.createElement('div')
-  menuOptionContainer.id = menuOption.id
+  if (menuOption.id) menuOptionContainer.id = menuOption.id
   menuOptionContainer.classList.add('expandable-menu-option')
 
   const menuOptionElement = createPopupMenuOption({
@@ -105,7 +105,7 @@ export function addPopupMenuOption(canvas: Canvas, element: HTMLElement) {
   const popupMenuEl = canvas?.menu?.menuEl
   if (!popupMenuEl) return
 
-  popupMenuEl.querySelector(`#${element.id}`)?.remove()
+  if (element.id) popupMenuEl.querySelector(`#${element.id}`)?.remove()
   popupMenuEl.appendChild(element)
 }
 

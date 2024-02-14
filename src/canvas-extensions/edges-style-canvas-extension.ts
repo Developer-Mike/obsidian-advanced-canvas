@@ -53,7 +53,6 @@ export default class EdgesStyleCanvasExtension {
       return
 
     const nestedMenuOptions = STYLES.map((style) => ({
-      id: '',
       label: style.menuName,
       icon: style.icon,
       callback: () => this.setStyleForSelection(canvas, selectedEdges, style)
