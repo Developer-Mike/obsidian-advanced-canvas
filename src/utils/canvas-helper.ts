@@ -2,36 +2,6 @@ import { setIcon, setTooltip } from "obsidian"
 import { BBox, Canvas, CanvasNode, CanvasNodeData, Position, Size } from "src/@types/Canvas"
 import AdvancedCanvasPlugin from "src/main"
 
-export function scaleBBox(bbox: BBox, scale: number): BBox {
-  let diffX = (scale - 1) * (bbox.maxX - bbox.minX)
-  let diffY = (scale - 1) * (bbox.maxY - bbox.minY)
-
-  return {
-    minX: bbox.minX - diffX / 2,
-    maxX: bbox.maxX + diffX / 2,
-    minY: bbox.minY - diffY / 2,
-    maxY: bbox.maxY + diffY / 2
-  }
-}
-
-export function getBBox(canvasNodes: (CanvasNode|CanvasNodeData)[]) {
-  let minX = Infinity
-  let minY = Infinity
-  let maxX = -Infinity
-  let maxY = -Infinity
-
-  for (const node of canvasNodes) {
-    const nodeData = node.getData ? node.getData() : node
-
-    minX = Math.min(minX, nodeData.x)
-    minY = Math.min(minY, nodeData.y)
-    maxX = Math.max(maxX, nodeData.x + nodeData.width)
-    maxY = Math.max(maxY, nodeData.y + nodeData.height)
-  }
-
-  return { minX, minY, maxX, maxY }
-}
-
 export function canvasCommand(plugin: AdvancedCanvasPlugin, check: (canvas: Canvas) => boolean, run: (canvas: Canvas) => void): (checking: boolean) => boolean {
   return (checking: boolean) => {
     const canvas = plugin.getCurrentCanvas()
@@ -105,16 +75,22 @@ export function createPopupMenuOption(menuOption: MenuOption): HTMLElement {
 }
 
 export function createExpandablePopupMenuOption(menuOption: MenuOption, subMenuOptions: MenuOption[]): HTMLElement {
+  const menuOptionContainer = document.createElement('div')
+  menuOptionContainer.id = menuOption.id
+  menuOptionContainer.classList.add('expandable-menu-option')
+
   const menuOptionElement = createPopupMenuOption({
     ...menuOption,
-    callback: () => menuOptionElement.classList.toggle('expanded')
+    id: '',
+    callback: () => menuOptionContainer.classList.toggle('expanded')
   })
-  menuOptionElement.classList.add('expandable-menu-option')
+
+  menuOptionContainer.appendChild(menuOptionElement)
 
   // Add popup menu
   const expandMenu = document.createElement('div')
   expandMenu.classList.add('expand-menu')
-  menuOptionElement.appendChild(expandMenu)
+  menuOptionContainer.appendChild(expandMenu)
 
   // Add nested options
   for (const subMenuOption of subMenuOptions) {
@@ -122,7 +98,7 @@ export function createExpandablePopupMenuOption(menuOption: MenuOption, subMenuO
     expandMenu.appendChild(subMenuOptionElement)
   }
 
-  return menuOptionElement
+  return menuOptionContainer
 }
 
 export function addPopupMenuOption(canvas: Canvas, element: HTMLElement) {
@@ -140,6 +116,36 @@ export function getCenterCoordinates(canvas: Canvas, nodeSize: Size): Position {
     x: (viewBounds.minX + viewBounds.maxX) / 2 - nodeSize.width / 2,
     y: (viewBounds.minY + viewBounds.maxY) / 2 - nodeSize.height / 2,
   }
+}
+
+export function scaleBBox(bbox: BBox, scale: number): BBox {
+  let diffX = (scale - 1) * (bbox.maxX - bbox.minX)
+  let diffY = (scale - 1) * (bbox.maxY - bbox.minY)
+
+  return {
+    minX: bbox.minX - diffX / 2,
+    maxX: bbox.maxX + diffX / 2,
+    minY: bbox.minY - diffY / 2,
+    maxY: bbox.maxY + diffY / 2
+  }
+}
+
+export function getBBox(canvasNodes: (CanvasNode|CanvasNodeData)[]) {
+  let minX = Infinity
+  let minY = Infinity
+  let maxX = -Infinity
+  let maxY = -Infinity
+
+  for (const node of canvasNodes) {
+    const nodeData = node.getData ? node.getData() : node
+
+    minX = Math.min(minX, nodeData.x)
+    minY = Math.min(minY, nodeData.y)
+    maxX = Math.max(maxX, nodeData.x + nodeData.width)
+    maxY = Math.max(maxY, nodeData.y + nodeData.height)
+  }
+
+  return { minX, minY, maxX, maxY }
 }
 
 export function zoomToBBox(canvas: Canvas, bbox: BBox) {
