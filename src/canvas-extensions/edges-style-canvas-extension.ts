@@ -120,6 +120,8 @@ export default class EdgesStyleCanvasExtension {
     let newPath = edge.bezier.path
     if (pathRouteType === 'direct') {
       newPath = `M${edge.bezier.from.x} ${edge.bezier.from.y} L${edge.bezier.to.x} ${edge.bezier.to.y}`
+    } else if (pathRouteType === 'a-star') {
+      
     }
     
     edge.path.interaction.setAttr("d", newPath)
