@@ -142,7 +142,6 @@ All features can be enabled/disabled in the settings.
 </details>
 
 ## Edge Styles
-(Unreleased)
 Set the style of the edges (arrows) to dotted, short-dashed or long-dashed.
 
 <details>
@@ -151,7 +150,6 @@ Set the style of the edges (arrows) to dotted, short-dashed or long-dashed.
 </details>
 
 ## Stickers
-(Unreleased)
 Convert image nodes to stickers. Stickers have a transparent background and no border.
 
 <details>
