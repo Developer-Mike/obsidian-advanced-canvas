@@ -55,7 +55,7 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   stickersFeatureEnabled: true,
 
   presentationFeatureEnabled: true,
-  defaultSlideSize: Object.values(SLIDE_SIZE_OPTIONS).first(),
+  defaultSlideSize: Object.keys(SLIDE_SIZE_OPTIONS).first(),
   useArrowKeysToChangeSlides: true,
   zoomToSlideWithoutPadding: true,
   slideTransitionAnimationDuration: 0.5,
@@ -219,7 +219,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
     )
 
     new Setting(containerEl)
-      .setName("Default slize ratio")
+      .setName("Default slide ratio")
       .setDesc("The default ratio of the slide.")
       .addDropdown((dropdown) =>
         dropdown
