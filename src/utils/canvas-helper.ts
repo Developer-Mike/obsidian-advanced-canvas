@@ -1,6 +1,7 @@
 import { setIcon, setTooltip } from "obsidian"
 import { BBox, Canvas, CanvasNode, CanvasNodeData, Position, Size } from "src/@types/Canvas"
 import AdvancedCanvasPlugin from "src/main"
+import * as BBoxHelper from "src/utils/bbox-helper"
 
 export function canvasCommand(plugin: AdvancedCanvasPlugin, check: (canvas: Canvas) => boolean, run: (canvas: Canvas) => void): (checking: boolean) => boolean {
   return (checking: boolean) => {
@@ -118,18 +119,6 @@ export function getCenterCoordinates(canvas: Canvas, nodeSize: Size): Position {
   }
 }
 
-export function scaleBBox(bbox: BBox, scale: number): BBox {
-  let diffX = (scale - 1) * (bbox.maxX - bbox.minX)
-  let diffY = (scale - 1) * (bbox.maxY - bbox.minY)
-
-  return {
-    minX: bbox.minX - diffX / 2,
-    maxX: bbox.maxX + diffX / 2,
-    minY: bbox.minY - diffY / 2,
-    maxY: bbox.maxY + diffY / 2
-  }
-}
-
 export function getBBox(canvasNodes: (CanvasNode|CanvasNodeData)[]) {
   let minX = Infinity
   let minY = Infinity
@@ -150,7 +139,7 @@ export function getBBox(canvasNodes: (CanvasNode|CanvasNodeData)[]) {
 
 export function zoomToBBox(canvas: Canvas, bbox: BBox) {
   const PADDING_CORRECTION_FACTOR = 1 / 1.1
-  const zoomedBBox = scaleBBox(bbox, PADDING_CORRECTION_FACTOR)
+  const zoomedBBox = BBoxHelper.scaleBBox(bbox, PADDING_CORRECTION_FACTOR)
 
   canvas.zoomToBbox(zoomedBBox)
   

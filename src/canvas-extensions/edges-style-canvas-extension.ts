@@ -1,7 +1,10 @@
-import { Canvas, CanvasEdge } from "src/@types/Canvas"
+import { Canvas, CanvasEdge, CanvasNode } from "src/@types/Canvas"
 import AdvancedCanvasPlugin from "src/main"
 import * as CanvasHelper from "src/utils/canvas-helper"
+import * as AStarHelper from "src/utils/a-star-helper"
+import * as SvgPathHelper from "src/utils/svg-path-helper"
 import { CanvasEvent } from "src/events/events"
+import * as BBoxHelper from "src/utils/bbox-helper"
 
 const STYLES_MENU_OPTIONS: CanvasHelper.MenuOption[] = [
   {
@@ -61,6 +64,11 @@ export default class EdgesStyleCanvasExtension {
       CanvasEvent.EdgeChanged,
       (canvas: Canvas, edge: CanvasEdge) => this.onEdgeChanged(canvas, edge)
     ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.NodeMoved,
+      (canvas: Canvas, node: CanvasNode) => this.onNodePositionChanged(canvas, node)
+    ))
   }
 
   onPopupMenuCreated(canvas: Canvas): void {
@@ -113,7 +121,7 @@ export default class EdgesStyleCanvasExtension {
     }
   }
 
-  private onEdgeChanged(_canvas: Canvas, edge: CanvasEdge) {
+  private onEdgeChanged(canvas: Canvas, edge: CanvasEdge) {
     if (!edge.bezier) return
     const pathRouteType = edge.getData().edgePathRoute
 
@@ -121,10 +129,41 @@ export default class EdgesStyleCanvasExtension {
     if (pathRouteType === 'direct') {
       newPath = `M${edge.bezier.from.x} ${edge.bezier.from.y} L${edge.bezier.to.x} ${edge.bezier.to.y}`
     } else if (pathRouteType === 'a-star') {
-      
+      const nodePadding = this.plugin.settingsManager.getSetting('edgeStylePathfinderMargin')
+      const nodeBBoxes = [...canvas.nodes.values()].map(node => 
+        BBoxHelper.enlargeBBox(node.getBBox(), nodePadding)
+      )
+
+      const gridResolution = this.plugin.settingsManager.getSetting('edgeStylePathfinderGridResolution')
+      console.log(edge.bezier.from, edge.bezier.to, nodeBBoxes, gridResolution)
+      const pathArray = AStarHelper.aStar(edge.bezier.from, edge.bezier.to, nodeBBoxes, gridResolution)
+      if (!pathArray) return // No path found - use default path
+
+      const svgPath = SvgPathHelper.pathArrayToSvgPath(pathArray)
+      newPath = svgPath
     }
     
     edge.path.interaction.setAttr("d", newPath)
     edge.path.display.setAttr("d", newPath)
+  }
+
+  private onNodePositionChanged(canvas: Canvas, node: CanvasNode) {
+    const nodeMargin = this.plugin.settingsManager.getSetting('edgeStylePathfinderMargin')
+
+    // Check if node intersects with any a-star edge
+    for (const edge of canvas.edges.values()) {
+      if (edge.getData().edgePathRoute !== 'a-star') continue
+
+      const edgeSvgPath = edge.path.interaction.getAttr("d")
+      if (!edgeSvgPath) continue
+
+      const edgePathArray = SvgPathHelper.svgPathToPathArray(edgeSvgPath)
+
+      const nodeBBox = BBoxHelper.enlargeBBox(node.getBBox(), nodeMargin)
+      const invalidPositions = edgePathArray.filter((pos) => BBoxHelper.intersectsBBox(pos, nodeBBox))
+      if (invalidPositions.length === 0) continue
+
+      this.onEdgeChanged(canvas, edge) // Update the edge path
+    }
   }
 }

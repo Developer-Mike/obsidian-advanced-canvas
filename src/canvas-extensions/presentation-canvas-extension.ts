@@ -3,6 +3,7 @@ import { Canvas, CanvasEdge, CanvasNode, Position, Size } from 'src/@types/Canva
 import AdvancedCanvasPlugin from 'src/main'
 import { CanvasEvent } from 'src/events/events'
 import * as CanvasHelper from "src/utils/canvas-helper"
+import * as BBoxHelper from "src/utils/bbox-helper"
 
 const START_SLIDE_NAME = 'Start Slide'
 const DEFAULT_SLIDE_NAME = 'New Slide'
@@ -151,13 +152,13 @@ export default class PresentationCanvasExtension {
     if (animationDurationMs > 0 && fromNode) {
       const animationIntensity = this.plugin.settingsManager.getSetting('slideTransitionAnimationIntensity')
 
-      const currentNodeBBoxEnlarged = CanvasHelper.scaleBBox(fromNode.getBBox(), animationIntensity)
+      const currentNodeBBoxEnlarged = BBoxHelper.scaleBBox(fromNode.getBBox(), animationIntensity)
       if (useCustomZoomFunction) CanvasHelper.zoomToBBox(canvas, currentNodeBBoxEnlarged)
       else canvas.zoomToBbox(currentNodeBBoxEnlarged)
 
       await sleep(animationDurationMs / 2)
 
-      const nextNodeBBoxEnlarged = CanvasHelper.scaleBBox(toNode.getBBox(), animationIntensity)
+      const nextNodeBBoxEnlarged = BBoxHelper.scaleBBox(toNode.getBBox(), animationIntensity)
       if (useCustomZoomFunction) CanvasHelper.zoomToBBox(canvas, nextNodeBBoxEnlarged)
       else canvas.zoomToBbox(nextNodeBBoxEnlarged)
 
