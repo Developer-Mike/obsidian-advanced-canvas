@@ -201,7 +201,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Disable node popup menu")
-      .setDesc("When enabled, the node popup menu won't show when in readonly mode. (If node interation is disabled, this setting has no effect.)")
+      .setDesc("When enabled, the node popup menu won't show when in readonly mode. (If node interaction is disabled, this setting has no effect.)")
       .addToggle((toggle) =>
         toggle
           .setValue(this.settingsManager.settings.disableNodePopup)
