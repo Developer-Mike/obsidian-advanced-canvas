@@ -11,7 +11,7 @@ export interface AdvancedCanvasPluginSettings {
 
   edgesStylingFeatureEnabled: boolean
   edgeStylePathfinderGridResolution: number
-  edgeStylePathfinderMargin: number
+  edgeStylePathfinderPathRounded: boolean
 
   commandsFeatureEnabled: boolean
   zoomToClonedNode: boolean
@@ -44,7 +44,7 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
 
   edgesStylingFeatureEnabled: true,
   edgeStylePathfinderGridResolution: 10,
-  edgeStylePathfinderMargin: 1,
+  edgeStylePathfinderPathRounded: false,
 
   commandsFeatureEnabled: true,
   zoomToClonedNode: true,
@@ -136,16 +136,16 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       .addText((text) =>
         text
           .setValue(this.settingsManager.getSetting('edgeStylePathfinderGridResolution').toString())
-          .onChange(async (value) => await this.settingsManager.setSetting({ edgeStylePathfinderGridResolution: Math.max(1, parseInt(value)) }))
+          .onChange(async (value) => await this.settingsManager.setSetting({ edgeStylePathfinderGridResolution: Math.max(5, parseInt(value)) }))
       )
 
     new Setting(containerEl)
-      .setName("A* node distance")
-      .setDesc("The distance between the edges and the nodes when using the A* path style.")
-      .addText((text) =>
-        text
-          .setValue(this.settingsManager.getSetting('edgeStylePathfinderMargin').toString())
-          .onChange(async (value) => await this.settingsManager.setSetting({ edgeStylePathfinderMargin: parseInt(value) }))
+      .setName("A* rounded path")
+      .setDesc("When enabled, the A* path style will be rounded.")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.settingsManager.getSetting('edgeStylePathfinderPathRounded'))
+          .onChange(async (value) => await this.settingsManager.setSetting({ edgeStylePathfinderPathRounded: value }))
       )
 
     this.createFeatureHeading(

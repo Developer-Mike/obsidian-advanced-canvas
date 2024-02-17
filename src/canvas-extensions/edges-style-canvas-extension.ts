@@ -66,8 +66,20 @@ export default class EdgesStyleCanvasExtension {
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.NodeAdded,
+      (canvas: Canvas, _node: CanvasNode) => this.updateAllEdges(canvas)
+    ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.NodeRemoved,
+      (canvas: Canvas, _node: CanvasNode) => this.updateAllEdges(canvas)
+    ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.DraggingStateChanged,
-      (canvas: Canvas, isDragging: boolean) => this.onDraggingStateChanged(canvas, isDragging)
+      (canvas: Canvas, isDragging: boolean) => {
+        if (!isDragging) this.updateAllEdges(canvas)
+      }
     ))
   }
 
@@ -125,20 +137,18 @@ export default class EdgesStyleCanvasExtension {
     if (!edge.bezier) return
     const pathRouteType = edge.getData().edgePathRoute
 
-    let newPath = edge.bezier.path
+    let newPath = edge.path.display.getAttr("d")
     if (pathRouteType === 'direct') {
       newPath = `M${edge.bezier.from.x} ${edge.bezier.from.y} L${edge.bezier.to.x} ${edge.bezier.to.y}`
     } else if (pathRouteType === 'a-star') {
-      const nodePadding = this.plugin.settingsManager.getSetting('edgeStylePathfinderMargin')
-      const nodeBBoxes = [...canvas.nodes.values()].map(node => 
-        BBoxHelper.enlargeBBox(node.getBBox(), nodePadding)
-      )
+      const nodeBBoxes = [...canvas.nodes.values()].map(node => node.getBBox())
 
       const gridResolution = this.plugin.settingsManager.getSetting('edgeStylePathfinderGridResolution')
       const pathArray = AStarHelper.aStar(edge.bezier.from, edge.bezier.to, nodeBBoxes, gridResolution)
       if (!pathArray) return // No path found - use default path
 
-      const svgPath = SvgPathHelper.pathArrayToSvgPath(pathArray)
+      const roundedPath = this.plugin.settingsManager.getSetting('edgeStylePathfinderPathRounded')
+      const svgPath = SvgPathHelper.pathArrayToSvgPath(pathArray, roundedPath)
       newPath = svgPath
     }
     
@@ -146,9 +156,7 @@ export default class EdgesStyleCanvasExtension {
     edge.path.display.setAttr("d", newPath)
   }
 
-  private onDraggingStateChanged(canvas: Canvas, isDragging: boolean) {
-    if (isDragging) return
-
+  private updateAllEdges(canvas: Canvas) {
     for (const edge of canvas.edges.values()) {
       this.onEdgeChanged(canvas, edge)
     }
