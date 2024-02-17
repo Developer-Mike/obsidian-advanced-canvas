@@ -135,7 +135,6 @@ export default class EdgesStyleCanvasExtension {
       )
 
       const gridResolution = this.plugin.settingsManager.getSetting('edgeStylePathfinderGridResolution')
-      console.log(edge.bezier.from, edge.bezier.to, nodeBBoxes, gridResolution)
       const pathArray = AStarHelper.aStar(edge.bezier.from, edge.bezier.to, nodeBBoxes, gridResolution)
       if (!pathArray) return // No path found - use default path
 

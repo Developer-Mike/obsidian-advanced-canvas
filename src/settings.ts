@@ -43,7 +43,7 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   shapesFeatureEnabled: true,
 
   edgesStylingFeatureEnabled: true,
-  edgeStylePathfinderGridResolution: 50,
+  edgeStylePathfinderGridResolution: 10,
   edgeStylePathfinderMargin: 1,
 
   commandsFeatureEnabled: true,
