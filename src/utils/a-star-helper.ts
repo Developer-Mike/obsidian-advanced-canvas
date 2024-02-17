@@ -83,6 +83,9 @@ export function aStar(startPos: Position, endPos: Position, obstacles: BBox[], g
     Math.round(endPos.x / gridResolution) * gridResolution,
     Math.round(endPos.y / gridResolution) * gridResolution
   )
+  
+  // Check if start and end positions are valid
+  if (!isValidPosition(start, obstacles) || !isValidPosition(end, obstacles)) return null
 
   const openSet: Node[] = [start]
   const closedSet: Node[] = []
