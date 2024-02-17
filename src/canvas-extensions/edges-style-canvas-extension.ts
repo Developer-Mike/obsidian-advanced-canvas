@@ -66,8 +66,8 @@ export default class EdgesStyleCanvasExtension {
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.NodeMoved,
-      (canvas: Canvas, node: CanvasNode) => this.onNodePositionChanged(canvas, node)
+      CanvasEvent.DraggingStateChanged,
+      (canvas: Canvas, isDragging: boolean) => this.onDraggingStateChanged(canvas, isDragging)
     ))
   }
 
@@ -146,23 +146,11 @@ export default class EdgesStyleCanvasExtension {
     edge.path.display.setAttr("d", newPath)
   }
 
-  private onNodePositionChanged(canvas: Canvas, node: CanvasNode) {
-    const nodeMargin = this.plugin.settingsManager.getSetting('edgeStylePathfinderMargin')
+  private onDraggingStateChanged(canvas: Canvas, isDragging: boolean) {
+    if (isDragging) return
 
-    // Check if node intersects with any a-star edge
     for (const edge of canvas.edges.values()) {
-      if (edge.getData().edgePathRoute !== 'a-star') continue
-
-      const edgeSvgPath = edge.path.interaction.getAttr("d")
-      if (!edgeSvgPath) continue
-
-      const edgePathArray = SvgPathHelper.svgPathToPathArray(edgeSvgPath)
-
-      const nodeBBox = BBoxHelper.enlargeBBox(node.getBBox(), nodeMargin)
-      const invalidPositions = edgePathArray.filter((pos) => BBoxHelper.intersectsBBox(pos, nodeBBox))
-      if (invalidPositions.length === 0) continue
-
-      this.onEdgeChanged(canvas, edge) // Update the edge path
+      this.onEdgeChanged(canvas, edge)
     }
   }
 }
