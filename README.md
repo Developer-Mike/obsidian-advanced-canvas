@@ -89,7 +89,6 @@ All features can be enabled/disabled in the settings.
   - The cloned node will have the same dimensions and color as the original node
 - `Advanced Canvas: Expand node up/down/left/right`
   - Expand the selected node in the direction of the arrow keys
-  - Default hotkey: `Alt` + `Arrow keys`
 
 ## Node Shapes
 <details>
@@ -158,7 +157,7 @@ Convert image nodes to stickers. Stickers have a transparent background and no b
 </details>
 
 ## Presentation Mode
-In presentation mode, you can navigate through the nodes using the arrow keys. The diffrent slides/nodes are connected using arrows. If you want to have multiple arrows pointing from the same node, you can number them in the order you want to navigate through them. While in presentation mode, the canvas is in readonly mode (So [better readonly](#better-readonly) effects the presentation mode as well!). You can exit the presentation mode using the `ESC` key.
+In presentation mode, you can navigate through the nodes using the arrow keys. The different slides/nodes are connected using arrows. If you want to have multiple arrows pointing from the same node, you can number them in the order you want to navigate through them. While in presentation mode, the canvas is in readonly mode (So [better readonly](#better-readonly) effects the presentation mode as well!). You can exit the presentation mode using the `ESC` key.
 
 <img src="./assets/sample-presentation-simple.gif" alt="Presentation mode example"/>
 

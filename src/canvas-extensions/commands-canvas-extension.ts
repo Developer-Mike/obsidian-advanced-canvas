@@ -53,12 +53,6 @@ export default class CommandsCanvasExtension {
       this.plugin.addCommand({
         id: `expand-node-${direction}`,
         name: `Expand node ${direction}`,
-        hotkeys: [
-          {
-            modifiers: ['Alt'],
-            key: DIRECTION_KEYS[direction]
-          }
-        ],
         checkCallback: CanvasHelper.canvasCommand(
           this.plugin,
           (canvas: Canvas) => !canvas.readonly && canvas.selection.size === 1,
