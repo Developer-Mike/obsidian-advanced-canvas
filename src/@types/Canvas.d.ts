@@ -219,14 +219,19 @@ export interface CanvasEdgeData {
   portalId?: string
 }
 
+type EndType = 'none' | 'arrow'
 export interface CanvasEdge {
   label: string
 
   from: {
     node: CanvasNode
+    side: Side
+    end: EndType
   }
   to: {
     node: CanvasNode
+    side: Side
+    end: EndType
   }
 
   bezier: {

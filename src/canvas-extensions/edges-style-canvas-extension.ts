@@ -137,14 +137,27 @@ export default class EdgesStyleCanvasExtension {
     if (!edge.bezier) return
     const pathRouteType = edge.getData().edgePathRoute
 
-    let newPath = edge.path.display.getAttr("d")
+    const fromPos = edge.from.end === 'none' ? 
+      BBoxHelper.getCenterOfBBoxSide(edge.from.node.getBBox(), edge.from.side) :
+      edge.bezier.from
+
+    const toPos = edge.to.end === 'none' ? 
+      BBoxHelper.getCenterOfBBoxSide(edge.to.node.getBBox(), edge.to.side) :
+      edge.bezier.to
+
+    let newPath = edge.bezier.path
+    if (fromPos.x != edge.bezier.from.x || fromPos.y != edge.bezier.from.y)
+      newPath = `M${fromPos.x} ${fromPos.y} L${edge.bezier.from.x} ${edge.bezier.from.y} ${newPath}`
+    if (toPos.x != edge.bezier.to.x || toPos.y != edge.bezier.to.y)
+      newPath = `${newPath} M${edge.bezier.to.x} ${edge.bezier.to.y} L${toPos.x} ${toPos.y}`
+  
     if (pathRouteType === 'direct') {
-      newPath = `M${edge.bezier.from.x} ${edge.bezier.from.y} L${edge.bezier.to.x} ${edge.bezier.to.y}`
+      newPath = SvgPathHelper.pathArrayToSvgPath([fromPos, toPos], false)
     } else if (pathRouteType === 'a-star') {
       const nodeBBoxes = [...canvas.nodes.values()].map(node => node.getBBox())
 
       const gridResolution = this.plugin.settingsManager.getSetting('edgeStylePathfinderGridResolution')
-      const pathArray = AStarHelper.aStar(edge.bezier.from, edge.bezier.to, nodeBBoxes, gridResolution)
+      const pathArray = AStarHelper.aStar(fromPos, edge.from.side, toPos, edge.to.side, nodeBBoxes, gridResolution)
       if (!pathArray) return // No path found - use default path
 
       const roundedPath = this.plugin.settingsManager.getSetting('edgeStylePathfinderPathRounded')

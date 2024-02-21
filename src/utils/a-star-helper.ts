@@ -1,4 +1,4 @@
-import { BBox, Position } from "src/@types/Canvas"
+import { BBox, Position, Side } from "src/@types/Canvas"
 import * as BBoxHelper from "src/utils/bbox-helper"
 
 const DIRECTIONS = [
@@ -73,15 +73,15 @@ function reconstructPath(node: Node): Node[] {
   return path.reverse()
 }
 
-export function aStar(startPos: Position, endPos: Position, obstacles: BBox[], gridResolution: number): Position[] | null {
+export function aStar(fromPos: Position, fromSide: Side, toPos: Position, toSide: Side, obstacles: BBox[], gridResolution: number): Position[] | null {
   // Round start and end positions to the nearest grid cell
   const start: Node = new Node(
-    Math.round(startPos.x / gridResolution) * gridResolution,
-    Math.round(startPos.y / gridResolution) * gridResolution
+    Math.floor(fromPos.x / gridResolution + (fromSide === 'right' ? 1 : 0)) * gridResolution,
+    Math.floor(fromPos.y / gridResolution + (fromSide === 'top' ? 1 : 0)) * gridResolution
   )
   const end: Node = new Node(
-    Math.round(endPos.x / gridResolution) * gridResolution,
-    Math.round(endPos.y / gridResolution) * gridResolution
+    Math.floor(toPos.x / gridResolution + (toSide === 'right' ? 1 : 0)) * gridResolution,
+    Math.floor(toPos.y / gridResolution + (toSide === 'top' ? 1 : 0)) * gridResolution
   )
   
   // Check if start and end positions are valid
@@ -111,7 +111,7 @@ export function aStar(startPos: Position, endPos: Position, obstacles: BBox[], g
 
     // Check if we have reached the end
     if (current.x === end.x && current.y === end.y) {
-      return [startPos, ...reconstructPath(current), endPos]
+      return [fromPos, ...reconstructPath(current), toPos]
     }
 
     // Expand neighbors
