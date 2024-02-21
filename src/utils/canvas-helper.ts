@@ -76,30 +76,35 @@ export function createPopupMenuOption(menuOption: MenuOption): HTMLElement {
 }
 
 export function createExpandablePopupMenuOption(menuOption: MenuOption, subMenuOptions: MenuOption[]): HTMLElement {
-  const menuOptionContainer = document.createElement('div')
-  if (menuOption.id) menuOptionContainer.id = menuOption.id
-  menuOptionContainer.classList.add('expandable-menu-option')
-
   const menuOptionElement = createPopupMenuOption({
     ...menuOption,
-    id: '',
-    callback: () => menuOptionContainer.classList.toggle('expanded')
+    callback: () => {
+      const submenuId = `${menuOption.id}-submenu`
+
+      if (menuOptionElement.classList.contains('is-active')) {
+        menuOptionElement.classList.remove('is-active')
+        menuOptionElement.parentElement?.querySelector(`#${submenuId}`)?.remove()
+        return
+      }
+
+      menuOptionElement.classList.add('is-active')
+
+      // Add popup menu
+      const submenu = document.createElement('div')
+      submenu.id = submenuId
+      submenu.classList.add('canvas-submenu')
+    
+      // Add nested options
+      for (const subMenuOption of subMenuOptions) {
+        const subMenuOptionElement = createPopupMenuOption(subMenuOption)
+        submenu.appendChild(subMenuOptionElement)
+      }
+
+      menuOptionElement.parentElement?.appendChild(submenu)
+    }
   })
 
-  menuOptionContainer.appendChild(menuOptionElement)
-
-  // Add popup menu
-  const expandMenu = document.createElement('div')
-  expandMenu.classList.add('expand-menu')
-  menuOptionContainer.appendChild(expandMenu)
-
-  // Add nested options
-  for (const subMenuOption of subMenuOptions) {
-    const subMenuOptionElement = createPopupMenuOption(subMenuOption)
-    expandMenu.appendChild(subMenuOptionElement)
-  }
-
-  return menuOptionContainer
+  return menuOptionElement
 }
 
 export function addPopupMenuOption(canvas: Canvas, element: HTMLElement) {
