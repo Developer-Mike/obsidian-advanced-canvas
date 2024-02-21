@@ -74,15 +74,25 @@ function reconstructPath(node: Node): Node[] {
 }
 
 export function aStar(fromPos: Position, fromSide: Side, toPos: Position, toSide: Side, obstacles: BBox[], gridResolution: number): Position[] | null {
-  // Round start and end positions to the nearest grid cell
   const start: Node = new Node(
-    Math.floor(fromPos.x / gridResolution + (fromSide === 'right' ? 1 : 0)) * gridResolution,
-    Math.floor(fromPos.y / gridResolution + (fromSide === 'top' ? 1 : 0)) * gridResolution
+    Math.floor(fromPos.x / gridResolution) * gridResolution,
+    Math.floor(fromPos.y / gridResolution) * gridResolution
   )
+  // Round start and end positions to the nearest grid cell outside of the nodes to connect
+  if (fromSide === 'right') start.x += gridResolution
+  else if (fromPos.x === start.x) start.x -= gridResolution
+  if (fromSide === 'bottom') start.y += gridResolution
+  else if (fromPos.y === start.y) start.y -= gridResolution
+
   const end: Node = new Node(
-    Math.floor(toPos.x / gridResolution + (toSide === 'right' ? 1 : 0)) * gridResolution,
-    Math.floor(toPos.y / gridResolution + (toSide === 'top' ? 1 : 0)) * gridResolution
+    Math.floor(toPos.x / gridResolution) * gridResolution,
+    Math.floor(toPos.y / gridResolution) * gridResolution
   )
+  // Round start and end positions to the nearest grid cell outside of the nodes to connect
+  if (toSide === 'right') end.x += gridResolution
+  else if (toPos.x === end.x) end.x -= gridResolution
+  if (toSide === 'bottom') end.y += gridResolution
+  else if (toPos.y === end.y) end.y -= gridResolution
   
   // Check if start and end positions are valid
   if (!isValidPosition(start, obstacles) || !isValidPosition(end, obstacles)) return null
