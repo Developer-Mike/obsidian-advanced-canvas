@@ -107,12 +107,14 @@ export function createExpandablePopupMenuOption(menuOption: MenuOption, subMenuO
   return menuOptionElement
 }
 
-export function addPopupMenuOption(canvas: Canvas, element: HTMLElement) {
+export function addPopupMenuOption(canvas: Canvas, element: HTMLElement, index: number = -1) {
   const popupMenuEl = canvas?.menu?.menuEl
   if (!popupMenuEl) return
 
   if (element.id) popupMenuEl.querySelector(`#${element.id}`)?.remove()
-  popupMenuEl.appendChild(element)
+
+  const sisterElement = index >= 0 ? popupMenuEl.children[index] : popupMenuEl.children[popupMenuEl.children.length + index]
+  popupMenuEl.insertAfter(element, sisterElement)
 }
 
 export function getCenterCoordinates(canvas: Canvas, nodeSize: Size): Position {

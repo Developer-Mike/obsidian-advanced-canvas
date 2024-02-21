@@ -99,11 +99,11 @@ export default class EdgesStyleCanvasExtension {
     const pathStyleMenuOption = CanvasHelper.createExpandablePopupMenuOption({
       id: 'edge-style-option',
       label: 'Edge style',
-      icon: 'paintbrush',
+      icon: 'minus',
     }, pathStyleNestedOptions)
 
     // Add menu option to menu bar
-    CanvasHelper.addPopupMenuOption(canvas, pathStyleMenuOption)
+    CanvasHelper.addPopupMenuOption(canvas, pathStyleMenuOption, -2)
 
     const pathRouteNestedOptions = ROUTES_MENU_OPTIONS.map((route) => ({
       ...route,
@@ -118,7 +118,7 @@ export default class EdgesStyleCanvasExtension {
     }, pathRouteNestedOptions)
 
     // Add menu option to menu bar
-    CanvasHelper.addPopupMenuOption(canvas, pathRouteMenuOption)
+    CanvasHelper.addPopupMenuOption(canvas, pathRouteMenuOption, -2)
   }
 
   private setStyleForSelection(canvas: Canvas, selectedEdges: CanvasEdge[], styleId: string|undefined) {
