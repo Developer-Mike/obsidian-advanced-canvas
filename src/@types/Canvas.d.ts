@@ -165,9 +165,13 @@ export interface CanvasNodeData {
   label?: string
   file?: string
 
-  isSticker: boolean
-  shape: string
-  isStartNode: boolean
+  isSticker?: boolean
+  shape?: string
+
+  isCollapsed?: boolean
+  collapsedParentGroupId?: string
+
+  isStartNode?: boolean
   edgesToNodeFromPortal?: { [key: string]: CanvasEdgeData[] }
 
   // Portal node
@@ -190,6 +194,7 @@ export interface CanvasNode {
   nodeEl: HTMLElement
   getBBox(): BBox
 
+  labelEl?: HTMLElement
   file?: TFile
 
   x: number

@@ -1,0 +1,38 @@
+#group-collapse-button {
+  position: absolute;
+  left: 0;
+  top: calc(-1 * var(--size-4-1) * var(--zoom-multiplier));
+
+  padding: var(--size-4-1) var(--size-4-2);
+  
+  transform-origin: bottom left;
+  transform: translate(0, -100%) scale(var(--zoom-multiplier));
+  
+  border-radius: var(--radius-s);
+  color: var(--text-muted);
+  background-color: rgba(var(--canvas-color), 0.1);
+
+  font-size: 1.5em;
+  line-height: 1;
+
+  pointer-events: initial;
+  cursor: pointer;
+}
+
+.canvas-node .canvas-group-label {
+  left: 40px;
+}
+
+.canvas-node[data-is-collapsed] {
+  .canvas-node-container {
+    display: none;
+  }
+
+  .canvas-group-label {
+    max-width: initial;
+  }
+}
+
+.canvas-node[data-collapsed-parent-group-id] {
+  display: none;
+}

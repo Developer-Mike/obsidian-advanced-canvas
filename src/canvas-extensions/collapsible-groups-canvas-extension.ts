@@ -1,6 +1,10 @@
+import { setIcon } from "obsidian"
 import { Canvas, CanvasNode } from "src/@types/Canvas"
 import { CanvasEvent } from "src/events/events"
 import AdvancedCanvasPlugin from "src/main"
+import * as BBoxHelper from "src/utils/bbox-helper"
+
+const COLLAPSE_BUTTON_ID = 'group-collapse-button'
 
 export default class CollapsibleGroupsCanvasExtension {
   plugin: AdvancedCanvasPlugin
@@ -11,14 +15,47 @@ export default class CollapsibleGroupsCanvasExtension {
     if (!this.plugin.settingsManager.getSetting('collapsibleGroupsFeatureEnabled')) return
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.NodeAdded,
-      (canvas: Canvas, node: CanvasNode) => this.onNodeAdded(canvas, node)
+      CanvasEvent.NodesChanged,
+      (canvas: Canvas, nodes: CanvasNode[]) => this.onNodesChanged(canvas, nodes)
     ))
   }
 
-  onNodeAdded(canvas: Canvas, node: CanvasNode) {
-    if (node.getData().type !== 'group') return
+  onNodesChanged(canvas: Canvas, nodes: CanvasNode[]) {
+    for (const groupNode of nodes) {
+      const groupNodeData = groupNode.getData()
+      if (groupNodeData.type !== 'group') return
 
-    // Add collapse/expand button next to the label
+      // Remove the collapse/expand button
+      groupNode.nodeEl?.querySelectorAll(`#${COLLAPSE_BUTTON_ID}`).forEach((el) => el.remove())
+
+      // Add collapse/expand button next to the label
+      const collapseButton = document.createElement('span')
+      collapseButton.id = COLLAPSE_BUTTON_ID
+      setIcon(collapseButton, groupNodeData.isCollapsed ? 'plus-circle' : 'minus-circle')
+
+      collapseButton.onclick = () => { this.toggleCollapse(canvas, groupNode) }
+
+      groupNode.labelEl?.insertAdjacentElement('afterend', collapseButton)
+    }
+  }
+
+  toggleCollapse(canvas: Canvas, groupNode: CanvasNode) {
+    const groupNodeData = groupNode.getData()
+    const isCollapsed = !groupNodeData.isCollapsed
+
+    // Collapse contained nodes
+    const containedNodes = [...canvas.nodes.values()].filter((node: CanvasNode) => 
+      BBoxHelper.insideBBox(node.getBBox(), groupNode.getBBox()) && node !== groupNode
+    )
+
+    const groupId = groupNodeData.id
+    for (const containedNode of containedNodes) {
+      if (isCollapsed && containedNode.getData().collapsedParentGroupId !== undefined) continue
+      if (!isCollapsed && containedNode.getData().collapsedParentGroupId !== groupId) continue
+
+      canvas.setNodeData(containedNode, 'collapsedParentGroupId', isCollapsed ? groupId : undefined)
+    }
+
+    canvas.setNodeData(groupNode, 'isCollapsed', isCollapsed ? true : undefined)
   }
 }
