@@ -12,8 +12,12 @@ export function scaleBBox(bbox: BBox, scale: number): BBox {
   }
 }
 
-export function intersectsBBox(position: Position, bbox: BBox): boolean {
+export function touchesBBox(position: Position, bbox: BBox): boolean {
   return position.x >= bbox.minX && position.x <= bbox.maxX && position.y >= bbox.minY && position.y <= bbox.maxY
+}
+
+export function insideBBox(position: Position, bbox: BBox): boolean {
+  return position.x > bbox.minX && position.x < bbox.maxX && position.y > bbox.minY && position.y < bbox.maxY
 }
 
 export function enlargeBBox(bbox: BBox, padding: number): BBox {

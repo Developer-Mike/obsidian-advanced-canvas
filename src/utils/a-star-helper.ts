@@ -37,8 +37,12 @@ function heuristic(node: Node, end: Node): number {
 }
 
 // Define a function to check if a position isn't inside any obstacle
-function isValidPosition(node: Position, obstacles: BBox[]): boolean {
-  return !obstacles.some(obstacle => BBoxHelper.intersectsBBox(node, obstacle))
+function isTouchingObstacle(node: Position, obstacles: BBox[]): boolean {
+  return obstacles.some(obstacle => BBoxHelper.touchesBBox(node, obstacle))
+}
+
+function isInsideObstacle(node: Position, obstacles: BBox[]): boolean {
+  return obstacles.some(obstacle => BBoxHelper.insideBBox(node, obstacle))
 }
 
 // Define a function to calculate movement cost based on direction
@@ -46,7 +50,7 @@ function getMovementCost(direction: { dx: number; dy: number }): number {
   return direction.dx !== 0 && direction.dy !== 0 ? DIAGONAL_COST : 1
 }
 
-function getValidNeighbors(node: Node, obstacles: BBox[], gridResolution: number): Node[] {
+function getPossibleNeighbors(node: Node, obstacles: BBox[], gridResolution: number): Node[] {
   const neighbors: Node[] = []
   
   for (const direction of DIRECTIONS) {
@@ -56,7 +60,7 @@ function getValidNeighbors(node: Node, obstacles: BBox[], gridResolution: number
     )
     neighbor.gCost = node.gCost + getMovementCost(direction)
 
-    if (!isValidPosition(neighbor, obstacles)) continue
+    if (isInsideObstacle(neighbor, obstacles)) continue
 
     neighbors.push(neighbor)
   }
@@ -79,23 +83,19 @@ export function aStar(fromPos: Position, fromSide: Side, toPos: Position, toSide
     Math.floor(fromPos.y / gridResolution) * gridResolution
   )
   // Round start and end positions to the nearest grid cell outside of the nodes to connect
-  if (fromSide === 'right') start.x += gridResolution
-  else if (fromPos.x === start.x) start.x -= gridResolution
-  if (fromSide === 'bottom') start.y += gridResolution
-  else if (fromPos.y === start.y) start.y -= gridResolution
+  if (fromSide === 'right' && fromPos.x !== start.x) start.x += gridResolution
+  if (fromSide === 'bottom' && fromPos.y !== start.y) start.y += gridResolution
 
   const end: Node = new Node(
     Math.floor(toPos.x / gridResolution) * gridResolution,
     Math.floor(toPos.y / gridResolution) * gridResolution
   )
   // Round start and end positions to the nearest grid cell outside of the nodes to connect
-  if (toSide === 'right') end.x += gridResolution
-  else if (toPos.x === end.x) end.x -= gridResolution
-  if (toSide === 'bottom') end.y += gridResolution
-  else if (toPos.y === end.y) end.y -= gridResolution
+  if (toSide === 'right' && toPos.x !== end.x) end.x += gridResolution
+  if (toSide === 'bottom' && toPos.y !== end.y) end.y += gridResolution
   
   // Check if start and end positions are valid
-  if (!isValidPosition(start, obstacles) || !isValidPosition(end, obstacles)) return null
+  if (isInsideObstacle(start, obstacles) || isInsideObstacle(end, obstacles)) return null
 
   const openSet: Node[] = [start]
   const closedSet: Node[] = []
@@ -124,8 +124,11 @@ export function aStar(fromPos: Position, fromSide: Side, toPos: Position, toSide
       return [fromPos, ...reconstructPath(current), toPos]
     }
 
+    // Location is not start or end, all touching positions are invalid
+    if (!(current.x === start.x && current.y === start.y) && isTouchingObstacle(current, obstacles)) continue
+
     // Expand neighbors
-    for (const neighbor of getValidNeighbors(current, obstacles, gridResolution)) {
+    for (const neighbor of getPossibleNeighbors(current, obstacles, gridResolution)) {
       if (neighbor.inList(closedSet)) continue
 
       // Calculate tentative gCost
