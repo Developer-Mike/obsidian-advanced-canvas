@@ -36,3 +36,7 @@
 .canvas-node[data-collapsed-parent-group-id] {
   display: none;
 }
+
+.canvas-node-interaction-layer[data-target-collapsed-parent-group-id] {
+  display: none;
+}
