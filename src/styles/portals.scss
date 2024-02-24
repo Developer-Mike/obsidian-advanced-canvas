@@ -25,3 +25,11 @@
     }
   }
 }
+
+:root {
+  --canvas-edge-unsaved-color: #ff5757a0;
+}
+
+.canvas-edges [data-is-unsaved] {
+  stroke: var(--canvas-edge-unsaved-color) !important;
+}
