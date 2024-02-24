@@ -252,7 +252,7 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
     - Payload: `Canvas`, `Edge`
   - `advanced-canvas:selection-changed`
     - Fired when the selection of the canvas changes
-    - Payload: `Canvas`, `updateSelection: (() => void) => void`
+    - Payload: `Canvas`, `oldSelection: Set<Node|Edge>`, `updateSelection: (() => void) => void`
   - `advanced-canvas:zoom-to-bbox:before` and `advanced-canvas:zoom-to-bbox:after`
     - Fired before and after the canvas gets zoomed to a bounding box (e.g. zoom to selection, zoom to fit all)
     - Payload: `Canvas`, `BBox`
