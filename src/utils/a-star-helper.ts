@@ -121,7 +121,7 @@ export function aStar(fromPos: Position, fromSide: Side, toPos: Position, toSide
 
     // Check if we have reached the end
     if (current.x === end.x && current.y === end.y) {
-      return [fromPos, ...reconstructPath(current), toPos]
+      return [fromPos, ...reconstructPath(current), toPos].map(node => ({ x: node.x, y: node.y }))
     }
 
     // Location is not start or end, all touching positions are invalid
