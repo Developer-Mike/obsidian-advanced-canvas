@@ -70,7 +70,11 @@ export default class PortalsCanvasExtension {
       CanvasEvent.LoadData,
       (canvas: Canvas, data: CanvasData, setData: (data: CanvasData) => void) => {
         this.getCanvasDataWithPortals(canvas, data)
-          .then((data: CanvasData) => setData(data))
+          .then((newData: CanvasData) => {
+            // Skip if the data didn't change
+            if (newData.nodes.length === data.nodes.length && newData.edges.length === data.edges.length) return
+            setData(newData)
+          })
       }
     ))
   }

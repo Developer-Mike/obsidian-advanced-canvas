@@ -105,7 +105,7 @@ export default class CanvasEventEmitter {
 
         that.triggerEdgeRelatedEvent(edge, () => {
           that.triggerWorkspaceEvent(CanvasEvent.EdgeAdded, this, edge)
-          that.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, this, edge)
+          // Changed event will be triggered when updatePath is called
         })
 
         return next.call(this, edge)
@@ -139,7 +139,7 @@ export default class CanvasEventEmitter {
       },
       redo: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
-        that.triggerWorkspaceEvent(CanvasEvent.Redo, this)
+        that.triggerWorkspaceEvent(CanvasEvent.Redo, this) // TODO
         that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()]) // If node data changed
         return result
       },
@@ -156,18 +156,14 @@ export default class CanvasEventEmitter {
 
           this.importData(data)
           that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()]) // If node data changed
-          ;[...this.edges.values()].forEach(edge => that.triggerEdgeRelatedEvent(edge, () => // If edge data changed
-            that.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, this, edge)
-          ))
+          // Edge data changed event will be triggered when updatePath is called
         }
 
         that.triggerWorkspaceEvent(CanvasEvent.LoadData, this, data, setData)
         const result = next.call(this, data)
 
         that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()]) // If node data changed
-        ;[...this.edges.values()].forEach(edge => that.triggerEdgeRelatedEvent(edge, () => // If edge data changed
-          that.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, this, edge)
-        ))
+        // Edge data changed event will be triggered when updatePath is called
 
         return result
       },
@@ -189,7 +185,7 @@ export default class CanvasEventEmitter {
       canvasView.canvas.edges.forEach(edge => this.patchEdge(edge))
 
       // Trigger nodes/edges added event
-      that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, canvasView.canvas, [...canvasView.canvas.nodes.values()])
+      canvasView.canvas.nodes.forEach(node => that.triggerWorkspaceEvent(CanvasEvent.NodeAdded, canvasView.canvas, node))
       canvasView.canvas.edges.forEach(edge => that.triggerWorkspaceEvent(CanvasEvent.EdgeAdded, canvasView.canvas, edge))
 
       // Re-init the canvas with the patched canvas object

@@ -16,6 +16,7 @@ import StickersCanvasExtension from './canvas-extensions/stickers-canvas-extensi
 import EdgesStyleCanvasExtension from './canvas-extensions/edges-style-canvas-extension'
 import EdgeDataTaggerCanvasExtension from './canvas-extensions/edge-data-tagger-canvas-extension'
 import CollapsibleGroupsCanvasExtension from './canvas-extensions/collapsible-groups-canvas-extension'
+import EventDebugger from './events/event-debugger'
 
 const CANVAS_EXTENSIONS: any[] = [
   NodeDataTaggerCanvasExtension,
@@ -47,6 +48,9 @@ export default class AdvancedCanvasPlugin extends Plugin {
 
     this.canvasEventEmitter = new CanvasEventEmitter(this)
     this.canvasExtensions = CANVAS_EXTENSIONS.map((Extension) => new Extension(this))
+
+    // DEBUG
+    new EventDebugger(this)
 	}
 
   onunload() {}
