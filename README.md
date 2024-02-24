@@ -40,9 +40,14 @@ All features can be enabled/disabled in the settings.
   - Document shape
   - Database shape
 - [Edge Styles](#edge-styles)
-  - Dotted
-  - Short-dashed
-  - Long-dashed
+  - Edge styles
+    - Dotted
+    - Short-dashed
+    - Long-dashed
+  - Path styles
+    - Default
+    - Straight
+    - A*
 - [Stickers](#stickers)
   - Convert image nodes to stickers (transparent background and no border)
 - [Presentation mode](#presentation)
@@ -141,11 +146,20 @@ All features can be enabled/disabled in the settings.
 </details>
 
 ## Edge Styles
+### Edge Styles
 Set the style of the edges (arrows) to dotted, short-dashed or long-dashed.
 
 <details>
     <summary>Edge Styles Example</summary>
     <img src="./assets/edge-styles.png" alt="Edge Styles Example"/>
+</details>
+
+### Path Styles
+Set the path style of the edges (arrows) to default, straight or A*.
+
+<details>
+    <summary>Path Styles Example</summary>
+    <img src="./assets/edge-path-styles.png" alt="Edge Path Styles Example"/>
 </details>
 
 ## Stickers
@@ -296,3 +310,4 @@ All contributions are welcome! Here's how you can help:
 
 ## Known Issues - Create an issue if you find any!
 - [ ] Shapes are not shown in the preview
+- [ ] Custom path styles don't move the label of the edge
