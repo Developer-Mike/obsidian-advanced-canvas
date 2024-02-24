@@ -197,8 +197,11 @@ export interface CanvasNode {
   width: number
   height: number
 
-  color: string
+  /** Move node to the front. */
   zIndex: number
+  updateZIndex(): void
+
+  color: string
 
   setData(data: CanvasNodeData): void
   getData(): CanvasNodeData
