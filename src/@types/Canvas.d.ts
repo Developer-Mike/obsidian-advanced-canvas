@@ -222,9 +222,11 @@ export interface CanvasEdgeData {
   fromSide: Side
   toSide: Side
   
-  edgeStyle?: undefined | 'long-dashed' | 'short-dashed' | 'dotted'
-  edgePathRoute?: undefined | 'direct' | 'a-star'
+  edgeStyle?: 'long-dashed' | 'short-dashed' | 'dotted'
+  edgePathRoute?: 'direct' | 'a-star'
+
   portalId?: string
+  isUnsaved?: boolean
 }
 
 type EndType = 'none' | 'arrow'

@@ -41,6 +41,11 @@ export default class PortalsCanvasExtension {
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.EdgeChanged,
+      (canvas: Canvas, edge: CanvasEdge) => this.onEdgeChanged(canvas, edge)
+    ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.Undo,
       (canvas: Canvas) => {
         this.getCanvasDataWithPortals(canvas, canvas.getData())
@@ -135,6 +140,17 @@ export default class PortalsCanvasExtension {
     Object.keys(nodeData.portalIdMaps?.edgeIdMap ?? {}).map(refEdgeId => canvas.edges.get(refEdgeId))
       .filter(edge => edge !== undefined)
       .forEach(edge => canvas.removeEdge(edge!))
+  }
+
+  private onEdgeChanged(canvas: Canvas, edge: CanvasEdge) {
+    const isUnsaved = (edge.from.node !== undefined && edge.to.node !== undefined) && // Edge not fully connected
+      (edge.from.node.getData().portalId !== undefined && edge.to.node.getData().portalId !== undefined) && // Both nodes are from portal
+      edge.getData().portalId === undefined // Edge is not from portal
+
+    edge.setData({
+      ...edge.getData(), 
+      isUnsaved: isUnsaved ? true : undefined
+    })
   }
 
   private onSelectionChanged(canvas: Canvas, oldSelection: Set<CanvasNode|CanvasEdge>, updateSelection: (update: () => void) => void) {
@@ -315,6 +331,7 @@ export default class PortalsCanvasExtension {
           // Push edges with updated from and to ids
           data.edges.push(...edges.map(edge => ({
             ...edge,
+            portalId: originNodeData.portalId,
             fromNode: `${idPrefix}${edge.fromNode}`,
             toNode: `${idPrefix}${edge.toNode}`
           })))
