@@ -1,8 +1,8 @@
 import AdvancedCanvasPlugin from "src/main"
-import { CanvasEvent } from "./events"
+import { CanvasEvent } from "../events/events"
 import { Canvas, CanvasNode } from "src/@types/Canvas"
 
-export default class EventDebugger {
+export default class DebugHelper {
   plugin: AdvancedCanvasPlugin
 
   constructor(plugin: AdvancedCanvasPlugin) {
