@@ -197,8 +197,11 @@ export interface CanvasNode {
   width: number
   height: number
 
-  color: string
+  /** Move node to the front. */
   zIndex: number
+  updateZIndex(): void
+
+  color: string
 
   setData(data: CanvasNodeData): void
   getData(): CanvasNodeData
@@ -214,9 +217,11 @@ export interface CanvasEdgeData {
   fromSide: Side
   toSide: Side
   
-  edgeStyle?: undefined | 'long-dashed' | 'short-dashed' | 'dotted'
-  edgePathRoute?: undefined | 'direct' | 'a-star'
+  edgeStyle?: 'long-dashed' | 'short-dashed' | 'dotted'
+  edgePathRoute?: 'direct' | 'a-star'
+
   portalId?: string
+  isUnsaved?: boolean
 }
 
 type EndType = 'none' | 'arrow'

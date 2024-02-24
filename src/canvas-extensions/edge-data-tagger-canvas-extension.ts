@@ -7,6 +7,7 @@ export function getExposedEdgeData(settings: AdvancedCanvasSettingsManager): (ke
   const exposedData: (keyof CanvasEdgeData)[] = []
 
   if (settings.getSetting('edgesStylingFeatureEnabled')) exposedData.push('edgeStyle')
+  if (settings.getSetting('portalsFeatureEnabled')) exposedData.push('isUnsaved')
 
   return exposedData
 }
@@ -27,7 +28,7 @@ export default class EdgeDataTaggerCanvasExtension {
           const dataValue = edgeData[dataKey]
           
           if (dataValue === undefined) delete edge.path.display.dataset[dataKey]
-          else edge.path.display.dataset[dataKey] = dataValue
+          else edge.path.display.dataset[dataKey] = dataValue as string
         }
       }
     ))

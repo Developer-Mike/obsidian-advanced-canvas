@@ -3,6 +3,8 @@ import AdvancedCanvasPlugin from "src/main"
 import * as CanvasHelper from "src/utils/canvas-helper"
 import { CanvasEvent } from "src/events/events"
 
+const IMAGE_FILE_EXTENSIONS = ["bmp", "png", "jpg", "jpeg", "gif", "svg", "webp", "avif"]
+
 export default class StickersCanvasExtension {
   plugin: AdvancedCanvasPlugin
 
@@ -37,7 +39,13 @@ export default class StickersCanvasExtension {
     const selectedNodesData = canvas.getSelectionData().nodes
 
     for (const nodeData of selectedNodesData) {
-      if (nodeData.type === 'file') return true
+      if (nodeData.type !== 'file') continue
+      
+      const nodeFileExtension = nodeData.file?.split('.').pop()?.toLowerCase()
+      if (!nodeFileExtension) continue
+      if (!IMAGE_FILE_EXTENSIONS.includes(nodeFileExtension)) continue
+
+      return true
     }
     
     return false

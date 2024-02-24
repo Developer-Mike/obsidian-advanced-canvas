@@ -1,5 +1,5 @@
 import { TFile } from "obsidian"
-import { BBox, Canvas, CanvasData, CanvasNode, CanvasNodeData } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasData, CanvasEdge, CanvasNode, CanvasNodeData } from "src/@types/Canvas"
 import { CanvasEvent } from "src/events/events"
 import AdvancedCanvasPlugin from "src/main"
 import * as CanvasHelper from "src/utils/canvas-helper"
@@ -37,7 +37,12 @@ export default class PortalsCanvasExtension {
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.SelectionChanged,
-      (canvas: Canvas, updateSelection: (update: () => void) => void) => this.onSelectionChanged(canvas, updateSelection)
+      (canvas: Canvas, oldSelection: Set<CanvasNode|CanvasEdge>, updateSelection: (update: () => void) => void) => this.onSelectionChanged(canvas, oldSelection, updateSelection)
+    ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.EdgeChanged,
+      (canvas: Canvas, edge: CanvasEdge) => this.onEdgeChanged(canvas, edge)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
@@ -137,12 +142,59 @@ export default class PortalsCanvasExtension {
       .forEach(edge => canvas.removeEdge(edge!))
   }
 
-  private onSelectionChanged(canvas: Canvas, updateSelection: (update: () => void) => void) {
+  private onEdgeChanged(canvas: Canvas, edge: CanvasEdge) {
+    const isUnsaved = (edge.from.node !== undefined && edge.to.node !== undefined) && // Edge not fully connected
+      (edge.from.node.getData().portalId !== undefined && edge.to.node.getData().portalId !== undefined) && // Both nodes are from portal
+      edge.getData().portalId === undefined // Edge is not from portal
+
+    edge.setData({
+      ...edge.getData(), 
+      isUnsaved: isUnsaved ? true : undefined
+    })
+  }
+
+  private onSelectionChanged(canvas: Canvas, oldSelection: Set<CanvasNode|CanvasEdge>, updateSelection: (update: () => void) => void) {
+    // Unselect nodes from portals
     updateSelection(() => {
       const updatedSelection = Array.from(canvas.selection)
         .filter(node => node.getData().portalId === undefined)
       canvas.selection = new Set(updatedSelection)
     })
+
+    // Move previously selected portals to the back
+    const previouslySelectedPortalNodesIds = Array.from(oldSelection)
+      .filter(node => (node.getData() as any).portalToFile !== undefined)
+      .flatMap(node => {
+        const portalNodeData = node.getData()
+        const nestedPortalsIds = this.getNestedPortalsIds(canvas, portalNodeData.id)
+
+        return [portalNodeData.id, ...nestedPortalsIds]
+      })
+
+    for (const node of canvas.nodes.values()) {
+      const nodeData = node.getData()
+
+      // Not from unselected portal
+      if (nodeData.portalId === undefined || !previouslySelectedPortalNodesIds.includes(nodeData.portalId)) continue
+
+      // Move to front
+      node.updateZIndex()
+    }
+  }
+
+  private getNestedPortalsIds(canvas: Canvas, portalId: string): string[] {
+    const nestedPortalsIds: string[] = []
+
+    for (const node of canvas.nodes.values()) {
+      const nodeData = node.getData()
+
+      if (nodeData.portalId === portalId) {
+        nestedPortalsIds.push(nodeData.id)
+        nestedPortalsIds.push(...this.getNestedPortalsIds(canvas, nodeData.id))
+      }
+    }
+
+    return nestedPortalsIds
   }
 
   restoreObjectSnappingState: () => void
@@ -279,6 +331,7 @@ export default class PortalsCanvasExtension {
           // Push edges with updated from and to ids
           data.edges.push(...edges.map(edge => ({
             ...edge,
+            portalId: originNodeData.portalId,
             fromNode: `${idPrefix}${edge.fromNode}`,
             toNode: `${idPrefix}${edge.toNode}`
           })))
