@@ -258,9 +258,9 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
   - `advanced-canvas:edge-removed`
     - Fired when an edge gets removed
     - Payload: `Canvas`, `Edge`
-  - `advanced-canvas:nodes-changed`
+  - `advanced-canvas:node-changed`
     - Fired when any node gets changed
-    - Payload: `Canvas`, `Node[]`
+    - Payload: `Canvas`, `Node`
   - `advanced-canvas:edge-changed`
     - Fired when any edge gets changed
     - Payload: `Canvas`, `Edge`

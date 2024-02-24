@@ -158,6 +158,13 @@ export interface CanvasData {
   edges: CanvasEdgeData[]
 }
 
+export interface CanvasElement {
+  canvas: Canvas
+  initialized: boolean
+
+  initialize(): void
+}
+
 export type CanvasNodeType = 'text' | 'group' | 'file' | 'link'
 export interface CanvasNodeData {
   type: CanvasNodeType
@@ -189,8 +196,7 @@ export interface CanvasNodeData {
   [key: string]: any
 }
 
-export interface CanvasNode {
-  canvas: Canvas
+export interface CanvasNode extends CanvasElement {
   nodeEl: HTMLElement
   getBBox(): BBox
 
@@ -230,7 +236,7 @@ export interface CanvasEdgeData {
 }
 
 type EndType = 'none' | 'arrow'
-export interface CanvasEdge {
+export interface CanvasEdge extends CanvasElement {
   label: string
 
   from: {
@@ -256,9 +262,6 @@ export interface CanvasEdge {
     interaction: HTMLElement
     display: HTMLElement
   }
-
-  initialized: boolean
-  initialize(): void
 
   updatePath(): void
   

@@ -22,18 +22,16 @@ export default class NodeDataTaggerCanvasExtension {
     this.plugin = plugin
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.NodesChanged,
-      (_canvas: Canvas, nodes: CanvasNode[]) => {
-        for (const node of nodes) {
-          const nodeData = node?.getData()
-          if (!nodeData) continue
+      CanvasEvent.NodeChanged,
+      (_canvas: Canvas, node: CanvasNode) => {
+        const nodeData = node?.getData()
+        if (!nodeData) return
 
-          for (const dataKey of getExposedNodeData(this.plugin.settingsManager)) {
-            const dataValue = nodeData[dataKey]
-            
-            if (dataValue === undefined) delete node.nodeEl.dataset[dataKey]
-            else node.nodeEl.dataset[dataKey] = dataValue
-          }
+        for (const dataKey of getExposedNodeData(this.plugin.settingsManager)) {
+          const dataValue = nodeData[dataKey]
+          
+          if (dataValue === undefined) delete node.nodeEl.dataset[dataKey]
+          else node.nodeEl.dataset[dataKey] = dataValue
         }
       }
     ))

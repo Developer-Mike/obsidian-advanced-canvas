@@ -10,22 +10,22 @@ export default class DebugHelper {
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.NodeAdded,
-      (_canvas: Canvas, _node: CanvasNode) => console.log('NodeAdded')
+      (_canvas: Canvas, _node: CanvasNode) => console.log('🟢 NodeAdded')
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.NodesChanged,
-      (_canvas: Canvas, nodes: CanvasNode[]) => nodes.forEach(_node => console.log('NodeChanged'))
+      CanvasEvent.NodeChanged,
+      (_canvas: Canvas, _node: CanvasNode) => console.log('🟡 NodeChanged')
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.EdgeAdded,
-      (_canvas: Canvas, _edge: CanvasNode) => console.log('EdgeAdded')
+      (_canvas: Canvas, _edge: CanvasNode) => console.log('🟢 EdgeAdded')
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.EdgeChanged,
-      (_canvas: Canvas, _edge: CanvasNode) => console.log('EdgeChanged')
+      (_canvas: Canvas, _edge: CanvasNode) => console.log('🟡 EdgeChanged')
     ))
   }
 }

@@ -12,7 +12,7 @@ export const CanvasEvent = {
   EdgeAdded: `${PLUGIN_EVENT_PREFIX}:edge-added`,
   NodeRemoved: `${PLUGIN_EVENT_PREFIX}:node-removed`,
   EdgeRemoved: `${PLUGIN_EVENT_PREFIX}:edge-removed`,
-  NodesChanged: `${PLUGIN_EVENT_PREFIX}:nodes-changed`,
+  NodeChanged: `${PLUGIN_EVENT_PREFIX}:node-changed`,
   EdgeChanged: `${PLUGIN_EVENT_PREFIX}:edge-changed`,
   SelectionChanged: `${PLUGIN_EVENT_PREFIX}:selection-changed`,
   ZoomToBbox: {

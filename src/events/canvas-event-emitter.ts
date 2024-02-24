@@ -1,5 +1,5 @@
 import AdvancedCanvasPlugin from "src/main"
-import { BBox, Canvas, CanvasData, CanvasEdge, CanvasEdgeData, CanvasNode, CanvasNodeData, CanvasView } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasData, CanvasEdge, CanvasEdgeData, CanvasElement, CanvasNode, CanvasNodeData, CanvasView } from "src/@types/Canvas"
 import { patchWorkspaceFunction as patchWorkspaceObject } from "src/utils/patch-helper"
 import { CanvasEvent } from "./events"
 import { WorkspaceLeaf } from "obsidian"
@@ -57,7 +57,7 @@ export default class CanvasEventEmitter {
         })
         this.requestSave()
 
-        that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [node])
+        that.triggerWorkspaceEvent(CanvasEvent.NodeChanged, this, node)
       },
       setEdgeData: (_next: any) => function (edge: CanvasEdge, key: keyof CanvasEdgeData, value: any) {
         edge.setData({ 
@@ -90,20 +90,17 @@ export default class CanvasEventEmitter {
         return result
       },
       addNode: (next: any) => function (node: CanvasNode) {
-        const result = next.call(this, node)
-
-        ;(async () => {
-          await sleep(1) // Fix obsidian bug where the unknownData doesn't get set
+        that.runAfterInitialized(node, () => {
           that.triggerWorkspaceEvent(CanvasEvent.NodeAdded, this, node)
-          that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [node])
-        })()
+          that.triggerWorkspaceEvent(CanvasEvent.NodeChanged, this, node)
+        })
 
-        return result
+        return next.call(this, node)
       },
       addEdge: (next: any) => function (edge: CanvasEdge) {
         that.patchEdge(edge)
 
-        that.triggerEdgeRelatedEvent(edge, () => {
+        that.runAfterInitialized(edge, () => {
           that.triggerWorkspaceEvent(CanvasEvent.EdgeAdded, this, edge)
           // Changed event will be triggered when updatePath is called
         })
@@ -134,13 +131,37 @@ export default class CanvasEventEmitter {
       undo: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
         that.triggerWorkspaceEvent(CanvasEvent.Undo, this)
-        that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()]) // If node data changed
+
+        // If node data changed
+        this.nodes.forEach((node: CanvasNode) => that.runAfterInitialized(node, () => {
+          that.triggerWorkspaceEvent(CanvasEvent.NodeAdded, this, node)
+          that.triggerWorkspaceEvent(CanvasEvent.NodeChanged, this, node)
+        }))
+
+        // If edge data changed
+        this.edges.forEach((edge: CanvasEdge) => that.runAfterInitialized(edge, () => {
+          that.triggerWorkspaceEvent(CanvasEvent.EdgeAdded, this, edge)
+          that.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, this, edge)
+        }))
+
         return result
       },
       redo: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
-        that.triggerWorkspaceEvent(CanvasEvent.Redo, this) // TODO
-        that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()]) // If node data changed
+        that.triggerWorkspaceEvent(CanvasEvent.Redo, this)
+
+        // If node data changed
+        this.nodes.forEach((node: CanvasNode) => that.runAfterInitialized(node, () => {
+          that.triggerWorkspaceEvent(CanvasEvent.NodeAdded, this, node)
+          that.triggerWorkspaceEvent(CanvasEvent.NodeChanged, this, node)
+        }))
+
+        // If edge data changed
+        this.edges.forEach((edge: CanvasEdge) => that.runAfterInitialized(edge, () => {
+          that.triggerWorkspaceEvent(CanvasEvent.EdgeAdded, this, edge)
+          that.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, this, edge)
+        }))
+
         return result
       },
       getData: (next: any) => function (...args: any) {
@@ -155,14 +176,14 @@ export default class CanvasEventEmitter {
           if (!this.view.file || this.view.file.path !== targetFilePath) return
 
           this.importData(data)
-          that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()]) // If node data changed
+          this.nodes.forEach((node: CanvasNode) => that.runAfterInitialized(node, () => that.triggerWorkspaceEvent(CanvasEvent.NodeAdded, this, node))) // If node data changed
           // Edge data changed event will be triggered when updatePath is called
         }
 
         that.triggerWorkspaceEvent(CanvasEvent.LoadData, this, data, setData)
         const result = next.call(this, data)
 
-        that.triggerWorkspaceEvent(CanvasEvent.NodesChanged, this, [...this.nodes.values()]) // If node data changed
+        this.nodes.forEach((node: CanvasNode) => that.runAfterInitialized(node, () => that.triggerWorkspaceEvent(CanvasEvent.NodeAdded, this, node)))
         // Edge data changed event will be triggered when updatePath is called
 
         return result
@@ -185,8 +206,8 @@ export default class CanvasEventEmitter {
       canvasView.canvas.edges.forEach(edge => this.patchEdge(edge))
 
       // Trigger nodes/edges added event
-      canvasView.canvas.nodes.forEach(node => that.triggerWorkspaceEvent(CanvasEvent.NodeAdded, canvasView.canvas, node))
-      canvasView.canvas.edges.forEach(edge => that.triggerWorkspaceEvent(CanvasEvent.EdgeAdded, canvasView.canvas, edge))
+      canvasView.canvas.nodes.forEach(node => that.runAfterInitialized(node, () => that.triggerWorkspaceEvent(CanvasEvent.NodeAdded, canvasView.canvas, node)))
+      canvasView.canvas.edges.forEach(edge => that.runAfterInitialized(edge, () => that.triggerWorkspaceEvent(CanvasEvent.EdgeAdded, canvasView.canvas, edge)))
 
       // Re-init the canvas with the patched canvas object
       canvasView.setViewData(canvasView.getViewData())
@@ -211,16 +232,16 @@ export default class CanvasEventEmitter {
     that.plugin.register(uninstall)
   }
   
-  private triggerEdgeRelatedEvent(edge: CanvasEdge, onReady: () => void) {
-    if (edge.initialized) {
+  private runAfterInitialized(canvasElement: CanvasElement, onReady: () => void) {
+    if (canvasElement.initialized) {
       onReady()
       return
     }
 
     const that = this
 
-    // Patch edge object
-    const uninstall = around(edge, {
+    // Patch CanvasElement object
+    const uninstall = around(canvasElement, {
       initialize: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
 

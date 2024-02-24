@@ -15,28 +15,26 @@ export default class CollapsibleGroupsCanvasExtension {
     if (!this.plugin.settingsManager.getSetting('collapsibleGroupsFeatureEnabled')) return
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.NodesChanged,
-      (canvas: Canvas, nodes: CanvasNode[]) => this.onNodesChanged(canvas, nodes)
+      CanvasEvent.NodeChanged,
+      (canvas: Canvas, node: CanvasNode) => this.onNodeChanged(canvas, node)
     ))
   }
 
-  onNodesChanged(canvas: Canvas, nodes: CanvasNode[]) {
-    for (const groupNode of nodes) {
-      const groupNodeData = groupNode.getData()
-      if (groupNodeData.type !== 'group') return
+  onNodeChanged(canvas: Canvas, groupNode: CanvasNode) {
+    const groupNodeData = groupNode.getData()
+    if (groupNodeData.type !== 'group') return
 
-      // Remove the collapse/expand button
-      groupNode.nodeEl?.querySelectorAll(`#${COLLAPSE_BUTTON_ID}`).forEach((el) => el.remove())
+    // Remove the collapse/expand button
+    groupNode.nodeEl?.querySelectorAll(`#${COLLAPSE_BUTTON_ID}`).forEach((el) => el.remove())
 
-      // Add collapse/expand button next to the label
-      const collapseButton = document.createElement('span')
-      collapseButton.id = COLLAPSE_BUTTON_ID
-      setIcon(collapseButton, groupNodeData.isCollapsed ? 'plus-circle' : 'minus-circle')
+    // Add collapse/expand button next to the label
+    const collapseButton = document.createElement('span')
+    collapseButton.id = COLLAPSE_BUTTON_ID
+    setIcon(collapseButton, groupNodeData.isCollapsed ? 'plus-circle' : 'minus-circle')
 
-      collapseButton.onclick = () => { this.toggleCollapse(canvas, groupNode) }
+    collapseButton.onclick = () => { this.toggleCollapse(canvas, groupNode) }
 
-      groupNode.labelEl?.insertAdjacentElement('afterend', collapseButton)
-    }
+    groupNode.labelEl?.insertAdjacentElement('afterend', collapseButton)
   }
 
   toggleCollapse(canvas: Canvas, groupNode: CanvasNode) {
