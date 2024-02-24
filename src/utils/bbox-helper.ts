@@ -12,11 +12,7 @@ export function scaleBBox(bbox: BBox, scale: number): BBox {
   }
 }
 
-export function touchesBBox(position: Position, bbox: BBox): boolean {
-  return position.x >= bbox.minX && position.x <= bbox.maxX && position.y >= bbox.minY && position.y <= bbox.maxY
-}
-
-export function insideBBox(position: Position|BBox, bbox: BBox): boolean {
+export function insideBBox(position: Position|BBox, bbox: BBox, canTouchEdge: Boolean): boolean {
   const providedBBox = {
     minX: (position as BBox).minX || (position as Position).x,
     minY: (position as BBox).minY || (position as Position).y,
@@ -24,7 +20,8 @@ export function insideBBox(position: Position|BBox, bbox: BBox): boolean {
     maxY: (position as BBox).maxY || (position as Position).y
   }
 
-  return providedBBox.minX >= bbox.minX && providedBBox.maxX <= bbox.maxX && providedBBox.minY >= bbox.minY && providedBBox.maxY <= bbox.maxY
+  return canTouchEdge ? providedBBox.minX >= bbox.minX && providedBBox.maxX <= bbox.maxX && providedBBox.minY >= bbox.minY && providedBBox.maxY <= bbox.maxY :
+    providedBBox.minX > bbox.minX && providedBBox.maxX < bbox.maxX && providedBBox.minY > bbox.minY && providedBBox.maxY < bbox.maxY
 }
 
 export function enlargeBBox(bbox: BBox, padding: number): BBox {

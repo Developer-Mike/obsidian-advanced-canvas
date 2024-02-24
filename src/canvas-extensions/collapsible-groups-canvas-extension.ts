@@ -45,7 +45,7 @@ export default class CollapsibleGroupsCanvasExtension {
 
     // Collapse contained nodes
     const containedNodes = [...canvas.nodes.values()].filter((node: CanvasNode) => 
-      BBoxHelper.insideBBox(node.getBBox(), groupNode.getBBox()) && node !== groupNode
+      BBoxHelper.insideBBox(node.getBBox(), groupNode.getBBox(), true) && node !== groupNode
     )
 
     const groupId = groupNodeData.id

@@ -38,11 +38,11 @@ function heuristic(node: Node, end: Node): number {
 
 // Define a function to check if a position isn't inside any obstacle
 function isTouchingObstacle(node: Position, obstacles: BBox[]): boolean {
-  return obstacles.some(obstacle => BBoxHelper.touchesBBox(node, obstacle))
+  return obstacles.some(obstacle => BBoxHelper.insideBBox(node, obstacle, true))
 }
 
 function isInsideObstacle(node: Position, obstacles: BBox[]): boolean {
-  return obstacles.some(obstacle => BBoxHelper.insideBBox(node, obstacle))
+  return obstacles.some(obstacle => BBoxHelper.insideBBox(node, obstacle, false))
 }
 
 // Define a function to calculate movement cost based on direction
