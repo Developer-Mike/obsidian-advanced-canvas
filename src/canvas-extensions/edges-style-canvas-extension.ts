@@ -154,7 +154,9 @@ export default class EdgesStyleCanvasExtension {
     if (pathRouteType === 'direct') {
       newPath = SvgPathHelper.pathArrayToSvgPath([fromPos, toPos], false)
     } else if (pathRouteType === 'a-star') {
-      const nodeBBoxes = [...canvas.nodes.values()].map(node => node.getBBox())
+      const nodeBBoxes = [...canvas.nodes.values()]
+        .filter(node => node.getData().type !== 'group')
+        .map(node => node.getBBox())
 
       const gridResolution = this.plugin.settingsManager.getSetting('edgeStylePathfinderGridResolution')
       const pathArray = AStarHelper.aStar(fromPos, edge.from.side, toPos, edge.to.side, nodeBBoxes, gridResolution)
