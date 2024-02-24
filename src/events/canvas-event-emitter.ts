@@ -84,8 +84,9 @@ export default class CanvasEventEmitter {
         return result
       },
       updateSelection: (next: any) => function (update: () => void) {
+        const oldSelection = new Set(this.selection)
         const result = next.call(this, update)
-        that.triggerWorkspaceEvent(CanvasEvent.SelectionChanged, this, ((update: () => void) => next.call(this, update)))
+        that.triggerWorkspaceEvent(CanvasEvent.SelectionChanged, this, oldSelection, ((update: () => void) => next.call(this, update)))
         return result
       },
       addNode: (next: any) => function (node: CanvasNode) {
