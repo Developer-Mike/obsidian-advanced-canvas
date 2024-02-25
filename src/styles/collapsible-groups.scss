@@ -32,3 +32,14 @@
     max-width: initial;
   }
 }
+
+.canvas-node-interaction-layer[data-target-collapsed-data] {
+  .canvas-node-resizer {
+    pointer-events: none;
+    cursor: inherit;
+
+    .canvas-node-connection-point {
+      pointer-events: all;
+    }
+  }
+}
