@@ -1,4 +1,4 @@
-import { BBox, Position, Side } from "src/@types/Canvas"
+import { BBox, CanvasNodeData, Position, Side } from "src/@types/Canvas"
 
 export function scaleBBox(bbox: BBox, scale: number): BBox {
   let diffX = (scale - 1) * (bbox.maxX - bbox.minX)
@@ -43,5 +43,14 @@ export function getCenterOfBBoxSide(bbox: BBox, side: Side): Position {
       return { x: (bbox.minX + bbox.maxX) / 2, y: bbox.maxY }
     case 'left':
       return { x: bbox.minX, y: (bbox.minY + bbox.maxY) / 2 }
+  }
+}
+
+export function bboxFromNodeData(nodeData: CanvasNodeData): BBox {
+  return {
+    minX: nodeData.x,
+    minY: nodeData.y,
+    maxX: nodeData.x + nodeData.width,
+    maxY: nodeData.y + nodeData.height
   }
 }

@@ -1,5 +1,5 @@
 import { setIcon } from "obsidian"
-import { Canvas, CanvasNode } from "src/@types/Canvas"
+import { Canvas, CanvasData, CanvasNode } from "src/@types/Canvas"
 import { CanvasEvent } from "src/events/events"
 import AdvancedCanvasPlugin from "src/main"
 import * as BBoxHelper from "src/utils/bbox-helper"
@@ -18,9 +18,19 @@ export default class CollapsibleGroupsCanvasExtension {
       CanvasEvent.NodeChanged,
       (canvas: Canvas, node: CanvasNode) => this.onNodeChanged(canvas, node)
     ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.DataRequested,
+      (_canvas: Canvas, data: CanvasData) => this.expandCollapsedNodes(data)
+    ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.LoadData,
+      (_canvas: Canvas, data: CanvasData, _setData: (data: CanvasData) => void) => this.collapseNodes(data)
+    ))
   }
 
-  onNodeChanged(canvas: Canvas, groupNode: CanvasNode) {
+  private onNodeChanged(canvas: Canvas, groupNode: CanvasNode) {
     const groupNodeData = groupNode.getData()
     if (groupNodeData.type !== 'group') return
 
@@ -30,60 +40,62 @@ export default class CollapsibleGroupsCanvasExtension {
     // Add collapse/expand button next to the label
     const collapseButton = document.createElement('span')
     collapseButton.id = COLLAPSE_BUTTON_ID
-    setIcon(collapseButton, groupNodeData.collapsedData !== undefined ? 'plus-circle' : 'minus-circle')
+    setIcon(collapseButton, groupNodeData.isCollapsed ? 'plus-circle' : 'minus-circle')
 
-    collapseButton.onclick = () => { this.toggleCollapse(canvas, groupNode) }
+    collapseButton.onclick = () => { this.setCollapsed(canvas, groupNode, !groupNode.getData().isCollapsed) }
 
     groupNode.labelEl?.insertAdjacentElement('afterend', collapseButton)
   }
 
-  toggleCollapse(canvas: Canvas, groupNode: CanvasNode) {
-    const groupNodeData = groupNode.getData()
-    const isCollapsed = groupNodeData.collapsedData === undefined
+  private setCollapsed(canvas: Canvas, groupNode: CanvasNode, collapsed: boolean) {
+    canvas.setNodeData(groupNode, 'isCollapsed', collapsed)
+    canvas.setData(canvas.getData())
+  }
 
-    if (isCollapsed) {
-      // Collapse contained nodes
-      const containedNodes = [...canvas.nodes.values()].filter((node: CanvasNode) => 
-        node.getData().id !== groupNodeData.id && BBoxHelper.insideBBox(node.getBBox(), groupNode.getBBox(), true)
+  private expandCollapsedNodes(data: CanvasData) {
+    data.nodes = data.nodes.flatMap((groupNodeData) => {
+      const collapsedData = groupNodeData.collapsedData
+      if (collapsedData === undefined) return [groupNodeData]
+
+      groupNodeData.collapsedData = undefined
+
+      data.edges.push(...collapsedData.edges)
+      return [groupNodeData, ...collapsedData.nodes.map((nodeData) => {
+        // Restore the relative position of the node to the group
+        nodeData.x += groupNodeData.x // TODO: Fix this
+        nodeData.y += groupNodeData.y // TODO: Fix this
+
+        return nodeData
+      })]
+    })
+  }
+
+  private collapseNodes(data: CanvasData) {
+    data.nodes.forEach((groupNodeData) => {
+      if (!groupNodeData.isCollapsed) return
+
+      const groupNodeBBox = BBoxHelper.bboxFromNodeData(groupNodeData)
+      const containedNodesData = data.nodes.filter((nodeData) =>
+        nodeData.id !== groupNodeData.id && BBoxHelper.insideBBox(BBoxHelper.bboxFromNodeData(nodeData), groupNodeBBox, true)
       )
-      const containedEdges = [...canvas.edges.values()].filter((edge) => {
-        const sourceNodeId = edge.from.node.getData().id
-        const targetNodeId = edge.to.node.getData().id
-
-        return containedNodes.some((node) => node.getData().id === sourceNodeId) || 
-          containedNodes.some((node) => node.getData().id === targetNodeId)
+      const containedEdgesData = data.edges.filter((edgeData) => {
+        return containedNodesData.some((nodeData) => nodeData.id === edgeData.fromNode) || 
+          containedNodesData.some((nodeData) => nodeData.id === edgeData.toNode)
       })
-      const collapsedData = {
-        nodes: containedNodes.map((node) => node.getData()).map((nodeData) => {
+
+      data.nodes = data.nodes.filter((nodeData) => !containedNodesData.includes(nodeData))
+      data.edges = data.edges.filter((edgeData) => !containedEdgesData.includes(edgeData))
+
+      groupNodeData.collapsedData = {
+        nodes: containedNodesData.map((nodeData) => {
           // Store the relative position of the node to the group
           nodeData.x -= groupNodeData.x
           nodeData.y -= groupNodeData.y
 
           return nodeData
         }),
-        edges: containedEdges.map((edge) => edge.getData())
+        edges: containedEdgesData
       }
-
-      containedNodes.forEach((node) => canvas.removeNode(node))
-      containedEdges.forEach((edge) => canvas.removeEdge(edge))
-
-      canvas.setNodeData(groupNode, 'collapsedData', collapsedData)
-    } else {
-      // Expand contained nodes
-      canvas.setNodeData(groupNode, 'collapsedData', undefined)
-
-      const collapsedData = groupNodeData.collapsedData
-      if (!collapsedData) return
-
-      // Move contained nodes to the group position
-      collapsedData.nodes.map((nodeData) => {
-        nodeData.x += groupNodeData.x
-        nodeData.y += groupNodeData.y
-
-        return nodeData
-      })
-
-      canvas.importData(collapsedData)
-    }
+    })
   }
 }

@@ -23,7 +23,7 @@
   left: 40px;
 }
 
-.canvas-node[data-collapsed-data] {
+.canvas-node[data-is-collapsed] {
   .canvas-node-container {
     display: none;
   }
@@ -33,13 +33,14 @@
   }
 }
 
-.canvas-node-interaction-layer[data-target-collapsed-data] {
+.canvas-node-interaction-layer[data-target-is-collapsed] {
   .canvas-node-resizer {
     pointer-events: none;
     cursor: inherit;
 
     .canvas-node-connection-point {
-      pointer-events: all;
+      display: none;
+      pointer-events: none;
     }
   }
 }

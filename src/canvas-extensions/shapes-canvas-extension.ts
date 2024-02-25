@@ -1,17 +1,16 @@
-import { Canvas, CanvasNode, CanvasNodeData } from "src/@types/Canvas"
+import { Canvas } from "src/@types/Canvas"
 import AdvancedCanvasPlugin from "src/main"
 import * as CanvasHelper from "src/utils/canvas-helper"
 import { CanvasEvent } from "src/events/events"
 
 interface Shape {
-  id: string|null
+  id?: string
   menuName: string
   icon: string
 }
 
 const SHAPES: Shape[] = [
   {
-    id: null,
     menuName: 'Default',
     icon: 'circle-off'
   },

@@ -8,7 +8,7 @@ export function getExposedNodeData(settings: AdvancedCanvasSettingsManager): (ke
   
   if (settings.getSetting('stickersFeatureEnabled')) exposedData.push('isSticker')
   if (settings.getSetting('shapesFeatureEnabled')) exposedData.push('shape')
-  if (settings.getSetting('collapsibleGroupsFeatureEnabled')) exposedData.push('collapsedData')
+  if (settings.getSetting('collapsibleGroupsFeatureEnabled')) exposedData.push('isCollapsed')
   if (settings.getSetting('presentationFeatureEnabled')) exposedData.push('isStartNode')
   if (settings.getSetting('portalsFeatureEnabled')) exposedData.push('portalToFile', 'portalId')
 
@@ -30,7 +30,7 @@ export default class NodeDataTaggerCanvasExtension {
         for (const dataKey of getExposedNodeData(this.plugin.settingsManager)) {
           const dataValue = nodeData[dataKey]
           
-          if (dataValue === undefined) delete node.nodeEl.dataset[dataKey]
+          if (!dataValue) delete node.nodeEl.dataset[dataKey]
           else node.nodeEl.dataset[dataKey] = dataValue
         }
       }

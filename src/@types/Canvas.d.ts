@@ -175,6 +175,7 @@ export interface CanvasNodeData {
   isSticker?: boolean
   shape?: string
 
+  isCollapsed?: boolean
   collapsedData?: CanvasData
 
   isStartNode?: boolean
