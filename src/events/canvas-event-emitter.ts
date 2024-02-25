@@ -170,22 +170,54 @@ export default class CanvasEventEmitter {
         return result
       },
       setData: (next: any) => function (data: CanvasData) {
+        const triggerEvents = (oldData: CanvasData, newData: CanvasData) => {
+          // Check for changes in node
+          const changedNodesIds = newData.nodes.filter((node: CanvasNodeData) => {
+            const oldNode = oldData.nodes.find((oldNode: CanvasNodeData) => oldNode.id === node.id)
+            return oldNode && JSON.stringify(oldNode) !== JSON.stringify(node)
+          }).map((node: CanvasNodeData) => node.id)
+          for (const nodeId of changedNodesIds) {
+            const node = this.nodes.get(nodeId)
+            if (!node) continue
+
+            that.runAfterInitialized(node, () => {
+              that.triggerWorkspaceEvent(CanvasEvent.NodeChanged, this, node)
+            })
+          }
+
+          // Check for changes in edge
+          const changedEdgesIds = newData.edges.filter((edge: CanvasEdgeData) => {
+            const oldEdge = oldData.edges.find((oldEdge: CanvasEdgeData) => oldEdge.id === edge.id)
+            return oldEdge && JSON.stringify(oldEdge) !== JSON.stringify(edge)
+          }).map((edge: CanvasEdgeData) => edge.id)
+          for (const edgeId of changedEdgesIds) {
+            const edge = this.edges.get(edgeId)
+            if (!edge) continue
+
+            that.runAfterInitialized(edge, () => {
+              that.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, this, edge)
+            })
+          }
+        }
+
         const targetFilePath = this.view.file.path
         const setData = (data: CanvasData) => {
           // Skip if the canvas got unloaded or the file changed
           if (!this.view.file || this.view.file.path !== targetFilePath) return
 
+          const oldData = this.getData()
+
           this.importData(data)
-          this.nodes.forEach((node: CanvasNode) => that.runAfterInitialized(node, () => that.triggerWorkspaceEvent(CanvasEvent.NodeAdded, this, node))) // If node data changed
-          // Edge data changed event will be triggered when updatePath is called
+
+          triggerEvents(oldData, data)
         }
+
+        const oldData = this.getData()
 
         that.triggerWorkspaceEvent(CanvasEvent.LoadData, this, data, setData)
         const result = next.call(this, data)
 
-        this.nodes.forEach((node: CanvasNode) => that.runAfterInitialized(node, () => that.triggerWorkspaceEvent(CanvasEvent.NodeAdded, this, node)))
-        // Edge data changed event will be triggered when updatePath is called
-
+        triggerEvents(oldData, data)
         return result
       },
       requestSave: (next: any) => function (...args: any) {
@@ -205,9 +237,15 @@ export default class CanvasEventEmitter {
       // Patch edges
       canvasView.canvas.edges.forEach(edge => this.patchEdge(edge))
 
-      // Trigger nodes/edges added event
-      canvasView.canvas.nodes.forEach(node => that.runAfterInitialized(node, () => that.triggerWorkspaceEvent(CanvasEvent.NodeAdded, canvasView.canvas, node)))
-      canvasView.canvas.edges.forEach(edge => that.runAfterInitialized(edge, () => that.triggerWorkspaceEvent(CanvasEvent.EdgeAdded, canvasView.canvas, edge)))
+      // Trigger nodes/edges added/changed event
+      canvasView.canvas.nodes.forEach(node => that.runAfterInitialized(node, () => {
+        that.triggerWorkspaceEvent(CanvasEvent.NodeAdded, canvasView.canvas, node)
+        that.triggerWorkspaceEvent(CanvasEvent.NodeChanged, canvasView.canvas, node)
+      }))
+      canvasView.canvas.edges.forEach(edge => that.runAfterInitialized(edge, () => {
+        that.triggerWorkspaceEvent(CanvasEvent.EdgeAdded, canvasView.canvas, edge)
+        edge.updatePath() // Trigger edge changed event
+      }))
 
       // Re-init the canvas with the patched canvas object
       canvasView.setViewData(canvasView.getViewData())

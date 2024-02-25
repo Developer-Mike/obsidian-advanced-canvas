@@ -175,8 +175,7 @@ export interface CanvasNodeData {
   isSticker?: boolean
   shape?: string
 
-  isCollapsed?: boolean
-  collapsedParentGroupId?: string
+  collapsedData?: CanvasData
 
   isStartNode?: boolean
   edgesToNodeFromPortal?: { [key: string]: CanvasEdgeData[] }

@@ -8,7 +8,7 @@ export function getExposedNodeData(settings: AdvancedCanvasSettingsManager): (ke
   
   if (settings.getSetting('stickersFeatureEnabled')) exposedData.push('isSticker')
   if (settings.getSetting('shapesFeatureEnabled')) exposedData.push('shape')
-  if (settings.getSetting('collapsibleGroupsFeatureEnabled')) exposedData.push('isCollapsed', 'collapsedParentGroupId')
+  if (settings.getSetting('collapsibleGroupsFeatureEnabled')) exposedData.push('collapsedData')
   if (settings.getSetting('presentationFeatureEnabled')) exposedData.push('isStartNode')
   if (settings.getSetting('portalsFeatureEnabled')) exposedData.push('portalToFile', 'portalId')
 

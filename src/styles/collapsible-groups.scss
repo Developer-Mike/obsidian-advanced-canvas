@@ -23,7 +23,7 @@
   left: 40px;
 }
 
-.canvas-node[data-is-collapsed] {
+.canvas-node[data-collapsed-data] {
   .canvas-node-container {
     display: none;
   }
