@@ -157,15 +157,25 @@ export default class EdgesStyleCanvasExtension {
       newPath = `M${fromPos.x} ${fromPos.y} L${edge.bezier.from.x} ${edge.bezier.from.y} ${newPath}`
     if (toPos.x != edge.bezier.to.x || toPos.y != edge.bezier.to.y)
       newPath = `${newPath} M${edge.bezier.to.x} ${edge.bezier.to.y} L${toPos.x} ${toPos.y}`
+
+    const labelTranslateString = edge.labelElement?.wrapperEl?.style?.transform
+    let newLabelPos = {
+      x: labelTranslateString ? parseFloat(labelTranslateString.split('(')[1].split('px')[0]) : 0,
+      y: labelTranslateString ? parseFloat(labelTranslateString.split(',')[1].split('px')[0]) : 0
+    }
   
     if (pathRouteType === 'direct') {
       newPath = SvgPathHelper.pathArrayToSvgPath([fromPos, toPos], false)
+      newLabelPos = {
+        x: (fromPos.x + toPos.x) / 2,
+        y: (fromPos.y + toPos.y) / 2
+      }
     } else if (pathRouteType === 'a-star') {
       const nodeBBoxes = [...canvas.nodes.values()]
         .filter(node => {
           const nodeData = node.getData()
           
-          const isGroup = nodeData.type === 'group' // Exclude group nodes$
+          const isGroup = nodeData.type === 'group' // Exclude group nodes
           const isOpenPortal = nodeData.portalToFile !== undefined // Exclude open portals
           
           return !isGroup && !isOpenPortal
@@ -177,11 +187,17 @@ export default class EdgesStyleCanvasExtension {
 
       const roundedPath = this.plugin.settingsManager.getSetting('edgeStylePathfinderPathRounded')
       const svgPath = SvgPathHelper.pathArrayToSvgPath(pathArray, roundedPath)
+
       newPath = svgPath
+      newLabelPos = pathArray[Math.floor(pathArray.length / 2)]
     }
     
     edge.path.interaction.setAttr("d", newPath)
     edge.path.display.setAttr("d", newPath)
+
+    if (edge.labelElement?.wrapperEl) {
+      edge.labelElement.wrapperEl.style.transform = `translate(${newLabelPos.x}px, ${newLabelPos.y}px)`
+    }
   }
 
   private updateAllEdges(canvas: Canvas) {

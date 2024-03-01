@@ -260,6 +260,14 @@ export interface CanvasEdge extends CanvasElement {
     display: HTMLElement
   }
 
+  labelElement: {
+    edge: CanvasEdge
+    initialTextState: string
+    isEditing: boolean
+    textareaEl: HTMLElement
+    wrapperEl: HTMLElement
+  }
+
   updatePath(): void
   
   setData(data: CanvasEdgeData): void
