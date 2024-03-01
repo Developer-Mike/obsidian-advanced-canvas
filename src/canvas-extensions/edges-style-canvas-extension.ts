@@ -81,6 +81,13 @@ export default class EdgesStyleCanvasExtension {
         if (!isDragging) this.updateAllEdges(canvas)
       }
     ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.NodeMoved,
+      (canvas: Canvas, _node: CanvasNode) => {
+        if (!canvas.isDragging) this.updateAllEdges(canvas)
+      }
+    ))
   }
 
   onPopupMenuCreated(canvas: Canvas): void {
