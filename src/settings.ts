@@ -23,8 +23,6 @@ export interface AdvancedCanvasPluginSettings {
   disableZoom: boolean
   disablePan: boolean
 
-  collapsibleGroupsFeatureEnabled: boolean
-
   stickersFeatureEnabled: boolean
 
   presentationFeatureEnabled: boolean
@@ -57,8 +55,6 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   disableNodePopup: false,
   disableZoom: false,
   disablePan: false,
-
-  collapsibleGroupsFeatureEnabled: true,
 
   stickersFeatureEnabled: true,
 
@@ -229,13 +225,6 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           .setValue(this.settingsManager.settings.disablePan)
           .onChange(async (value) => await this.settingsManager.setSetting({ disablePan: value }))
       )*/
-
-    this.createFeatureHeading(
-      containerEl,
-      "Collapsible groups",
-      "Group nodes can be collapsed and expanded to keep the canvas organized.",
-      'collapsibleGroupsFeatureEnabled'
-    )
 
     this.createFeatureHeading(
       containerEl,

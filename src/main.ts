@@ -15,7 +15,6 @@ import IconsHelper from './utils/icons-helper'
 import StickersCanvasExtension from './canvas-extensions/stickers-canvas-extension'
 import EdgesStyleCanvasExtension from './canvas-extensions/edges-style-canvas-extension'
 import EdgeDataTaggerCanvasExtension from './canvas-extensions/edge-data-tagger-canvas-extension'
-import CollapsibleGroupsCanvasExtension from './canvas-extensions/collapsible-groups-canvas-extension'
 import DebugHelper from './utils/debug-helper'
 
 const CANVAS_EXTENSIONS: any[] = [
@@ -25,7 +24,6 @@ const CANVAS_EXTENSIONS: any[] = [
   CommandsCanvasExtension,
   ReadonlyCanvasExtension,
   GroupCanvasExtension,
-  CollapsibleGroupsCanvasExtension,
   EncapsulateCanvasExtension,
   StickersCanvasExtension,
   ShapesCanvasExtension,
