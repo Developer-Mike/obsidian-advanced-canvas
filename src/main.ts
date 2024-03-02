@@ -16,11 +16,13 @@ import StickersCanvasExtension from './canvas-extensions/stickers-canvas-extensi
 import EdgesStyleCanvasExtension from './canvas-extensions/edges-style-canvas-extension'
 import EdgeDataTaggerCanvasExtension from './canvas-extensions/edge-data-tagger-canvas-extension'
 import DebugHelper from './utils/debug-helper'
+import DefaultNodeSizeCanvasExtension from './canvas-extensions/default-node-size-canvas-extension'
 
 const CANVAS_EXTENSIONS: any[] = [
   NodeDataTaggerCanvasExtension,
   EdgeDataTaggerCanvasExtension,
   InteractionTaggerCanvasExtension,
+  DefaultNodeSizeCanvasExtension,
   CommandsCanvasExtension,
   ReadonlyCanvasExtension,
   GroupCanvasExtension,

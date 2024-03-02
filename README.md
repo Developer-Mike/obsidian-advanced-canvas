@@ -62,6 +62,7 @@ All features can be enabled/disabled in the settings.
 - [Encapsulate selection](#encapsulate-selection)
   - Create a new canvas from the selected nodes
   - Create a link to the new canvas in the current canvas
+- Change the default text node size to 260x60 (from 250x60) to align with the grid
 - Expose [canvas events](#canvas-events) to use them in other plugins
 - Expose node data to style them using CSS
 
