@@ -81,13 +81,6 @@ export default class EdgesStyleCanvasExtension {
         if (!isDragging) this.updateAllEdges(canvas)
       }
     ))
-
-    this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.NodeMoved,
-      (canvas: Canvas, _node: CanvasNode) => {
-        if (!canvas.isDragging) this.updateAllEdges(canvas)
-      }
-    ))
   }
 
   onPopupMenuCreated(canvas: Canvas): void {
@@ -140,7 +133,7 @@ export default class EdgesStyleCanvasExtension {
     }
   }
 
-  private onEdgeChanged(canvas: Canvas, edge: CanvasEdge) {
+  private async onEdgeChanged(canvas: Canvas, edge: CanvasEdge) {
     if (!edge.bezier) return
     const pathRouteType = edge.getData().edgePathRoute
 
@@ -171,6 +164,8 @@ export default class EdgesStyleCanvasExtension {
         y: (fromPos.y + toPos.y) / 2
       }
     } else if (pathRouteType === 'a-star') {
+      if (canvas.isDragging && !this.plugin.settingsManager.getSetting('edgeStylePathfinderPathLiveUpdate')) return
+      
       const nodeBBoxes = [...canvas.nodes.values()]
         .filter(node => {
           const nodeData = node.getData()
@@ -195,9 +190,8 @@ export default class EdgesStyleCanvasExtension {
     edge.path.interaction.setAttr("d", newPath)
     edge.path.display.setAttr("d", newPath)
 
-    if (edge.labelElement?.wrapperEl) {
-      edge.labelElement.wrapperEl.style.transform = `translate(${newLabelPos.x}px, ${newLabelPos.y}px)`
-    }
+    if (!edge.labelElement?.wrapperEl) return
+    edge.labelElement.wrapperEl.style.transform = `translate(${newLabelPos.x}px, ${newLabelPos.y}px)`
   }
 
   private updateAllEdges(canvas: Canvas) {

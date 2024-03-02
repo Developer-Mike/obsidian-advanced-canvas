@@ -11,6 +11,7 @@ export interface AdvancedCanvasPluginSettings {
 
   edgesStylingFeatureEnabled: boolean
   edgeStylePathfinderGridResolution: number
+  edgeStylePathfinderPathLiveUpdate: boolean
   edgeStylePathfinderPathRounded: boolean
 
   commandsFeatureEnabled: boolean
@@ -44,6 +45,7 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
 
   edgesStylingFeatureEnabled: true,
   edgeStylePathfinderGridResolution: 10,
+  edgeStylePathfinderPathLiveUpdate: true,
   edgeStylePathfinderPathRounded: false,
 
   commandsFeatureEnabled: true,
@@ -137,6 +139,15 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
         text
           .setValue(this.settingsManager.getSetting('edgeStylePathfinderGridResolution').toString())
           .onChange(async (value) => await this.settingsManager.setSetting({ edgeStylePathfinderGridResolution: Math.max(5, parseInt(value)) }))
+      )
+
+    new Setting(containerEl)
+      .setName("Live update A* path")
+      .setDesc("When enabled, the A* path style will be updated live while dragging the edge.")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.settingsManager.getSetting('edgeStylePathfinderPathLiveUpdate'))
+          .onChange(async (value) => await this.settingsManager.setSetting({ edgeStylePathfinderPathLiveUpdate: value }))
       )
 
     new Setting(containerEl)
