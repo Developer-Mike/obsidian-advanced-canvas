@@ -280,7 +280,7 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
     - Payload: `Canvas`, `BBox`
   - `advanced-canvas:popup-menu-created`
     - Fired when the a node popup menu gets created (Not firing multiple times if it gets moved between nodes of the same type)
-    - Payload: `Canvas`, `Node`
+    - Payload: `Canvas`
   - `advanced-canvas:node-interaction`
     - Fired when a node gets hovered over
     - Payload: `Canvas`, `Node`

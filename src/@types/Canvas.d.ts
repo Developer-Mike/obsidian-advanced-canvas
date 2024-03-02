@@ -61,7 +61,7 @@ export interface Canvas {
   readonly: boolean
   setReadonly(readonly: boolean): void
 
-  selection: Set<CanvasNode|CanvasEdge>
+  selection: Set<CanvasElement>
   getSelectionData(): SelectionData
   deselectAll(): void
 
@@ -163,6 +163,7 @@ export interface CanvasElement {
   initialized: boolean
 
   initialize(): void
+  setColor(color: string): void
 }
 
 export type CanvasNodeType = 'text' | 'group' | 'file' | 'link'

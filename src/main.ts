@@ -17,6 +17,7 @@ import EdgesStyleCanvasExtension from './canvas-extensions/edges-style-canvas-ex
 import EdgeDataTaggerCanvasExtension from './canvas-extensions/edge-data-tagger-canvas-extension'
 import DebugHelper from './utils/debug-helper'
 import DefaultNodeSizeCanvasExtension from './canvas-extensions/default-node-size-canvas-extension'
+import ColorPaletteCanvasExtension from './canvas-extensions/color-palette-canvas-extension'
 
 const CANVAS_EXTENSIONS: any[] = [
   NodeDataTaggerCanvasExtension,
@@ -27,6 +28,7 @@ const CANVAS_EXTENSIONS: any[] = [
   ReadonlyCanvasExtension,
   GroupCanvasExtension,
   EncapsulateCanvasExtension,
+  ColorPaletteCanvasExtension,
   StickersCanvasExtension,
   ShapesCanvasExtension,
   EdgesStyleCanvasExtension,
