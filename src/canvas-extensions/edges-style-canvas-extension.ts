@@ -1,4 +1,4 @@
-import { Canvas, CanvasEdge, CanvasNode } from "src/@types/Canvas"
+import { Canvas, CanvasEdge, CanvasNode, Position } from "src/@types/Canvas"
 import AdvancedCanvasPlugin from "src/main"
 import * as CanvasHelper from "src/utils/canvas-helper"
 import * as AStarHelper from "src/utils/a-star-helper"
@@ -63,6 +63,11 @@ export default class EdgesStyleCanvasExtension {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.EdgeChanged,
       (canvas: Canvas, edge: CanvasEdge) => this.onEdgeChanged(canvas, edge)
+    ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.EdgeCenterRequested,
+      (canvas: Canvas, edge: CanvasEdge, center: Position) => this.onEdgeCenterRequested(canvas, edge, center)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
@@ -133,9 +138,21 @@ export default class EdgesStyleCanvasExtension {
     }
   }
 
-  private async onEdgeChanged(canvas: Canvas, edge: CanvasEdge) {
+  private updateAllEdges(canvas: Canvas) {
+    for (const edge of canvas.edges.values()) {
+      this.onEdgeChanged(canvas, edge)
+    }
+  }
+
+  private onEdgeChanged(canvas: Canvas, edge: CanvasEdge) {
     if (!edge.bezier) return
-    const pathRouteType = edge.getData().edgePathRoute
+    
+    // Reset path to default
+    edge.updatePath()
+    edge.center = undefined
+
+    const pathRouteType = edge.getData().edgePathRoute ?? 'default'
+    if (pathRouteType === 'default') return 
 
     const fromPos = edge.from.end === 'none' ? 
       BBoxHelper.getCenterOfBBoxSide(edge.from.node.getBBox(), edge.from.side) :
@@ -145,23 +162,13 @@ export default class EdgesStyleCanvasExtension {
       BBoxHelper.getCenterOfBBoxSide(edge.to.node.getBBox(), edge.to.side) :
       edge.bezier.to
 
-    let newPath = edge.bezier.path
-    if (fromPos.x != edge.bezier.from.x || fromPos.y != edge.bezier.from.y)
-      newPath = `M${fromPos.x} ${fromPos.y} L${edge.bezier.from.x} ${edge.bezier.from.y} ${newPath}`
-    if (toPos.x != edge.bezier.to.x || toPos.y != edge.bezier.to.y)
-      newPath = `${newPath} M${edge.bezier.to.x} ${edge.bezier.to.y} L${toPos.x} ${toPos.y}`
-
-    const labelTranslateString = edge.labelElement?.wrapperEl?.style?.transform
-    let newLabelPos = {
-      x: labelTranslateString ? parseFloat(labelTranslateString.split('(')[1].split('px')[0]) : 0,
-      y: labelTranslateString ? parseFloat(labelTranslateString.split(',')[1].split('px')[0]) : 0
-    }
+    let newPath = edge.path.display.getAttribute("d")
   
     if (pathRouteType === 'direct') {
       newPath = SvgPathHelper.pathArrayToSvgPath([fromPos, toPos], false)
-      newLabelPos = {
-        x: (fromPos.x + toPos.x) / 2,
-        y: (fromPos.y + toPos.y) / 2
+      edge.center = { 
+        x: (fromPos.x + toPos.x) / 2, 
+        y: (fromPos.y + toPos.y) / 2 
       }
     } else if (pathRouteType === 'a-star') {
       if (canvas.isDragging && !this.plugin.settingsManager.getSetting('edgeStylePathfinderPathLiveUpdate')) return
@@ -184,19 +191,17 @@ export default class EdgesStyleCanvasExtension {
       const svgPath = SvgPathHelper.pathArrayToSvgPath(pathArray, roundedPath)
 
       newPath = svgPath
-      newLabelPos = pathArray[Math.floor(pathArray.length / 2)]
+      edge.center = pathArray[Math.floor(pathArray.length / 2)]
     }
     
     edge.path.interaction.setAttr("d", newPath)
     edge.path.display.setAttr("d", newPath)
 
-    if (!edge.labelElement?.wrapperEl) return
-    edge.labelElement.wrapperEl.style.transform = `translate(${newLabelPos.x}px, ${newLabelPos.y}px)`
+    if (edge.labelElement) edge.labelElement.render()
   }
 
-  private updateAllEdges(canvas: Canvas) {
-    for (const edge of canvas.edges.values()) {
-      this.onEdgeChanged(canvas, edge)
-    }
+  private onEdgeCenterRequested(_canvas: Canvas, edge: CanvasEdge, center: Position) {
+    center.x = edge.center?.x ?? center.x
+    center.y = edge.center?.y ?? center.y
   }
 }

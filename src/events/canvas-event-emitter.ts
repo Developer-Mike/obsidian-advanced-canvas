@@ -223,9 +223,14 @@ export default class CanvasEventEmitter {
 
     // Patch edge
     const uninstall = around(edge, {
-      updatePath: (next: any) => function (...args: any) {
+      render: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
         that.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, this.canvas, edge)
+        return result
+      },
+      getCenter: (next: any) => function (...args: any) {
+        const result = next.call(this, ...args)
+        that.triggerWorkspaceEvent(CanvasEvent.EdgeCenterRequested, this.canvas, edge, result)
         return result
       }
     })

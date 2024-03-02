@@ -266,8 +266,14 @@ export interface CanvasEdge extends CanvasElement {
     isEditing: boolean
     textareaEl: HTMLElement
     wrapperEl: HTMLElement
+
+    render(): void
   }
 
+  /** Custom field */
+  center?: Position
+  getCenter(): Position
+  render(): void
   updatePath(): void
   
   setData(data: CanvasEdgeData): void
