@@ -223,7 +223,7 @@ export default class PortalsCanvasExtension {
   }
 
   private onOpenPortalMoved(canvas: Canvas, portalNode: CanvasNode) {
-    const portalNodeData = portalNode.getData()
+    let portalNodeData = portalNode.getData()
 
     // Update nested nodes positions
     const nestedNodesIdMap = portalNode.getData().portalIdMaps?.nodeIdMap
@@ -241,6 +241,8 @@ export default class PortalsCanvasExtension {
         width: targetSize.width,
         height: targetSize.height
       })
+
+      return
     }
 
     // Move nested nodes
