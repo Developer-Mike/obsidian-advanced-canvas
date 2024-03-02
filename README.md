@@ -17,8 +17,12 @@
     <b>⚡ Supercharge</b> your canvas experience! Create presentations, flowcharts and more!
 </p>
 
-## Installation (waiting for approval for the community plugins list)
-- Install using [BRAT](https://github.com/TfTHacker/obsidian42-brat)
+## Installation
+Recommended:
+- Open the Community Plugins tab in the settings and search for "Advanced Canvas"
+
+OR
+- Install it using [BRAT](https://github.com/TfTHacker/obsidian42-brat)
 
 OR
 - Create a folder named `advanced-canvas` in your vault's plugins folder (`<vault>/.obsidian/plugins/`).
