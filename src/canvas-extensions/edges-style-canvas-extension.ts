@@ -152,7 +152,12 @@ export default class EdgesStyleCanvasExtension {
     edge.center = undefined
 
     const pathRouteType = edge.getData().edgePathRoute ?? 'default'
-    if (pathRouteType === 'default') return 
+    if (pathRouteType === 'default') {
+      // Update label position
+      edge.labelElement?.render() 
+
+      return
+    }
 
     const fromPos = edge.from.end === 'none' ? 
       BBoxHelper.getCenterOfBBoxSide(edge.from.node.getBBox(), edge.from.side) :
@@ -196,8 +201,7 @@ export default class EdgesStyleCanvasExtension {
     
     edge.path.interaction.setAttr("d", newPath)
     edge.path.display.setAttr("d", newPath)
-
-    if (edge.labelElement) edge.labelElement.render()
+    edge.labelElement?.render()
   }
 
   private onEdgeCenterRequested(_canvas: Canvas, edge: CanvasEdge, center: Position) {
