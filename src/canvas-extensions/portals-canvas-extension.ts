@@ -122,7 +122,6 @@ export default class PortalsCanvasExtension {
 
   private setPortalOpen(canvas: Canvas, portalNode: CanvasNode, open: boolean) {
     const portalNodeData = portalNode.getData()
-
     canvas.setNodeData(portalNode, 'portalToFile', open ? portalNodeData.file : undefined)
 
     // Update whole canvas data
@@ -143,7 +142,7 @@ export default class PortalsCanvasExtension {
       .forEach(edge => canvas.removeEdge(edge!))
   }
 
-  private onEdgeChanged(canvas: Canvas, edge: CanvasEdge) {
+  private onEdgeChanged(_canvas: Canvas, edge: CanvasEdge) {
     const isUnsaved = (edge.from.node !== undefined && edge.to.node !== undefined) && // Edge not fully connected
       (edge.from.node.getData().portalId !== undefined && edge.to.node.getData().portalId !== undefined) && // Both nodes are from portal
       edge.getData().portalId === undefined // Edge is not from portal

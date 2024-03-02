@@ -177,14 +177,14 @@ export default class CanvasEventEmitter {
           if (!this.view.file || this.view.file.path !== targetFilePath) return
 
           this.importData(data)
-          this.nodes.forEach((node: CanvasNode) => that.runAfterInitialized(node, () => that.triggerWorkspaceEvent(CanvasEvent.NodeAdded, this, node))) // If node data changed
+          this.nodes.forEach((node: CanvasNode) => that.runAfterInitialized(node, () => that.triggerWorkspaceEvent(CanvasEvent.NodeChanged, this, node))) // If node data changed
           // Edge data changed event will be triggered when updatePath is called
         }
 
         that.triggerWorkspaceEvent(CanvasEvent.LoadData, this, data, setData)
         const result = next.call(this, data)
 
-        this.nodes.forEach((node: CanvasNode) => that.runAfterInitialized(node, () => that.triggerWorkspaceEvent(CanvasEvent.NodeAdded, this, node)))
+        this.nodes.forEach((node: CanvasNode) => that.runAfterInitialized(node, () => that.triggerWorkspaceEvent(CanvasEvent.NodeChanged, this, node))) // If node data changed
         // Edge data changed event will be triggered when updatePath is called
 
         return result
