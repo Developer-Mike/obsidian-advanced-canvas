@@ -71,6 +71,11 @@ All features can be enabled/disabled in the settings.
 - Expose [canvas events](#canvas-events) to use them in other plugins
 - Expose node data to style them using CSS
 
+## Support
+If you want to support me and my work, consider starring ⭐ the repository, or, if you want to support me financially, you can donate any amount on [Ko-fi](https://ko-fi.com/X8X27IA08) ❤️
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/X8X27IA08)
+
 ## Updated UI
 ### Canvas Card Menu
 <details>
