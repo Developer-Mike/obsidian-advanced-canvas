@@ -52,6 +52,7 @@ All features can be enabled/disabled in the settings.
     - Default
     - Straight
     - A*
+- [Custom colors](#custom-colors) in the color picker
 - [Stickers](#stickers)
   - Convert image nodes to stickers (transparent background and no border)
 - [Presentation mode](#presentation)
@@ -165,6 +166,21 @@ Set the path style of the edges (arrows) to default, straight or A*.
 <details>
     <summary>Path Styles Example</summary>
     <img src="./assets/edge-path-styles.png" alt="Edge Path Styles Example"/>
+</details>
+
+## Custom Colors
+Add custom colors to the color picker. You can add them using the following css snippet:
+```css
+:root {
+    /* Where X is the index of the color in the palette */
+    /* The colors 1-6 are already used by Obsidian */
+    --canvas-color-X: 0, 255, 0; /* RGB */
+}
+```
+
+<details>
+    <summary>Custom Colors In Palette</summary>
+    <img src="./assets/custom-colors.png" alt="Custom Colors In Palette"/>
 </details>
 
 ## Stickers

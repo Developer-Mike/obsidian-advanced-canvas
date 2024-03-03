@@ -89,10 +89,10 @@ export default class PresentationCanvasExtension {
 
   onPopupMenuCreated(canvas: Canvas): void {
     // If the canvas is readonly or there are multiple/no nodes selected, return
-    const selectedNodeData = canvas.getSelectionData().nodes
-    if (canvas.readonly || selectedNodeData.length !== 1) return
+    const selectedNodesData = canvas.getSelectionData().nodes
+    if (canvas.readonly || selectedNodesData.length !== 1 || canvas.selection.size > 1) return
     
-    const selectedNode = canvas.nodes.get(selectedNodeData[0].id)
+    const selectedNode = canvas.nodes.get(selectedNodesData[0].id)
     if (!selectedNode) return
     
     CanvasHelper.addPopupMenuOption(
