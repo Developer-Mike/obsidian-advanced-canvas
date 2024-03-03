@@ -25,6 +25,23 @@ export default class ColorPaletteCanvasExtension {
     this.plugin.register(() => this.observer?.disconnect())
   }
 
+  private updateCustomColorModStyleClasses() {
+    document.getElementById(CUSTOM_COLORS_MOD_STYLES_ID)?.remove()
+
+    const customColorModStyle = document.createElement('style')
+    customColorModStyle.id = CUSTOM_COLORS_MOD_STYLES_ID
+    document.body.appendChild(customColorModStyle)
+
+    for (const colorId of this.getCustomColors()) {
+      // Add mod-canvas-color-<colorId> style to the css
+      customColorModStyle.innerHTML += `
+        .mod-canvas-color-${colorId} {
+          --canvas-color: var(--canvas-color-${colorId});
+        }
+      `
+    }
+  }
+
   private patchColorSelection(canvas: Canvas) {
     if (this.observer) this.observer.disconnect()
 
@@ -66,23 +83,6 @@ export default class ColorPaletteCanvasExtension {
     })
 
     return menuItem
-  }
-
-  private updateCustomColorModStyleClasses() {
-    document.getElementById(CUSTOM_COLORS_MOD_STYLES_ID)?.remove()
-
-    const customColorModStyle = document.createElement('style')
-    customColorModStyle.id = CUSTOM_COLORS_MOD_STYLES_ID
-    document.body.appendChild(customColorModStyle)
-
-    for (const colorId of this.getCustomColors()) {
-      // Add mod-canvas-color-<colorId> style to the css
-      customColorModStyle.innerHTML += `
-        .mod-canvas-color-${colorId} {
-          --canvas-color: var(--canvas-color-${colorId});
-        }
-      `
-    }
   }
 
   private getCustomColors(): string[] {
