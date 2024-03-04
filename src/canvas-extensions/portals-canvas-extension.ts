@@ -1,5 +1,5 @@
 import { TFile } from "obsidian"
-import { BBox, Canvas, CanvasData, CanvasEdge, CanvasNode, CanvasNodeData } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasData, CanvasEdge, CanvasElement, CanvasNode, CanvasNodeData } from "src/@types/Canvas"
 import { CanvasEvent } from "src/events/events"
 import AdvancedCanvasPlugin from "src/main"
 import * as CanvasHelper from "src/utils/canvas-helper"
@@ -153,7 +153,7 @@ export default class PortalsCanvasExtension {
     })
   }
 
-  private onSelectionChanged(canvas: Canvas, oldSelection: Set<CanvasNode|CanvasEdge>, updateSelection: (update: () => void) => void) {
+  private onSelectionChanged(canvas: Canvas, oldSelection: Set<CanvasElement>, updateSelection: (update: () => void) => void) {
     // Unselect nodes from portals
     updateSelection(() => {
       const updatedSelection = Array.from(canvas.selection)

@@ -164,6 +164,9 @@ export interface CanvasElement {
 
   initialize(): void
   setColor(color: string): void
+  
+  getData(): CanvasNodeData | CanvasEdgeData
+  setData(data: CanvasNodeData | CanvasEdgeData): void
 }
 
 export type CanvasNodeType = 'text' | 'group' | 'file' | 'link'
