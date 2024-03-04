@@ -175,8 +175,8 @@ export default class CanvasEventEmitter {
       }
     })
     
-    that.runAfterInitialized(node, () => {
-      that.triggerWorkspaceEvent(CanvasEvent.NodeAdded, this, node)
+    this.runAfterInitialized(node, () => {
+      this.triggerWorkspaceEvent(CanvasEvent.NodeAdded, node.canvas, node)
     })
   }
 
@@ -207,8 +207,8 @@ export default class CanvasEventEmitter {
       }
     })
     
-    that.runAfterInitialized(edge, () => {
-      that.triggerWorkspaceEvent(CanvasEvent.EdgeAdded, this, edge)
+    this.runAfterInitialized(edge, () => {
+      this.triggerWorkspaceEvent(CanvasEvent.EdgeAdded, edge.canvas, edge)
     })
   }
   
@@ -238,12 +238,12 @@ export default class CanvasEventEmitter {
   private emitEventsForUnknownDataChanges(canvas: Canvas) {
     // If node data changed
     canvas.nodes.forEach((node: CanvasNode) => this.runAfterInitialized(node, () => {
-      this.triggerWorkspaceEvent(CanvasEvent.NodeChanged, this, node)
+      this.triggerWorkspaceEvent(CanvasEvent.NodeChanged, node.canvas, node)
     }))
 
     // If edge data changed
     canvas.edges.forEach((edge: CanvasEdge) => this.runAfterInitialized(edge, () => {
-      this.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, this, edge)
+      this.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, edge.canvas, edge)
     }))
   }
 
