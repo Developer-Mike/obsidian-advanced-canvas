@@ -126,20 +126,20 @@ export default class EdgesStyleCanvasExtension {
     CanvasHelper.addPopupMenuOption(canvas, pathRouteMenuOption, -2)
   }
 
-  private setStyleForSelection(canvas: Canvas, selectedEdges: CanvasEdge[], styleId: string|undefined) {
+  private setStyleForSelection(_canvas: Canvas, selectedEdges: CanvasEdge[], styleId: string|undefined) {
     for (const edge of selectedEdges) {
-      canvas.setEdgeData(edge, 'edgeStyle', styleId)
+      edge.setData({ ...edge.getData(), edgeStyle: styleId as any })
     }
   }
 
-  private setPathRouteForSelection(canvas: Canvas, selectedEdges: CanvasEdge[], pathRouteTypeId: string|undefined) {
+  private setPathRouteForSelection(_canvas: Canvas, selectedEdges: CanvasEdge[], pathRouteTypeId: string|undefined) {
     for (const edge of selectedEdges) {
-      canvas.setEdgeData(edge, 'edgePathRoute', pathRouteTypeId)
+      edge.setData({ ...edge.getData(), edgePathRoute: pathRouteTypeId as any })
     }
   }
 
   private updateAllEdges(canvas: Canvas) {
-    for (const edge of canvas.edges.values()) {
+    for (const edge of canvas.edges?.values() ?? []) {
       this.onEdgeChanged(canvas, edge)
     }
   }

@@ -88,8 +88,6 @@ export interface Canvas {
   lockedX: number
   lockedY: number
   lockedZoom: number
-  setNodeData(node: CanvasNode, key: keyof CanvasNodeData, value: any): void
-  setEdgeData(edge: CanvasEdge, key: keyof CanvasEdgeData, value: any): void
 }
 
 export interface CanvasOptions {
@@ -161,6 +159,7 @@ export interface CanvasData {
 export interface CanvasElement {
   canvas: Canvas
   initialized: boolean
+  isDirty?: boolean // Custom for Change event
 
   initialize(): void
   setColor(color: string): void
@@ -177,7 +176,7 @@ export interface CanvasNodeData {
   file?: string
 
   isSticker?: boolean
-  shape?: string
+  shape?: string | null
 
   isStartNode?: boolean
   edgesToNodeFromPortal?: { [key: string]: CanvasEdgeData[] }

@@ -1,7 +1,7 @@
 import { around } from "monkey-around"
 import { Plugin } from "obsidian"
 
-export function patchWorkspaceFunction<T>(plugin: Plugin, getTarget: () => T|undefined, functions: { [key: string]: (next: any) => (...args: any) => any }): Promise<T> {
+export function tryPatchWorkspacePrototype<T>(plugin: Plugin, getTarget: () => T|undefined, functions: { [key: string]: (next: any) => (...args: any) => any }): Promise<T> {
   return new Promise((resolve) => {
     const tryPatch = () => {
       const target = getTarget()
@@ -30,4 +30,9 @@ export function patchWorkspaceFunction<T>(plugin: Plugin, getTarget: () => T|und
 
     plugin.registerEvent(listener)
   })
+}
+
+export function patchObjectInstance<T>(plugin: Plugin, target: T, functions: { [key: string]: (next: any) => (...args: any) => any }): void {
+  const uninstaller = around(target as any, functions)
+  plugin.register(uninstaller)
 }

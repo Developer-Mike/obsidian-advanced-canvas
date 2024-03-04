@@ -122,7 +122,10 @@ export default class PortalsCanvasExtension {
 
   private setPortalOpen(canvas: Canvas, portalNode: CanvasNode, open: boolean) {
     const portalNodeData = portalNode.getData()
-    canvas.setNodeData(portalNode, 'portalToFile', open ? portalNodeData.file : undefined)
+    portalNode.setData({
+      ...portalNodeData,
+      portalToFile: open ? portalNodeData.file : undefined
+    })
 
     // Update whole canvas data
     canvas.setData(canvas.getData())

@@ -118,9 +118,9 @@ export default class PresentationCanvasExtension {
     if (!node) return
 
     const startNode = this.getStartNode(canvas)
-    if (startNode) canvas.setNodeData(startNode, 'isStartNode', false)
+    if (startNode) startNode.setData({ ...startNode.getData(), isStartNode: false })
 
-    if (node !== startNode) canvas.setNodeData(node, 'isStartNode', true)
+    if (node !== startNode) node.setData({ ...node.getData(), isStartNode: true })
   }
 
   private getSlideSize(): Size {
@@ -142,7 +142,7 @@ export default class PresentationCanvasExtension {
       focus: false,
     })
 
-    if (isStartNode) canvas.setNodeData(groupNode, 'isStartNode', true)
+    if (isStartNode) groupNode.setData({ ...groupNode.getData(), isStartNode: true })
   }
 
   private async animateNodeTransition(canvas: Canvas, fromNode: CanvasNode|undefined, toNode: CanvasNode) {
