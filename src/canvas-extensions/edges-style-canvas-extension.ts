@@ -1,4 +1,4 @@
-import { Canvas, CanvasEdge, CanvasNode } from "src/@types/Canvas"
+import { Canvas, CanvasEdge, CanvasNode, Position } from "src/@types/Canvas"
 import AdvancedCanvasPlugin from "src/main"
 import * as CanvasHelper from "src/utils/canvas-helper"
 import * as AStarHelper from "src/utils/a-star-helper"
@@ -66,6 +66,11 @@ export default class EdgesStyleCanvasExtension {
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.EdgeCenterRequested,
+      (canvas: Canvas, edge: CanvasEdge, center: Position) => this.onEdgeCenterRequested(canvas, edge, center)
+    ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.NodeAdded,
       (canvas: Canvas, _node: CanvasNode) => this.updateAllEdges(canvas)
     ))
@@ -121,21 +126,38 @@ export default class EdgesStyleCanvasExtension {
     CanvasHelper.addPopupMenuOption(canvas, pathRouteMenuOption, -2)
   }
 
-  private setStyleForSelection(canvas: Canvas, selectedEdges: CanvasEdge[], styleId: string|undefined) {
+  private setStyleForSelection(_canvas: Canvas, selectedEdges: CanvasEdge[], styleId: string|undefined) {
     for (const edge of selectedEdges) {
-      canvas.setEdgeData(edge, 'edgeStyle', styleId)
+      edge.setData({ ...edge.getData(), edgeStyle: styleId as any })
     }
   }
 
-  private setPathRouteForSelection(canvas: Canvas, selectedEdges: CanvasEdge[], pathRouteTypeId: string|undefined) {
+  private setPathRouteForSelection(_canvas: Canvas, selectedEdges: CanvasEdge[], pathRouteTypeId: string|undefined) {
     for (const edge of selectedEdges) {
-      canvas.setEdgeData(edge, 'edgePathRoute', pathRouteTypeId)
+      edge.setData({ ...edge.getData(), edgePathRoute: pathRouteTypeId as any })
+    }
+  }
+
+  private updateAllEdges(canvas: Canvas) {
+    for (const edge of canvas.edges?.values() ?? []) {
+      this.onEdgeChanged(canvas, edge)
     }
   }
 
   private onEdgeChanged(canvas: Canvas, edge: CanvasEdge) {
     if (!edge.bezier) return
-    const pathRouteType = edge.getData().edgePathRoute
+    
+    // Reset path to default
+    edge.updatePath()
+    edge.center = undefined
+
+    const pathRouteType = edge.getData().edgePathRoute ?? 'default'
+    if (pathRouteType === 'default') {
+      // Update label position
+      edge.labelElement?.render() 
+
+      return
+    }
 
     const fromPos = edge.from.end === 'none' ? 
       BBoxHelper.getCenterOfBBoxSide(edge.from.node.getBBox(), edge.from.side) :
@@ -145,20 +167,22 @@ export default class EdgesStyleCanvasExtension {
       BBoxHelper.getCenterOfBBoxSide(edge.to.node.getBBox(), edge.to.side) :
       edge.bezier.to
 
-    let newPath = edge.bezier.path
-    if (fromPos.x != edge.bezier.from.x || fromPos.y != edge.bezier.from.y)
-      newPath = `M${fromPos.x} ${fromPos.y} L${edge.bezier.from.x} ${edge.bezier.from.y} ${newPath}`
-    if (toPos.x != edge.bezier.to.x || toPos.y != edge.bezier.to.y)
-      newPath = `${newPath} M${edge.bezier.to.x} ${edge.bezier.to.y} L${toPos.x} ${toPos.y}`
+    let newPath = edge.path.display.getAttribute("d")
   
     if (pathRouteType === 'direct') {
       newPath = SvgPathHelper.pathArrayToSvgPath([fromPos, toPos], false)
+      edge.center = { 
+        x: (fromPos.x + toPos.x) / 2, 
+        y: (fromPos.y + toPos.y) / 2 
+      }
     } else if (pathRouteType === 'a-star') {
+      if (canvas.isDragging && !this.plugin.settingsManager.getSetting('edgeStylePathfinderPathLiveUpdate')) return
+      
       const nodeBBoxes = [...canvas.nodes.values()]
         .filter(node => {
           const nodeData = node.getData()
           
-          const isGroup = nodeData.type === 'group' // Exclude group nodes$
+          const isGroup = nodeData.type === 'group' // Exclude group nodes
           const isOpenPortal = nodeData.portalToFile !== undefined // Exclude open portals
           
           return !isGroup && !isOpenPortal
@@ -170,16 +194,18 @@ export default class EdgesStyleCanvasExtension {
 
       const roundedPath = this.plugin.settingsManager.getSetting('edgeStylePathfinderPathRounded')
       const svgPath = SvgPathHelper.pathArrayToSvgPath(pathArray, roundedPath)
+
       newPath = svgPath
+      edge.center = pathArray[Math.floor(pathArray.length / 2)]
     }
     
     edge.path.interaction.setAttr("d", newPath)
     edge.path.display.setAttr("d", newPath)
+    edge.labelElement?.render()
   }
 
-  private updateAllEdges(canvas: Canvas) {
-    for (const edge of canvas.edges.values()) {
-      this.onEdgeChanged(canvas, edge)
-    }
+  private onEdgeCenterRequested(_canvas: Canvas, edge: CanvasEdge, center: Position) {
+    center.x = edge.center?.x ?? center.x
+    center.y = edge.center?.y ?? center.y
   }
 }

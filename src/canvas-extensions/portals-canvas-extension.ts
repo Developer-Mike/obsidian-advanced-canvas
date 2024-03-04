@@ -1,5 +1,5 @@
 import { TFile } from "obsidian"
-import { BBox, Canvas, CanvasData, CanvasEdge, CanvasNode, CanvasNodeData } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasData, CanvasEdge, CanvasElement, CanvasNode, CanvasNodeData } from "src/@types/Canvas"
 import { CanvasEvent } from "src/events/events"
 import AdvancedCanvasPlugin from "src/main"
 import * as CanvasHelper from "src/utils/canvas-helper"
@@ -121,7 +121,13 @@ export default class PortalsCanvasExtension {
   }
 
   private setPortalOpen(canvas: Canvas, portalNode: CanvasNode, open: boolean) {
-    canvas.setNodeData(portalNode, 'portalToFile', open ? portalNode.getData().file : undefined)
+    const portalNodeData = portalNode.getData()
+    portalNode.setData({
+      ...portalNodeData,
+      portalToFile: open ? portalNodeData.file : undefined
+    })
+
+    // Update whole canvas data
     canvas.setData(canvas.getData())
   }
 
@@ -150,7 +156,7 @@ export default class PortalsCanvasExtension {
     })
   }
 
-  private onSelectionChanged(canvas: Canvas, oldSelection: Set<CanvasNode|CanvasEdge>, updateSelection: (update: () => void) => void) {
+  private onSelectionChanged(canvas: Canvas, oldSelection: Set<CanvasElement>, updateSelection: (update: () => void) => void) {
     // Unselect nodes from portals
     updateSelection(() => {
       const updatedSelection = Array.from(canvas.selection)
@@ -216,7 +222,7 @@ export default class PortalsCanvasExtension {
   }
 
   private onOpenPortalMoved(canvas: Canvas, portalNode: CanvasNode) {
-    const portalNodeData = portalNode.getData()
+    let portalNodeData = portalNode.getData()
 
     // Update nested nodes positions
     const nestedNodesIdMap = portalNode.getData().portalIdMaps?.nodeIdMap
@@ -234,6 +240,8 @@ export default class PortalsCanvasExtension {
         width: targetSize.width,
         height: targetSize.height
       })
+
+      return
     }
 
     // Move nested nodes

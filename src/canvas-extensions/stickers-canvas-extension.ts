@@ -61,7 +61,7 @@ export default class StickersCanvasExtension {
       if (!node) continue
       
       const wasSticker = node.getData().isSticker
-      canvas.setNodeData(node, 'isSticker', !wasSticker)
+      node.setData({ ...nodeData, isSticker: wasSticker ? undefined : true })
     }
   }
 }

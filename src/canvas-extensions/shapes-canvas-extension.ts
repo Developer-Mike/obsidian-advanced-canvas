@@ -110,7 +110,7 @@ export default class ShapesCanvasExtension {
       const node = canvas.nodes.get(nodeData.id)
       if (!node) continue
       
-      canvas.setNodeData(node, 'shape', shape.id)
+      node.setData({ ...nodeData, shape: shape.id })
     }
   }
 }

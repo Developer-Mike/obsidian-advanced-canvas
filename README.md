@@ -17,8 +17,12 @@
     <b>⚡ Supercharge</b> your canvas experience! Create presentations, flowcharts and more!
 </p>
 
-## Installation (waiting for approval for the community plugins list)
-- Install using [BRAT](https://github.com/TfTHacker/obsidian42-brat)
+## Installation
+Recommended:
+- Open the Community Plugins tab in the settings and search for "Advanced Canvas"
+
+OR
+- Install it using [BRAT](https://github.com/TfTHacker/obsidian42-brat)
 
 OR
 - Create a folder named `advanced-canvas` in your vault's plugins folder (`<vault>/.obsidian/plugins/`).
@@ -48,6 +52,7 @@ All features can be enabled/disabled in the settings.
     - Default
     - Straight
     - A*
+- [Custom colors](#custom-colors) in the color picker
 - [Stickers](#stickers)
   - Convert image nodes to stickers (transparent background and no border)
 - [Presentation mode](#presentation)
@@ -62,8 +67,14 @@ All features can be enabled/disabled in the settings.
 - [Encapsulate selection](#encapsulate-selection)
   - Create a new canvas from the selected nodes
   - Create a link to the new canvas in the current canvas
+- Change the default text node size to 260x60 (from 250x60) to align with the grid
 - Expose [canvas events](#canvas-events) to use them in other plugins
 - Expose node data to style them using CSS
+
+## Support
+If you want to support me and my work, consider starring ⭐ the repository, or, if you want to support me financially, you can donate any amount on [Ko-fi](https://ko-fi.com/X8X27IA08) ❤️
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/X8X27IA08)
 
 ## Updated UI
 ### Canvas Card Menu
@@ -162,6 +173,21 @@ Set the path style of the edges (arrows) to default, straight or A*.
     <img src="./assets/edge-path-styles.png" alt="Edge Path Styles Example"/>
 </details>
 
+## Custom Colors
+Add custom colors to the color picker. You can add them using the following css snippet:
+```css
+:root {
+    /* Where X is the index of the color in the palette */
+    /* The colors 1-6 are already used by Obsidian */
+    --canvas-color-X: 0, 255, 0; /* RGB */
+}
+```
+
+<details>
+    <summary>Custom Colors In Palette</summary>
+    <img src="./assets/custom-colors.png" alt="Custom Colors In Palette"/>
+</details>
+
 ## Stickers
 Convert image nodes to stickers. Stickers have a transparent background and no border.
 
@@ -231,7 +257,7 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
 
 <details>
     <summary>
-        All Events (23)
+        All Events (24)
     </summary>
 
   - `advanced-canvas:canvas-changed`
@@ -264,6 +290,9 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
   - `advanced-canvas:edge-changed`
     - Fired when any edge gets changed
     - Payload: `Canvas`, `Edge`
+  - `advanced-canvas:edge-center-requested`
+    - Fired when the center of an edge gets requested (e.g. for the edge label position)
+    - Payload: `Canvas`, `Edge`, `Position (Reference!)`
   - `advanced-canvas:selection-changed`
     - Fired when the selection of the canvas changes
     - Payload: `Canvas`, `oldSelection: Set<Node|Edge>`, `updateSelection: (() => void) => void`
@@ -272,7 +301,7 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
     - Payload: `Canvas`, `BBox`
   - `advanced-canvas:popup-menu-created`
     - Fired when the a node popup menu gets created (Not firing multiple times if it gets moved between nodes of the same type)
-    - Payload: `Canvas`, `Node`
+    - Payload: `Canvas`
   - `advanced-canvas:node-interaction`
     - Fired when a node gets hovered over
     - Payload: `Canvas`, `Node`
@@ -310,4 +339,3 @@ All contributions are welcome! Here's how you can help:
 
 ## Known Issues - Create an issue if you find any!
 - [ ] Shapes are not shown in the preview
-- [ ] Custom path styles don't move the label of the edge

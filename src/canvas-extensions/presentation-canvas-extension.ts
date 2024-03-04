@@ -89,10 +89,10 @@ export default class PresentationCanvasExtension {
 
   onPopupMenuCreated(canvas: Canvas): void {
     // If the canvas is readonly or there are multiple/no nodes selected, return
-    const selectedNodeData = canvas.getSelectionData().nodes
-    if (canvas.readonly || selectedNodeData.length !== 1) return
+    const selectedNodesData = canvas.getSelectionData().nodes
+    if (canvas.readonly || selectedNodesData.length !== 1 || canvas.selection.size > 1) return
     
-    const selectedNode = canvas.nodes.get(selectedNodeData[0].id)
+    const selectedNode = canvas.nodes.get(selectedNodesData[0].id)
     if (!selectedNode) return
     
     CanvasHelper.addPopupMenuOption(
@@ -118,9 +118,9 @@ export default class PresentationCanvasExtension {
     if (!node) return
 
     const startNode = this.getStartNode(canvas)
-    if (startNode) canvas.setNodeData(startNode, 'isStartNode', false)
+    if (startNode) startNode.setData({ ...startNode.getData(), isStartNode: false })
 
-    if (node !== startNode) canvas.setNodeData(node, 'isStartNode', true)
+    if (node !== startNode) node.setData({ ...node.getData(), isStartNode: true })
   }
 
   private getSlideSize(): Size {
@@ -142,7 +142,7 @@ export default class PresentationCanvasExtension {
       focus: false,
     })
 
-    if (isStartNode) canvas.setNodeData(groupNode, 'isStartNode', true)
+    if (isStartNode) groupNode.setData({ ...groupNode.getData(), isStartNode: true })
   }
 
   private async animateNodeTransition(canvas: Canvas, fromNode: CanvasNode|undefined, toNode: CanvasNode) {

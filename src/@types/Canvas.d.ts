@@ -61,7 +61,7 @@ export interface Canvas {
   readonly: boolean
   setReadonly(readonly: boolean): void
 
-  selection: Set<CanvasNode|CanvasEdge>
+  selection: Set<CanvasElement>
   getSelectionData(): SelectionData
   deselectAll(): void
 
@@ -88,8 +88,6 @@ export interface Canvas {
   lockedX: number
   lockedY: number
   lockedZoom: number
-  setNodeData(node: CanvasNode, key: keyof CanvasNodeData, value: any): void
-  setEdgeData(edge: CanvasEdge, key: keyof CanvasEdgeData, value: any): void
 }
 
 export interface CanvasOptions {
@@ -161,8 +159,13 @@ export interface CanvasData {
 export interface CanvasElement {
   canvas: Canvas
   initialized: boolean
+  isDirty?: boolean // Custom for Change event
 
   initialize(): void
+  setColor(color: string): void
+  
+  getData(): CanvasNodeData | CanvasEdgeData
+  setData(data: CanvasNodeData | CanvasEdgeData): void
 }
 
 export type CanvasNodeType = 'text' | 'group' | 'file' | 'link'
@@ -173,7 +176,7 @@ export interface CanvasNodeData {
   file?: string
 
   isSticker?: boolean
-  shape?: string
+  shape?: string | null
 
   isCollapsed?: boolean
   collapsedData?: CanvasData
@@ -263,6 +266,20 @@ export interface CanvasEdge extends CanvasElement {
     display: HTMLElement
   }
 
+  labelElement: {
+    edge: CanvasEdge
+    initialTextState: string
+    isEditing: boolean
+    textareaEl: HTMLElement
+    wrapperEl: HTMLElement
+
+    render(): void
+  }
+
+  /** Custom field */
+  center?: Position
+  getCenter(): Position
+  render(): void
   updatePath(): void
   
   setData(data: CanvasEdgeData): void
