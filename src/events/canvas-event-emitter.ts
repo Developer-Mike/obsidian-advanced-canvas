@@ -153,13 +153,9 @@ export default class CanvasEventEmitter {
           // Skip if the canvas got unloaded or the file changed
           if (!this.view.file || this.view.file.path !== targetFilePath) return
 
-          const oldData = this.getData()
-
           this.importData(data)
           that.emitEventsForUnknownDataChanges(this)
         }
-
-        const oldData = this.getData()
 
         that.triggerWorkspaceEvent(CanvasEvent.LoadData, this, data, setData)
         const result = next.call(this, data)
@@ -209,8 +205,8 @@ export default class CanvasEventEmitter {
       }
     })
     
-    that.runAfterInitialized(node, () => {
-      that.triggerWorkspaceEvent(CanvasEvent.NodeAdded, this, node)
+    this.runAfterInitialized(node, () => {
+      this.triggerWorkspaceEvent(CanvasEvent.NodeAdded, node.canvas, node)
     })
   }
 
@@ -241,8 +237,8 @@ export default class CanvasEventEmitter {
       }
     })
     
-    that.runAfterInitialized(edge, () => {
-      that.triggerWorkspaceEvent(CanvasEvent.EdgeAdded, this, edge)
+    this.runAfterInitialized(edge, () => {
+      this.triggerWorkspaceEvent(CanvasEvent.EdgeAdded, edge.canvas, edge)
     })
   }
   

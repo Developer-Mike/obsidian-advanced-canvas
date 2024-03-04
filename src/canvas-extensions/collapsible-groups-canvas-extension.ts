@@ -48,7 +48,7 @@ export default class CollapsibleGroupsCanvasExtension {
   }
 
   private setCollapsed(canvas: Canvas, groupNode: CanvasNode, collapsed: boolean) {
-    canvas.setNodeData(groupNode, 'isCollapsed', collapsed)
+    groupNode.setData({ ...groupNode.getData(), isCollapsed: collapsed })
     canvas.setData(canvas.getData())
   }
 
