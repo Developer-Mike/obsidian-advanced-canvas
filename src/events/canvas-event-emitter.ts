@@ -268,12 +268,12 @@ export default class CanvasEventEmitter {
   private emitEventsForUnknownDataChanges(canvas: Canvas) {
     // If node data changed
     canvas.nodes.forEach((node: CanvasNode) => this.runAfterInitialized(node, () => {
-      this.triggerWorkspaceEvent(CanvasEvent.NodeChanged, this, node)
+      this.triggerWorkspaceEvent(CanvasEvent.NodeChanged, node.canvas, node)
     }))
 
     // If edge data changed
     canvas.edges.forEach((edge: CanvasEdge) => this.runAfterInitialized(edge, () => {
-      this.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, this, edge)
+      this.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, edge.canvas, edge)
     }))
   }
 

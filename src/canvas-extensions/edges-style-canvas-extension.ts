@@ -139,7 +139,7 @@ export default class EdgesStyleCanvasExtension {
   }
 
   private updateAllEdges(canvas: Canvas) {
-    for (const edge of canvas.edges?.values() ?? []) {
+    for (const edge of canvas.edges.values()) {
       this.onEdgeChanged(canvas, edge)
     }
   }
