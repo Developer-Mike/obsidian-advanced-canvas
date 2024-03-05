@@ -207,6 +207,7 @@ export default class CanvasEventEmitter {
     
     this.runAfterInitialized(node, () => {
       this.triggerWorkspaceEvent(CanvasEvent.NodeAdded, node.canvas, node)
+      this.triggerWorkspaceEvent(CanvasEvent.NodeChanged, node.canvas, node)
     })
   }
 
