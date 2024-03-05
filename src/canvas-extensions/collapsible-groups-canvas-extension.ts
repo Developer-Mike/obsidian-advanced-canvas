@@ -1,5 +1,5 @@
 import { setIcon } from "obsidian"
-import { Canvas, CanvasData, CanvasNode } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasData, CanvasNode } from "src/@types/Canvas"
 import { CanvasEvent } from "src/events/events"
 import AdvancedCanvasPlugin from "src/main"
 import * as BBoxHelper from "src/utils/bbox-helper"
@@ -17,6 +17,11 @@ export default class CollapsibleGroupsCanvasExtension {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.NodeChanged,
       (canvas: Canvas, node: CanvasNode) => this.onNodeChanged(canvas, node)
+    ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.NodeBBoxRequested,
+      (canvas: Canvas, node: CanvasNode, bbox: BBox) => this.onNodeBBoxRequested(canvas, node, bbox)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
@@ -50,6 +55,15 @@ export default class CollapsibleGroupsCanvasExtension {
   private setCollapsed(canvas: Canvas, groupNode: CanvasNode, collapsed: boolean | undefined) {
     groupNode.setData({ ...groupNode.getData(), isCollapsed: collapsed })
     canvas.setData(canvas.getData())
+  }
+
+  onNodeBBoxRequested(_canvas: Canvas, node: CanvasNode, bbox: BBox) {
+    const nodeData = node.getData()
+    if (nodeData.type !== 'group' || !nodeData.isCollapsed) return
+
+    // Set the size of the collapsed group to 0
+    bbox.maxX = bbox.minX
+    bbox.maxY = bbox.minY
   }
 
   private expandCollapsedNodes(data: CanvasData) {

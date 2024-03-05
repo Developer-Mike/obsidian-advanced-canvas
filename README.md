@@ -257,7 +257,7 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
 
 <details>
     <summary>
-        All Events (24)
+        All Events (25)
     </summary>
 
   - `advanced-canvas:canvas-changed`
@@ -290,6 +290,9 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
   - `advanced-canvas:edge-changed`
     - Fired when any edge gets changed
     - Payload: `Canvas`, `Edge`
+  - `advanced-canvas:node-bbox-requested`
+    - Fired when the bounding box of a node gets requested (e.g. for the edge path or when dragging a group)
+    - Payload: `Canvas`, `Node`, `BBox (Reference!)`
   - `advanced-canvas:edge-center-requested`
     - Fired when the center of an edge gets requested (e.g. for the edge label position)
     - Payload: `Canvas`, `Edge`, `Position (Reference!)`

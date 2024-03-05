@@ -202,6 +202,11 @@ export default class CanvasEventEmitter {
         }
 
         return result
+      },
+      getBBox: (next: any) => function (...args: any) {
+        const result = next.call(this, ...args)
+        that.triggerWorkspaceEvent(CanvasEvent.NodeBBoxRequested, this.canvas, node, result)
+        return result
       }
     })
     
