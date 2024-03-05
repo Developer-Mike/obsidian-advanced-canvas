@@ -42,12 +42,12 @@ export default class CollapsibleGroupsCanvasExtension {
     collapseButton.id = COLLAPSE_BUTTON_ID
     setIcon(collapseButton, groupNodeData.isCollapsed ? 'plus-circle' : 'minus-circle')
 
-    collapseButton.onclick = () => { this.setCollapsed(canvas, groupNode, !groupNode.getData().isCollapsed) }
+    collapseButton.onclick = () => { this.setCollapsed(canvas, groupNode, groupNode.getData().isCollapsed ? undefined : true) }
 
     groupNode.labelEl?.insertAdjacentElement('afterend', collapseButton)
   }
 
-  private setCollapsed(canvas: Canvas, groupNode: CanvasNode, collapsed: boolean) {
+  private setCollapsed(canvas: Canvas, groupNode: CanvasNode, collapsed: boolean | undefined) {
     groupNode.setData({ ...groupNode.getData(), isCollapsed: collapsed })
     canvas.setData(canvas.getData())
   }
@@ -60,13 +60,14 @@ export default class CollapsibleGroupsCanvasExtension {
       groupNodeData.collapsedData = undefined
 
       data.edges.push(...collapsedData.edges)
-      return [groupNodeData, ...collapsedData.nodes.map((nodeData) => {
-        // Restore the relative position of the node to the group
-        nodeData.x += groupNodeData.x // TODO: Fix this
-        nodeData.y += groupNodeData.y // TODO: Fix this
-
-        return nodeData
-      })]
+      return [groupNodeData, ...collapsedData.nodes.map((nodeData) => (
+        {
+          ...nodeData,
+          // Restore the relative position of the node to the group
+          x: nodeData.x + groupNodeData.x,
+          y: nodeData.y + groupNodeData.y
+        }
+      ))]
     })
   }
 
@@ -87,13 +88,14 @@ export default class CollapsibleGroupsCanvasExtension {
       data.edges = data.edges.filter((edgeData) => !containedEdgesData.includes(edgeData))
 
       groupNodeData.collapsedData = {
-        nodes: containedNodesData.map((nodeData) => {
-          // Store the relative position of the node to the group
-          nodeData.x -= groupNodeData.x
-          nodeData.y -= groupNodeData.y
-
-          return nodeData
-        }),
+        nodes: containedNodesData.map((nodeData) => (
+          {
+            ...nodeData,
+            // Store the relative position of the node to the group
+            x: nodeData.x - groupNodeData.x,
+            y: nodeData.y - groupNodeData.y
+          }
+        )),
         edges: containedEdgesData
       }
     })
