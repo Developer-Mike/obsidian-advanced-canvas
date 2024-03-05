@@ -17,10 +17,12 @@
 
   pointer-events: initial;
   cursor: pointer;
+
+  transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1)
 }
 
 .canvas-node .canvas-group-label {
-  left: 40px;
+  left: calc(40px * var(--zoom-multiplier));
 }
 
 .canvas-node[data-is-collapsed] {
