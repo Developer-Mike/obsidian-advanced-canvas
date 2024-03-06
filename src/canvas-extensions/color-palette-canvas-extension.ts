@@ -60,8 +60,11 @@ export default class ColorPaletteCanvasExtension {
 
       this.updateCustomColorModStyleClasses()
 
+      const currentNodeColor = canvas.getSelectionData().nodes.map(node => node.color).last()
       for (const colorId of this.getCustomColors()) {
         const customColorMenuItem = this.createColorMenuItem(canvas, colorId)
+        if (currentNodeColor === colorId) customColorMenuItem.classList.add('is-active')
+        
         submenu.insertBefore(customColorMenuItem, submenu.lastChild)
       }
     })
@@ -75,6 +78,8 @@ export default class ColorPaletteCanvasExtension {
     menuItem.classList.add(`mod-canvas-color-${colorId}`)
 
     menuItem.addEventListener('click', () => {
+      menuItem.classList.add('is-active')
+
       for (const item of canvas.selection) {
         item.setColor(colorId)
       }
