@@ -102,14 +102,14 @@ export default class CanvasEventEmitter {
       },
       undo: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
+        this.importData(this.getData(), true) // Force update the canvas data
         that.triggerWorkspaceEvent(CanvasEvent.Undo, this)
-        that.emitEventsForUnknownDataChanges(this)
         return result
       },
       redo: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
+        this.importData(this.getData(), true) // Force update the canvas data
         that.triggerWorkspaceEvent(CanvasEvent.Redo, this)
-        that.emitEventsForUnknownDataChanges(this)
         return result
       },
       getData: (next: any) => function (...args: any) {
@@ -117,48 +117,18 @@ export default class CanvasEventEmitter {
         that.triggerWorkspaceEvent(CanvasEvent.DataRequested, this, result)
         return result
       },
-      setData: (next: any) => function (data: CanvasData) {
-        const triggerEvents = (oldData: CanvasData, newData: CanvasData) => {
-          // Check for changes in node
-          const changedNodesIds = newData.nodes.filter((node: CanvasNodeData) => {
-            const oldNode = oldData.nodes.find((oldNode: CanvasNodeData) => oldNode.id === node.id)
-            return oldNode && JSON.stringify(oldNode) !== JSON.stringify(node)
-          }).map((node: CanvasNodeData) => node.id)
-          for (const nodeId of changedNodesIds) {
-            const node = this.nodes.get(nodeId)
-            if (!node) continue
-
-            that.runAfterInitialized(node, () => {
-              that.triggerWorkspaceEvent(CanvasEvent.NodeChanged, this, node)
-            })
-          }
-
-          // Check for changes in edge
-          const changedEdgesIds = newData.edges.filter((edge: CanvasEdgeData) => {
-            const oldEdge = oldData.edges.find((oldEdge: CanvasEdgeData) => oldEdge.id === edge.id)
-            return oldEdge && JSON.stringify(oldEdge) !== JSON.stringify(edge)
-          }).map((edge: CanvasEdgeData) => edge.id)
-          for (const edgeId of changedEdgesIds) {
-            const edge = this.edges.get(edgeId)
-            if (!edge) continue
-
-            that.runAfterInitialized(edge, () => {
-              that.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, this, edge)
-            })
-          }
-        }
-
+      importData: (next: any) => function (data: CanvasData, clearCanvas?: boolean, silent?: boolean) {
         const targetFilePath = this.view.file.path
         const setData = (data: CanvasData) => {
           // Skip if the canvas got unloaded or the file changed
           if (!this.view.file || this.view.file.path !== targetFilePath) return
 
-          this.importData(data)
+          this.importData(data, true, true)
           that.emitEventsForUnknownDataChanges(this)
         }
 
-        that.triggerWorkspaceEvent(CanvasEvent.LoadData, this, data, setData)
-        const result = next.call(this, data)
+        if (!silent) that.triggerWorkspaceEvent(CanvasEvent.LoadData, this, data, setData)
+        const result = next.call(this, data, canvasView)
         that.emitEventsForUnknownDataChanges(this)
         return result
       },
@@ -201,6 +171,10 @@ export default class CanvasEventEmitter {
           delete node.isDirty
         }
 
+        // Save the data to the file
+        this.canvas.data = this.canvas.getData()
+        this.canvas.view.requestSave()
+        
         return result
       },
       getBBox: (next: any) => function (...args: any) {
@@ -228,6 +202,10 @@ export default class CanvasEventEmitter {
           that.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, this.canvas, edge)
           delete edge.isDirty
         }
+
+        // Save the data to the file
+        this.canvas.data = this.canvas.getData()
+        this.canvas.view.requestSave()
 
         return result
       },

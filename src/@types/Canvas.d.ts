@@ -26,7 +26,7 @@ export interface Canvas {
   setData(data: CanvasData): void
 
   /** Basically setData, but without modifying the history */
-  importData(data: CanvasData): void
+  importData(data: CanvasData, clearCanvas?: boolean): void
 
   nodes: Map<string, CanvasNode>
   edges: Map<string, CanvasEdge>

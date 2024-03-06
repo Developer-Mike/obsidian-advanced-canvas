@@ -37,28 +37,12 @@ export default class PortalsCanvasExtension {
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.SelectionChanged,
-      (canvas: Canvas, oldSelection: Set<CanvasNode|CanvasEdge>, updateSelection: (update: () => void) => void) => this.onSelectionChanged(canvas, oldSelection, updateSelection)
+      (canvas: Canvas, oldSelection: Set<CanvasElement>, updateSelection: (update: () => void) => void) => this.onSelectionChanged(canvas, oldSelection, updateSelection)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.EdgeChanged,
       (canvas: Canvas, edge: CanvasEdge) => this.onEdgeChanged(canvas, edge)
-    ))
-
-    this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.Undo,
-      (canvas: Canvas) => {
-        this.getCanvasDataWithPortals(canvas, canvas.getData())
-          .then((data: CanvasData) => canvas.importData(data))
-      }
-    ))
-
-    this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.Redo,
-      (canvas: Canvas) => {
-        this.getCanvasDataWithPortals(canvas, canvas.getData())
-          .then((data: CanvasData) => canvas.importData(data))
-      }
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(

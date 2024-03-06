@@ -61,8 +61,10 @@ export default class CollapsibleGroupsCanvasExtension {
     const nodeData = node.getData()
     if (nodeData.type !== 'group' || !nodeData.isCollapsed) return
 
-    // Set the size of the collapsed group to 0
-    bbox.maxX = bbox.minX
+    // Set width to label width
+    bbox.maxX = bbox.minX + (node.nodeEl?.getBoundingClientRect().width ?? 0)
+    
+    // Set height of to 0 (Don't drag any nodes with it)
     bbox.maxY = bbox.minY
   }
 

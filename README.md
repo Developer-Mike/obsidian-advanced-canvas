@@ -344,4 +344,3 @@ All contributions are welcome! Here's how you can help:
 - [ ] Shapes are not shown in the preview
 - [ ] Nodes from portals can still be moved by using a group
 - [ ] Edges from portals can still be dragged
-- [ ] Undoing/Redoing a group collapse does not revert the `isCollapsed` state of the group
