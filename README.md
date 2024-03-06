@@ -257,7 +257,7 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
 
 <details>
     <summary>
-        All Events (25)
+        All Events (26)
     </summary>
 
   - `advanced-canvas:canvas-changed`
@@ -296,6 +296,9 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
   - `advanced-canvas:edge-center-requested`
     - Fired when the center of an edge gets requested (e.g. for the edge label position)
     - Payload: `Canvas`, `Edge`, `Position (Reference!)`
+  - `advanced-canvas:containing-nodes-requested`
+    - Fired when the nodes inside a bounding box get requested
+    - Payload: `Canvas`, `BBox`, `Node[] (Reference!)`
   - `advanced-canvas:selection-changed`
     - Fired when the selection of the canvas changes
     - Payload: `Canvas`, `oldSelection: Set<Node|Edge>`, `updateSelection: (() => void) => void`
@@ -342,5 +345,4 @@ All contributions are welcome! Here's how you can help:
 
 ## Known Issues - Create an issue if you find any!
 - [ ] Shapes are not shown in the preview
-- [ ] Nodes from portals can still be moved by using a group
 - [ ] Edges from portals can still be dragged

@@ -25,7 +25,7 @@ export interface Canvas {
   getData(): CanvasData
   setData(data: CanvasData): void
 
-  /** Basically setData, but without modifying the history */
+  /** Basically setData (if clearCanvas == true), but without modifying the history */
   importData(data: CanvasData, clearCanvas?: boolean): void
 
   nodes: Map<string, CanvasNode>
@@ -76,6 +76,8 @@ export interface Canvas {
   removeNode(node: CanvasNode): void
   addEdge(edge: CanvasEdge): void
   removeEdge(edge: CanvasEdge): void
+
+  getContainingNodes(bbox: BBox): CanvasNode[]
 
   history: CanvasHistory
   undo(): void

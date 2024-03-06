@@ -16,6 +16,7 @@ export const CanvasEvent = {
   EdgeChanged: `${PLUGIN_EVENT_PREFIX}:edge-changed`,
   NodeBBoxRequested: `${PLUGIN_EVENT_PREFIX}:node-bbox-requested`,
   EdgeCenterRequested: `${PLUGIN_EVENT_PREFIX}:edge-center-requested`,
+  ContainingNodesRequested: `${PLUGIN_EVENT_PREFIX}:containing-nodes-requested`,
   SelectionChanged: `${PLUGIN_EVENT_PREFIX}:selection-changed`,
   ZoomToBbox: {
     Before: `${PLUGIN_EVENT_PREFIX}:zoom-to-bbox:before`,

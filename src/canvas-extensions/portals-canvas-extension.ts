@@ -36,6 +36,11 @@ export default class PortalsCanvasExtension {
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.ContainingNodesRequested,
+      (canvas: Canvas, bbox: BBox, nodes: CanvasNode[]) => this.onContainingNodesRequested(canvas, bbox, nodes)
+    ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.SelectionChanged,
       (canvas: Canvas, oldSelection: Set<CanvasElement>, updateSelection: (update: () => void) => void) => this.onSelectionChanged(canvas, oldSelection, updateSelection)
     ))
@@ -138,6 +143,11 @@ export default class PortalsCanvasExtension {
       ...edge.getData(), 
       isUnsaved: isUnsaved ? true : undefined
     })
+  }
+
+  private onContainingNodesRequested(_canvas: Canvas, _bbox: BBox, nodes: CanvasNode[]) {
+    // Remove nodes from portals from the list
+    nodes.splice(0, nodes.length, ...nodes.filter(node => node.getData().portalId === undefined))
   }
 
   private onSelectionChanged(canvas: Canvas, oldSelection: Set<CanvasElement>, updateSelection: (update: () => void) => void) {

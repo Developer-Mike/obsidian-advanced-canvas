@@ -65,6 +65,11 @@ export default class CanvasEventEmitter {
         that.triggerWorkspaceEvent(CanvasEvent.DraggingStateChanged, this, dragging)
         return result
       },
+      getContainingNodes: (next: any) => function (bbox: BBox) {
+        const result = next.call(this, bbox)
+        that.triggerWorkspaceEvent(CanvasEvent.ContainingNodesRequested, this, bbox, result)
+        return result
+      },
       updateSelection: (next: any) => function (update: () => void) {
         const oldSelection = new Set(this.selection)
         const result = next.call(this, update)
@@ -174,7 +179,7 @@ export default class CanvasEventEmitter {
         // Save the data to the file
         this.canvas.data = this.canvas.getData()
         this.canvas.view.requestSave()
-        
+
         return result
       },
       getBBox: (next: any) => function (...args: any) {
