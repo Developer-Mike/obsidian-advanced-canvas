@@ -21,7 +21,7 @@
   transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.canvas-node .canvas-group-label {
+[data-collapsible-groups-enabled] .canvas-node .canvas-group-label {
   left: calc(40px * var(--zoom-multiplier));
 }
 
