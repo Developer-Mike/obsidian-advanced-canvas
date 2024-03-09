@@ -133,7 +133,7 @@ export default class CanvasEventEmitter {
         }
 
         if (!silent) that.triggerWorkspaceEvent(CanvasEvent.LoadData, this, data, setData)
-        const result = next.call(this, data, canvasView)
+        const result = next.call(this, data, clearCanvas)
         that.emitEventsForUnknownDataChanges(this)
         return result
       },
