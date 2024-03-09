@@ -93,7 +93,7 @@ export default class CollapsibleGroupsCanvasExtension {
 
       const groupNodeBBox = BBoxHelper.bboxFromNodeData(groupNodeData)
       const containedNodesData = data.nodes.filter((nodeData) =>
-        nodeData.id !== groupNodeData.id && BBoxHelper.insideBBox(BBoxHelper.bboxFromNodeData(nodeData), groupNodeBBox, true)
+        nodeData.id !== groupNodeData.id && BBoxHelper.insideBBox(BBoxHelper.bboxFromNodeData(nodeData), groupNodeBBox, false)
       )
       const containedEdgesData = data.edges.filter((edgeData) => {
         return containedNodesData.some((nodeData) => nodeData.id === edgeData.fromNode) || 
