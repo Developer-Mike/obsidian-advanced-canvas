@@ -52,7 +52,7 @@ export class FileSelectModal extends SuggestModal<TFile> {
   }
 
   renderSuggestion(file: TFile, el: HTMLElement) {
-    el.setText((file as any).getShortName())
+    el.setText(file.extension === 'md' ? file.basename : file.name)
   }
 
   onChooseSuggestion(_file: TFile, _evt: MouseEvent | KeyboardEvent) {}
