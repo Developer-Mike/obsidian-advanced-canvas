@@ -60,6 +60,8 @@ All features can be enabled/disabled in the settings.
 - [Portals](#portals)
   - Embed other canvases inside your canvas
   - Create edges (arrows) to the embedded canvas
+- [Collapsible groups](#collapsible-groups)
+  - Collapse and expand groups to organize your canvas
 - [Better readonly](#better-readonly)
   - Disable node popup menus
   - Lock the canvas' position
@@ -234,6 +236,14 @@ Embed other canvases inside your canvas and create edges (arrows) to the embedde
 
 ### Usage
 - Embed a canvas file and click on the door icon of the popup menu to open a portal
+
+## Collapsible Groups
+Collapse and expand groups to organize your canvas.
+
+<details>
+    <summary>Collapsible Groups Example</summary>
+    <img src="./assets/collapsible-groups.png" alt="Collapsible Groups Example"/>
+</details>
 
 ## Better Readonly
 - Disable node popup menus
