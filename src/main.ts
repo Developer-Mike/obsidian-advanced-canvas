@@ -1,5 +1,5 @@
-import { ItemView, Plugin } from 'obsidian'
-import AdvancedCanvasSettingsManager from './settings'
+import { ItemView, Plugin, WorkspaceWindow } from 'obsidian'
+import SettingsManager from './settings'
 import ShapesCanvasExtension from './canvas-extensions/shapes-canvas-extension'
 import { Canvas, CanvasView } from './@types/Canvas'
 import CanvasEventEmitter from './events/canvas-event-emitter'
@@ -19,6 +19,7 @@ import DebugHelper from './utils/debug-helper'
 import DefaultNodeSizeCanvasExtension from './canvas-extensions/default-node-size-canvas-extension'
 import ColorPaletteCanvasExtension from './canvas-extensions/color-palette-canvas-extension'
 import CollapsibleGroupsCanvasExtension from './canvas-extensions/collapsible-groups-canvas-extension'
+import WindowsManager from './windows-manager'
 
 const CANVAS_EXTENSIONS: any[] = [
   NodeDataTaggerCanvasExtension,
@@ -39,17 +40,21 @@ const CANVAS_EXTENSIONS: any[] = [
 ]
 
 export default class AdvancedCanvasPlugin extends Plugin {
-  settingsManager: AdvancedCanvasSettingsManager
+  settings: SettingsManager
+  windowsManager: WindowsManager
+  debugHelper: DebugHelper
+
   canvasEventEmitter: CanvasEventEmitter
   canvasExtensions: any[]
-  debugHelper: DebugHelper
 
 	async onload() {
     IconsHelper.addIcons()
     
-    this.settingsManager = new AdvancedCanvasSettingsManager(this)
-    await this.settingsManager.loadSettings()
-    this.settingsManager.addSettingsTab()
+    this.settings = new SettingsManager(this)
+    await this.settings.loadSettings()
+    this.settings.addSettingsTab()
+
+    this.windowsManager = new WindowsManager(this)
 
     this.canvasEventEmitter = new CanvasEventEmitter(this)
     this.canvasExtensions = CANVAS_EXTENSIONS.map((Extension) => new Extension(this))

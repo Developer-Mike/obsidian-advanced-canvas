@@ -13,7 +13,7 @@ export default class PortalsCanvasExtension {
   constructor(plugin: AdvancedCanvasPlugin) {
     this.plugin = plugin
 
-    if (!this.plugin.settingsManager.getSetting('portalsFeatureEnabled')) return
+    if (!this.plugin.settings.getSetting('portalsFeatureEnabled')) return
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.PopupMenuCreated,
@@ -286,7 +286,7 @@ export default class PortalsCanvasExtension {
       if (portalNodeData.type !== 'file') continue
 
       // Reset portal size
-      if (this.plugin.settingsManager.getSetting('maintainClosedPortalSize')) {
+      if (this.plugin.settings.getSetting('maintainClosedPortalSize')) {
         portalNodeData.width = portalNodeData.closedPortalWidth ?? portalNodeData.width
         portalNodeData.height = portalNodeData.closedPortalHeight ?? portalNodeData.height
       }
@@ -336,7 +336,7 @@ export default class PortalsCanvasExtension {
           })))
 
           delete originNodeData.edgesToNodeFromPortal![portalId]
-        } else if (this.plugin.settingsManager.getSetting('showEdgesIntoDisabledPortals')) {
+        } else if (this.plugin.settings.getSetting('showEdgesIntoDisabledPortals')) {
           // If portal is closed, add alternative edges directly to portal
           // But don't delete the edges
 

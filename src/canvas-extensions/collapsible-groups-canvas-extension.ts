@@ -12,7 +12,7 @@ export default class CollapsibleGroupsCanvasExtension {
   constructor(plugin: AdvancedCanvasPlugin) {
     this.plugin = plugin
 
-    if (!this.plugin.settingsManager.getSetting('collapsibleGroupsFeatureEnabled')) return
+    if (!this.plugin.settings.getSetting('collapsibleGroupsFeatureEnabled')) return
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.CanvasChanged,

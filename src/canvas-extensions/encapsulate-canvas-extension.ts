@@ -12,7 +12,7 @@ export default class EncapsulateCanvasExtension {
   constructor(plugin: AdvancedCanvasPlugin) {
     this.plugin = plugin
 
-    if (!this.plugin.settingsManager.getSetting('canvasEncapsulationEnabled')) return
+    if (!this.plugin.settings.getSetting('canvasEncapsulationEnabled')) return
 
     /* Add command to encapsulate selection */
     this.plugin.addCommand({

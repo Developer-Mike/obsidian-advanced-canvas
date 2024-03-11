@@ -11,7 +11,7 @@ export default class StickersCanvasExtension {
   constructor(plugin: AdvancedCanvasPlugin) {
     this.plugin = plugin
 
-    if (!this.plugin.settingsManager.getSetting('stickersFeatureEnabled')) return
+    if (!this.plugin.settings.getSetting('stickersFeatureEnabled')) return
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.PopupMenuCreated,

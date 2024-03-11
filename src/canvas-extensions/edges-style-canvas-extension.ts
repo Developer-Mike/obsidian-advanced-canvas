@@ -53,7 +53,7 @@ export default class EdgesStyleCanvasExtension {
   constructor(plugin: AdvancedCanvasPlugin) {
     this.plugin = plugin
 
-    if (!this.plugin.settingsManager.getSetting('edgesStylingFeatureEnabled')) return
+    if (!this.plugin.settings.getSetting('edgesStylingFeatureEnabled')) return
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.PopupMenuCreated,
@@ -176,7 +176,7 @@ export default class EdgesStyleCanvasExtension {
         y: (fromPos.y + toPos.y) / 2 
       }
     } else if (pathRouteType === 'a-star') {
-      if (canvas.isDragging && !this.plugin.settingsManager.getSetting('edgeStylePathfinderPathLiveUpdate')) return
+      if (canvas.isDragging && !this.plugin.settings.getSetting('edgeStylePathfinderPathLiveUpdate')) return
       
       const nodeBBoxes = [...canvas.nodes.values()]
         .filter(node => {
@@ -188,11 +188,11 @@ export default class EdgesStyleCanvasExtension {
           return !isGroup && !isOpenPortal
         }).map(node => node.getBBox())
 
-      const gridResolution = this.plugin.settingsManager.getSetting('edgeStylePathfinderGridResolution')
+      const gridResolution = this.plugin.settings.getSetting('edgeStylePathfinderGridResolution')
       const pathArray = AStarHelper.aStar(fromPos, edge.from.side, toPos, edge.to.side, nodeBBoxes, gridResolution)
       if (!pathArray) return // No path found - use default path
 
-      const roundedPath = this.plugin.settingsManager.getSetting('edgeStylePathfinderPathRounded')
+      const roundedPath = this.plugin.settings.getSetting('edgeStylePathfinderPathRounded')
       const svgPath = SvgPathHelper.pathArrayToSvgPath(pathArray, roundedPath)
 
       newPath = svgPath

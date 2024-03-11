@@ -27,7 +27,7 @@ export default class NodeDataTaggerCanvasExtension {
         const nodeData = node?.getData()
         if (!nodeData) return
 
-        for (const dataKey of getExposedNodeData(this.plugin.settingsManager)) {
+        for (const dataKey of getExposedNodeData(this.plugin.settings)) {
           const dataValue = nodeData[dataKey]
           
           if (!dataValue) delete node.nodeEl.dataset[dataKey]

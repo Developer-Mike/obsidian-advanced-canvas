@@ -24,7 +24,7 @@ export default class EdgeDataTaggerCanvasExtension {
         const edgeData = edge?.getData()
         if (!edgeData) return
 
-        for (const dataKey of getExposedEdgeData(this.plugin.settingsManager)) {
+        for (const dataKey of getExposedEdgeData(this.plugin.settings)) {
           const dataValue = edgeData[dataKey]
           
           if (!dataValue) delete edge.path.display.dataset[dataKey]

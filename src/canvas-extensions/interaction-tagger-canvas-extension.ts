@@ -18,7 +18,7 @@ export default class InteractionTaggerCanvasExtension {
         const interactionEl = canvas.nodeInteractionLayer.interactionEl
         if (!interactionEl) return
     
-        for (const dataKey of getExposedNodeData(this.plugin.settingsManager)) {
+        for (const dataKey of getExposedNodeData(this.plugin.settings)) {
           const datasetKey = TARGET_NODE_DATASET_PREFIX + dataKey.toString().charAt(0).toUpperCase() + dataKey.toString().slice(1)
     
           const dataValue = node?.getData()[dataKey]

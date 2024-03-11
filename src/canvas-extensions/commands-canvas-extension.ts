@@ -17,7 +17,7 @@ export default class CommandsCanvasExtension {
   constructor(plugin: AdvancedCanvasPlugin) {
     this.plugin = plugin
 
-    if (!this.plugin.settingsManager.getSetting('commandsFeatureEnabled')) return
+    if (!this.plugin.settings.getSetting('commandsFeatureEnabled')) return
 
     this.plugin.addCommand({
       id: 'create-text-node',
@@ -74,7 +74,7 @@ export default class CommandsCanvasExtension {
     if (!sourceNode) return
     const sourceNodeData = sourceNode.getData()
 
-    const nodeMargin = this.plugin.settingsManager.getSetting('cloneNodeMargin')
+    const nodeMargin = this.plugin.settings.getSetting('cloneNodeMargin')
     const offset = { 
       x: (sourceNode.width + nodeMargin) * (cloneDirection === 'left' ? -1 : (cloneDirection === 'right' ? 1 : 0)),
       y: (sourceNode.height + nodeMargin) * (cloneDirection === 'up' ? -1 : (cloneDirection === 'down' ? 1 : 0))
@@ -97,7 +97,7 @@ export default class CommandsCanvasExtension {
       shape: sourceNodeData.shape 
     })
 
-    if (this.plugin.settingsManager.getSetting('zoomToClonedNode'))
+    if (this.plugin.settings.getSetting('zoomToClonedNode'))
       canvas.zoomToBbox(clonedNode.getBBox())
   }
 
@@ -105,7 +105,7 @@ export default class CommandsCanvasExtension {
     const node = canvas.selection.values().next().value
     if (!node) return
 
-    const expandNodeStepSize = this.plugin.settingsManager.getSetting('expandNodeStepSize')
+    const expandNodeStepSize = this.plugin.settings.getSetting('expandNodeStepSize')
     const expand = {
       x: expandDirection === 'left' ? -1 : (expandDirection === 'right' ? 1 : 0),
       y: expandDirection === 'up' ? -1 : (expandDirection === 'down' ? 1 : 0)

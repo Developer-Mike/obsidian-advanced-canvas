@@ -1,3 +1,4 @@
+import { WorkspaceWindow } from "obsidian"
 import { Canvas } from "src/@types/Canvas"
 import { CanvasEvent } from "src/events/events"
 import AdvancedCanvasPlugin from "src/main"
@@ -13,9 +14,16 @@ export default class ColorPaletteCanvasExtension {
     this.plugin = plugin
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
+      'advanced-canvas:window-open',
+      () => this.updateCustomColorModStyleClasses()
+    ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
       'css-change',
       () => this.updateCustomColorModStyleClasses()
     ))
+
+    this.updateCustomColorModStyleClasses()
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.PopupMenuCreated,
@@ -26,19 +34,22 @@ export default class ColorPaletteCanvasExtension {
   }
 
   private updateCustomColorModStyleClasses() {
-    document.getElementById(CUSTOM_COLORS_MOD_STYLES_ID)?.remove()
+    const customCss = this.getCustomColors().map((colorId) => `
+      .mod-canvas-color-${colorId} {
+        --canvas-color: var(--canvas-color-${colorId});
+      }
+    `).join('')
 
-    const customColorModStyle = document.createElement('style')
-    customColorModStyle.id = CUSTOM_COLORS_MOD_STYLES_ID
-    document.body.appendChild(customColorModStyle)
+    for (const win of this.plugin.windowsManager.windows) {
+      const doc = win.document
+      
+      doc.getElementById(CUSTOM_COLORS_MOD_STYLES_ID)?.remove()
 
-    for (const colorId of this.getCustomColors()) {
-      // Add mod-canvas-color-<colorId> style to the css
-      customColorModStyle.innerHTML += `
-        .mod-canvas-color-${colorId} {
-          --canvas-color: var(--canvas-color-${colorId});
-        }
-      `
+      const customColorModStyle = doc.createElement('style')
+      customColorModStyle.id = CUSTOM_COLORS_MOD_STYLES_ID
+      doc.head.appendChild(customColorModStyle)
+
+      customColorModStyle.textContent = customCss
     }
   }
 
@@ -57,8 +68,6 @@ export default class ColorPaletteCanvasExtension {
 
       const submenu = canvas.menu.menuEl.querySelector('.canvas-submenu')
       if (!submenu) return
-
-      this.updateCustomColorModStyleClasses()
 
       const currentNodeColor = canvas.getSelectionData().nodes.map(node => node.color).last()
       for (const colorId of this.getCustomColors()) {
