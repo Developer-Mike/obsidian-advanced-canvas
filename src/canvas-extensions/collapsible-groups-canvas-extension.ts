@@ -15,11 +15,6 @@ export default class CollapsibleGroupsCanvasExtension {
     if (!this.plugin.settings.getSetting('collapsibleGroupsFeatureEnabled')) return
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.CanvasChanged,
-      (canvas: Canvas) => canvas.wrapperEl.dataset.collapsibleGroupsEnabled = 'true'
-    ))
-
-    this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.NodeChanged,
       (canvas: Canvas, node: CanvasNode) => this.onNodeChanged(canvas, node)
     ))

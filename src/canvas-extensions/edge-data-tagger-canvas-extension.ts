@@ -1,9 +1,9 @@
 import { Canvas, CanvasEdge, CanvasEdgeData } from "src/@types/Canvas"
 import { CanvasEvent } from "src/events/events"
 import AdvancedCanvasPlugin from "src/main"
-import AdvancedCanvasSettingsManager from "src/settings"
+import SettingsManager from "src/settings"
 
-export function getExposedEdgeData(settings: AdvancedCanvasSettingsManager): (keyof CanvasEdgeData)[] {
+export function getExposedEdgeData(settings: SettingsManager): (keyof CanvasEdgeData)[] {
   const exposedData: (keyof CanvasEdgeData)[] = []
 
   if (settings.getSetting('edgesStylingFeatureEnabled')) exposedData.push('edgeStyle')

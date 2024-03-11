@@ -14,8 +14,8 @@ export default class ColorPaletteCanvasExtension {
     this.plugin = plugin
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      'advanced-canvas:window-open',
-      () => this.updateCustomColorModStyleClasses()
+      'window-open',
+      (_win: WorkspaceWindow, _window: Window) => this.updateCustomColorModStyleClasses()
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(

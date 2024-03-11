@@ -25,6 +25,7 @@ export interface AdvancedCanvasPluginSettings {
   disablePan: boolean
 
   collapsibleGroupsFeatureEnabled: boolean
+  collapsedGroupPreviewOnDrag: boolean
 
   stickersFeatureEnabled: boolean
 
@@ -61,6 +62,7 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   disablePan: false,
 
   collapsibleGroupsFeatureEnabled: true,
+  collapsedGroupPreviewOnDrag: true,
 
   stickersFeatureEnabled: true,
 
@@ -78,7 +80,9 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   showEdgesIntoDisabledPortals: true
 }
 
-export default class AdvancedCanvasSettingsManager {
+export default class SettingsManager {
+  static SETTINGS_CHANGED_EVENT = 'advanced-canvas:settings-changed'
+
   private plugin: AdvancedCanvasPlugin
   private settings: AdvancedCanvasPluginSettings
   private settingsTab: AdvancedCanvasPluginSettingTab
@@ -89,6 +93,7 @@ export default class AdvancedCanvasSettingsManager {
 
   async loadSettings() {
     this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.plugin.loadData())
+    this.plugin.app.workspace.trigger(SettingsManager.SETTINGS_CHANGED_EVENT)
   }
 
   async saveSettings() {
@@ -102,6 +107,7 @@ export default class AdvancedCanvasSettingsManager {
   async setSetting(data: Partial<AdvancedCanvasPluginSettings>) {
     this.settings = Object.assign(this.settings, data)
     await this.saveSettings()
+    this.plugin.app.workspace.trigger(SettingsManager.SETTINGS_CHANGED_EVENT)
   }
 
   addSettingsTab() {
@@ -111,9 +117,9 @@ export default class AdvancedCanvasSettingsManager {
 }
 
 export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
-  settingsManager: AdvancedCanvasSettingsManager
+  settingsManager: SettingsManager
 
-  constructor(plugin: AdvancedCanvasPlugin, settingsManager: AdvancedCanvasSettingsManager) {
+  constructor(plugin: AdvancedCanvasPlugin, settingsManager: SettingsManager) {
     super(plugin.app, plugin)
     this.settingsManager = settingsManager
   }
@@ -247,6 +253,15 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       "Group nodes can be collapsed and expanded to keep the canvas organized.",
       'collapsibleGroupsFeatureEnabled'
     )
+
+    new Setting(containerEl)
+      .setName("Collapsed group preview on drag")
+      .setDesc("When enabled, a group that is collapsed show its border while dragging a node.")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.settingsManager.getSetting('collapsedGroupPreviewOnDrag'))
+          .onChange(async (value) => await this.settingsManager.setSetting({ collapsedGroupPreviewOnDrag: value }))
+      )
 
     this.createFeatureHeading(
       containerEl,

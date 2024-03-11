@@ -1,4 +1,4 @@
-import { ItemView, Plugin, WorkspaceWindow } from 'obsidian'
+import { ItemView, Plugin } from 'obsidian'
 import SettingsManager from './settings'
 import ShapesCanvasExtension from './canvas-extensions/shapes-canvas-extension'
 import { Canvas, CanvasView } from './@types/Canvas'
@@ -20,8 +20,10 @@ import DefaultNodeSizeCanvasExtension from './canvas-extensions/default-node-siz
 import ColorPaletteCanvasExtension from './canvas-extensions/color-palette-canvas-extension'
 import CollapsibleGroupsCanvasExtension from './canvas-extensions/collapsible-groups-canvas-extension'
 import WindowsManager from './windows-manager'
+import CanvasWrapperDataTaggerCanvasExtension from './canvas-extensions/canvas-wrapper-data-tagger-canvas-extension'
 
 const CANVAS_EXTENSIONS: any[] = [
+  CanvasWrapperDataTaggerCanvasExtension,
   NodeDataTaggerCanvasExtension,
   EdgeDataTaggerCanvasExtension,
   InteractionTaggerCanvasExtension,

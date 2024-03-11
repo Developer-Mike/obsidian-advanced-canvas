@@ -1,9 +1,9 @@
 import { Canvas, CanvasNode, CanvasNodeData } from "src/@types/Canvas"
 import { CanvasEvent } from "src/events/events"
 import AdvancedCanvasPlugin from "src/main"
-import AdvancedCanvasSettingsManager from "src/settings"
+import SettingsManager from "src/settings"
 
-export function getExposedNodeData(settings: AdvancedCanvasSettingsManager): (keyof CanvasNodeData)[] {
+export function getExposedNodeData(settings: SettingsManager): (keyof CanvasNodeData)[] {
   const exposedData: (keyof CanvasNodeData)[] = []
   
   if (settings.getSetting('stickersFeatureEnabled')) exposedData.push('isSticker')

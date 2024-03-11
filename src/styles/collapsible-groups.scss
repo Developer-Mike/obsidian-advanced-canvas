@@ -21,7 +21,7 @@
   transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-[data-collapsible-groups-enabled] .canvas-node .canvas-group-label {
+.canvas-wrapper[data-collapsible-groups-feature-enabled="true"] .canvas-node .canvas-group-label {
   left: calc(40px * var(--zoom-multiplier));
 }
 
@@ -32,6 +32,17 @@
 
   .canvas-group-label {
     max-width: initial;
+  }
+}
+
+.canvas-wrapper[data-collapsed-group-preview-on-drag="true"][data-is-dragging] .canvas-node[data-is-collapsed] .canvas-node-container {
+  display: block;
+  opacity: 0.5;
+
+  border-style: dashed;
+
+  .canvas-node-content {
+    background-color: transparent;
   }
 }
 
