@@ -60,6 +60,11 @@ export default class CanvasEventEmitter {
         that.triggerWorkspaceEvent(CanvasEvent.NodeMoved, this, node)
         return result
       },
+      onDoubleClick: (next: any) => function (event: MouseEvent) {
+        const preventDefault = { value: false }
+        that.triggerWorkspaceEvent(CanvasEvent.DoubleClick, this, event, preventDefault)
+        if (!preventDefault.value) next.call(this, event)
+      },
       setDragging: (next: any) => function (dragging: boolean) {
         const result = next.call(this, dragging)
         that.triggerWorkspaceEvent(CanvasEvent.DraggingStateChanged, this, dragging)

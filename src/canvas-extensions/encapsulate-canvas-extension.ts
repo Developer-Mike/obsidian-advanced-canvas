@@ -1,7 +1,7 @@
-import { Menu, SuggestModal } from "obsidian"
+import { Menu } from "obsidian"
 import { Canvas } from "src/@types/Canvas"
 import AdvancedCanvasPlugin from "src/main"
-import FileNameModal from "src/utils/modal-helper"
+import { FileNameModal } from "src/utils/modal-helper"
 import * as CanvasHelper from "src/utils/canvas-helper"
 
 const ENCAPSULATED_FILE_NODE_SIZE = { width: 300, height: 300 }
@@ -46,11 +46,11 @@ export default class EncapsulateCanvasExtension {
     const sourceFileFolder = canvas.view.file.parent?.path
     if (!sourceFileFolder) return // Should never happen
 
-    const targetFilePath = await FileNameModal.awaitInput(new FileNameModal(
+    const targetFilePath = await new FileNameModal(
       this.plugin.app,
       sourceFileFolder,
       'canvas'
-    ))
+    ).awaitInput()
 
     const newFileData = { nodes: selection.nodes, edges: selection.edges }
     const file = await this.plugin.app.vault.create(targetFilePath, JSON.stringify(newFileData, null, 2))

@@ -1,6 +1,6 @@
-import App, { SuggestModal } from "obsidian"
+import App, { SuggestModal, TFile } from "obsidian"
 
-export default class FileNameModal extends SuggestModal<string> {
+export class FileNameModal extends SuggestModal<string> {
   parentPath: string
   fileExtension: string
 
@@ -29,10 +29,38 @@ export default class FileNameModal extends SuggestModal<string> {
 
   onChooseSuggestion(_text: string, _evt: MouseEvent | KeyboardEvent) {}
 
-  static awaitInput(modal: FileNameModal): Promise<string> {
+  awaitInput(): Promise<string> {
     return new Promise((resolve, _reject) => {
-      modal.onChooseSuggestion = (text: string) => { resolve(text) }
-      modal.open()
+      this.onChooseSuggestion = (text: string) => { resolve(text) }
+      this.open()
+    })
+  }
+}
+
+export class FileSelectModal extends SuggestModal<TFile> {
+  files: TFile[]
+
+  constructor(app: App, extensionsRegex: string) {
+    super(app)
+
+    this.files = this.app.vault.getFiles().filter(f => f.path.match(new RegExp(extensionsRegex)))
+  }
+
+  getSuggestions(query: string): TFile[] {
+    return this.files
+      .filter(f => f.name.toLowerCase().includes(query.toLowerCase()))
+  }
+
+  renderSuggestion(file: TFile, el: HTMLElement) {
+    el.setText((file as any).getShortName())
+  }
+
+  onChooseSuggestion(_file: TFile, _evt: MouseEvent | KeyboardEvent) {}
+
+  awaitInput(): Promise<TFile> {
+    return new Promise((resolve, _reject) => {
+      this.onChooseSuggestion = (file: TFile) => { resolve(file) }
+      this.open()
     })
   }
 }

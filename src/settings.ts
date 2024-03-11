@@ -1,12 +1,18 @@
 import { Notice, PluginSettingTab, Setting } from "obsidian"
 import AdvancedCanvasPlugin from "./main"
 
-const SLIDE_SIZE_OPTIONS: { [key: string]: string } = {
+const NODE_TYPES_ON_DOUBLE_CLICK = {
+  'text': 'Text',
+  'file': 'File'
+}
+
+const SLIDE_SIZE_OPTIONS = {
   '1200x675': '16:9',
   '1350x900': '3:2',
 }
 
 export interface AdvancedCanvasPluginSettings {
+  nodeTypeOnDoubleClick: string
   defaultTextNodeWidth: number
   defaultTextNodeHeight: number
 
@@ -47,6 +53,7 @@ export interface AdvancedCanvasPluginSettings {
 }
 
 export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
+  nodeTypeOnDoubleClick: Object.keys(NODE_TYPES_ON_DOUBLE_CLICK).first(),
   defaultTextNodeWidth: 260,
   defaultTextNodeHeight: 60,
 
@@ -138,6 +145,16 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       .setHeading()
       .setName("General")
 
+    new Setting(containerEl)
+      .setName("Node type on double click")
+      .setDesc("The type of node that will be created when double clicking on the canvas.")
+      .addDropdown((dropdown) =>
+        dropdown
+          .addOptions(NODE_TYPES_ON_DOUBLE_CLICK)
+          .setValue(this.settingsManager.getSetting('nodeTypeOnDoubleClick'))
+          .onChange(async (value) => await this.settingsManager.setSetting({ nodeTypeOnDoubleClick: value }))
+        )
+    
     new Setting(containerEl)
       .setName("Default text node width")
       .setDesc("The default width of a text node.")

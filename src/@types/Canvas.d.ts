@@ -68,9 +68,9 @@ export interface Canvas {
   toggleObjectSnapping(enabled: boolean): void
   dragTempNode(dragEvent: any, nodeSize: Size, onDropped: (position: Position) => void): void
 
-  createTextNode(options: TextNodeOptions): CanvasNode
-  createGroupNode(options: GroupNodeOptions): CanvasNode
-  createFileNode(options: FileNodeOptions): CanvasNode
+  createTextNode(options: { [key: string]: any }): CanvasNode
+  createGroupNode(options: { [key: string]: any }): CanvasNode
+  createFileNode(options: { [key: string]: any }): CanvasNode
 
   addNode(node: CanvasNode): void
   removeNode(node: CanvasNode): void
@@ -83,6 +83,8 @@ export interface Canvas {
   undo(): void
   redo(): void
 
+  posFromEvt(event: MouseEvent): Position
+  onDoubleClick(event: MouseEvent): void
   handlePaste(): void
   requestSave(): void
 

@@ -266,7 +266,7 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
 
 <details>
     <summary>
-        All Events (26)
+        All Events (27)
     </summary>
 
   - `advanced-canvas:canvas-changed`
@@ -278,6 +278,9 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
   - `advanced-canvas:node-moved`
     - Fired when a node gets moved
     - Payload: `Canvas`, `Node`
+  - `advanced-canvas:double-click`
+    - Fired when the canvas gets double-clicked
+    - Payload: `Canvas`, `MouseEvent`, `preventDefault: { value: Boolean }`
   - `advanced-canvas:dragging-state-changed`
     - Fired when the dragging state of the canvas changes
     - Payload: `Canvas`, `boolean`
