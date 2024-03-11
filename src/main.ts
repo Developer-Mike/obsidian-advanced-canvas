@@ -16,7 +16,7 @@ import StickersCanvasExtension from './canvas-extensions/stickers-canvas-extensi
 import EdgesStyleCanvasExtension from './canvas-extensions/edges-style-canvas-extension'
 import EdgeDataTaggerCanvasExtension from './canvas-extensions/edge-data-tagger-canvas-extension'
 import DebugHelper from './utils/debug-helper'
-import DefaultNodeSizeCanvasExtension from './canvas-extensions/default-node-size-canvas-extension'
+import BetterDefaultSettingsCanvasExtension from './canvas-extensions/better-default-settings-canvas-extension'
 import ColorPaletteCanvasExtension from './canvas-extensions/color-palette-canvas-extension'
 import CollapsibleGroupsCanvasExtension from './canvas-extensions/collapsible-groups-canvas-extension'
 import WindowsManager from './windows-manager'
@@ -27,7 +27,7 @@ const CANVAS_EXTENSIONS: any[] = [
   NodeDataTaggerCanvasExtension,
   EdgeDataTaggerCanvasExtension,
   InteractionTaggerCanvasExtension,
-  DefaultNodeSizeCanvasExtension,
+  BetterDefaultSettingsCanvasExtension,
   CommandsCanvasExtension,
   ReadonlyCanvasExtension,
   GroupCanvasExtension,

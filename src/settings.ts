@@ -7,6 +7,9 @@ const SLIDE_SIZE_OPTIONS: { [key: string]: string } = {
 }
 
 export interface AdvancedCanvasPluginSettings {
+  defaultTextNodeWidth: number
+  defaultTextNodeHeight: number
+
   shapesFeatureEnabled: boolean
 
   edgesStylingFeatureEnabled: boolean
@@ -44,6 +47,9 @@ export interface AdvancedCanvasPluginSettings {
 }
 
 export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
+  defaultTextNodeWidth: 260,
+  defaultTextNodeHeight: 60,
+
   shapesFeatureEnabled: true,
 
   edgesStylingFeatureEnabled: true,
@@ -127,6 +133,28 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
   display(): void {
     let { containerEl } = this
     containerEl.empty()
+
+    new Setting(containerEl)
+      .setHeading()
+      .setName("General")
+
+    new Setting(containerEl)
+      .setName("Default text node width")
+      .setDesc("The default width of a text node.")
+      .addText((text) =>
+        text
+          .setValue(this.settingsManager.getSetting('defaultTextNodeWidth').toString())
+          .onChange(async (value) => await this.settingsManager.setSetting({ defaultTextNodeWidth: Math.max(1, parseInt(value)) }))
+      )
+    
+    new Setting(containerEl)
+      .setName("Default text node height")
+      .setDesc("The default height of a text node.")
+      .addText((text) =>
+        text
+          .setValue(this.settingsManager.getSetting('defaultTextNodeHeight').toString())
+          .onChange(async (value) => await this.settingsManager.setSetting({ defaultTextNodeHeight: Math.max(1, parseInt(value)) }))
+      )
 
     this.createFeatureHeading(
       containerEl,
