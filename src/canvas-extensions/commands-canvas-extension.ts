@@ -1,15 +1,10 @@
 import { Canvas } from "src/@types/Canvas"
 import AdvancedCanvasPlugin from "src/main"
 import * as CanvasHelper from "src/utils/canvas-helper"
+import { FileSelectModal } from "src/utils/modal-helper"
 
 type Direction = 'up' | 'down' | 'left' | 'right'
 const DIRECTIONS = ['up', 'down', 'left', 'right'] as Direction[]
-const DIRECTION_KEYS = {
-  up: 'ArrowUp',
-  down: 'ArrowDown',
-  left: 'ArrowLeft',
-  right: 'ArrowRight'
-}
 
 export default class CommandsCanvasExtension {
   plugin: AdvancedCanvasPlugin
@@ -26,6 +21,16 @@ export default class CommandsCanvasExtension {
         this.plugin,
         (canvas: Canvas) => !canvas.readonly,
         (canvas: Canvas) => this.createTextNode(canvas)
+      )
+    })
+
+    this.plugin.addCommand({
+      id: 'create-file-node',
+      name: 'Create file node',
+      checkCallback: CanvasHelper.canvasCommand(
+        this.plugin,
+        (canvas: Canvas) => !canvas.readonly,
+        (canvas: Canvas) => this.createFileNode(canvas)
       )
     })
 
@@ -67,6 +72,14 @@ export default class CommandsCanvasExtension {
     const pos = CanvasHelper.getCenterCoordinates(canvas, size)
 
     canvas.createTextNode({ pos: pos, size: size })
+  }
+
+  private async createFileNode(canvas: Canvas) {
+    const size = canvas.config.defaultFileNodeDimensions
+    const pos = CanvasHelper.getCenterCoordinates(canvas, size)
+    const file = await new FileSelectModal(this.plugin.app, '.*').awaitInput()
+
+    canvas.createFileNode({ pos: pos, size: size, file: file })
   }
 
   private cloneNode(canvas: Canvas, cloneDirection: Direction) {

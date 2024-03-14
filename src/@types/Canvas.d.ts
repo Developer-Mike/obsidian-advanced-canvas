@@ -119,6 +119,7 @@ export interface SelectionData {
 
 export interface CanvasConfig {
   defaultTextNodeDimensions: Size
+  defaultFileNodeDimensions: Size
 }
 
 export interface CanvasView extends ItemView {
