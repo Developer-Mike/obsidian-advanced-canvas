@@ -35,6 +35,11 @@ export default class BetterDefaultSettingsCanvasExtension {
       width: this.plugin.settings.getSetting('defaultTextNodeWidth'),
       height: this.plugin.settings.getSetting('defaultTextNodeHeight')
     }
+
+    canvas.config.defaultFileNodeDimensions = {
+      width: this.plugin.settings.getSetting('defaultFileNodeWidth'),
+      height: this.plugin.settings.getSetting('defaultFileNodeHeight')
+    }
   }
 
   private async onDoubleClick(canvas: Canvas, event: MouseEvent, preventDefault: { value: boolean }) {

@@ -15,6 +15,8 @@ export interface AdvancedCanvasPluginSettings {
   nodeTypeOnDoubleClick: string
   defaultTextNodeWidth: number
   defaultTextNodeHeight: number
+  defaultFileNodeWidth: number
+  defaultFileNodeHeight: number
 
   shapesFeatureEnabled: boolean
 
@@ -56,6 +58,8 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   nodeTypeOnDoubleClick: Object.keys(NODE_TYPES_ON_DOUBLE_CLICK).first(),
   defaultTextNodeWidth: 260,
   defaultTextNodeHeight: 60,
+  defaultFileNodeWidth: 400,
+  defaultFileNodeHeight: 400,
 
   shapesFeatureEnabled: true,
 
@@ -171,6 +175,24 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
         text
           .setValue(this.settingsManager.getSetting('defaultTextNodeHeight').toString())
           .onChange(async (value) => await this.settingsManager.setSetting({ defaultTextNodeHeight: Math.max(1, parseInt(value)) }))
+      )
+
+    new Setting(containerEl)
+      .setName("Default file node width")
+      .setDesc("The default width of a file node.")
+      .addText((text) =>
+        text
+          .setValue(this.settingsManager.getSetting('defaultFileNodeWidth').toString())
+          .onChange(async (value) => await this.settingsManager.setSetting({ defaultFileNodeWidth: Math.max(1, parseInt(value)) }))
+      )
+
+    new Setting(containerEl)
+      .setName("Default file node height")
+      .setDesc("The default height of a file node.")
+      .addText((text) =>
+        text
+          .setValue(this.settingsManager.getSetting('defaultFileNodeHeight').toString())
+          .onChange(async (value) => await this.settingsManager.setSetting({ defaultFileNodeHeight: Math.max(1, parseInt(value)) }))
       )
 
     this.createFeatureHeading(
