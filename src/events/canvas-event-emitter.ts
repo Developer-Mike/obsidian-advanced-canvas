@@ -48,7 +48,7 @@ export default class CanvasEventEmitter {
     })
 
     // Patch canvas after patching the canvas view using the non-null canvas view
-    await patchWorkspaceObject(this.plugin, () => canvasView?.canvas, {
+    const canvas = await patchWorkspaceObject(this.plugin, () => canvasView?.canvas, {
       markViewportChanged: (next: any) => function (...args: any) {
         that.triggerWorkspaceEvent(CanvasEvent.ViewportChanged.Before, this)
         const result = next.call(this, ...args)
@@ -150,21 +150,13 @@ export default class CanvasEventEmitter {
       }
     })
 
-    // Canvas is now patched - update all open canvases
+    // Canvas is now patched - update all open canvas views
     this.plugin.app.workspace.iterateAllLeaves((leaf: WorkspaceLeaf) => {
       if (leaf.view.getViewType() !== 'canvas') return
 
       const canvasView = leaf.view as CanvasView
-
-      // Patch canvas elements
-      canvasView.canvas.nodes.forEach(node => this.patchNode(node))
-      canvasView.canvas.edges.forEach(edge => this.patchEdge(edge))
-
-      // Re-init the canvas with the patched canvas object
-      canvasView.setViewData(canvasView.getViewData())
-
-      // Trigger popup menu changed event
-      this.triggerWorkspaceEvent(CanvasEvent.PopupMenuCreated, canvasView.canvas)
+      // @ts-ignore
+      canvasView.leaf.rebuildView()
     })
   }
 
