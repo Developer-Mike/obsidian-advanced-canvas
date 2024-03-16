@@ -6,10 +6,10 @@ const NODE_TYPES_ON_DOUBLE_CLICK = {
   'file': 'File'
 }
 
-const SLIDE_SIZE_OPTIONS = {
+/*const SLIDE_SIZE_OPTIONS = {
   '1200x675': '16:9',
   '1350x900': '3:2',
-}
+}*/
 
 export interface AdvancedCanvasPluginSettings {
   nodeTypeOnDoubleClick: string
@@ -42,6 +42,7 @@ export interface AdvancedCanvasPluginSettings {
 
   presentationFeatureEnabled: boolean
   defaultSlideSize: string
+  wrapInSlidePadding: number
   useArrowKeysToChangeSlides: boolean
   zoomToSlideWithoutPadding: boolean
   slideTransitionAnimationDuration: number
@@ -70,8 +71,8 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
 
   commandsFeatureEnabled: true,
   zoomToClonedNode: true,
-  cloneNodeMargin: 25,
-  expandNodeStepSize: 25,
+  cloneNodeMargin: 20,
+  expandNodeStepSize: 20,
 
   betterReadonlyEnabled: true,
   disableNodePopup: false,
@@ -84,7 +85,8 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   stickersFeatureEnabled: true,
 
   presentationFeatureEnabled: true,
-  defaultSlideSize: Object.keys(SLIDE_SIZE_OPTIONS).first(),
+  defaultSlideSize: '1200x675',
+  wrapInSlidePadding: 20,
   useArrowKeysToChangeSlides: true,
   zoomToSlideWithoutPadding: true,
   slideTransitionAnimationDuration: 0.5,
@@ -346,13 +348,21 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Default slide ratio")
-      .setDesc("The default ratio of the slide.")
-      .addDropdown((dropdown) =>
-        dropdown
-          .addOptions(SLIDE_SIZE_OPTIONS)
+      .setDesc("The default ratio of the slide. For example, 16:9 is 1200x675 and 3:2 is 1350x900.")
+      .addText((text) =>
+        text
           .setValue(this.settingsManager.getSetting('defaultSlideSize'))
-          .onChange(async (value) => await this.settingsManager.setSetting({ defaultSlideSize: value }))
-        )
+          .onChange(async (value) => await this.settingsManager.setSetting({ defaultSlideSize: value.replace(' ', '') }))
+      )
+
+    new Setting(containerEl)
+      .setName("Wrap in slide padding")
+      .setDesc("The padding of the slide when wrapping the canvas in a slide.")
+      .addText((text) =>
+        text
+          .setValue(this.settingsManager.getSetting('wrapInSlidePadding').toString())
+          .onChange(async (value) => await this.settingsManager.setSetting({ wrapInSlidePadding: parseInt(value) }))
+      )
 
     new Setting(containerEl)
       .setName("Use arrow keys to change slides")

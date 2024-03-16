@@ -169,6 +169,8 @@ export interface CanvasElement {
   initialize(): void
   setColor(color: string): void
   
+  getBBox(): BBox
+  
   getData(): CanvasNodeData | CanvasEdgeData
   setData(data: CanvasNodeData | CanvasEdgeData): void
 }
@@ -187,6 +189,8 @@ export interface CanvasNodeData {
   collapsedData?: CanvasData
 
   isStartNode?: boolean
+  sideRatio?: number
+
   edgesToNodeFromPortal?: { [key: string]: CanvasEdgeData[] }
 
   // Portal node
@@ -206,7 +210,6 @@ export interface CanvasNodeData {
 
 export interface CanvasNode extends CanvasElement {
   nodeEl: HTMLElement
-  getBBox(): BBox
 
   labelEl?: HTMLElement
   file?: TFile
