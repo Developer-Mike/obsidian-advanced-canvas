@@ -35,6 +35,18 @@ export default class CommandsCanvasExtension {
     })
 
     this.plugin.addCommand({
+      id: 'select-all-edges',
+      name: 'Select all edges',
+      checkCallback: CanvasHelper.canvasCommand(
+        this.plugin,
+        (_canvas: Canvas) => true,
+        (canvas: Canvas) => canvas.updateSelection(() => 
+          canvas.selection = new Set(canvas.edges.values())
+        )
+      )
+    })
+
+    this.plugin.addCommand({
       id: 'zoom-to-selection',
       name: 'Zoom to selection',
       checkCallback: CanvasHelper.canvasCommand(
