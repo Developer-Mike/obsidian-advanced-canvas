@@ -1,4 +1,4 @@
-import { ItemView, TFile, View, WorkspaceLeaf } from "obsidian"
+import { ItemView, TFile, WorkspaceLeaf } from "obsidian"
 
 export interface Size {
   width: number
@@ -63,6 +63,7 @@ export interface Canvas {
 
   selection: Set<CanvasElement>
   getSelectionData(): SelectionData
+  updateSelection(update: () => void): void
   deselectAll(): void
 
   toggleObjectSnapping(enabled: boolean): void
