@@ -101,6 +101,8 @@ If you want to support me and my work, consider starring ⭐ the repository, or,
   - Create a new text node
 - `Advanced Canvas: Create file node`
   - Create a new file node
+- `Advanced Canvas: Select all edges`
+  - Select all edges
 - `Advanced Canvas: Zoom to selection`
   - Zoom to the bounding box of the selected nodes
 - `Advanced Canvas: Clone node up/down/left/right`
