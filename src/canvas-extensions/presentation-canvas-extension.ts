@@ -1,5 +1,5 @@
-import { Notice } from 'obsidian'
-import { Canvas, CanvasEdge, CanvasNode, Position, Size } from 'src/@types/Canvas'
+import { Menu, Notice } from 'obsidian'
+import { BBox, Canvas, CanvasEdge, CanvasElement, CanvasNode, Position, Size } from 'src/@types/Canvas'
 import AdvancedCanvasPlugin from 'src/main'
 import { CanvasEvent } from 'src/events/events'
 import * as CanvasHelper from "src/utils/canvas-helper"
@@ -18,6 +18,23 @@ export default class PresentationCanvasExtension {
     this.plugin = plugin
 
     if (!this.plugin.settings.getSetting('presentationFeatureEnabled')) return
+
+    /* Add wrap in slide option to context menu */
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      'canvas:selection-menu',
+      (menu: Menu, canvas: Canvas) => {
+        menu.addItem((item) =>
+          item
+            .setTitle('Wrap in slide')
+            .setIcon('gallery-vertical')
+            .onClick(() => this.addSlide(canvas, undefined, 
+              BBoxHelper.enlargeBBox(BBoxHelper.combineBBoxes(
+                [...canvas.selection.values()].map((element: CanvasElement) => element.getBBox())
+              ), this.plugin.settings.getSetting('wrapInSlidePadding'))
+            ))
+        )
+      }
+    ))
 
     this.plugin.addCommand({
 			id: 'create-new-slide',
@@ -69,6 +86,11 @@ export default class PresentationCanvasExtension {
       CanvasEvent.PopupMenuCreated,
       (canvas: Canvas) => this.onPopupMenuCreated(canvas)
     ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.NodeMoved,
+      (canvas: Canvas, node: CanvasNode) => this.onNodeMoved(canvas, node)
+    ))
   }
 
   onCanvasChanged(canvas: Canvas): void {
@@ -81,7 +103,7 @@ export default class PresentationCanvasExtension {
           label: 'Drag to add slide',
           icon: 'gallery-vertical'
         },
-        () => this.getSlideSize(),
+        () => this.getDefaultSlideSize(),
         (canvas: Canvas, pos: Position) => this.addSlide(canvas, pos)
       )
     )
@@ -105,6 +127,28 @@ export default class PresentationCanvasExtension {
       })
     )
   }
+
+  private onNodeMoved(_canvas: Canvas, node: CanvasNode) {
+    const nodeData = node.getData()
+    if (!nodeData.sideRatio) return
+
+    const nodeBBox = node.getBBox()
+    const nodeSize = {
+      width: nodeBBox.maxX - nodeBBox.minX,
+      height: nodeBBox.maxY - nodeBBox.minY
+    }
+    const nodeAspectRatio = nodeSize.width / nodeSize.height
+
+    if (nodeAspectRatio < nodeData.sideRatio)
+      nodeSize.width = nodeSize.height * nodeData.sideRatio
+    else nodeSize.height = nodeSize.width / nodeData.sideRatio
+
+    node.setData({
+      ...nodeData,
+      width: nodeSize.width,
+      height: nodeSize.height
+    })
+  }
   
   private getStartNode(canvas: Canvas): CanvasNode|undefined {
     for (const [_, node] of canvas.nodes) {
@@ -123,26 +167,56 @@ export default class PresentationCanvasExtension {
     if (node !== startNode) node.setData({ ...node.getData(), isStartNode: true })
   }
 
-  private getSlideSize(): Size {
+  private getDefaultSlideSize(): Size {
     const slideSizeString = this.plugin.settings.getSetting('defaultSlideSize')
     const slideSizeArray = slideSizeString.split('x').map((value: string) => parseInt(value))
     return { width: slideSizeArray[0], height: slideSizeArray[1] }
   }
 
-  private addSlide(canvas: Canvas, pos?: Position) {
-    if (!pos) pos = CanvasHelper.getCenterCoordinates(canvas, this.getSlideSize())
+  private getSlideAspectRatio(): number {
+    const slideSize = this.getDefaultSlideSize()
+    return slideSize.width / slideSize.height
+  }
 
+  private addSlide(canvas: Canvas, pos?: Position, bbox?: BBox) {
     const isStartNode = this.getStartNode(canvas) == null
-    const nodeSize = this.getSlideSize()
+    const slideSize = this.getDefaultSlideSize()
+    const slideAspectRatio = this.getSlideAspectRatio()
+
+    if (bbox) {
+      const bboxWidth = bbox.maxX - bbox.minX
+      const bboxHeight = bbox.maxY - bbox.minY
+
+      // Make sure the nodes fit inside the bounding box while keeping the aspect ratio
+      if (bboxWidth / bboxHeight > slideAspectRatio) {
+        slideSize.width = bboxWidth
+        slideSize.height = bboxWidth / slideAspectRatio
+      } else {
+        slideSize.height = bboxHeight
+        slideSize.width = bboxHeight * slideAspectRatio
+      }
+      
+      pos = { 
+        x: bbox.minX,
+        y: bbox.minY
+      }
+    }
+
+    // If no position is provided, use the center of the canvas
+    if (!pos) pos = CanvasHelper.getCenterCoordinates(canvas, this.getDefaultSlideSize())
 
     const groupNode = canvas.createGroupNode({
       pos: pos,
-      size: nodeSize,
+      size: slideSize,
       label: isStartNode ? START_SLIDE_NAME : DEFAULT_SLIDE_NAME,
       focus: false,
     })
 
-    if (isStartNode) groupNode.setData({ ...groupNode.getData(), isStartNode: true })
+    groupNode.setData({ 
+      ...groupNode.getData(), 
+      sideRatio: slideAspectRatio,
+      isStartNode: isStartNode ? true : undefined,
+    })
   }
 
   private async animateNodeTransition(canvas: Canvas, fromNode: CanvasNode|undefined, toNode: CanvasNode) {

@@ -1,5 +1,21 @@
 import { BBox, CanvasNodeData, Position, Side } from "src/@types/Canvas"
 
+export function combineBBoxes(bboxes: BBox[]): BBox {
+  let minX = Infinity
+  let minY = Infinity
+  let maxX = -Infinity
+  let maxY = -Infinity
+
+  for (let bbox of bboxes) {
+    minX = Math.min(minX, bbox.minX)
+    minY = Math.min(minY, bbox.minY)
+    maxX = Math.max(maxX, bbox.maxX)
+    maxY = Math.max(maxY, bbox.maxY)
+  }
+
+  return { minX, minY, maxX, maxY }
+}
+
 export function scaleBBox(bbox: BBox, scale: number): BBox {
   let diffX = (scale - 1) * (bbox.maxX - bbox.minX)
   let diffY = (scale - 1) * (bbox.maxY - bbox.minY)
