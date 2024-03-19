@@ -50,7 +50,7 @@ export default class BetterDefaultSettingsCanvasExtension {
 
     switch (this.plugin.settings.getSetting('nodeTypeOnDoubleClick')) {
       case 'file':
-        const file = await new FileSelectModal(this.plugin.app, '.*').awaitInput()
+        const file = await new FileSelectModal(this.plugin.app, undefined, true).awaitInput()
 
         canvas.createFileNode({
           pos: pos,

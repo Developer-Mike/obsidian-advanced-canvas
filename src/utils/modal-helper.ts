@@ -1,4 +1,5 @@
-import App, { SuggestModal, TFile } from "obsidian"
+import App, { SuggestModal, TFile } from 'obsidian'
+import * as PathHelper from 'src/utils/path-helper'
 
 export class FileNameModal extends SuggestModal<string> {
   parentPath: string
@@ -37,29 +38,70 @@ export class FileNameModal extends SuggestModal<string> {
   }
 }
 
-export class FileSelectModal extends SuggestModal<TFile> {
-  files: TFile[]
+export class FileSelectModal extends SuggestModal<string> {
+  files: string[]
+  suggestNewFile: boolean
 
-  constructor(app: App, extensionsRegex: string) {
+  constructor(app: App, extensionsRegex?: RegExp, suggestNewFile: boolean = false) {
     super(app)
 
-    this.files = this.app.vault.getFiles().filter(f => f.path.match(new RegExp(extensionsRegex)))
+    this.files = this.app.vault.getFiles()
+      .map(file => file.path)
+      .filter(path => PathHelper.extension(path)?.match(extensionsRegex ?? /.*/))
+    this.suggestNewFile = suggestNewFile
+
+    this.setPlaceholder('Type to search...')
+    this.setInstructions([{
+        command: '↑↓',
+        purpose: 'to navigate'
+    }, {
+        command: '↵',
+        purpose: 'to open'
+    }, {
+        command: 'shift ↵',
+        purpose: 'to create'
+    }, {
+        command: 'esc',
+        purpose: 'to dismiss'
+    }])
+
+    this.scope.register(['Shift'], 'Enter', ((e) => {
+      this.onChooseSuggestion(this.inputEl.value, e)
+      this.close()
+    }))
   }
 
-  getSuggestions(query: string): TFile[] {
-    return this.files
-      .filter(f => f.name.toLowerCase().includes(query.toLowerCase()))
+  getSuggestions(query: string): string[] {
+    const suggestions = this.files.filter(path => path.toLowerCase().includes(query.toLowerCase()))
+    if (suggestions.length === 0 && this.suggestNewFile) suggestions.push(query)
+
+    return suggestions
   }
 
-  renderSuggestion(file: TFile, el: HTMLElement) {
-    el.setText(file.extension === 'md' ? file.basename : file.name)
+  renderSuggestion(path: string, el: HTMLElement) {
+    const simplifiedPath = path.replace(/\.md$/, '')
+    el.setText(simplifiedPath)
   }
 
-  onChooseSuggestion(_file: TFile, _evt: MouseEvent | KeyboardEvent) {}
+  onChooseSuggestion(_path: string, _evt: MouseEvent | KeyboardEvent) {}
 
   awaitInput(): Promise<TFile> {
     return new Promise((resolve, _reject) => {
-      this.onChooseSuggestion = (file: TFile) => { resolve(file) }
+      this.onChooseSuggestion = (path: string, _evt: MouseEvent | KeyboardEvent) => {
+        const file = this.app.vault.getAbstractFileByPath(path)
+
+        if (file instanceof TFile) {
+          resolve(file)
+          return
+        }
+
+        if (!this.suggestNewFile) return
+
+        if (PathHelper.extension(path) === undefined) path += '.md'
+        const newFile = this.app.vault.create(path, '')
+        resolve(newFile)
+      }
+
       this.open()
     })
   }

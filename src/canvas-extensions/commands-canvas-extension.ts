@@ -89,7 +89,7 @@ export default class CommandsCanvasExtension {
   private async createFileNode(canvas: Canvas) {
     const size = canvas.config.defaultFileNodeDimensions
     const pos = CanvasHelper.getCenterCoordinates(canvas, size)
-    const file = await new FileSelectModal(this.plugin.app, '.*').awaitInput()
+    const file = await new FileSelectModal(this.plugin.app, undefined, true).awaitInput()
 
     canvas.createFileNode({ pos: pos, size: size, file: file })
   }
