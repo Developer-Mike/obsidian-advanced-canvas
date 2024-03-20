@@ -75,14 +75,15 @@ class PropertiesModal extends Modal {
       )
   }
 
-  onClose() {
-    this.contentEl.empty()
-
-  }
+  onClose() {}
 
   awaitDialog(): Promise<void> {
     return new Promise((resolve) => {
-      this.onClose = () => resolve()
+      this.onClose = () => {
+        this.contentEl.empty()
+        resolve()
+      }
+
       this.open()
     })
   }

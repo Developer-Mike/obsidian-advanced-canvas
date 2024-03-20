@@ -53,6 +53,8 @@ All features can be enabled/disabled in the settings.
     - Straight
     - A*
 - [Custom colors](#custom-colors) in the color picker
+- [Properties Support](#properties-support)
+  - Set properties for the canvas file
 - [Stickers](#stickers)
   - Convert image nodes to stickers (transparent background and no border)
 - [Presentation mode](#presentation)
@@ -192,6 +194,24 @@ Add custom colors to the color picker. You can add them using the following css 
     <summary>Custom Colors In Palette</summary>
     <img src="./assets/custom-colors.png" alt="Custom Colors In Palette"/>
 </details>
+
+## Properties Support
+Support for properties in canvas files just like in md files. You can edit the properties using the [updated control menu](#canvas-control-menu).
+
+Supported properties:
+- `cssclasses`
+
+### Custom Background Example (cssclasses)
+```css
+.canvas-wrapper.<CLASS-NAME> > .canvas-background {
+    background-image: url('<IMAGE-URL>');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    
+    filter: blur(5px) brightness(0.8);
+}
+```
 
 ## Stickers
 Convert image nodes to stickers. Stickers have a transparent background and no border.
