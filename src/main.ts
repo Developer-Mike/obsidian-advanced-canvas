@@ -21,6 +21,7 @@ import ColorPaletteCanvasExtension from './canvas-extensions/color-palette-canva
 import CollapsibleGroupsCanvasExtension from './canvas-extensions/collapsible-groups-canvas-extension'
 import WindowsManager from './windows-manager'
 import CanvasWrapperDataTaggerCanvasExtension from './canvas-extensions/canvas-wrapper-data-tagger-canvas-extension'
+import CssclassesCanvasExtension from './canvas-extensions/cssclasses-canvas-extension'
 
 const CANVAS_EXTENSIONS: any[] = [
   CanvasWrapperDataTaggerCanvasExtension,
@@ -29,6 +30,7 @@ const CANVAS_EXTENSIONS: any[] = [
   InteractionTaggerCanvasExtension,
   BetterDefaultSettingsCanvasExtension,
   CommandsCanvasExtension,
+  CssclassesCanvasExtension,
   ReadonlyCanvasExtension,
   GroupCanvasExtension,
   CollapsibleGroupsCanvasExtension,

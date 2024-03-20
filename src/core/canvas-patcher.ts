@@ -1,6 +1,6 @@
 import AdvancedCanvasPlugin from "src/main"
 import { BBox, Canvas, CanvasData, CanvasEdge, CanvasElement, CanvasNode, CanvasView } from "src/@types/Canvas"
-import { patchObjectInstance, tryPatchWorkspacePrototype as patchWorkspaceObject } from "src/utils/patch-helper"
+import { patchObjectInstance, patchObjectPrototype } from "src/utils/patch-helper"
 import { CanvasEvent } from "./events"
 import { WorkspaceLeaf } from "obsidian"
 import { around } from "monkey-around"
@@ -15,28 +15,25 @@ export default class CanvasPatcher {
 
   private async applyPatches() {
     const that = this
+
+    // Get the current canvas view or wait for it to be created
+    const canvasView = this.plugin.getCurrentCanvasView() ?? await new Promise<CanvasView>((resolve) => {
+      // @ts-ignore
+      const uninstall = around(this.plugin.app.internalPlugins.plugins.canvas.views, {
+        canvas: (next: any) => function (...args: any) {
+          const result = next.call(this, ...args)
+
+          resolve(result)
+          uninstall() // Uninstall the patch
+
+          return result
+        }
+      })
+      this.plugin.register(uninstall)
+    })
     
-    // Patch canvas popup menu
-    patchWorkspaceObject(this.plugin, () => this.plugin.getCurrentCanvas()?.menu, {
-      render: (next: any) => function (...args: any) {
-        const result = next.call(this, ...args)
-        that.triggerWorkspaceEvent(CanvasEvent.PopupMenuCreated, this.canvas)
-        next.call(this) // Re-Center the popup menu
-        return result
-      }
-    })
-
-    // Patch interaction layer
-    patchWorkspaceObject(this.plugin, () => this.plugin.getCurrentCanvas()?.nodeInteractionLayer, {
-      setTarget: (next: any) => function (node: CanvasNode) {
-        const result = next.call(this, node)
-        that.triggerWorkspaceEvent(CanvasEvent.NodeInteraction, this.canvas, node)
-        return result
-      }
-    })
-
     // Patch canvas view
-    const canvasView = await patchWorkspaceObject(this.plugin, () => this.plugin.getCurrentCanvasView(), {
+    patchObjectPrototype(this.plugin, canvasView, {
       getViewData: (_next: any) => function (..._args: any) {
         const canvasData = this.canvas.getData()
         canvasData.metadata = this.canvas.metadata ?? {}
@@ -53,8 +50,8 @@ export default class CanvasPatcher {
       }
     })
 
-    // Patch canvas after patching the canvas view using the non-null canvas view
-    await patchWorkspaceObject(this.plugin, () => canvasView?.canvas, {
+    // Patch canvas
+    patchObjectPrototype(this.plugin, canvasView.canvas, {
       markViewportChanged: (next: any) => function (...args: any) {
         that.triggerWorkspaceEvent(CanvasEvent.ViewportChanged.Before, this)
         const result = next.call(this, ...args)
@@ -152,6 +149,25 @@ export default class CanvasPatcher {
         that.triggerWorkspaceEvent(CanvasEvent.CanvasSaved.Before, this)
         const result = next.call(this, ...args)
         that.triggerWorkspaceEvent(CanvasEvent.CanvasSaved.After, this)
+        return result
+      }
+    })
+
+    // Patch canvas popup menu
+    patchObjectPrototype(this.plugin, canvasView.canvas.menu, {
+      render: (next: any) => function (...args: any) {
+        const result = next.call(this, ...args)
+        that.triggerWorkspaceEvent(CanvasEvent.PopupMenuCreated, this.canvas)
+        next.call(this) // Re-Center the popup menu
+        return result
+      }
+    })
+
+    // Patch interaction layer
+    patchObjectPrototype(this.plugin, canvasView.canvas.nodeInteractionLayer, {
+      setTarget: (next: any) => function (node: CanvasNode) {
+        const result = next.call(this, node)
+        that.triggerWorkspaceEvent(CanvasEvent.NodeInteraction, this.canvas, node)
         return result
       }
     })

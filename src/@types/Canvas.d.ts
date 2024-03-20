@@ -102,7 +102,7 @@ export interface CanvasOptions {
 }
 
 export interface CanvasMetadata {
-
+  cssclasses: string[]
 }
 
 export interface CanvasHistory {

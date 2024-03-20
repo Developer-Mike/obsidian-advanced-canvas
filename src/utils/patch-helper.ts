@@ -32,6 +32,11 @@ export function tryPatchWorkspacePrototype<T>(plugin: Plugin, getTarget: () => T
   })
 }
 
+export function patchObjectPrototype<T>(plugin: Plugin, target: T, functions: { [key: string]: (next: any) => (...args: any) => any }): void {
+  const uninstaller = around((target as any).constructor.prototype, functions)
+  plugin.register(uninstaller)
+}
+
 export function patchObjectInstance<T>(plugin: Plugin, target: T, functions: { [key: string]: (next: any) => (...args: any) => any }): void {
   const uninstaller = around(target as any, functions)
   plugin.register(uninstaller)
