@@ -1,7 +1,7 @@
 import { Canvas, CanvasNode } from "src/@types/Canvas"
 import { getExposedNodeData } from "./node-data-tagger-canvas-extension"
 import AdvancedCanvasPlugin from "src/main"
-import { CanvasEvent } from "src/events/events"
+import { CanvasEvent } from "src/core/events"
 
 export const TARGET_NODE_DATASET_PREFIX = "target"
 

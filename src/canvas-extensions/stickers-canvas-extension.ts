@@ -1,7 +1,7 @@
 import { Canvas, CanvasEdge, CanvasNode } from "src/@types/Canvas"
 import AdvancedCanvasPlugin from "src/main"
 import * as CanvasHelper from "src/utils/canvas-helper"
-import { CanvasEvent } from "src/events/events"
+import { CanvasEvent } from "src/core/events"
 
 const IMAGE_FILE_EXTENSIONS = ["bmp", "png", "jpg", "jpeg", "gif", "svg", "webp", "avif"]
 

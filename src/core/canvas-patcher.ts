@@ -1,11 +1,11 @@
 import AdvancedCanvasPlugin from "src/main"
-import { BBox, Canvas, CanvasData, CanvasEdge, CanvasEdgeData, CanvasElement, CanvasNode, CanvasNodeData, CanvasView } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasData, CanvasEdge, CanvasElement, CanvasNode, CanvasView } from "src/@types/Canvas"
 import { patchObjectInstance, tryPatchWorkspacePrototype as patchWorkspaceObject } from "src/utils/patch-helper"
 import { CanvasEvent } from "./events"
 import { WorkspaceLeaf } from "obsidian"
 import { around } from "monkey-around"
 
-export default class CanvasEventEmitter {
+export default class CanvasPatcher {
   plugin: AdvancedCanvasPlugin
 
   constructor(plugin: AdvancedCanvasPlugin) {
@@ -38,17 +38,23 @@ export default class CanvasEventEmitter {
     // Patch canvas view
     const canvasView = await patchWorkspaceObject(this.plugin, () => this.plugin.getCurrentCanvasView(), {
       getViewData: (_next: any) => function (..._args: any) {
-        return JSON.stringify(this.canvas.getData(), null, 2)
+        const canvasData = this.canvas.getData()
+        canvasData.metadata = this.canvas.metadata ?? {}
+
+        return JSON.stringify(canvasData, null, 2)
       },
-      setViewData: (next: any) => function (...args: any) {
-        const result = next.call(this, ...args)
+      setViewData: (next: any) => function (json: string, ...args: any) {
+        const result = next.call(this, json, ...args)
+        this.canvas.metadata = JSON.parse(json).metadata
+
         that.triggerWorkspaceEvent(CanvasEvent.CanvasChanged, this.canvas)
+
         return result
       }
     })
 
     // Patch canvas after patching the canvas view using the non-null canvas view
-    const canvas = await patchWorkspaceObject(this.plugin, () => canvasView?.canvas, {
+    await patchWorkspaceObject(this.plugin, () => canvasView?.canvas, {
       markViewportChanged: (next: any) => function (...args: any) {
         that.triggerWorkspaceEvent(CanvasEvent.ViewportChanged.Before, this)
         const result = next.call(this, ...args)

@@ -2,7 +2,7 @@ import { ItemView, Plugin } from 'obsidian'
 import SettingsManager from './settings'
 import ShapesCanvasExtension from './canvas-extensions/shapes-canvas-extension'
 import { Canvas, CanvasView } from './@types/Canvas'
-import CanvasEventEmitter from './events/canvas-event-emitter'
+import CanvasPatcher from './core/canvas-patcher'
 import GroupCanvasExtension from './canvas-extensions/group-canvas-extension'
 import PresentationCanvasExtension from './canvas-extensions/presentation-canvas-extension'
 import InteractionTaggerCanvasExtension from './canvas-extensions/interaction-tagger-canvas-extension'
@@ -46,7 +46,7 @@ export default class AdvancedCanvasPlugin extends Plugin {
   windowsManager: WindowsManager
   debugHelper: DebugHelper
 
-  canvasEventEmitter: CanvasEventEmitter
+  canvasEventEmitter: CanvasPatcher
   canvasExtensions: any[]
 
 	async onload() {
@@ -58,7 +58,7 @@ export default class AdvancedCanvasPlugin extends Plugin {
 
     this.windowsManager = new WindowsManager(this)
 
-    this.canvasEventEmitter = new CanvasEventEmitter(this)
+    this.canvasEventEmitter = new CanvasPatcher(this)
     this.canvasExtensions = CANVAS_EXTENSIONS.map((Extension) => new Extension(this))
 	}
 

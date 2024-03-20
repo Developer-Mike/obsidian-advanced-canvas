@@ -3,7 +3,7 @@ import AdvancedCanvasPlugin from "src/main"
 import * as CanvasHelper from "src/utils/canvas-helper"
 import * as AStarHelper from "src/utils/a-star-helper"
 import * as SvgPathHelper from "src/utils/svg-path-helper"
-import { CanvasEvent } from "src/events/events"
+import { CanvasEvent } from "src/core/events"
 import * as BBoxHelper from "src/utils/bbox-helper"
 
 const STYLES_MENU_OPTIONS: CanvasHelper.MenuOption[] = [

@@ -1,7 +1,7 @@
 import { Menu, Notice } from 'obsidian'
 import { BBox, Canvas, CanvasEdge, CanvasElement, CanvasNode, Position, Size } from 'src/@types/Canvas'
 import AdvancedCanvasPlugin from 'src/main'
-import { CanvasEvent } from 'src/events/events'
+import { CanvasEvent } from 'src/core/events'
 import * as CanvasHelper from "src/utils/canvas-helper"
 import * as BBoxHelper from "src/utils/bbox-helper"
 

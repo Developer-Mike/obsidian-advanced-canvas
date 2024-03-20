@@ -1,7 +1,7 @@
 import { Canvas } from "src/@types/Canvas"
 import * as CanvasHelper from "src/utils/canvas-helper"
 import AdvancedCanvasPlugin from "src/main"
-import { CanvasEvent } from "src/events/events"
+import { CanvasEvent } from "src/core/events"
 import { AdvancedCanvasPluginSettings } from "src/settings"
 
 export default class ReadonlyCanvasExtension {
