@@ -41,6 +41,11 @@ const ROUTES_MENU_OPTIONS: CanvasHelper.MenuOption[] = [
     icon: 'minus'
   },
   {
+    id: 'square',
+    label: 'Square',
+    icon: 'corner-down-right'
+  },
+  {
     id: 'a-star',
     label: 'A*',
     icon: 'navigation'
@@ -171,6 +176,29 @@ export default class EdgesStyleCanvasExtension {
   
     if (pathRouteType === 'direct') {
       newPath = SvgPathHelper.pathArrayToSvgPath([fromPos, toPos], false)
+      edge.center = { 
+        x: (fromPos.x + toPos.x) / 2, 
+        y: (fromPos.y + toPos.y) / 2 
+      }
+    } else if (pathRouteType === 'square') {
+      let pathArray: Position[] = []
+      if (edge.from.side === 'bottom' || edge.from.side === 'top') {
+        pathArray = [
+          fromPos, 
+          { x: fromPos.x, y: fromPos.y + (toPos.y - fromPos.y) / 2 },
+          { x: toPos.x, y: fromPos.y + (toPos.y - fromPos.y) / 2 },
+          toPos
+        ]
+      } else {
+        pathArray = [
+          fromPos, 
+          { x: fromPos.x + (toPos.x - fromPos.x) / 2, y: fromPos.y },
+          { x: fromPos.x + (toPos.x - fromPos.x) / 2, y: toPos.y },
+          toPos
+        ]
+      }
+
+      newPath = SvgPathHelper.pathArrayToSvgPath(pathArray, false)
       edge.center = { 
         x: (fromPos.x + toPos.x) / 2, 
         y: (fromPos.y + toPos.y) / 2 

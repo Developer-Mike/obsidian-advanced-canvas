@@ -6,11 +6,6 @@ const NODE_TYPES_ON_DOUBLE_CLICK = {
   'file': 'File'
 }
 
-/*const SLIDE_SIZE_OPTIONS = {
-  '1200x675': '16:9',
-  '1350x900': '3:2',
-}*/
-
 export interface AdvancedCanvasPluginSettings {
   nodeTypeOnDoubleClick: string
   defaultTextNodeWidth: number
@@ -77,7 +72,7 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   edgesStylingFeatureEnabled: true,
   edgeStylePathfinderGridResolution: 10,
   edgeStylePathfinderPathLiveUpdate: true,
-  edgeStylePathfinderPathRounded: false,
+  edgeStylePathfinderPathRounded: true,
 
   commandsFeatureEnabled: true,
   zoomToClonedNode: true,

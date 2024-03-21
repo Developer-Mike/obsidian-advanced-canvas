@@ -249,7 +249,7 @@ export interface CanvasEdgeData {
   toEnd: 'none' | undefined
   
   edgeStyle?: 'long-dashed' | 'short-dashed' | 'dotted'
-  edgePathRoute?: 'direct' | 'a-star'
+  edgePathRoute?: 'direct' | 'square' | 'a-star'
 
   portalId?: string
   isUnsaved?: boolean
