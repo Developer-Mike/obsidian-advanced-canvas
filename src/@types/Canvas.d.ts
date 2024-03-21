@@ -244,6 +244,9 @@ export interface CanvasEdgeData {
 
   fromSide: Side
   toSide: Side
+
+  fromEnd: undefined | 'arrow'
+  toEnd: 'none' | undefined
   
   edgeStyle?: 'long-dashed' | 'short-dashed' | 'dotted'
   edgePathRoute?: 'direct' | 'a-star'

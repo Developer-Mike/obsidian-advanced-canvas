@@ -22,6 +22,11 @@ import CollapsibleGroupsCanvasExtension from './canvas-extensions/collapsible-gr
 import WindowsManager from './windows-manager'
 import CanvasWrapperDataTaggerCanvasExtension from './canvas-extensions/canvas-wrapper-data-tagger-canvas-extension'
 import PropertiesCanvasExtension from './canvas-extensions/properties-canvas-extension'
+import CanvasLinkObsidianExtension from './obsidian-extensions/canvas-link-obsidian-extension'
+
+const OBSIDIAN_EXTENSIONS: any[] = [
+  CanvasLinkObsidianExtension
+]
 
 const CANVAS_EXTENSIONS: any[] = [
   CanvasWrapperDataTaggerCanvasExtension,
@@ -48,7 +53,9 @@ export default class AdvancedCanvasPlugin extends Plugin {
   windowsManager: WindowsManager
   debugHelper: DebugHelper
 
-  canvasEventEmitter: CanvasPatcher
+  obsidianExtensions: any[] = []
+
+  canvasPatcher: CanvasPatcher
   canvasExtensions: any[]
 
 	async onload() {
@@ -60,7 +67,9 @@ export default class AdvancedCanvasPlugin extends Plugin {
 
     this.windowsManager = new WindowsManager(this)
 
-    this.canvasEventEmitter = new CanvasPatcher(this)
+    this.obsidianExtensions = OBSIDIAN_EXTENSIONS.map((Extension) => new Extension(this))
+
+    this.canvasPatcher = new CanvasPatcher(this)
     this.canvasExtensions = CANVAS_EXTENSIONS.map((Extension) => new Extension(this))
 	}
 

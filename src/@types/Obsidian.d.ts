@@ -9,8 +9,6 @@ declare module "obsidian" {
     /** @public */
     vault: Vault
     /** @public */
-    metadataCache: MetadataCache
-    /** @public */
     fileManager: FileManager
     /**
      * The last known user interaction event, to help commands find out what modifier keys are pressed.
@@ -20,7 +18,13 @@ declare module "obsidian" {
 
     // Custom
     /** @public */
+    metadataCache: ExtendedMetadataCache
+    /** @public */
     workspace: Workspace & ExtendedWorkspace
+  }
+
+  export interface ExtendedMetadataCache extends MetadataCache {
+    resolveLinks: (filepath: string) => void
   }
 
   export interface ExtendedWorkspace {

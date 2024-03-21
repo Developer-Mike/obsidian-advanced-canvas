@@ -18,6 +18,11 @@ export interface AdvancedCanvasPluginSettings {
   defaultFileNodeWidth: number
   defaultFileNodeHeight: number
 
+  canvasLinksFeatureEnabled: boolean
+  showLinksToEmbeddedFiles: boolean
+  showLinksBetweenFileNodesInGraph: boolean
+  showLinksBetweenFileNodesInProperties: boolean
+
   shapesFeatureEnabled: boolean
 
   edgesStylingFeatureEnabled: boolean
@@ -62,6 +67,11 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   defaultFileNodeWidth: 400,
   defaultFileNodeHeight: 400,
 
+  canvasLinksFeatureEnabled: true,
+  showLinksToEmbeddedFiles: true,
+  showLinksBetweenFileNodesInGraph: true,
+  showLinksBetweenFileNodesInProperties: false,
+
   shapesFeatureEnabled: true,
 
   edgesStylingFeatureEnabled: true,
@@ -79,7 +89,7 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   disableZoom: false,
   disablePan: false,
 
-  collapsibleGroupsFeatureEnabled: true,
+  collapsibleGroupsFeatureEnabled: false,
   collapsedGroupPreviewOnDrag: true,
 
   stickersFeatureEnabled: true,
@@ -195,6 +205,40 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
         text
           .setValue(this.settingsManager.getSetting('defaultFileNodeHeight').toString())
           .onChange(async (value) => await this.settingsManager.setSetting({ defaultFileNodeHeight: Math.max(1, parseInt(value)) }))
+      )
+
+    this.createFeatureHeading(
+      containerEl,
+      "Canvas Links",
+      "Treat canvas links similar to markdown links.",
+      'canvasLinksFeatureEnabled'
+    )
+
+    new Setting(containerEl)
+      .setName("Show links to embedded files")
+      .setDesc("When enabled, embedded files of file nodes will have a connection to the canvas file in the graph.")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.settingsManager.getSetting('showLinksToEmbeddedFiles'))
+          .onChange(async (value) => await this.settingsManager.setSetting({ showLinksToEmbeddedFiles: value }))
+      )
+
+    new Setting(containerEl)
+      .setName("Show links between file nodes in graph")
+      .setDesc("When enabled, edges (arrows) between file nodes will be shown in the graph as connections.")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.settingsManager.getSetting('showLinksBetweenFileNodesInGraph'))
+          .onChange(async (value) => await this.settingsManager.setSetting({ showLinksBetweenFileNodesInGraph: value }))
+      )
+
+    new Setting(containerEl)
+      .setName("Show links between file nodes in properties")
+      .setDesc("When enabled, edges (arrows) between file nodes will be shown in the properties of the file nodes. (Automatically shows connections in the graph as well.)")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.settingsManager.getSetting('showLinksBetweenFileNodesInProperties'))
+          .onChange(async (value) => await this.settingsManager.setSetting({ showLinksBetweenFileNodesInProperties: value }))
       )
 
     this.createFeatureHeading(
