@@ -17,20 +17,23 @@ export default class CanvasPatcher {
     const that = this
 
     // Get the current canvas view or wait for it to be created
-    const canvasView = this.plugin.getCurrentCanvasView() ?? await new Promise<CanvasView>((resolve) => {
-      // @ts-ignore
-      const uninstall = around(this.plugin.app.internalPlugins.plugins.canvas.views, {
-        canvas: (next: any) => function (...args: any) {
-          const result = next.call(this, ...args)
+    const canvasView = (
+      this.plugin.app.workspace.getLeavesOfType('canvas')?.first()?.view ??
+      await new Promise<CanvasView>((resolve) => {
+        // @ts-ignore
+        const uninstall = around(this.plugin.app.internalPlugins.plugins.canvas.views, {
+          canvas: (next: any) => function (...args: any) {
+            const result = next.call(this, ...args)
 
-          resolve(result)
-          uninstall() // Uninstall the patch
+            resolve(result)
+            uninstall() // Uninstall the patch
 
-          return result
-        }
+            return result
+          }
+        })
+        this.plugin.register(uninstall)
       })
-      this.plugin.register(uninstall)
-    })
+    ) as CanvasView
     
     // Patch canvas view
     patchObjectPrototype(this.plugin, canvasView, {
