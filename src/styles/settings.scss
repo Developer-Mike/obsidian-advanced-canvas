@@ -1,0 +1,16 @@
+.properties-field {
+  & > .setting-item-info {
+    flex: 0;
+    margin: 0;
+    padding: var(--size-4-1) var(--size-4-2);
+
+    border: var(--input-border-width) solid var(--background-modifier-border);
+    border-radius: var(--input-radius) 0 0 var(--input-radius);
+  }
+
+  & > .setting-item-control > input {
+    width: 100%;
+
+    border-radius: 0 var(--input-radius) var(--input-radius) 0;
+  }
+}
