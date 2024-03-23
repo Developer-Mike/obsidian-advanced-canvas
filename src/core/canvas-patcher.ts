@@ -45,7 +45,7 @@ export default class CanvasPatcher {
       },
       setViewData: (next: any) => function (json: string, ...args: any) {
         const result = next.call(this, json, ...args)
-        this.canvas.metadata = JSON.parse(json).metadata
+        this.canvas.metadata = JSON.parse(json)?.metadata ?? {}
 
         that.triggerWorkspaceEvent(CanvasEvent.CanvasChanged, this.canvas)
 
