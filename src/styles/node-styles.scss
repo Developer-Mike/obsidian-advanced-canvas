@@ -1,3 +1,4 @@
+// Shapes
 .center-text-node .canvas-node-content {
   .markdown-preview-view {
     padding: 0 !important;
@@ -242,4 +243,17 @@
   &:has(.embed-iframe)::after {
     z-index: -1;
   }
+}
+
+// Borders
+.canvas-node[data-border-style="dotted"] .canvas-node-container {
+  border-style: dotted;
+}
+
+.canvas-node[data-border-style='dashed'] .canvas-node-container {
+  border-style: dashed;
+}
+
+.canvas-node[data-border-style='invisible'] .canvas-node-container {
+  border: none;
 }

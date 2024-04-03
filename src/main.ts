@@ -1,6 +1,6 @@
 import { ItemView, Plugin } from 'obsidian'
 import SettingsManager from './settings'
-import ShapesCanvasExtension from './canvas-extensions/shapes-canvas-extension'
+import NodeStylesCanvasExtension from './canvas-extensions/node-styles-canvas-extension'
 import { Canvas, CanvasView } from './@types/Canvas'
 import CanvasPatcher from './core/canvas-patcher'
 import GroupCanvasExtension from './canvas-extensions/group-canvas-extension'
@@ -13,7 +13,7 @@ import CommandsCanvasExtension from './canvas-extensions/commands-canvas-extensi
 import PortalsCanvasExtension from './canvas-extensions/portals-canvas-extension'
 import IconsHelper from './utils/icons-helper'
 import StickersCanvasExtension from './canvas-extensions/stickers-canvas-extension'
-import EdgesStyleCanvasExtension from './canvas-extensions/edges-style-canvas-extension'
+import EdgeStylesCanvasExtension from './canvas-extensions/edge-styles-canvas-extension'
 import EdgeDataTaggerCanvasExtension from './canvas-extensions/edge-data-tagger-canvas-extension'
 import DebugHelper from './utils/debug-helper'
 import BetterDefaultSettingsCanvasExtension from './canvas-extensions/better-default-settings-canvas-extension'
@@ -37,8 +37,8 @@ const CANVAS_EXTENSIONS: any[] = [
   EncapsulateCanvasExtension,
   ColorPaletteCanvasExtension,
   StickersCanvasExtension,
-  ShapesCanvasExtension,
-  EdgesStyleCanvasExtension,
+  NodeStylesCanvasExtension,
+  EdgeStylesCanvasExtension,
   PresentationCanvasExtension,
   PortalsCanvasExtension
 ]

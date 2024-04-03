@@ -52,7 +52,7 @@ const ROUTES_MENU_OPTIONS: CanvasHelper.MenuOption[] = [
   }
 ]
 
-export default class EdgesStyleCanvasExtension {
+export default class EdgeStylesCanvasExtension {
   plugin: AdvancedCanvasPlugin
 
   constructor(plugin: AdvancedCanvasPlugin) {

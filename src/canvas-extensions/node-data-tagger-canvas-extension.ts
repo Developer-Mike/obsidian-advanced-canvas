@@ -6,8 +6,12 @@ import SettingsManager from "src/settings"
 export function getExposedNodeData(settings: SettingsManager): (keyof CanvasNodeData)[] {
   const exposedData: (keyof CanvasNodeData)[] = []
   
+  if (settings.getSetting('nodeStylingFeatureEnabled')) {
+    if (settings.getSetting('shapesFeatureEnabled')) exposedData.push('shape')
+    if (settings.getSetting('borderStyleFeatureEnabled')) exposedData.push('borderStyle')
+  }
+
   if (settings.getSetting('stickersFeatureEnabled')) exposedData.push('isSticker')
-  if (settings.getSetting('shapesFeatureEnabled')) exposedData.push('shape')
   if (settings.getSetting('collapsibleGroupsFeatureEnabled')) exposedData.push('isCollapsed')
   if (settings.getSetting('presentationFeatureEnabled')) exposedData.push('isStartNode')
   if (settings.getSetting('portalsFeatureEnabled')) exposedData.push('portalToFile', 'portalId')

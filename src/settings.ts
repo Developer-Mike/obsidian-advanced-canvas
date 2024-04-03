@@ -13,7 +13,9 @@ export interface AdvancedCanvasPluginSettings {
   defaultFileNodeWidth: number
   defaultFileNodeHeight: number
 
+  nodeStylingFeatureEnabled: boolean
   shapesFeatureEnabled: boolean
+  borderStyleFeatureEnabled: boolean
 
   edgesStylingFeatureEnabled: boolean
   edgeStylePathfinderGridResolution: number
@@ -77,7 +79,9 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   collapsibleGroupsFeatureEnabled: true,
   collapsedGroupPreviewOnDrag: true,
 
+  nodeStylingFeatureEnabled: true,
   stickersFeatureEnabled: true,
+  borderStyleFeatureEnabled: true,
 
   presentationFeatureEnabled: true,
   defaultSlideSize: '1200x675',
@@ -194,10 +198,28 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
 
     this.createFeatureHeading(
       containerEl,
-      "Shapes",
-      "Shape your nodes for creating e.g. mind maps or flow charts.",
-      'shapesFeatureEnabled'
+      "Node styling",
+      "Style your nodes with different shapes and borders.",
+      'nodeStylingFeatureEnabled'
     )
+
+    new Setting(containerEl)
+      .setName("Node Shapes")
+      .setDesc("Shape your nodes for creating e.g. mind maps or flow charts.")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.settingsManager.getSetting('shapesFeatureEnabled'))
+          .onChange(async (value) => await this.settingsManager.setSetting({ shapesFeatureEnabled: value }))
+      )
+
+    new Setting(containerEl)
+      .setName("Border styles")
+      .setDesc("Style your nodes with different border styles.")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.settingsManager.getSetting('borderStyleFeatureEnabled'))
+          .onChange(async (value) => await this.settingsManager.setSetting({ borderStyleFeatureEnabled: value }))
+      )
 
     this.createFeatureHeading(
       containerEl,

@@ -190,6 +190,7 @@ export interface CanvasNodeData {
 
   isSticker?: boolean
   shape?: string | null
+  borderStyle?: string
 
   isCollapsed?: boolean
   collapsedData?: CanvasData
