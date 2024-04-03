@@ -32,17 +32,22 @@ OR
 ## Features
 All features can be enabled/disabled in the settings.
 
-- Create groups independently of the nodes ([Updated card menu](#updated-canvas-card-menu))
+- Create groups independently of the nodes (Updated card menu)
 - More [canvas commands](#canvas-commands)
-- (Flowchart) [Node shapes](#node-shapes)
-  - Terminal shape
-  - Process shape
-  - Decision shape
-  - Input/Output shape
-  - On-page Reference shape
-  - Predefined Process shape
-  - Document shape
-  - Database shape
+- [Node Styles](#node-styles)
+  - (Flowchart) [Node Shapes](#node-shapes)
+    - Terminal shape
+    - Process shape
+    - Decision shape
+    - Input/Output shape
+    - On-page Reference shape
+    - Predefined Process shape
+    - Document shape
+    - Database shape
+  - [Border Styles](#border-styles)
+    - Dotted
+    - Dashed
+    - Invisible
 - [Edge Styles](#edge-styles)
   - Edge styles
     - Dotted
@@ -79,25 +84,6 @@ If you want to support me and my work, consider starring ⭐ the repository, or,
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/X8X27IA08)
 
-## Updated UI
-### Canvas Card Menu
-<details>
-    <summary>Canvas Card Menu</summary>
-    <img src="./assets/card-menu.png" alt="New canvas card menu"/>
-</details>
-
-### Node Popup Menu
-<details>
-    <summary>Node Popup Menu</summary>
-    <img src="./assets/popup-menu.png" alt="New node popup menu"/>
-</details>
-
-### Canvas Control Menu
-<details>
-    <summary>Canvas Control Menu</summary>
-    <img src="./assets/control-menu.png" alt="New canvas control menu"/>
-</details>
-
 ## Canvas Commands
 - `Advanced Canvas: Create text node`
   - Create a new text node
@@ -113,16 +99,17 @@ If you want to support me and my work, consider starring ⭐ the repository, or,
 - `Advanced Canvas: Expand node up/down/left/right`
   - Expand the selected node in the direction of the arrow keys
 
-## Node Shapes
+## Node Styles
+### Node Shapes
 <details>
     <summary>Flowchart Example</summary>
     <img src="./assets/sample-flowchart.png" alt="Flowchart Example"/>
 </details>
 
-### Usage
-- Use the [updated popup menu](#node-popup-menu) set a node's shape
+#### Usage
+- Use the updated popup menu set a node's shape
 
-### Shapes
+#### Shapes
 <details>
     <summary>Terminal Shape</summary>
     <img src="./assets/flowchart-nodes/terminal.png" alt="Terminal Shape"/>
@@ -163,6 +150,14 @@ If you want to support me and my work, consider starring ⭐ the repository, or,
     <img src="./assets/flowchart-nodes/database.png" alt="Database Shape"/>
 </details>
 
+### Border Styles
+Set the style of the border to dotted, dashed or invisible.
+
+<details>
+    <summary>Border Styles Example</summary>
+    <img src="./assets/border-styles.png" alt="Border Styles Example"/>
+</details>
+
 ## Edge Styles
 ### Edge Styles
 Set the style of the edges (arrows) to dotted, short-dashed or long-dashed.
@@ -196,7 +191,7 @@ Add custom colors to the color picker. You can add them using the following css 
 </details>
 
 ## Properties Support
-Support for properties in canvas files just like in md files. You can edit the properties using the [updated control menu](#canvas-control-menu).
+Support for properties in canvas files just like in md files. You can edit the properties using the updated control menu.
 
 Supported properties:
 - `cssclasses`
@@ -241,12 +236,12 @@ In presentation mode, you can navigate through the nodes using the arrow keys. T
 
 ### Usage
 - Create the first slide
-  - Create the first slide of the presentation using the [updated popup menu](#node-popup-menu)
-  - OR create a node and mark it as the first slide using the [updated card menu](#canvas-card-menu)
+  - Create the first slide of the presentation using the updated popup menu
+  - OR create a node and mark it as the first slide using the updated card menu
 - Add more slides
   - Link the slides using arrows
     - If you want to loop back to a previous slide, you can number the arrows in the order you want to navigate through them
-  - <b>TIP:</b> Create slides with consistent dimensions by using the [updated card menu](#canvas-card-menu)
+  - <b>TIP:</b> Create slides with consistent dimensions by using the updated card menu
 - Control the presentation
   - Start the presentation using the command palette (`Advanced Canvas: Start presentation`)
   - Change slides using the arrow keys
@@ -275,7 +270,7 @@ Collapse and expand groups to organize your canvas.
 - BUT to retain some interactivity, it allows zooming to a bounding box (e.g. zoom to selection, zoom to fit all)
 
 ### Usage
-- Use the [updated control menu](#canvas-control-menu) to toggle the new features (Only shown if the canvas is in readonly mode)
+- Use the updated control menu to toggle the new features (Only shown if the canvas is in readonly mode)
 
 ## Encapsulate Selection
 Move the current selection to a new canvas and create a link in the current canvas.
