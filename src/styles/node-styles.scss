@@ -246,6 +246,10 @@
 }
 
 // Borders
+.canvas-node[data-border-style].is-themed .canvas-node-container {
+  box-shadow: none;
+}
+
 .canvas-node[data-border-style="dotted"] .canvas-node-container {
   border-style: dotted;
 }
