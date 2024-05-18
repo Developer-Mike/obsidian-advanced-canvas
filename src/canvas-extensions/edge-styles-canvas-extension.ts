@@ -133,13 +133,13 @@ export default class EdgeStylesCanvasExtension {
 
   private setStyleForSelection(_canvas: Canvas, selectedEdges: CanvasEdge[], styleId: string|undefined) {
     for (const edge of selectedEdges) {
-      edge.setData({ ...edge.getData(), edgeStyle: styleId as any })
+      edge.setData({ ...edge.getData(), edgeStyle: styleId as any }, true)
     }
   }
 
   private setPathRouteForSelection(_canvas: Canvas, selectedEdges: CanvasEdge[], pathRouteTypeId: string|undefined) {
     for (const edge of selectedEdges) {
-      edge.setData({ ...edge.getData(), edgePathRoute: pathRouteTypeId as any })
+      edge.setData({ ...edge.getData(), edgePathRoute: pathRouteTypeId as any }, true)
     }
   }
 

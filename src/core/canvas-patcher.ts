@@ -1,5 +1,5 @@
 import AdvancedCanvasPlugin from "src/main"
-import { BBox, Canvas, CanvasData, CanvasEdge, CanvasElement, CanvasNode, CanvasView } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasData, CanvasEdge, CanvasEdgeData, CanvasElement, CanvasNode, CanvasNodeData, CanvasView } from "src/@types/Canvas"
 import { patchObjectInstance, patchObjectPrototype } from "src/utils/patch-helper"
 import { CanvasEvent } from "./events"
 import { WorkspaceLeaf } from "obsidian"
@@ -191,8 +191,8 @@ export default class CanvasPatcher {
     const that = this
 
     patchObjectInstance(this.plugin, node, {
-      setData: (next: any) => function (...args: any) {
-        const result = next.call(this, ...args)
+      setData: (next: any) => function (data: CanvasNodeData, addHistory?: boolean) {
+        const result = next.call(this, data)
 
         if (node.initialized && !node.isDirty) {
           node.isDirty = true
@@ -203,6 +203,9 @@ export default class CanvasPatcher {
         // Save the data to the file
         this.canvas.data = this.canvas.getData()
         this.canvas.view.requestSave()
+
+        // Add to the undo stack
+        if (addHistory) this.canvas.pushHistory(this.canvas.getData())
 
         return result
       },
@@ -223,8 +226,8 @@ export default class CanvasPatcher {
     const that = this
 
     patchObjectInstance(this.plugin, edge, {
-      setData: (next: any) => function (...args: any) {
-        const result = next.call(this, ...args)
+      setData: (next: any) => function (data: CanvasEdgeData, addHistory?: boolean) {
+        const result = next.call(this, data)
 
         if (edge.initialized && !edge.isDirty) {
           edge.isDirty = true
@@ -235,6 +238,9 @@ export default class CanvasPatcher {
         // Save the data to the file
         this.canvas.data = this.canvas.getData()
         this.canvas.view.requestSave()
+
+        // Add to the undo stack
+        if (addHistory) this.canvas.pushHistory(this.canvas.getData())
 
         return result
       },

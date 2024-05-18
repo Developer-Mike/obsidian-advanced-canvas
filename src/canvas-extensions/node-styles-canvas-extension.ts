@@ -141,7 +141,7 @@ export default class NodeStylesCanvasExtension {
       const node = canvas.nodes.get(nodeData.id)
       if (!node) continue
       
-      node.setData({ ...nodeData, shape: shapeId })
+      node.setData({ ...nodeData, shape: shapeId }, true)
     }
   }
 
@@ -152,7 +152,7 @@ export default class NodeStylesCanvasExtension {
       const node = canvas.nodes.get(nodeData.id)
       if (!node) continue
       
-      node.setData({ ...nodeData, borderStyle: borderId })
+      node.setData({ ...nodeData, borderStyle: borderId }, true)
     }
   }
 }

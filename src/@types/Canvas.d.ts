@@ -232,7 +232,7 @@ export interface CanvasNode extends CanvasElement {
 
   color: string
 
-  setData(data: CanvasNodeData): void
+  setData(data: CanvasNodeData, addHistory?: boolean): void
   getData(): CanvasNodeData
 }
 
@@ -297,7 +297,7 @@ export interface CanvasEdge extends CanvasElement {
   render(): void
   updatePath(): void
   
-  setData(data: CanvasEdgeData): void
+  setData(data: CanvasEdgeData, addHistory?: boolean): void
   getData(): CanvasEdgeData
 }
 

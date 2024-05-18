@@ -39,7 +39,7 @@ export default class PropertiesCanvasExtension {
       canvas.wrapperEl.classList.remove(cssclass)
     })
 
-    this.previousCssclasses = canvas.metadata.properties?.cssclasses || []
+    this.previousCssclasses = canvas.metadata?.properties?.cssclasses || []
     this.previousCssclasses.forEach((cssclass) => {
       canvas.wrapperEl.classList.add(cssclass)
     })

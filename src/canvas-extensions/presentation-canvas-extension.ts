@@ -164,7 +164,7 @@ export default class PresentationCanvasExtension {
     const startNode = this.getStartNode(canvas)
     if (startNode) startNode.setData({ ...startNode.getData(), isStartNode: false })
 
-    if (node !== startNode) node.setData({ ...node.getData(), isStartNode: true })
+    if (node !== startNode) node.setData({ ...node.getData(), isStartNode: true }, true)
   }
 
   private getDefaultSlideSize(): Size {

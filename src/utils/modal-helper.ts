@@ -90,10 +90,8 @@ export class FileSelectModal extends SuggestModal<string> {
       this.onChooseSuggestion = (path: string, _evt: MouseEvent | KeyboardEvent) => {
         const file = this.app.vault.getAbstractFileByPath(path)
 
-        if (file instanceof TFile) {
-          resolve(file)
-          return
-        }
+        if (file instanceof TFile)
+          return resolve(file)
 
         if (!this.suggestNewFile) return
 
