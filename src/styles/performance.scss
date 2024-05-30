@@ -1,10 +1,10 @@
 // Source (Slightly modified): https://forum.obsidian.md/t/performance-issue-with-built-in-canvas-plugin/68609/2
 
-.view-content:has(> .canvas-wrapper) {
+.view-content:has(> .canvas-wrapper[data-performance-optimization-enabled='true']) {
   overflow: hidden;
 }
 
-.canvas-wrapper {
+.canvas-wrapper[data-performance-optimization-enabled='true'] {
   width: 1000%;
   height: 1000%;
 

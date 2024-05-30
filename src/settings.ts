@@ -13,6 +13,8 @@ export interface AdvancedCanvasPluginSettings {
   defaultFileNodeWidth: number
   defaultFileNodeHeight: number
 
+  performanceOptimizationEnabled: boolean
+
   nodeStylingFeatureEnabled: boolean
   shapesFeatureEnabled: boolean
   borderStyleFeatureEnabled: boolean
@@ -59,7 +61,11 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   defaultFileNodeWidth: 400,
   defaultFileNodeHeight: 400,
 
+  performanceOptimizationEnabled: false,
+
   shapesFeatureEnabled: true,
+  nodeStylingFeatureEnabled: true,
+  borderStyleFeatureEnabled: true,
 
   edgesStylingFeatureEnabled: true,
   edgeStylePathfinderGridResolution: 10,
@@ -79,9 +85,7 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   collapsibleGroupsFeatureEnabled: true,
   collapsedGroupPreviewOnDrag: true,
 
-  nodeStylingFeatureEnabled: true,
   stickersFeatureEnabled: true,
-  borderStyleFeatureEnabled: true,
 
   presentationFeatureEnabled: true,
   defaultSlideSize: '1200x675',
@@ -195,6 +199,13 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           .setValue(this.settingsManager.getSetting('defaultFileNodeHeight').toString())
           .onChange(async (value) => await this.settingsManager.setSetting({ defaultFileNodeHeight: Math.max(1, parseInt(value)) }))
       )
+
+    this.createFeatureHeading(
+      containerEl,
+      "Performance optimization",
+      "Optimize the performance of the canvas (Side effect is some amount of blurriness).",
+      'performanceOptimizationEnabled'
+    )
 
     this.createFeatureHeading(
       containerEl,

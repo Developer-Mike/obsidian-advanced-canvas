@@ -4,6 +4,7 @@ import AdvancedCanvasPlugin from "src/main"
 import SettingsManager, { AdvancedCanvasPluginSettings } from "src/settings"
 
 const EXPOSED_SETTINGS: (keyof AdvancedCanvasPluginSettings)[] = [
+  'performanceOptimizationEnabled',
   'collapsibleGroupsFeatureEnabled',
   'collapsedGroupPreviewOnDrag'
 ]
