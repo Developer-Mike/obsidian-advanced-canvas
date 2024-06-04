@@ -177,8 +177,8 @@ export default class EdgeStylesCanvasExtension {
     if (pathRouteType === 'direct') {
       newPath = SvgPathHelper.pathArrayToSvgPath([fromPos, toPos], false)
       edge.center = { 
-        x: (fromPos.x + toPos.x) / 2, 
-        y: (fromPos.y + toPos.y) / 2 
+        x: (fromPos.x + toPos.x) / 2,
+        y: (fromPos.y + toPos.y) / 2
       }
     } else if (pathRouteType === 'square') {
       let pathArray: Position[] = []
@@ -215,10 +215,17 @@ export default class EdgeStylesCanvasExtension {
           
           return !isGroup && !isOpenPortal
         }).map(node => node.getBBox())
+      
+      const fromPosWithMargin = BBoxHelper.moveInDirection(fromPos, edge.from.side, 10)
+      const toPosWithMargin = BBoxHelper.moveInDirection(toPos, edge.to.side, 10)
 
       const gridResolution = this.plugin.settings.getSetting('edgeStylePathfinderGridResolution')
-      const pathArray = AStarHelper.aStar(fromPos, edge.from.side, toPos, edge.to.side, nodeBBoxes, gridResolution)
+      const pathArray = AStarHelper.aStar(fromPosWithMargin, edge.from.side, toPosWithMargin, edge.to.side, nodeBBoxes, gridResolution)
       if (!pathArray) return // No path found - use default path
+
+      // Make connection points to the node removing the margin
+      pathArray.splice(0, 0, fromPos)
+      pathArray.splice(pathArray.length, 0, toPos)
 
       const roundedPath = this.plugin.settings.getSetting('edgeStylePathfinderPathRounded')
       const svgPath = SvgPathHelper.pathArrayToSvgPath(pathArray, roundedPath)

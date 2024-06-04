@@ -49,6 +49,19 @@ export function enlargeBBox(bbox: BBox, padding: number): BBox {
   }
 }
 
+export function moveInDirection(position: Position, side: Side, distance: number): Position {
+  switch (side) {
+    case 'top':
+      return { x: position.x, y: position.y - distance }
+    case 'right':
+      return { x: position.x + distance, y: position.y }
+    case 'bottom':
+      return { x: position.x, y: position.y + distance }
+    case 'left':
+      return { x: position.x - distance, y: position.y }
+  }
+}
+
 export function getCenterOfBBoxSide(bbox: BBox, side: Side): Position {
   switch (side) {
     case 'top':

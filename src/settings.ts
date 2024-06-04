@@ -43,6 +43,7 @@ export interface AdvancedCanvasPluginSettings {
   defaultSlideSize: string
   wrapInSlidePadding: number
   useArrowKeysToChangeSlides: boolean
+  useEscKeyToExitPresentation: boolean
   zoomToSlideWithoutPadding: boolean
   slideTransitionAnimationDuration: number
   slideTransitionAnimationIntensity: number
@@ -91,6 +92,7 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   defaultSlideSize: '1200x675',
   wrapInSlidePadding: 20,
   useArrowKeysToChangeSlides: true,
+  useEscKeyToExitPresentation: true,
   zoomToSlideWithoutPadding: true,
   slideTransitionAnimationDuration: 0.5,
   slideTransitionAnimationIntensity: 1.25,
@@ -399,6 +401,15 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
         toggle
           .setValue(this.settingsManager.getSetting('useArrowKeysToChangeSlides'))
           .onChange(async (value) => await this.settingsManager.setSetting({ useArrowKeysToChangeSlides: value }))
+      )
+
+    new Setting(containerEl)
+      .setName("Use ESC key to exit presentation")
+      .setDesc("When enabled, you can use the ESC key to exit the presentation mode.")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.settingsManager.getSetting('useEscKeyToExitPresentation'))
+          .onChange(async (value) => await this.settingsManager.setSetting({ useEscKeyToExitPresentation: value }))
       )
 
     new Setting(containerEl)
