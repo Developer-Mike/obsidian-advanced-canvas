@@ -14,3 +14,25 @@
     border-radius: 0 var(--input-radius) var(--input-radius) 0;
   }
 }
+
+.kofi-button {
+  z-index: 999;
+
+  position: absolute;
+  bottom: var(--size-4-5);
+  right: var(--size-4-5);
+
+  height: 30px;
+
+  img {
+    height: 100%;
+  }
+}
+
+.ac-settings-heading {
+  &:not(:first-child) {
+    margin-top: var(--size-4-10) !important;
+  }
+  
+  border-bottom: 1px solid var(--color-accent);
+}
