@@ -13,6 +13,7 @@ export default class PresentationCanvasExtension {
   savedViewport: any = null
   isPresentationMode: boolean = false
   visitedNodes: any[] = []
+  fullscreenModalObserver: MutationObserver | null = null
 
   constructor(plugin: any) {
     this.plugin = plugin
@@ -305,7 +306,7 @@ export default class PresentationCanvasExtension {
     }
 
     // Keep modals while in fullscreen mode
-    const fullscreenModalObserver = new MutationObserver((mutationRecords) => {
+    this.fullscreenModalObserver = new MutationObserver((mutationRecords) => {
       mutationRecords.forEach((mutationRecord) => {
         mutationRecord.addedNodes.forEach((node) => {
           document.body.removeChild(node)
@@ -316,13 +317,11 @@ export default class PresentationCanvasExtension {
       const inputField = document.querySelector(".prompt-input") as HTMLInputElement|null
       if (inputField) inputField.focus()
     })
-    fullscreenModalObserver.observe(document.body, { childList: true })
+    this.fullscreenModalObserver.observe(document.body, { childList: true })
 
     // Register event handler for exiting presentation mode
     canvas.wrapperEl.onfullscreenchange = (_e: any) => {
       if (document.fullscreenElement) return
-
-      fullscreenModalObserver.disconnect()
       this.endPresentation(canvas)
     }
 
@@ -337,6 +336,8 @@ export default class PresentationCanvasExtension {
 
   private endPresentation(canvas: Canvas) {
     // Unregister event handlers
+    this.fullscreenModalObserver?.disconnect()
+    this.fullscreenModalObserver = null
     canvas.wrapperEl.onkeydown = null
     canvas.wrapperEl.onfullscreenchange = null
 
