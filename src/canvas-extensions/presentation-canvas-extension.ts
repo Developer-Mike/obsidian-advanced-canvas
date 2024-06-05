@@ -57,6 +57,26 @@ export default class PresentationCanvasExtension {
     })
 
     this.plugin.addCommand({
+			id: 'continue-presentation',
+      name: 'Continue presentation',
+      checkCallback: CanvasHelper.canvasCommand(
+        this.plugin,
+        (_canvas: Canvas) => !this.isPresentationMode,
+        (canvas: Canvas) => this.startPresentation(canvas, true)
+      )
+    })
+
+    this.plugin.addCommand({
+      id: 'end-presentation',
+      name: 'End presentation',
+      checkCallback: CanvasHelper.canvasCommand(
+        this.plugin,
+        (_canvas: Canvas) => this.isPresentationMode,
+        (canvas: Canvas) => this.endPresentation(canvas)
+      )
+    })
+
+    this.plugin.addCommand({
       id: 'previous-node',
       name: 'Previous node',
       checkCallback: CanvasHelper.canvasCommand(
@@ -244,14 +264,19 @@ export default class PresentationCanvasExtension {
     else canvas.zoomToBbox(nodeBBox)
   }
 
-  private async startPresentation(canvas: Canvas) {
-    const startNode = this.getStartNode(canvas)
-    if (!startNode) {
-      new Notice('No start node found. Please mark a node as a start node trough the popup menu.')
-      return
+  private async startPresentation(canvas: Canvas, tryContinue: boolean = false) {
+    // Only reset visited nodes if we are not trying to continue
+    if (!tryContinue || this.visitedNodes.length === 0) {
+      const startNode = this.getStartNode(canvas)
+      if (!startNode) {
+        new Notice('No start node found. Please mark a node as a start node trough the popup menu.')
+        return
+      }
+      
+      this.visitedNodes = [startNode]
     }
 
-    this.visitedNodes = []
+    // Save current viewport
     this.savedViewport = {
       x: canvas.tx,
       y: canvas.ty,
@@ -267,10 +292,15 @@ export default class PresentationCanvasExtension {
     canvas.setReadonly(true)
 
     // Register event handler for keyboard navigation
-    if (this.plugin.settings.getSetting('useArrowKeysToChangeSlides')) {
-      canvas.wrapperEl.onkeydown = (e: any) => {
+    canvas.wrapperEl.onkeydown = (e: any) => {
+      if (this.plugin.settings.getSetting('useArrowKeysToChangeSlides')) {
         if (e.key === 'ArrowRight') this.nextNode(canvas)
         else if (e.key === 'ArrowLeft') this.previousNode(canvas)
+      }
+
+      if (this.plugin.settings.getSetting('usePgUpPgDownKeysToChangeSlides')) {
+        if (e.key === 'PageDown') this.nextNode(canvas)
+        else if (e.key === 'PageUp') this.previousNode(canvas)
       }
     }
 
@@ -302,8 +332,7 @@ export default class PresentationCanvasExtension {
     await sleep(500)
 
     // Zoom to first node
-    this.visitedNodes.push(startNode)
-    this.animateNodeTransition(canvas, undefined, startNode)
+    this.animateNodeTransition(canvas, undefined, this.visitedNodes.last())
   }
 
   private endPresentation(canvas: Canvas) {

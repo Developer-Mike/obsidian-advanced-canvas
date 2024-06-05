@@ -43,7 +43,7 @@ export interface AdvancedCanvasPluginSettings {
   defaultSlideSize: string
   wrapInSlidePadding: number
   useArrowKeysToChangeSlides: boolean
-  useEscKeyToExitPresentation: boolean
+  usePgUpPgDownKeysToChangeSlides: boolean
   zoomToSlideWithoutPadding: boolean
   slideTransitionAnimationDuration: number
   slideTransitionAnimationIntensity: number
@@ -92,7 +92,7 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   defaultSlideSize: '1200x675',
   wrapInSlidePadding: 20,
   useArrowKeysToChangeSlides: true,
-  useEscKeyToExitPresentation: true,
+  usePgUpPgDownKeysToChangeSlides: true,
   zoomToSlideWithoutPadding: true,
   slideTransitionAnimationDuration: 0.5,
   slideTransitionAnimationIntensity: 1.25,
@@ -404,12 +404,12 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       )
 
     new Setting(containerEl)
-      .setName("Use ESC key to exit presentation")
-      .setDesc("When enabled, you can use the ESC key to exit the presentation mode.")
+      .setName("Use PgUp/PgDown keys to change slides")
+      .setDesc("When enabled, you can use the PgUp/PgDown keys to change slides in presentation mode (Makes the presentation mode compatible with most presentation remotes).")
       .addToggle((toggle) =>
         toggle
-          .setValue(this.settingsManager.getSetting('useEscKeyToExitPresentation'))
-          .onChange(async (value) => await this.settingsManager.setSetting({ useEscKeyToExitPresentation: value }))
+          .setValue(this.settingsManager.getSetting('usePgUpPgDownKeysToChangeSlides'))
+          .onChange(async (value) => await this.settingsManager.setSetting({ usePgUpPgDownKeysToChangeSlides: value }))
       )
 
     new Setting(containerEl)
