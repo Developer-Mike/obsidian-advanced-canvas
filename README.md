@@ -62,7 +62,7 @@ All features can be enabled/disabled in the settings.
   - Set properties for the canvas file
 - [Stickers](#stickers)
   - Convert image nodes to stickers (transparent background and no border)
-- [Presentation mode](#presentation)
+- [Presentation mode](#presentation-mode)
   - Create presentations by connecting nodes with arrows
 - [Portals](#portals)
   - Embed other canvases inside your canvas
