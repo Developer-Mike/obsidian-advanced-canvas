@@ -258,6 +258,13 @@
   border-style: dashed;
 }
 
-.canvas-node[data-border-style='invisible'] .canvas-node-container {
-  border: none;
+.canvas-node[data-border-style='invisible'] {
+  &:not(.is-focused) .canvas-node-container {
+    border-color: transparent !important;
+  }
+
+  .canvas-node-container {
+    background-color: transparent;
+    box-shadow: none;
+  }
 }
