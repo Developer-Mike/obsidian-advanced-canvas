@@ -56,6 +56,7 @@ All features can be enabled/disabled in the settings.
   - Path styles
     - Default
     - Straight
+    - Square
     - A*
 - [Custom colors](#custom-colors) in the color picker
 - [Properties Support](#properties-support)
