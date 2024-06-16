@@ -40,6 +40,7 @@ export interface AdvancedCanvasPluginSettings {
   stickersFeatureEnabled: boolean
 
   presentationFeatureEnabled: boolean
+  showSetStartNodeInPopup: boolean
   defaultSlideSize: string
   wrapInSlidePadding: number
   useArrowKeysToChangeSlides: boolean
@@ -89,6 +90,7 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   stickersFeatureEnabled: true,
 
   presentationFeatureEnabled: true,
+  showSetStartNodeInPopup: false,
   defaultSlideSize: '1200x675',
   wrapInSlidePadding: 20,
   useArrowKeysToChangeSlides: true,
@@ -338,6 +340,15 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       "Presentations",
       "Create a presentation from your canvas.",
       'presentationFeatureEnabled'
+    )
+
+    new Setting(containerEl)
+    .setName("Show \"Set Start Node\" in node popup")
+    .setDesc("If turned off, you can still set the start node using the corresponding command.")
+    .addToggle((toggle) =>
+      toggle
+        .setValue(this.settingsManager.getSetting('showSetStartNodeInPopup'))
+        .onChange(async (value) => await this.settingsManager.setSetting({ showSetStartNodeInPopup: value }))
     )
 
     new Setting(containerEl)

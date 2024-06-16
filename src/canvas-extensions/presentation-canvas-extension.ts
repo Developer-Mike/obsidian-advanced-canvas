@@ -48,6 +48,16 @@ export default class PresentationCanvasExtension {
     })
 
     this.plugin.addCommand({
+			id: 'set-start-node',
+			name: 'Set start node',
+			checkCallback: CanvasHelper.canvasCommand(
+        this.plugin,
+        (canvas: Canvas) => !canvas.readonly && !this.isPresentationMode && canvas.getSelectionData().nodes.length === 1,
+        (canvas: Canvas) => this.setStartNode(canvas, canvas.nodes.get(canvas.getSelectionData().nodes[0].id))
+      )
+    })
+
+    this.plugin.addCommand({
 			id: 'start-presentation',
       name: 'Start presentation',
       checkCallback: CanvasHelper.canvasCommand(
@@ -131,6 +141,8 @@ export default class PresentationCanvasExtension {
   }
 
   onPopupMenuCreated(canvas: Canvas): void {
+    if (!this.plugin.settings.getSetting('showSetStartNodeInPopup')) return
+
     // If the canvas is readonly or there are multiple/no nodes selected, return
     const selectedNodesData = canvas.getSelectionData().nodes
     if (canvas.readonly || selectedNodesData.length !== 1 || canvas.selection.size > 1) return
