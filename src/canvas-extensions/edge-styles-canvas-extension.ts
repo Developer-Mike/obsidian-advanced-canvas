@@ -81,6 +81,11 @@ export default class EdgeStylesCanvasExtension {
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.NodeMoved,
+      (canvas: Canvas, _node: CanvasNode) => this.updateAllEdges(canvas)
+    ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.NodeRemoved,
       (canvas: Canvas, _node: CanvasNode) => this.updateAllEdges(canvas)
     ))
@@ -88,7 +93,7 @@ export default class EdgeStylesCanvasExtension {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.DraggingStateChanged,
       (canvas: Canvas, isDragging: boolean) => {
-        if (!isDragging) this.updateAllEdges(canvas)
+        if (!isDragging && !this.plugin.settings.getSetting('edgeStylePathfinderPathLiveUpdate')) this.updateAllEdges(canvas)
       }
     ))
   }
