@@ -1,4 +1,4 @@
-import { Canvas, CanvasEdge, CanvasNode, Position } from "src/@types/Canvas"
+import { Canvas, CanvasEdge, CanvasNode, Position, Side } from "src/@types/Canvas"
 import AdvancedCanvasPlugin from "src/main"
 import * as CanvasHelper from "src/utils/canvas-helper"
 import * as AStarHelper from "src/utils/a-star-helper"
@@ -176,7 +176,7 @@ export default class EdgeStylesCanvasExtension {
   
     if (pathRouteType === 'direct') {
       newPath = SvgPathHelper.pathArrayToSvgPath([fromPos, toPos], false)
-      edge.center = { 
+      edge.center = {
         x: (fromPos.x + toPos.x) / 2,
         y: (fromPos.y + toPos.y) / 2
       }
@@ -236,6 +236,25 @@ export default class EdgeStylesCanvasExtension {
     
     edge.path.interaction.setAttr("d", newPath)
     edge.path.display.setAttr("d", newPath)
+
+    // Rotate arrows accordingly
+    const edgeRotation = Math.atan2(edge.bezier.to.y - edge.bezier.from.y, edge.bezier.to.x - edge.bezier.from.x) - (Math.PI / 2)
+    const setArrowRotation = (element: HTMLElement, side: Side, rotation: number) => {
+      element.style.transform = element.style.transform
+        .replace(/rotate\([-\d]+(deg|rad)\)/g, `rotate(${rotation}rad)`)
+
+      const offset = BBoxHelper.getSideVector(side)
+      element.style.translate = `${offset.x * 7}px ${offset.y * -7}px`
+    }
+
+    if (pathRouteType === 'direct') {
+      if (edge.fromLineEnd.el) setArrowRotation(edge.fromLineEnd.el, edge.from.side, edgeRotation)
+      if (edge.toLineEnd.el) setArrowRotation(edge.toLineEnd.el, edge.to.side, edgeRotation - Math.PI)
+    } else {
+      if (edge.fromLineEnd.el) edge.fromLineEnd.el.style.translate = ""
+      if (edge.toLineEnd.el) edge.toLineEnd.el.style.translate = ""
+    }
+
     edge.labelElement?.render()
   }
 

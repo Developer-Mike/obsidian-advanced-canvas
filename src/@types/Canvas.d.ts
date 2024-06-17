@@ -262,10 +262,19 @@ export interface CanvasEdge extends CanvasElement {
     side: Side
     end: EndType
   }
+  fromLineEnd: {
+    el: HTMLElement
+    type: 'arrow'
+  }
+
   to: {
     node: CanvasNode
     side: Side
     end: EndType
+  }
+  toLineEnd: {
+    el: HTMLElement
+    type: 'arrow'
   }
 
   bezier: {
