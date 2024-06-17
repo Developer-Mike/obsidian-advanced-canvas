@@ -253,11 +253,11 @@ export default class EdgeStylesCanvasExtension {
     }
 
     if (pathRouteType === 'direct') {
-      if (edge.fromLineEnd.el) setArrowRotation(edge.fromLineEnd.el, edge.from.side, edgeRotation)
-      if (edge.toLineEnd.el) setArrowRotation(edge.toLineEnd.el, edge.to.side, edgeRotation - Math.PI)
+      if (edge.fromLineEnd?.el) setArrowRotation(edge.fromLineEnd.el, edge.from.side, edgeRotation)
+      if (edge.toLineEnd?.el) setArrowRotation(edge.toLineEnd.el, edge.to.side, edgeRotation - Math.PI)
     } else {
-      if (edge.fromLineEnd.el) edge.fromLineEnd.el.style.translate = ""
-      if (edge.toLineEnd.el) edge.toLineEnd.el.style.translate = ""
+      if (edge.fromLineEnd?.el) edge.fromLineEnd.el.style.translate = ""
+      if (edge.toLineEnd?.el) edge.toLineEnd.el.style.translate = ""
     }
 
     edge.labelElement?.render()
