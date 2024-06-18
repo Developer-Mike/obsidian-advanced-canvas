@@ -1,17 +1,14 @@
 import { Canvas, CanvasNode } from "src/@types/Canvas"
-import { getExposedNodeData } from "./node-data-tagger-canvas-extension"
-import AdvancedCanvasPlugin from "src/main"
+import { getExposedNodeData } from "./node-exposer"
 import { CanvasEvent } from "src/core/events"
+import CanvasExtension from "../canvas-extension"
 
 export const TARGET_NODE_DATASET_PREFIX = "target"
 
-export default class InteractionTaggerCanvasExtension {
-  plugin: AdvancedCanvasPlugin
+export default class NodeInteractionExposerExtension extends CanvasExtension {
+  isEnabled() { return true }
 
-  constructor(plugin: AdvancedCanvasPlugin) {
-    this.plugin = plugin
-
-    // Register events
+  init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.NodeInteraction,
       (canvas: Canvas, node: CanvasNode) => {

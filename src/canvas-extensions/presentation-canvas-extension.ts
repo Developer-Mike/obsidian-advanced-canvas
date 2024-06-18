@@ -1,25 +1,22 @@
 import { Menu, Notice } from 'obsidian'
 import { BBox, Canvas, CanvasEdge, CanvasElement, CanvasNode, Position, Size } from 'src/@types/Canvas'
-import AdvancedCanvasPlugin from 'src/main'
 import { CanvasEvent } from 'src/core/events'
 import * as CanvasHelper from "src/utils/canvas-helper"
 import * as BBoxHelper from "src/utils/bbox-helper"
+import CanvasExtension from './canvas-extension'
 
 const START_SLIDE_NAME = 'Start Slide'
 const DEFAULT_SLIDE_NAME = 'New Slide'
 
-export default class PresentationCanvasExtension {
-  plugin: AdvancedCanvasPlugin
+export default class PresentationCanvasExtension extends CanvasExtension {
   savedViewport: any = null
   isPresentationMode: boolean = false
   visitedNodes: any[] = []
   fullscreenModalObserver: MutationObserver | null = null
 
-  constructor(plugin: any) {
-    this.plugin = plugin
-
-    if (!this.plugin.settings.getSetting('presentationFeatureEnabled')) return
-
+  isEnabled() { return 'presentationFeatureEnabled' as const }
+  
+  init() {
     /* Add wrap in slide option to context menu */
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       'canvas:selection-menu',

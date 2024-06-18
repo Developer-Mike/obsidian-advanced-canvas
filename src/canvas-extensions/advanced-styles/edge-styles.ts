@@ -5,6 +5,7 @@ import * as AStarHelper from "src/utils/a-star-helper"
 import * as SvgPathHelper from "src/utils/svg-path-helper"
 import { CanvasEvent } from "src/core/events"
 import * as BBoxHelper from "src/utils/bbox-helper"
+import CanvasExtension from "../canvas-extension"
 
 const STYLES_MENU_OPTIONS: CanvasHelper.MenuOption[] = [
   {
@@ -52,14 +53,10 @@ const ROUTES_MENU_OPTIONS: CanvasHelper.MenuOption[] = [
   }
 ]
 
-export default class EdgeStylesCanvasExtension {
-  plugin: AdvancedCanvasPlugin
+export default class EdgeStylesExtension extends CanvasExtension {
+  isEnabled() { return 'edgesStylingFeatureEnabled' as const }
 
-  constructor(plugin: AdvancedCanvasPlugin) {
-    this.plugin = plugin
-
-    if (!this.plugin.settings.getSetting('edgesStylingFeatureEnabled')) return
-
+  init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.PopupMenuCreated,
       (canvas: Canvas) => this.onPopupMenuCreated(canvas)

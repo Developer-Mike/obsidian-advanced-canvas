@@ -1,18 +1,14 @@
-import { Canvas, CanvasEdge, CanvasNode } from "src/@types/Canvas"
-import AdvancedCanvasPlugin from "src/main"
+import { Canvas } from "src/@types/Canvas"
 import * as CanvasHelper from "src/utils/canvas-helper"
 import { CanvasEvent } from "src/core/events"
+import CanvasExtension from "../canvas-extension"
 
 const IMAGE_FILE_EXTENSIONS = ["bmp", "png", "jpg", "jpeg", "gif", "svg", "webp", "avif"]
 
-export default class StickersCanvasExtension {
-  plugin: AdvancedCanvasPlugin
+export default class StickersCanvasExtension extends CanvasExtension {
+  isEnabled() { return 'stickersFeatureEnabled' as const }
 
-  constructor(plugin: AdvancedCanvasPlugin) {
-    this.plugin = plugin
-
-    if (!this.plugin.settings.getSetting('stickersFeatureEnabled')) return
-
+  init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.PopupMenuCreated,
       (canvas: Canvas) => this.onPopupMenuCreated(canvas)

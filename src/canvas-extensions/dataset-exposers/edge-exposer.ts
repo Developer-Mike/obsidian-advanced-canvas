@@ -1,7 +1,7 @@
 import { Canvas, CanvasEdge, CanvasEdgeData } from "src/@types/Canvas"
 import { CanvasEvent } from "src/core/events"
-import AdvancedCanvasPlugin from "src/main"
 import SettingsManager from "src/settings"
+import CanvasExtension from "../canvas-extension"
 
 export function getExposedEdgeData(settings: SettingsManager): (keyof CanvasEdgeData)[] {
   const exposedData: (keyof CanvasEdgeData)[] = []
@@ -12,12 +12,10 @@ export function getExposedEdgeData(settings: SettingsManager): (keyof CanvasEdge
   return exposedData
 }
 
-export default class EdgeDataTaggerCanvasExtension {
-  plugin: AdvancedCanvasPlugin
+export default class EdgeExposerExtension extends CanvasExtension {
+  isEnabled() { return true }
 
-  constructor(plugin: AdvancedCanvasPlugin) {
-    this.plugin = plugin
-
+  init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.EdgeChanged,
       (_canvas: Canvas, edge: CanvasEdge) => {

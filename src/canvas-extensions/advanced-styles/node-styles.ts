@@ -2,6 +2,7 @@ import { Canvas } from "src/@types/Canvas"
 import AdvancedCanvasPlugin from "src/main"
 import * as CanvasHelper from "src/utils/canvas-helper"
 import { CanvasEvent } from "src/core/events"
+import CanvasExtension from "../canvas-extension"
 
 const SHAPES_MENU_OPTIONS: CanvasHelper.MenuOption[] = [
   {
@@ -72,14 +73,10 @@ const BORDER_STYLES_MENU_OPTIONS: CanvasHelper.MenuOption[] = [
   }
 ]
 
-export default class NodeStylesCanvasExtension {
-  plugin: AdvancedCanvasPlugin
+export default class NodeStylesExtension extends CanvasExtension {
+  isEnabled() { return 'nodeStylingFeatureEnabled' as const }
 
-  constructor(plugin: AdvancedCanvasPlugin) {
-    this.plugin = plugin
-
-    if (!this.plugin.settings.getSetting('nodeStylingFeatureEnabled')) return
-
+  init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.PopupMenuCreated,
       (canvas: Canvas) => this.onPopupMenuCreated(canvas)

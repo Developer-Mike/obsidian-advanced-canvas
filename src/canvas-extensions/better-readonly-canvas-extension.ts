@@ -1,18 +1,13 @@
 import { Canvas } from "src/@types/Canvas"
 import * as CanvasHelper from "src/utils/canvas-helper"
-import AdvancedCanvasPlugin from "src/main"
 import { CanvasEvent } from "src/core/events"
 import { AdvancedCanvasPluginSettings } from "src/settings"
+import CanvasExtension from "./canvas-extension"
 
-export default class ReadonlyCanvasExtension {
-  plugin: AdvancedCanvasPlugin
+export default class BetterReadonlyCanvasExtension extends CanvasExtension {
+  isEnabled() { return 'betterReadonlyEnabled' as const }
 
-  constructor(plugin: any) {
-    this.plugin = plugin
-    const that = this
-
-    if (!this.plugin.settings.getSetting('betterReadonlyEnabled')) return
-
+  init() {
     /* Popup listener */
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.PopupMenuCreated,
@@ -29,20 +24,20 @@ export default class ReadonlyCanvasExtension {
         if (movingToBBox) {
           movingToBBox = false
 
-          that.updateLockedZoom(canvas)
-          that.updateLockedPan(canvas)
+          this.updateLockedZoom(canvas)
+          this.updateLockedPan(canvas)
 
           return
         }
 
         if (!canvas.readonly) return
 
-        if (that.plugin.settings.getSetting('disableZoom')) {
+        if (this.plugin.settings.getSetting('disableZoom')) {
           canvas.zoom = canvas.lockedZoom ?? canvas.zoom
           canvas.tZoom = canvas.lockedZoom ?? canvas.tZoom
         }
 
-        if (that.plugin.settings.getSetting('disablePan')) {
+        if (this.plugin.settings.getSetting('disablePan')) {
           canvas.x = canvas.lockedX ?? canvas.x
           canvas.tx = canvas.lockedX ?? canvas.tx
           canvas.y = canvas.lockedY ?? canvas.y

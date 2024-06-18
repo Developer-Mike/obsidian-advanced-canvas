@@ -1,7 +1,7 @@
 import { Canvas, CanvasNode, CanvasNodeData } from "src/@types/Canvas"
 import { CanvasEvent } from "src/core/events"
-import AdvancedCanvasPlugin from "src/main"
 import SettingsManager from "src/settings"
+import CanvasExtension from "../canvas-extension"
 
 export function getExposedNodeData(settings: SettingsManager): (keyof CanvasNodeData)[] {
   const exposedData: (keyof CanvasNodeData)[] = []
@@ -19,12 +19,10 @@ export function getExposedNodeData(settings: SettingsManager): (keyof CanvasNode
   return exposedData
 }
 
-export default class NodeDataTaggerCanvasExtension {
-  plugin: AdvancedCanvasPlugin
+export default class NodeExposerExtension extends CanvasExtension {
+  isEnabled() { return true }
 
-  constructor(plugin: AdvancedCanvasPlugin) {
-    this.plugin = plugin
-
+  init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.NodeChanged,
       (_canvas: Canvas, node: CanvasNode) => {

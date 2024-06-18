@@ -1,19 +1,15 @@
 import { setIcon } from "obsidian"
 import { BBox, Canvas, CanvasData, CanvasNode } from "src/@types/Canvas"
 import { CanvasEvent } from "src/core/events"
-import AdvancedCanvasPlugin from "src/main"
 import * as BBoxHelper from "src/utils/bbox-helper"
+import CanvasExtension from "./canvas-extension"
 
 const COLLAPSE_BUTTON_ID = 'group-collapse-button'
 
-export default class CollapsibleGroupsCanvasExtension {
-  plugin: AdvancedCanvasPlugin
+export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
+  isEnabled() { return 'collapsibleGroupsFeatureEnabled' as const }
 
-  constructor(plugin: AdvancedCanvasPlugin) {
-    this.plugin = plugin
-
-    if (!this.plugin.settings.getSetting('collapsibleGroupsFeatureEnabled')) return
-
+  init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.NodeChanged,
       (canvas: Canvas, node: CanvasNode) => this.onNodeChanged(canvas, node)
