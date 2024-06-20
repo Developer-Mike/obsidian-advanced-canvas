@@ -52,9 +52,9 @@ export const DEFAULT_NODE_STYLE_SETTINGS = [
         cssclass: 'shape-pill'
       },
       {
-        icon: 'shape-diamond',
+        icon: 'diamond',
         label: 'Diamond',
-        cssclass: 'diamond'
+        cssclass: 'shape-diamond'
       },
       {
         icon: 'shape-parallelogram',
@@ -62,9 +62,9 @@ export const DEFAULT_NODE_STYLE_SETTINGS = [
         cssclass: 'shape-parallelogram'
       },
       {
-        icon: 'shape-circle',
+        icon: 'circle',
         label: 'Circle',
-        cssclass: 'circle'
+        cssclass: 'shape-circle'
       },
       {
         icon: 'shape-predefined-process',
@@ -103,9 +103,9 @@ export const DEFAULT_NODE_STYLE_SETTINGS = [
         cssclass: 'border-dotted'
       },
       {
-        icon: 'border-invisible',
+        icon: 'eye-off',
         label: 'Invisible',
-        cssclass: 'eye-off'
+        cssclass: 'border-invisible'
       }
     ]
   }

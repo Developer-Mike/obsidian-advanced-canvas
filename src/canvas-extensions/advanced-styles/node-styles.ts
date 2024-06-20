@@ -1,4 +1,4 @@
-import { Canvas } from "src/@types/Canvas"
+import { Canvas, CanvasNode } from "src/@types/Canvas"
 import * as CanvasHelper from "src/utils/canvas-helper"
 import { CanvasEvent } from "src/core/events"
 import CanvasExtension from "../canvas-extension"
@@ -11,75 +11,68 @@ export default class NodeStylesExtension extends CanvasExtension {
       CanvasEvent.PopupMenuCreated,
       (canvas: Canvas) => this.onPopupMenuCreated(canvas)
     ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.NodeChanged,
+      (canvas: Canvas, node: CanvasNode) => this.onNodeChanged(canvas, node)
+    ))
   }
 
   onPopupMenuCreated(canvas: Canvas): void {
-    // If the canvas is readonly or there is no valid shape in the selection, return
-    if (canvas.readonly || !this.hasValidNodeInSelection(canvas))
+    const selectionNodeData = canvas.getSelectionData().nodes
+    if (canvas.readonly || selectionNodeData.length === 0)
       return
 
-    // Add shapes menu option
-    if (this.plugin.settings.getSetting('shapesFeatureEnabled')) {
-      const menuOption = CanvasHelper.createExpandablePopupMenuOption({
-        id: 'node-shape-option',
-        label: 'Node shape',
-        icon: 'shapes'
-      }, SHAPES_MENU_OPTIONS.map((shape) => ({
-        ...shape,
-        callback: () => this.setShapeForSelection(canvas, shape.id)
-      })))
+    CanvasHelper.createStyleDropdownMenu(
+      canvas, this.plugin.settings.getSetting('nodeStyleSettings'),
+      selectionNodeData[0].cssclasses ?? [],
+      (cssclass: string) => {
+        for (const nodeData of selectionNodeData) {
+          const node = canvas.nodes.get(nodeData.id)
+          if (!node) continue
 
-      // Add menu option to menu bar
-      CanvasHelper.addPopupMenuOption(canvas, menuOption)
-    }
+          const cssclasses = nodeData.cssclasses ?? []
+          if (cssclasses.includes(cssclass)) continue
 
-    // Add border styles menu option
-    if (this.plugin.settings.getSetting('borderStyleFeatureEnabled')) {
-      const menuOption = CanvasHelper.createExpandablePopupMenuOption({
-        id: 'node-border-style-option',
-        label: 'Border style',
-        icon: 'box-select'
-      }, BORDER_STYLES_MENU_OPTIONS.map((borderStyle) => ({
-        ...borderStyle,
-        callback: () => this.setBorderStyleForSelection(canvas, borderStyle.id)
-      })))
+          node.setData({
+            ...nodeData,
+            cssclasses: [...cssclasses, cssclass]
+          }, true)
+        }
+      },
+      (cssclasses: string[]) => {
+        for (const nodeData of selectionNodeData) {
+          const node = canvas.nodes.get(nodeData.id)
+          if (!node) continue
 
-      // Add menu option to menu bar
-      CanvasHelper.addPopupMenuOption(canvas, menuOption)
-    }
+          const currentCssclasses = nodeData.cssclasses ?? []
+
+          node.setData({
+            ...nodeData,
+            cssclasses: currentCssclasses.filter(c => !cssclasses.includes(c))
+          }, true)
+        }
+      }
+    )
   }
 
-  private hasValidNodeInSelection(canvas: Canvas): boolean {
-    const selectedNodesData = canvas.getSelectionData().nodes
+  onNodeChanged(_canvas: Canvas, node: CanvasNode): void {
+    const nodeData = node.getData()
+    const cssclasses = nodeData.cssclasses ?? []
 
-    for (const nodeData of selectedNodesData) {
-      if (nodeData.type === 'text') return true
+    // Remove all previous css classes
+    const allCssclasses = this.plugin.settings.getSetting('nodeStyleSettings')
+      .flatMap(s => s.values)
+      .map(v => v.cssclass)
+      .filter(c => c !== null) as string[]
+
+    for (const cssclass of allCssclasses) {
+      node.nodeEl.classList.remove(cssclass)
     }
-    
-    return false
-  }
 
-  private setShapeForSelection(canvas: Canvas, shapeId: string | undefined) {
-    const selectedNodesData = canvas.getSelectionData().nodes
-
-    for (const nodeData of selectedNodesData) {
-      if (nodeData.type !== 'text') continue
-
-      const node = canvas.nodes.get(nodeData.id)
-      if (!node) continue
-      
-      node.setData({ ...nodeData, shape: shapeId }, true)
-    }
-  }
-
-  private setBorderStyleForSelection(canvas: Canvas, borderId: string | undefined) {
-    const selectedNodesData = canvas.getSelectionData().nodes
-
-    for (const nodeData of selectedNodesData) {
-      const node = canvas.nodes.get(nodeData.id)
-      if (!node) continue
-      
-      node.setData({ ...nodeData, borderStyle: borderId }, true)
+    // Add new css classes
+    for (const cssclass of cssclasses) {
+      node.nodeEl.classList.add(cssclass)
     }
   }
 }
