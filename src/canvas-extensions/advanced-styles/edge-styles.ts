@@ -1,5 +1,4 @@
 import { Canvas, CanvasEdge, CanvasNode, Position, Side } from "src/@types/Canvas"
-import AdvancedCanvasPlugin from "src/main"
 import * as CanvasHelper from "src/utils/canvas-helper"
 import * as AStarHelper from "src/utils/a-star-helper"
 import * as SvgPathHelper from "src/utils/svg-path-helper"

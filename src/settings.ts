@@ -16,8 +16,6 @@ export interface AdvancedCanvasPluginSettings {
   performanceOptimizationEnabled: boolean
 
   nodeStylingFeatureEnabled: boolean
-  shapesFeatureEnabled: boolean
-  borderStyleFeatureEnabled: boolean
 
   edgesStylingFeatureEnabled: boolean
   edgeStylePathfinderGridResolution: number
@@ -36,8 +34,6 @@ export interface AdvancedCanvasPluginSettings {
 
   collapsibleGroupsFeatureEnabled: boolean
   collapsedGroupPreviewOnDrag: boolean
-
-  stickersFeatureEnabled: boolean
 
   presentationFeatureEnabled: boolean
   showSetStartNodeInPopup: boolean
@@ -65,9 +61,7 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
 
   performanceOptimizationEnabled: false,
 
-  shapesFeatureEnabled: true,
   nodeStylingFeatureEnabled: true,
-  borderStyleFeatureEnabled: true,
 
   edgesStylingFeatureEnabled: true,
   edgeStylePathfinderGridResolution: 10,
@@ -86,8 +80,6 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
 
   collapsibleGroupsFeatureEnabled: true,
   collapsedGroupPreviewOnDrag: true,
-
-  stickersFeatureEnabled: true,
 
   presentationFeatureEnabled: true,
   showSetStartNodeInPopup: false,
@@ -219,24 +211,6 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       'nodeStylingFeatureEnabled'
     )
 
-    new Setting(containerEl)
-      .setName("Node Shapes")
-      .setDesc("Shape your nodes for creating e.g. mind maps or flow charts.")
-      .addToggle((toggle) =>
-        toggle
-          .setValue(this.settingsManager.getSetting('shapesFeatureEnabled'))
-          .onChange(async (value) => await this.settingsManager.setSetting({ shapesFeatureEnabled: value }))
-      )
-
-    new Setting(containerEl)
-      .setName("Border styles")
-      .setDesc("Style your nodes with different border styles.")
-      .addToggle((toggle) =>
-        toggle
-          .setValue(this.settingsManager.getSetting('borderStyleFeatureEnabled'))
-          .onChange(async (value) => await this.settingsManager.setSetting({ borderStyleFeatureEnabled: value }))
-      )
-
     this.createFeatureHeading(
       containerEl,
       "Edges styling",
@@ -327,13 +301,6 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           .setValue(this.settingsManager.getSetting('collapsedGroupPreviewOnDrag'))
           .onChange(async (value) => await this.settingsManager.setSetting({ collapsedGroupPreviewOnDrag: value }))
       )
-
-    this.createFeatureHeading(
-      containerEl,
-      "Stickers",
-      "Convert an image node to a sticker by supporting transparency and removing the border.",
-      'stickersFeatureEnabled'
-    )
 
     this.createFeatureHeading(
       containerEl,

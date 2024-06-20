@@ -188,9 +188,7 @@ export interface CanvasNodeData {
   label?: string
   file?: string
 
-  isSticker?: boolean
-  shape?: string | null
-  borderStyle?: string
+  cssclasses?: string[]
 
   isCollapsed?: boolean
   collapsedData?: CanvasData

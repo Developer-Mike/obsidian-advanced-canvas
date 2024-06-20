@@ -1,77 +1,7 @@
 import { Canvas } from "src/@types/Canvas"
-import AdvancedCanvasPlugin from "src/main"
 import * as CanvasHelper from "src/utils/canvas-helper"
 import { CanvasEvent } from "src/core/events"
 import CanvasExtension from "../canvas-extension"
-
-const SHAPES_MENU_OPTIONS: CanvasHelper.MenuOption[] = [
-  {
-    label: 'Default',
-    icon: 'circle-off'
-  },
-  {
-    id: 'oval',
-    label: 'Oval',
-    icon: 'oval'
-  },
-  {
-    id: 'centered-rectangle',
-    label: 'Rectangle',
-    icon: 'rectangle-horizontal'
-  },
-  {
-    id: 'diamond',
-    label: 'Diamond',
-    icon: 'diamond'
-  },
-  {
-    id: 'parallelogram',
-    label: 'Parallelogram',
-    icon: 'parallelogram'
-  },
-  {
-    id: 'circle',
-    label: 'Circle',
-    icon: 'circle'
-  },
-  {
-    id: 'predefined-process',
-    label: 'Predefined process',
-    icon: 'predefined-process'
-  },
-  {
-    id: 'document',
-    label: 'Document',
-    icon: 'document'
-  },
-  {
-    id: 'database',
-    label: 'Database',
-    icon: 'database-shape'
-  }
-]
-
-const BORDER_STYLES_MENU_OPTIONS: CanvasHelper.MenuOption[] = [
-  {
-    label: 'Solid',
-    icon: 'square'
-  },
-  {
-    id: 'dashed',
-    label: 'Dashed',
-    icon: 'box-select'
-  },
-  {
-    id: 'dotted',
-    label: 'Dotted',
-    icon: 'dot'
-  },
-  {
-    id: 'invisible',
-    label: 'Invisible',
-    icon: 'eye-off'
-  }
-]
 
 export default class NodeStylesExtension extends CanvasExtension {
   isEnabled() { return 'nodeStylingFeatureEnabled' as const }

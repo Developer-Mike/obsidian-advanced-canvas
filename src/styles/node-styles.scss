@@ -1,3 +1,54 @@
+.canvas-node {
+  //#region Text Alignment
+  &.text-align-center {
+    text-align: center;
+  }
+
+  &.text-align-right {
+    text-align: right;
+  }
+  //#endregion
+
+  //#region Shape
+
+  //#endregion
+
+  //#region Borders
+  &.border-dashed {
+    box-shadow: none;
+
+    .canvas-node-container {
+      border-style: dashed;
+    }
+  }
+
+  &.border-dotted {
+    box-shadow: none;
+
+    .canvas-node-container {
+      border-style: dotted;
+    }
+  }
+
+  &.border-invisible {
+    box-shadow: none;
+
+    &:not(.is-focused) .canvas-node-container {
+      border-color: transparent !important;
+    }
+
+    .canvas-node-label {
+      display: none;
+    }
+
+    .canvas-node-container {
+      background-color: transparent;
+      box-shadow: none;
+    }
+  }
+  //#endregion
+}
+
 // Shapes
 .center-text-node .canvas-node-content {
   .markdown-preview-view {
@@ -242,29 +293,5 @@
   /* Move top of cylinder to background while editing */
   &:has(.embed-iframe)::after {
     z-index: -1;
-  }
-}
-
-// Borders
-.canvas-node[data-border-style].is-themed .canvas-node-container {
-  box-shadow: none;
-}
-
-.canvas-node[data-border-style="dotted"] .canvas-node-container {
-  border-style: dotted;
-}
-
-.canvas-node[data-border-style='dashed'] .canvas-node-container {
-  border-style: dashed;
-}
-
-.canvas-node[data-border-style='invisible'] {
-  &:not(.is-focused) .canvas-node-container {
-    border-color: transparent !important;
-  }
-
-  .canvas-node-container {
-    background-color: transparent;
-    box-shadow: none;
   }
 }
