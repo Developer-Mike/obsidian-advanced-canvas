@@ -97,6 +97,18 @@
   
   &.shape-circle .canvas-node-container {
     border-radius: 50%;
+    
+    .markdown-preview-view {
+      padding: 0 !important;
+      overflow-y: initial;
+
+      .markdown-preview-section {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+    }
   }
   
   &.shape-predefined-process {
