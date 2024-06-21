@@ -188,6 +188,7 @@ export interface CanvasNodeData {
   label?: string
   file?: string
 
+  // wasInitialized?: boolean
   cssclasses?: string[]
 
   isCollapsed?: boolean

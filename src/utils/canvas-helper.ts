@@ -160,7 +160,7 @@ export function zoomToBBox(canvas: Canvas, bbox: BBox) {
   canvas.tZoom = Math.log2(scaleFactor)
 }
 
-export function createStyleDropdownMenu(canvas: Canvas, stylableAttributes: StylableAttribute[], currentCssclasses: string[], addCssclass: (cssclass: string) => void, removeCssclasses: (cssclasses: string[]) => void) {
+export function createStyleDropdownMenu(canvas: Canvas, stylableAttributes: StylableAttribute[], currentCssclasses: string[], updateCssclasses: (addCssclasses: string[], removeCssclasses: string[]) => void) {
   const STYLE_MENU_ID = 'style-menu'
   const STYLE_MENU_DROPDOWN_ID = 'style-menu-dropdown'
   const STYLE_MENU_DROPDOWN_SUBMENU_ID = 'style-menu-dropdown-submenu'
@@ -263,6 +263,8 @@ export function createStyleDropdownMenu(canvas: Canvas, stylableAttributes: Styl
         const topOffset = parseFloat(window.getComputedStyle(styleMenuDropdownElement).getPropertyValue('padding-top')) + (styleMenuDropdownElement.offsetHeight - styleMenuDropdownElement.clientHeight) / 2
         styleMenuDropdownSubmenuElement.style.top = `${stylableAttributeElement.getBoundingClientRect().top - topOffset - popupMenuElement.getBoundingClientRect().top}px`
 
+        // TODO: Swap sides if it is too close to the edge
+
         for (const value of stylableAttribute.values) {
           const styleMenuDropdownSubmenuOptionElement = document.createElement('div')
           styleMenuDropdownSubmenuOptionElement.classList.add('menu-item')
@@ -306,24 +308,22 @@ export function createStyleDropdownMenu(canvas: Canvas, stylableAttributes: Styl
 
           // Add click event
           styleMenuDropdownSubmenuOptionElement.addEventListener('click', () => {
-            // Remove other cssclasses of same stylable attribute if multiselect is disabled
-            if (!stylableAttribute.multiselect) {
-              const allValues = stylableAttribute.values
-                .map(otherValue => otherValue.cssclass)
-                .filter(cssclass => cssclass !== null) as string[]
-              removeCssclasses(allValues)
+            let cssclassesToRemove = stylableAttribute.values
+              .map(otherValue => otherValue.cssclass)
+              .filter(cssclass => cssclass !== null && cssclass !== value.cssclass) as string[]
+            let cssclassesToAdd = value.cssclass === null ? [] : [value.cssclass]
 
-              // Keep correct reference
-              currentCssclasses = currentCssclasses.filter(cssclass => !allValues.includes(cssclass))
+            if (stylableAttribute.multiselect) {
+              const isAlreadySelected = currentCssclasses.includes(value.cssclass ?? '')
+              cssclassesToRemove = isAlreadySelected && value.cssclass !== null ? [value.cssclass] : []
+              cssclassesToAdd = !isAlreadySelected && value.cssclass !== null ? [value.cssclass] : []
             }
 
-            // Add cssclass
-            if (value.cssclass !== null) {
-              addCssclass(value.cssclass)
+            // Keep correct reference
+            currentCssclasses = currentCssclasses.filter(cssclass => !cssclassesToRemove.includes(cssclass))
+            currentCssclasses.push(...cssclassesToAdd)
 
-              // Keep correct reference
-              currentCssclasses.push(value.cssclass)
-            }
+            updateCssclasses(cssclassesToAdd, cssclassesToRemove)
 
             // Close menu
             styleMenuButtonElement.dispatchEvent(new Event('click'))
