@@ -2,7 +2,7 @@ import { Canvas, CanvasNode } from "src/@types/Canvas"
 import * as CanvasHelper from "src/utils/canvas-helper"
 import { CanvasEvent } from "src/core/events"
 import CanvasExtension from "../canvas-extension"
-import SettingsManager from "src/settings"
+import { StylableAttribute } from "./style-settings"
 
 export default class NodeStylesExtension extends CanvasExtension {
   isEnabled() { return 'nodeStylingFeatureEnabled' as const }
@@ -18,7 +18,7 @@ export default class NodeStylesExtension extends CanvasExtension {
       (canvas: Canvas, node: CanvasNode) => this.onNodeChanged(canvas, node)
     ))
   }
-  
+
   private onPopupMenuCreated(canvas: Canvas): void {
     const selectionNodeData = canvas.getSelectionData().nodes
     if (canvas.readonly || selectionNodeData.length === 0)
@@ -26,48 +26,41 @@ export default class NodeStylesExtension extends CanvasExtension {
 
     CanvasHelper.createStyleDropdownMenu(
       canvas, this.plugin.settings.getSetting('nodeStyleSettings'),
-      selectionNodeData[0].cssclasses ?? [],
-      (addCssclasses, removeCssclasses) => this.updateCssclassesOfSelection(canvas, addCssclasses, removeCssclasses)
+      selectionNodeData[0].styleAttributes ?? {},
+      (attribute, value) => this.setStyleAttributeForSelection(canvas, attribute, value)
     )
   }
 
-  private updateCssclassesOfSelection(canvas: Canvas, addCssclasses: string[], removeCssclasses: string[]): void {
+  private setStyleAttributeForSelection(canvas: Canvas, attribute: StylableAttribute, value: string | null): void {
     const selectionNodeData = canvas.getSelectionData().nodes
     for (const nodeData of selectionNodeData) {
       const node = canvas.nodes.get(nodeData.id)
       if (!node) continue
 
-      const currentCssclasses = nodeData.cssclasses ?? []
+      // Only apply the attribute if the node type is allowed
+      if (attribute.nodeTypes && !attribute.nodeTypes.includes(nodeData.type)) continue
 
       node.setData({
         ...nodeData,
-        cssclasses: [
-          ...currentCssclasses.filter(c => !removeCssclasses.includes(c)),
-          ...addCssclasses.filter(c => !currentCssclasses.includes(c))
-        ]
-      }, true)
+        styleAttributes: {
+          ...nodeData.styleAttributes,
+          [attribute.datasetKey]: value
+        }
+      })
     }
+    
+    canvas.pushHistory(canvas.getData())
   }
 
   private onNodeChanged(_canvas: Canvas, node: CanvasNode): void {
     const nodeData = node.getData()
-    const cssclasses = nodeData.cssclasses ?? []
 
-    // Remove all possible css classes
-    const allCssclasses = this.plugin.settings.getSetting('nodeStyleSettings')
-      .flatMap(s => s.values)
-      .map(v => v.cssclass)
-      .filter(c => c !== null) as string[]
-
-    for (const cssclass of allCssclasses) {
-      console.log(cssclass)
-      node.nodeEl.classList.remove(cssclass)
-    }
-
-    // Add new css classes
-    for (const cssclass of cssclasses) {
-      if (cssclass === '') continue
-      node.nodeEl.classList.add(cssclass)
+    // Apply the style attributes to the node
+    if (nodeData.styleAttributes) {
+      for (const [key, value] of Object.entries(nodeData.styleAttributes)) {
+        if (value === null) delete node.nodeEl.dataset[key]
+        else node.nodeEl.dataset[key] = value
+      }
     }
   }
 }

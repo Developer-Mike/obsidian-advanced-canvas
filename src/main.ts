@@ -25,7 +25,6 @@ import PropertiesCanvasExtension from './canvas-extensions/properties-canvas-ext
 
 // Advanced Styles
 import NodeStylesExtension from './canvas-extensions/advanced-styles/node-styles'
-import StickersCanvasExtension from './canvas-extensions/advanced-styles/stickers-canvas-extension'
 import EdgeStylesExtension from './canvas-extensions/advanced-styles/edge-styles'
 
 // Dataset Exposers
@@ -33,6 +32,7 @@ import NodeInteractionExposerExtension from './canvas-extensions/dataset-exposer
 import NodeExposerExtension from './canvas-extensions/dataset-exposers/node-exposer'
 import EdgeExposerExtension from './canvas-extensions/dataset-exposers/edge-exposer'
 import CanvasWrapperExposerExtension from './canvas-extensions/dataset-exposers/canvas-wrapper-exposer'
+import MigrationHelper from './utils/migration-helper'
 
 const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   // Dataset Exposers
@@ -42,7 +42,6 @@ const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   NodeInteractionExposerExtension,
 
   // Advanced Styles
-  StickersCanvasExtension,
   NodeStylesExtension,
   EdgeStylesExtension,
 
@@ -62,14 +61,19 @@ const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
 ]
 
 export default class AdvancedCanvasPlugin extends Plugin {
+  migrationHelper: MigrationHelper
+  debugHelper: DebugHelper
+
   settings: SettingsManager
   windowsManager: WindowsManager
-  debugHelper: DebugHelper
 
   canvasPatcher: CanvasPatcher
   canvasExtensions: CanvasExtension[]
 
 	async onload() {
+    this.migrationHelper = new MigrationHelper(this)
+    await this.migrationHelper.migrate()
+
     IconsHelper.addIcons()
     
     this.settings = new SettingsManager(this)

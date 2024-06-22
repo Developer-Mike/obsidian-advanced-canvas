@@ -5,13 +5,7 @@ import CanvasExtension from "../canvas-extension"
 
 export function getExposedNodeData(settings: SettingsManager): (keyof CanvasNodeData)[] {
   const exposedData: (keyof CanvasNodeData)[] = []
-  
-  if (settings.getSetting('nodeStylingFeatureEnabled')) {
-    if (settings.getSetting('shapesFeatureEnabled')) exposedData.push('shape')
-    if (settings.getSetting('borderStyleFeatureEnabled')) exposedData.push('borderStyle')
-  }
 
-  if (settings.getSetting('stickersFeatureEnabled')) exposedData.push('isSticker')
   if (settings.getSetting('collapsibleGroupsFeatureEnabled')) exposedData.push('isCollapsed')
   if (settings.getSetting('presentationFeatureEnabled')) exposedData.push('isStartNode')
   if (settings.getSetting('portalsFeatureEnabled')) exposedData.push('portalToFile', 'portalId')

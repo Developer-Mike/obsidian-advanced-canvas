@@ -160,7 +160,7 @@ export function zoomToBBox(canvas: Canvas, bbox: BBox) {
   canvas.tZoom = Math.log2(scaleFactor)
 }
 
-export function createStyleDropdownMenu(canvas: Canvas, stylableAttributes: StylableAttribute[], currentCssclasses: string[], updateCssclasses: (addCssclasses: string[], removeCssclasses: string[]) => void) {
+export function createStyleDropdownMenu(canvas: Canvas, stylableAttributes: StylableAttribute[], currentStyleAttributes: { [key: string]: string | null }, setStyleAttribute: (attribute: StylableAttribute, value: string | null) => void) {
   const STYLE_MENU_ID = 'style-menu'
   const STYLE_MENU_DROPDOWN_ID = 'style-menu-dropdown'
   const STYLE_MENU_DROPDOWN_SUBMENU_ID = 'style-menu-dropdown-submenu'
@@ -200,10 +200,17 @@ export function createStyleDropdownMenu(canvas: Canvas, stylableAttributes: Styl
     styleMenuDropdownElement.style.position = 'absolute'
     styleMenuDropdownElement.style.maxHeight = 'initial'
 
-    styleMenuDropdownElement.style.left = `${styleMenuButtonElement.getBoundingClientRect().left - popupMenuElement.getBoundingClientRect().left}px`
     styleMenuDropdownElement.style.top = `${popupMenuElement.getBoundingClientRect().height}px`
 
-    // TODO: Swap sides if it is too close to the edge
+    const canvasWrapperCenterX = canvas.wrapperEl.getBoundingClientRect().left + canvas.wrapperEl.getBoundingClientRect().width / 2
+
+    const leftPosition = styleMenuButtonElement.getBoundingClientRect().left - popupMenuElement.getBoundingClientRect().left
+    const rightPosition = popupMenuElement.getBoundingClientRect().right - styleMenuButtonElement.getBoundingClientRect().right
+
+    // Swap sides if it is too close to the edge
+    if (popupMenuElement.getBoundingClientRect().left + leftPosition < canvasWrapperCenterX)
+      styleMenuDropdownElement.style.left = `${leftPosition}px`
+    else styleMenuDropdownElement.style.right = `${rightPosition}px`
 
     // Add style options
     for (const stylableAttribute of stylableAttributes) {
@@ -215,9 +222,9 @@ export function createStyleDropdownMenu(canvas: Canvas, stylableAttributes: Styl
       const iconElement = document.createElement('div')
       iconElement.classList.add('menu-item-icon')
 
-      const selectedStyle = stylableAttribute.values
-        .find(value => currentCssclasses.includes(value.cssclass ?? 'null'))
-        ?? stylableAttribute.values.find(value => value.cssclass === null)!!
+      const selectedStyle = stylableAttribute.options
+        .find(option => currentStyleAttributes[stylableAttribute.datasetKey] === option.value) ??
+        stylableAttribute.options.find(value => value.value === null)!!
       setIcon(iconElement, selectedStyle.icon)
 
       stylableAttributeElement.appendChild(iconElement)
@@ -258,14 +265,21 @@ export function createStyleDropdownMenu(canvas: Canvas, stylableAttributes: Styl
         // Position correctly
         styleMenuDropdownSubmenuElement.style.position = 'absolute'
         styleMenuDropdownSubmenuElement.style.maxHeight = 'initial'
-    
-        styleMenuDropdownSubmenuElement.style.left = `${styleMenuDropdownElement.getBoundingClientRect().right - popupMenuElement.getBoundingClientRect().left}px`
+
         const topOffset = parseFloat(window.getComputedStyle(styleMenuDropdownElement).getPropertyValue('padding-top')) + (styleMenuDropdownElement.offsetHeight - styleMenuDropdownElement.clientHeight) / 2
         styleMenuDropdownSubmenuElement.style.top = `${stylableAttributeElement.getBoundingClientRect().top - topOffset - popupMenuElement.getBoundingClientRect().top}px`
 
-        // TODO: Swap sides if it is too close to the edge
+        // Swap sides if it is too close to the edge
+        const leftPosition = styleMenuDropdownElement.getBoundingClientRect().right - popupMenuElement.getBoundingClientRect().left
+        const rightPosition = popupMenuElement.getBoundingClientRect().right - styleMenuDropdownElement.getBoundingClientRect().left
 
-        for (const value of stylableAttribute.values) {
+        // Swap sides if it is too close to the edge
+        if (popupMenuElement.getBoundingClientRect().left + leftPosition < canvasWrapperCenterX)
+          styleMenuDropdownSubmenuElement.style.left = `${leftPosition}px`
+        else styleMenuDropdownSubmenuElement.style.right = `${rightPosition}px`
+
+        // Add style options
+        for (const value of stylableAttribute.options) {
           const styleMenuDropdownSubmenuOptionElement = document.createElement('div')
           styleMenuDropdownSubmenuOptionElement.classList.add('menu-item')
           styleMenuDropdownSubmenuOptionElement.classList.add('tappable')
@@ -308,22 +322,11 @@ export function createStyleDropdownMenu(canvas: Canvas, stylableAttributes: Styl
 
           // Add click event
           styleMenuDropdownSubmenuOptionElement.addEventListener('click', () => {
-            let cssclassesToRemove = stylableAttribute.values
-              .map(otherValue => otherValue.cssclass)
-              .filter(cssclass => cssclass !== null && cssclass !== value.cssclass) as string[]
-            let cssclassesToAdd = value.cssclass === null ? [] : [value.cssclass]
-
-            if (stylableAttribute.multiselect) {
-              const isAlreadySelected = currentCssclasses.includes(value.cssclass ?? '')
-              cssclassesToRemove = isAlreadySelected && value.cssclass !== null ? [value.cssclass] : []
-              cssclassesToAdd = !isAlreadySelected && value.cssclass !== null ? [value.cssclass] : []
-            }
+            // Set style attribute
+            setStyleAttribute(stylableAttribute, value.value)
 
             // Keep correct reference
-            currentCssclasses = currentCssclasses.filter(cssclass => !cssclassesToRemove.includes(cssclass))
-            currentCssclasses.push(...cssclassesToAdd)
-
-            updateCssclasses(cssclassesToAdd, cssclassesToRemove)
+            currentStyleAttributes[stylableAttribute.datasetKey] = value.value
 
             // Close menu
             styleMenuButtonElement.dispatchEvent(new Event('click'))

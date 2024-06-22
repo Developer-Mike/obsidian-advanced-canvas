@@ -1,10 +1,20 @@
 .canvas-node {
   //#region Text Alignment
-  &.text-align-center {
-    text-align: center;
+  &[data-text-align='center'] {
+    .markdown-preview-view {
+      padding: 0 !important;
+      overflow-y: initial;
+
+      .markdown-preview-section {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+    }
   }
 
-  &.text-align-right {
+  &[data-text-align='right'] {
     text-align: right;
   }
   //#endregion
@@ -44,11 +54,11 @@
     -webkit-mask-size: 100%;
   }
   
-  &.shape-pill .canvas-node-container {
+  &[data-shape='pill'] .canvas-node-container {
     border-radius: 5000px;
   }
   
-  &.shape-diamond {
+  &[data-shape='diamond'] {
     @extend .reactive-node;
   
     // https://yoksel.github.io/url-encoder/ - assets/diamond-shape.svg
@@ -84,7 +94,7 @@
     }
   }
   
-  &.shape-parallelogram .canvas-node-container {
+  &[data-shape='parallelogram'] .canvas-node-container {
     transform: skewX(-20deg);
   
     /* Fix blurry text */
@@ -95,23 +105,16 @@
     }
   }
   
-  &.shape-circle .canvas-node-container {
+  &[data-shape='circle'] .canvas-node-container {
     border-radius: 50%;
     
     .markdown-preview-view {
       padding: 0 !important;
       overflow-y: initial;
-
-      .markdown-preview-section {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-      }
     }
   }
   
-  &.shape-predefined-process {
+  &[data-shape='predefined']-process {
     @extend .reactive-node;
   
     $line-padding: 10px;
@@ -144,7 +147,7 @@
     }
   }
   
-  &.shape-document {
+  &[data-shape='document'] {
     @extend .reactive-node;
   
     // https://yoksel.github.io/url-encoder/ - assets/document-shape.svg
@@ -167,7 +170,7 @@
     }
   }
   
-  &.shape-database {
+  &[data-shape='database'] {
     @extend .reactive-node;
     $oval-height: 50px;
   
@@ -235,23 +238,17 @@
   //#endregion
 
   //#region Borders
-  &.border-dashed {
+  &[data-border='dashed'] .canvas-node-container {
     box-shadow: none;
-
-    .canvas-node-container {
-      border-style: dashed;
-    }
+    border-style: dashed;
   }
 
-  &.border-dotted {
+  &[data-border='dotted'] .canvas-node-container {
     box-shadow: none;
-
-    .canvas-node-container {
-      border-style: dotted;
-    }
+    border-style: dotted;
   }
 
-  &.border-invisible {
+  &[data-border='invisible'] {
     box-shadow: none;
 
     &:not(.is-focused):not(.is-selected) .canvas-node-container {

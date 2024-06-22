@@ -82,6 +82,7 @@ export interface Canvas {
   getContainingNodes(bbox: BBox): CanvasNode[]
 
   history: CanvasHistory
+  pushHistory(data: CanvasData): void
   undo(): void
   redo(): void
 
@@ -188,8 +189,8 @@ export interface CanvasNodeData {
   label?: string
   file?: string
 
-  // wasInitialized?: boolean
-  cssclasses?: string[]
+  needsToBeInitialized?: boolean
+  styleAttributes?: { [key: string]: string | null }
 
   isCollapsed?: boolean
   collapsedData?: CanvasData

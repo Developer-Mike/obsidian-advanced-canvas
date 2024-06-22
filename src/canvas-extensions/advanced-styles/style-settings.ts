@@ -3,109 +3,113 @@ import { CanvasNodeType } from "src/@types/Canvas"
 export interface StylableAttributeOption {
   icon: string
   label: string
-  cssclass: string | null // The element with the null value is the default
+  value: string | null // The element with the null value is the default
 }
 
 export interface StylableAttribute {
+  datasetKey: string
   label: string
   nodeTypes?: CanvasNodeType[]
   multiselect: boolean
-  values: StylableAttributeOption[]
+  options: StylableAttributeOption[]
 }
 
 export const DEFAULT_NODE_STYLE_SETTINGS = [
   {
+    datasetKey: 'textAlign',
     label: 'Text Alignment',
     nodeTypes: ['text', 'file'],
     multiselect: false,
-    values: [
+    options: [
       {
         icon: 'align-left',
         label: 'Left',
-        cssclass: null
+        value: null
       },
       {
         icon: 'align-center',
         label: 'Center',
-        cssclass: 'text-align-center'
+        value: 'center'
       },
       {
         icon: 'align-right',
         label: 'Right',
-        cssclass: 'text-align-right'
+        value: 'right'
       }
     ]
   },
   {
+    datasetKey: 'shape',
     label: 'Shape',
     nodeTypes: ['text'],
     multiselect: false,
-    values: [
+    options: [
       {
         icon: 'rectangle-horizontal',
         label: 'Round Rectangle (default)',
-        cssclass: null
+        value: null
       },
       {
         icon: 'shape-pill',
         label: 'Pill',
-        cssclass: 'shape-pill'
+        value: 'pill'
       },
       {
         icon: 'diamond',
         label: 'Diamond',
-        cssclass: 'shape-diamond'
+        value: 'diamond'
       },
       {
         icon: 'shape-parallelogram',
         label: 'Parallelogram',
-        cssclass: 'shape-parallelogram'
+        value: 'parallelogram'
       },
       {
         icon: 'circle',
         label: 'Circle',
-        cssclass: 'shape-circle'
+        value: 'circle'
       },
       {
         icon: 'shape-predefined-process',
         label: 'Predefined Process',
-        cssclass: 'shape-predefined-process'
+        value: 'predefined-process'
       },
       {
         icon: 'shape-document',
         label: 'Document',
-        cssclass: 'shape-document'
+        value: 'document'
       },
       {
         icon: 'shape-database',
         label: 'Database',
-        cssclass: 'shape-database'
+        value: 'database'
       }
     ]
   },
   {
+    datasetKey: 'border',
     label: 'Border',
     multiselect: false,
-    values: [
+    options: [
       {
         icon: 'border-solid',
         label: 'Solid',
-        cssclass: null
+        value: null
       },
       {
         icon: 'border-dashed',
         label: 'Dashed',
-        cssclass: 'border-dashed'
+        value: 'dashed'
       },
       {
         icon: 'border-dotted',
         label: 'Dotted',
-        cssclass: 'border-dotted'
+        value: 'dotted'
       },
       {
         icon: 'eye-off',
         label: 'Invisible',
-        cssclass: 'border-invisible'
+        value: 'invisible'
       }
     ]
   }
@@ -113,23 +117,24 @@ export const DEFAULT_NODE_STYLE_SETTINGS = [
 
 export const DEFAULT_EDGE_STYLE_SETTINGS = [
   { // TODO
+    datasetKey: 'style',
     label: 'Style',
     multiselect: false,
-    values: [
+    options: [
       {
         icon: 'dotted-line',
         label: 'Dotted',
-        cssclass: 'dotted-line'
+        value: 'dotted'
       },
       {
         icon: 'short-dashed-line',
         label: 'Short Dashed',
-        cssclass: 'short-dashed-line'
+        value: 'short-dashed'
       },
       {
         icon: 'long-dashed-line',
         label: 'Long Dashed',
-        cssclass: 'long-dashed-line'
+        value: 'long-dashed'
       }
     ]
   }
