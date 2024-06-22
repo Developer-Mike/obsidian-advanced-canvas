@@ -189,7 +189,7 @@ export interface CanvasNodeData {
   label?: string
   file?: string
 
-  needsToBeInitialized?: boolean
+  // TODO: needsToBeInitialized?: boolean
   styleAttributes?: { [key: string]: string | null }
 
   isCollapsed?: boolean
@@ -245,12 +245,13 @@ export interface CanvasEdgeData {
 
   fromSide: Side
   toSide: Side
-  
-  edgeStyle?: 'long-dashed' | 'short-dashed' | 'dotted'
-  edgePathRoute?: 'direct' | 'square' | 'a-star'
+
+  styleAttributes?: { [key: string]: string | null }
 
   portalId?: string
   isUnsaved?: boolean
+
+  [key: string]: any
 }
 
 type EndType = 'none' | 'arrow'

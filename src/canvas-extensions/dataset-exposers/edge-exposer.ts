@@ -6,7 +6,7 @@ import CanvasExtension from "../canvas-extension"
 export function getExposedEdgeData(settings: SettingsManager): (keyof CanvasEdgeData)[] {
   const exposedData: (keyof CanvasEdgeData)[] = []
 
-  if (settings.getSetting('edgesStylingFeatureEnabled')) exposedData.push('edgeStyle')
+  if (settings.getSetting('edgesStylingFeatureEnabled')) exposedData.push('styleAttributes')
   if (settings.getSetting('portalsFeatureEnabled')) exposedData.push('isUnsaved')
 
   return exposedData
@@ -22,11 +22,15 @@ export default class EdgeExposerExtension extends CanvasExtension {
         const edgeData = edge?.getData()
         if (!edgeData) return
 
-        for (const dataKey of getExposedEdgeData(this.plugin.settings)) {
-          const dataValue = edgeData[dataKey]
-          
-          if (!dataValue) delete edge.path.display.dataset[dataKey]
-          else edge.path.display.dataset[dataKey] = dataValue as string
+        for (const exposedDataKey of getExposedEdgeData(this.plugin.settings)) {
+            const datasetPairs = edgeData[exposedDataKey] instanceof Object
+              ? Object.entries(edgeData[exposedDataKey])
+              : [[exposedDataKey, edgeData[exposedDataKey]]]
+
+            for (const [key, value] of datasetPairs) {
+              if (!value) delete edge.path.display.dataset[key]
+              else edge.path.display.dataset[key] = value
+            }
         }
       }
     ))

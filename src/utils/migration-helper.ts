@@ -25,11 +25,11 @@ export default class MigrationHelper {
           if (nodeData.isSticker) newStyleAttributes['border'] = 'invisible'
           if (nodeData.borderStyle) newStyleAttributes['border'] = nodeData.borderStyle
           if (nodeData.shape) {
-            newStyleAttributes['textAlign'] = 'center'
-            newStyleAttributes['shape'] = nodeData.shape
+            newStyleAttributes.textAlign = 'center'
+            newStyleAttributes.shape = nodeData.shape
 
-            if (newStyleAttributes['shape'] === 'centered-rectangle') delete newStyleAttributes['shape']
-            if (newStyleAttributes['shape'] === 'oval') newStyleAttributes['shape'] = 'pill'
+            if (newStyleAttributes?.shape === 'centered-rectangle') delete newStyleAttributes.shape
+            if (newStyleAttributes?.shape === 'oval') newStyleAttributes.shape = 'pill'
           }
 
           node.setData({
@@ -44,7 +44,10 @@ export default class MigrationHelper {
         for (const edge of canvas.edges.values()) {
           const edgeData = edge.getData()
 
-          // TODO
+          const newStyleAttributes: { [key: string]: string | null } = {}
+
+          if (edgeData.edgeStyle) newStyleAttributes.edge = edgeData.edgeStyle
+          if (edgeData.edgePathRoute) newStyleAttributes.pathfindingMethod = edgeData.edgePathRoute
         }
       }
     ))

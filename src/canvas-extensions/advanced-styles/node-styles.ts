@@ -1,4 +1,4 @@
-import { Canvas, CanvasNode } from "src/@types/Canvas"
+import { Canvas } from "src/@types/Canvas"
 import * as CanvasHelper from "src/utils/canvas-helper"
 import { CanvasEvent } from "src/core/events"
 import CanvasExtension from "../canvas-extension"
@@ -12,16 +12,11 @@ export default class NodeStylesExtension extends CanvasExtension {
       CanvasEvent.PopupMenuCreated,
       (canvas: Canvas) => this.onPopupMenuCreated(canvas)
     ))
-
-    this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.NodeChanged,
-      (canvas: Canvas, node: CanvasNode) => this.onNodeChanged(canvas, node)
-    ))
   }
 
   private onPopupMenuCreated(canvas: Canvas): void {
     const selectionNodeData = canvas.getSelectionData().nodes
-    if (canvas.readonly || selectionNodeData.length === 0)
+    if (canvas.readonly || selectionNodeData.length === 0 || selectionNodeData.length !== canvas.selection.size)
       return
 
     CanvasHelper.createStyleDropdownMenu(
@@ -50,17 +45,5 @@ export default class NodeStylesExtension extends CanvasExtension {
     }
     
     canvas.pushHistory(canvas.getData())
-  }
-
-  private onNodeChanged(_canvas: Canvas, node: CanvasNode): void {
-    const nodeData = node.getData()
-
-    // Apply the style attributes to the node
-    if (nodeData.styleAttributes) {
-      for (const [key, value] of Object.entries(nodeData.styleAttributes)) {
-        if (value === null) delete node.nodeEl.dataset[key]
-        else node.nodeEl.dataset[key] = value
-      }
-    }
   }
 }

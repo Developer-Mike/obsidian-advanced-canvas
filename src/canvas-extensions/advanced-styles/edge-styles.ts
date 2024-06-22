@@ -5,52 +5,7 @@ import * as SvgPathHelper from "src/utils/svg-path-helper"
 import { CanvasEvent } from "src/core/events"
 import * as BBoxHelper from "src/utils/bbox-helper"
 import CanvasExtension from "../canvas-extension"
-
-const STYLES_MENU_OPTIONS: CanvasHelper.MenuOption[] = [
-  {
-    id: undefined,
-    label: 'Default',
-    icon: 'minus'
-  },
-  {
-    id: 'long-dashed',
-    label: 'Dashed (long)',
-    icon: 'long-dashed-line'
-  },
-  {
-    id: 'short-dashed',
-    label: 'Dashed',
-    icon: 'short-dashed-line'
-  },
-  {
-    id: 'dotted',
-    label: 'Dotted',
-    icon: 'dotted-line'
-  }
-]
-
-const ROUTES_MENU_OPTIONS: CanvasHelper.MenuOption[] = [
-  {
-    id: undefined,
-    label: 'Default',
-    icon: 'route'
-  },
-  {
-    id: 'direct',
-    label: 'Direct',
-    icon: 'minus'
-  },
-  {
-    id: 'square',
-    label: 'Square',
-    icon: 'corner-down-right'
-  },
-  {
-    id: 'a-star',
-    label: 'A*',
-    icon: 'navigation'
-  }
-]
+import { StylableAttribute } from "./style-settings"
 
 export default class EdgeStylesExtension extends CanvasExtension {
   isEnabled() { return 'edgesStylingFeatureEnabled' as const }
@@ -89,59 +44,40 @@ export default class EdgeStylesExtension extends CanvasExtension {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.DraggingStateChanged,
       (canvas: Canvas, isDragging: boolean) => {
-        if (!isDragging && !this.plugin.settings.getSetting('edgeStylePathfinderPathLiveUpdate')) this.updateAllEdges(canvas)
+        if (isDragging || this.plugin.settings.getSetting('edgeStylePathfinderPathLiveUpdate')) return
+        this.updateAllEdges(canvas)
       }
     ))
   }
 
-  onPopupMenuCreated(canvas: Canvas): void {
-    // If the canvas is readonly or there is no edge in the selection, return
+  private onPopupMenuCreated(canvas: Canvas): void {
     const selectedEdges = [...canvas.selection].filter((item: any) => item.path !== undefined) as CanvasEdge[]
-    if (canvas.readonly || selectedEdges.length === 0)
+    if (canvas.readonly || selectedEdges.length === 0 || selectedEdges.length !== canvas.selection.size)
       return
 
-    // Path styles
-    const pathStyleNestedOptions = STYLES_MENU_OPTIONS.map((style) => ({
-      ...style,
-      id: undefined,
-      callback: () => this.setStyleForSelection(canvas, selectedEdges, style.id)
-    }))
-
-    const pathStyleMenuOption = CanvasHelper.createExpandablePopupMenuOption({
-      id: 'edge-style-option',
-      label: 'Edge style',
-      icon: 'minus',
-    }, pathStyleNestedOptions)
-
-    // Add menu option to menu bar
-    CanvasHelper.addPopupMenuOption(canvas, pathStyleMenuOption, -2)
-
-    const pathRouteNestedOptions = ROUTES_MENU_OPTIONS.map((route) => ({
-      ...route,
-      id: undefined,
-      callback: () => this.setPathRouteForSelection(canvas, selectedEdges, route.id)
-    }))
-
-    const pathRouteMenuOption = CanvasHelper.createExpandablePopupMenuOption({
-      id: 'edge-path-route-option',
-      label: 'Edge path route',
-      icon: 'route',
-    }, pathRouteNestedOptions)
-
-    // Add menu option to menu bar
-    CanvasHelper.addPopupMenuOption(canvas, pathRouteMenuOption, -2)
+    CanvasHelper.createStyleDropdownMenu(
+      canvas, this.plugin.settings.getSetting('edgeStyleSettings'),
+      selectedEdges[0].getData().styleAttributes ?? {},
+      (attribute, value) => this.setStyleAttributeForSelection(canvas, attribute, value)
+    )
   }
 
-  private setStyleForSelection(_canvas: Canvas, selectedEdges: CanvasEdge[], styleId: string|undefined) {
-    for (const edge of selectedEdges) {
-      edge.setData({ ...edge.getData(), edgeStyle: styleId as any }, true)
-    }
-  }
+  private setStyleAttributeForSelection(canvas: Canvas, attribute: StylableAttribute, value: string | null): void {
+    const selectedEdges = [...canvas.selection].filter((item: any) => item.path !== undefined) as CanvasEdge[]
 
-  private setPathRouteForSelection(_canvas: Canvas, selectedEdges: CanvasEdge[], pathRouteTypeId: string|undefined) {
     for (const edge of selectedEdges) {
-      edge.setData({ ...edge.getData(), edgePathRoute: pathRouteTypeId as any }, true)
+      const edgeData = edge.getData()
+
+      edge.setData({
+        ...edgeData,
+        styleAttributes: {
+          ...edgeData.styleAttributes,
+          [attribute.datasetKey]: value
+        }
+      })
     }
+    
+    canvas.pushHistory(canvas.getData())
   }
 
   private updateAllEdges(canvas: Canvas) {
@@ -157,8 +93,8 @@ export default class EdgeStylesExtension extends CanvasExtension {
     edge.updatePath()
     edge.center = undefined
 
-    const pathRouteType = edge.getData().edgePathRoute ?? 'default'
-    if (pathRouteType === 'default') {
+    const pathRouteType = edge.getData().styleAttributes?.pathfindingMethod
+    if (!pathRouteType) {
       // Update label position
       edge.labelElement?.render() 
 

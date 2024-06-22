@@ -6,6 +6,7 @@ import CanvasExtension from "../canvas-extension"
 export function getExposedNodeData(settings: SettingsManager): (keyof CanvasNodeData)[] {
   const exposedData: (keyof CanvasNodeData)[] = []
 
+  if (settings.getSetting('nodeStylingFeatureEnabled')) exposedData.push('styleAttributes')
   if (settings.getSetting('collapsibleGroupsFeatureEnabled')) exposedData.push('isCollapsed')
   if (settings.getSetting('presentationFeatureEnabled')) exposedData.push('isStartNode')
   if (settings.getSetting('portalsFeatureEnabled')) exposedData.push('portalToFile', 'portalId')
@@ -23,11 +24,15 @@ export default class NodeExposerExtension extends CanvasExtension {
         const nodeData = node?.getData()
         if (!nodeData) return
 
-        for (const dataKey of getExposedNodeData(this.plugin.settings)) {
-          const dataValue = nodeData[dataKey]
-          
-          if (!dataValue) delete node.nodeEl.dataset[dataKey]
-          else node.nodeEl.dataset[dataKey] = dataValue
+        for (const exposedDataKey of getExposedNodeData(this.plugin.settings)) {
+          const datasetPairs = nodeData[exposedDataKey] instanceof Object
+            ? Object.entries(nodeData[exposedDataKey])
+            : [[exposedDataKey, nodeData[exposedDataKey]]]
+
+          for (const [key, value] of datasetPairs) {
+            if (!value) delete node.nodeEl.dataset[key]
+            else node.nodeEl.dataset[key] = value
+          }
         }
       }
     ))

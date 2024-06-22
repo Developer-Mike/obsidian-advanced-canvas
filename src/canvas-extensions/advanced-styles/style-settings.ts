@@ -10,7 +10,6 @@ export interface StylableAttribute {
   datasetKey: string
   label: string
   nodeTypes?: CanvasNodeType[]
-  multiselect: boolean
   options: StylableAttributeOption[]
 }
 
@@ -19,11 +18,10 @@ export const DEFAULT_NODE_STYLE_SETTINGS = [
     datasetKey: 'textAlign',
     label: 'Text Alignment',
     nodeTypes: ['text', 'file'],
-    multiselect: false,
     options: [
       {
         icon: 'align-left',
-        label: 'Left',
+        label: 'Left (default)',
         value: null
       },
       {
@@ -42,7 +40,6 @@ export const DEFAULT_NODE_STYLE_SETTINGS = [
     datasetKey: 'shape',
     label: 'Shape',
     nodeTypes: ['text'],
-    multiselect: false,
     options: [
       {
         icon: 'rectangle-horizontal',
@@ -89,11 +86,10 @@ export const DEFAULT_NODE_STYLE_SETTINGS = [
   {
     datasetKey: 'border',
     label: 'Border',
-    multiselect: false,
     options: [
       {
         icon: 'border-solid',
-        label: 'Solid',
+        label: 'Solid (default)',
         value: null
       },
       {
@@ -116,25 +112,55 @@ export const DEFAULT_NODE_STYLE_SETTINGS = [
 ] as StylableAttribute[]
 
 export const DEFAULT_EDGE_STYLE_SETTINGS = [
-  { // TODO
-    datasetKey: 'style',
-    label: 'Style',
-    multiselect: false,
+  {
+    datasetKey: 'edge',
+    label: 'Edge Style',
     options: [
       {
-        icon: 'dotted-line',
+        icon: 'edge-solid',
+        label: 'Solid (default)',
+        value: null
+      },
+      {
+        icon: 'edge-dotted',
         label: 'Dotted',
         value: 'dotted'
       },
       {
-        icon: 'short-dashed-line',
+        icon: 'edge-short-dashed',
         label: 'Short Dashed',
         value: 'short-dashed'
       },
       {
-        icon: 'long-dashed-line',
+        icon: 'edge-long-dashed',
         label: 'Long Dashed',
         value: 'long-dashed'
+      }
+    ]
+  },
+  {
+    datasetKey: 'pathfindingMethod',
+    label: 'Pathfinding Method',
+    options: [
+      {
+        icon: 'pathfinding-method-bezier',
+        label: 'Bezier (default)',
+        value: null
+      },
+      {
+        icon: 'slash',
+        label: 'Direct',
+        value: 'direct'
+      },
+      {
+        icon: 'pathfinding-method-square',
+        label: 'Square',
+        value: 'square'
+      },
+      {
+        icon: 'map',
+        label: 'A*',
+        value: 'a-star'
       }
     ]
   }
