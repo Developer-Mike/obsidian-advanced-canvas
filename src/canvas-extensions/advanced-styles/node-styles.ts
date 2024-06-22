@@ -2,7 +2,7 @@ import { Canvas } from "src/@types/Canvas"
 import * as CanvasHelper from "src/utils/canvas-helper"
 import { CanvasEvent } from "src/core/events"
 import CanvasExtension from "../canvas-extension"
-import { DEFAULT_NODE_STYLE_SETTINGS, StylableAttribute } from "./style-settings"
+import { DEFAULT_NODE_STYLE_SETTINGS, StylableAttribute } from "./style-config"
 import SettingsManager from "src/settings"
 
 export default class NodeStylesExtension extends CanvasExtension {
@@ -28,8 +28,11 @@ export default class NodeStylesExtension extends CanvasExtension {
     if (canvas.readonly || selectionNodeData.length === 0 || selectionNodeData.length !== canvas.selection.size)
       return
 
+    const selectedNodeTypes = new Set(selectionNodeData.map(node => node.type))
+    const availableNodeStyles = this.allNodeStyles.filter(style => !style.nodeTypes || style.nodeTypes.some(type => selectedNodeTypes.has(type)))
+
     CanvasHelper.createStyleDropdownMenu(
-      canvas, this.allNodeStyles,
+      canvas, availableNodeStyles,
       selectionNodeData[0].styleAttributes ?? {},
       (attribute, value) => this.setStyleAttributeForSelection(canvas, attribute, value)
     )

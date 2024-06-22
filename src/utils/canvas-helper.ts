@@ -1,6 +1,6 @@
 import { addIcon, setIcon, setTooltip } from "obsidian"
 import { BBox, Canvas, CanvasNode, CanvasNodeData, Position, Size } from "src/@types/Canvas"
-import { StylableAttribute } from "src/canvas-extensions/advanced-styles/style-settings"
+import { StylableAttribute } from "src/canvas-extensions/advanced-styles/style-config"
 import AdvancedCanvasPlugin from "src/main"
 import * as BBoxHelper from "src/utils/bbox-helper"
 

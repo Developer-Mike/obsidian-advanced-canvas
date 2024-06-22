@@ -1,6 +1,6 @@
 import { Notice, PluginSettingTab, Setting } from "obsidian"
 import AdvancedCanvasPlugin from "./main"
-import { DEFAULT_EDGE_STYLE_SETTINGS, DEFAULT_NODE_STYLE_SETTINGS, StylableAttribute } from "./canvas-extensions/advanced-styles/style-settings"
+import { DEFAULT_EDGE_STYLE_SETTINGS, DEFAULT_NODE_STYLE_SETTINGS, StylableAttribute } from "./canvas-extensions/advanced-styles/style-config"
 
 const NODE_TYPES_ON_DOUBLE_CLICK = {
   'text': 'Text',

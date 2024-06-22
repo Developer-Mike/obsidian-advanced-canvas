@@ -5,7 +5,7 @@ import * as SvgPathHelper from "src/utils/svg-path-helper"
 import { CanvasEvent } from "src/core/events"
 import * as BBoxHelper from "src/utils/bbox-helper"
 import CanvasExtension from "../canvas-extension"
-import { DEFAULT_EDGE_STYLE_SETTINGS, StylableAttribute } from "./style-settings"
+import { DEFAULT_EDGE_STYLE_SETTINGS, StylableAttribute } from "./style-config"
 import SettingsManager from "src/settings"
 
 export default class EdgeStylesExtension extends CanvasExtension {

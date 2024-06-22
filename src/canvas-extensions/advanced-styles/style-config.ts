@@ -17,7 +17,7 @@ export const DEFAULT_NODE_STYLE_SETTINGS = [
   {
     datasetKey: 'textAlign',
     label: 'Text Alignment',
-    nodeTypes: ['text', 'file'],
+    nodeTypes: ['text'],
     options: [
       {
         icon: 'align-left',
