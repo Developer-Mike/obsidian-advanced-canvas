@@ -32,6 +32,10 @@ export default class MigrationHelper {
             if (newStyleAttributes?.shape === 'oval') newStyleAttributes.shape = 'pill'
           }
 
+          delete nodeData.isSticker
+          delete nodeData.borderStyle
+          delete nodeData.shape
+
           node.setData({
             ...nodeData,
             styleAttributes: {
@@ -48,6 +52,9 @@ export default class MigrationHelper {
 
           if (edgeData.edgeStyle) newStyleAttributes.edge = edgeData.edgeStyle
           if (edgeData.edgePathRoute) newStyleAttributes.pathfindingMethod = edgeData.edgePathRoute
+
+          delete edgeData.edgeStyle
+          delete edgeData.edgePathRoute
         }
       }
     ))
