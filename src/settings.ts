@@ -17,10 +17,10 @@ export interface AdvancedCanvasPluginSettings {
   performanceOptimizationEnabled: boolean
 
   nodeStylingFeatureEnabled: boolean
-  nodeStyleSettings: StylableAttribute[]
+  customNodeStyleSettings: StylableAttribute[]
 
   edgesStylingFeatureEnabled: boolean
-  edgeStyleSettings: StylableAttribute[]
+  customEdgeStyleSettings: StylableAttribute[]
   edgeStylePathfinderGridResolution: number
   edgeStylePathfinderPathLiveUpdate: boolean
   edgeStylePathfinderPathRounded: boolean
@@ -65,10 +65,10 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   performanceOptimizationEnabled: false,
 
   nodeStylingFeatureEnabled: true,
-  nodeStyleSettings: DEFAULT_NODE_STYLE_SETTINGS,
+  customNodeStyleSettings: [],
 
   edgesStylingFeatureEnabled: true,
-  edgeStyleSettings: DEFAULT_EDGE_STYLE_SETTINGS,
+  customEdgeStyleSettings: [],
   edgeStylePathfinderGridResolution: 10,
   edgeStylePathfinderPathLiveUpdate: true,
   edgeStylePathfinderPathRounded: true,

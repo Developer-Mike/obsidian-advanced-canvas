@@ -5,12 +5,21 @@ import * as SvgPathHelper from "src/utils/svg-path-helper"
 import { CanvasEvent } from "src/core/events"
 import * as BBoxHelper from "src/utils/bbox-helper"
 import CanvasExtension from "../canvas-extension"
-import { StylableAttribute } from "./style-settings"
+import { DEFAULT_EDGE_STYLE_SETTINGS, StylableAttribute } from "./style-settings"
+import SettingsManager from "src/settings"
 
 export default class EdgeStylesExtension extends CanvasExtension {
+  allEdgeStyles: StylableAttribute[]
+
   isEnabled() { return 'edgesStylingFeatureEnabled' as const }
 
   init() {
+    this.allEdgeStyles = [...DEFAULT_EDGE_STYLE_SETTINGS, ...this.plugin.settings.getSetting('customEdgeStyleSettings')]
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      SettingsManager.SETTINGS_CHANGED_EVENT,
+      () => this.allEdgeStyles = [...DEFAULT_EDGE_STYLE_SETTINGS, ...this.plugin.settings.getSetting('customEdgeStyleSettings')]
+    ))
+
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.PopupMenuCreated,
       (canvas: Canvas) => this.onPopupMenuCreated(canvas)
@@ -56,7 +65,7 @@ export default class EdgeStylesExtension extends CanvasExtension {
       return
 
     CanvasHelper.createStyleDropdownMenu(
-      canvas, this.plugin.settings.getSetting('edgeStyleSettings'),
+      canvas, this.allEdgeStyles,
       selectedEdges[0].getData().styleAttributes ?? {},
       (attribute, value) => this.setStyleAttributeForSelection(canvas, attribute, value)
     )

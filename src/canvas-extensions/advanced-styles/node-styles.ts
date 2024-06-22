@@ -2,12 +2,21 @@ import { Canvas } from "src/@types/Canvas"
 import * as CanvasHelper from "src/utils/canvas-helper"
 import { CanvasEvent } from "src/core/events"
 import CanvasExtension from "../canvas-extension"
-import { StylableAttribute } from "./style-settings"
+import { DEFAULT_NODE_STYLE_SETTINGS, StylableAttribute } from "./style-settings"
+import SettingsManager from "src/settings"
 
 export default class NodeStylesExtension extends CanvasExtension {
+  allNodeStyles: StylableAttribute[]
+
   isEnabled() { return 'nodeStylingFeatureEnabled' as const }
 
   init() {
+    this.allNodeStyles = [...DEFAULT_NODE_STYLE_SETTINGS, ...this.plugin.settings.getSetting('customNodeStyleSettings')]
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      SettingsManager.SETTINGS_CHANGED_EVENT,
+      () => this.allNodeStyles = [...DEFAULT_NODE_STYLE_SETTINGS, ...this.plugin.settings.getSetting('customNodeStyleSettings')]
+    ))
+
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.PopupMenuCreated,
       (canvas: Canvas) => this.onPopupMenuCreated(canvas)
@@ -20,7 +29,7 @@ export default class NodeStylesExtension extends CanvasExtension {
       return
 
     CanvasHelper.createStyleDropdownMenu(
-      canvas, this.plugin.settings.getSetting('nodeStyleSettings'),
+      canvas, this.allNodeStyles,
       selectionNodeData[0].styleAttributes ?? {},
       (attribute, value) => this.setStyleAttributeForSelection(canvas, attribute, value)
     )
