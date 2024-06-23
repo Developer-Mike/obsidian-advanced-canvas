@@ -104,13 +104,10 @@ export default class EdgeStylesExtension extends CanvasExtension {
     edge.center = undefined
 
     // Set arrow style
-    const arrowStyle = edgeData.styleAttributes?.arrow
-    if (arrowStyle) {
-      const arrowPolygonPoints = this.getArrowPolygonPoints(arrowStyle)
+    const arrowPolygonPoints = this.getArrowPolygonPoints(edgeData.styleAttributes?.arrow)
 
-      if (edge.fromLineEnd?.el) edge.fromLineEnd.el.querySelector('polygon')?.setAttribute('points', arrowPolygonPoints)
-      if (edge.toLineEnd?.el) edge.toLineEnd.el.querySelector('polygon')?.setAttribute('points', arrowPolygonPoints)
-    }
+    if (edge.fromLineEnd?.el) edge.fromLineEnd.el.querySelector('polygon')?.setAttribute('points', arrowPolygonPoints)
+    if (edge.toLineEnd?.el) edge.toLineEnd.el.querySelector('polygon')?.setAttribute('points', arrowPolygonPoints)
 
     // Set pathfinding method
     const pathRouteType = edgeData.styleAttributes?.pathfindingMethod
@@ -193,21 +190,23 @@ export default class EdgeStylesExtension extends CanvasExtension {
     edge.labelElement?.render()
 
     // Rotate arrows accordingly
-    const edgeRotation = Math.atan2(edge.bezier.to.y - edge.bezier.from.y, edge.bezier.to.x - edge.bezier.from.x) - (Math.PI / 2)
-    const setArrowRotation = (element: HTMLElement, side: Side, rotation: number) => {
-      element.style.transform = element.style.transform
-        .replace(/rotate\([-\d]+(deg|rad)\)/g, `rotate(${rotation}rad)`)
+    if (this.plugin.settings.getSetting('edgeStyleDirectRotateArrow')) {
+      const edgeRotation = Math.atan2(edge.bezier.to.y - edge.bezier.from.y, edge.bezier.to.x - edge.bezier.from.x) - (Math.PI / 2)
+      const setArrowRotation = (element: HTMLElement, side: Side, rotation: number) => {
+        element.style.transform = element.style.transform
+          .replace(/rotate\([-\d]+(deg|rad)\)/g, `rotate(${rotation}rad)`)
 
-      const offset = BBoxHelper.getSideVector(side)
-      element.style.translate = `${offset.x * 7}px ${offset.y * -7}px`
-    }
+        const offset = BBoxHelper.getSideVector(side)
+        element.style.translate = `${offset.x * 7}px ${offset.y * -7}px`
+      }
 
-    if (pathRouteType === 'direct') {
-      if (edge.fromLineEnd?.el) setArrowRotation(edge.fromLineEnd.el, edge.from.side, edgeRotation)
-      if (edge.toLineEnd?.el) setArrowRotation(edge.toLineEnd.el, edge.to.side, edgeRotation - Math.PI)
-    } else {
-      if (edge.fromLineEnd?.el) edge.fromLineEnd.el.style.translate = ""
-      if (edge.toLineEnd?.el) edge.toLineEnd.el.style.translate = ""
+      if (pathRouteType === 'direct') {
+        if (edge.fromLineEnd?.el) setArrowRotation(edge.fromLineEnd.el, edge.from.side, edgeRotation)
+        if (edge.toLineEnd?.el) setArrowRotation(edge.toLineEnd.el, edge.to.side, edgeRotation - Math.PI)
+      } else {
+        if (edge.fromLineEnd?.el) edge.fromLineEnd.el.style.translate = ""
+        if (edge.toLineEnd?.el) edge.toLineEnd.el.style.translate = ""
+      }
     }
   }
 
@@ -216,7 +215,7 @@ export default class EdgeStylesExtension extends CanvasExtension {
     center.y = edge.center?.y ?? center.y
   }
 
-  private getArrowPolygonPoints(arrowStyle: string): string {
+  private getArrowPolygonPoints(arrowStyle?: string | null): string {
     if (arrowStyle === 'halved-triangle')
       return `-2,0 7.5,12 -2,12`
     else if (arrowStyle === 'thin-triangle')

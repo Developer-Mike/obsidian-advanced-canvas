@@ -21,6 +21,7 @@ export interface AdvancedCanvasPluginSettings {
 
   edgesStylingFeatureEnabled: boolean
   customEdgeStyleSettings: StylableAttribute[]
+  edgeStyleDirectRotateArrow: boolean
   edgeStylePathfinderGridResolution: number
   edgeStylePathfinderPathLiveUpdate: boolean
   edgeStylePathfinderPathRounded: boolean
@@ -69,6 +70,7 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
 
   edgesStylingFeatureEnabled: true,
   customEdgeStyleSettings: [],
+  edgeStyleDirectRotateArrow: false,
   edgeStylePathfinderGridResolution: 10,
   edgeStylePathfinderPathLiveUpdate: true,
   edgeStylePathfinderPathRounded: true,
@@ -239,6 +241,15 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
         button
           .setButtonText("Open Tutorial")
           .onClick(() => window.open("https://github.com/Developer-Mike/obsidian-advanced-canvas/blob/main/README.md#custom-styles"))
+      )
+
+    new Setting(containerEl)
+      .setName("Rotate arrow if pathfinding method is \"Direct\"")
+      .setDesc("When enabled, the arrow will be rotated to the direction of the edge if the pathfinding method is set to \"Direct\".")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.settingsManager.getSetting('edgeStyleDirectRotateArrow'))
+          .onChange(async (value) => await this.settingsManager.setSetting({ edgeStyleDirectRotateArrow: value }))
       )
 
     new Setting(containerEl)
