@@ -28,8 +28,17 @@ export default class EdgeExposerExtension extends CanvasExtension {
               : [[exposedDataKey, edgeData[exposedDataKey]]]
 
             for (const [key, value] of datasetPairs) {
-              if (!value) delete edge.path.display.dataset[key]
-              else edge.path.display.dataset[key] = value
+              if (!value) {
+                delete edge.path.display.dataset[key]
+
+                if (edge.fromLineEnd?.el) delete edge.fromLineEnd.el.dataset[key]
+                if (edge.toLineEnd?.el) delete edge.toLineEnd.el.dataset[key]
+              } else {
+                edge.path.display.dataset[key] = value
+
+                if (edge.fromLineEnd?.el) edge.fromLineEnd.el.dataset[key] = value
+                if (edge.toLineEnd?.el) edge.toLineEnd.el.dataset[key] = value
+              }
             }
         }
       }

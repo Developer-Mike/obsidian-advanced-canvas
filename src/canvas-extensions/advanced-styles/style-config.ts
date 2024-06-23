@@ -139,6 +139,32 @@ export const DEFAULT_EDGE_STYLE_SETTINGS = [
     ]
   },
   {
+    datasetKey: 'arrow',
+    label: 'Arrow Style',
+    options: [
+      {
+        icon: 'arrow-triangle',
+        label: 'Triangle (default)',
+        value: null
+      },
+      {
+        icon: 'arrow-triangle-outline',
+        label: 'Triangle Outline',
+        value: 'triangle-outline'
+      },
+      {
+        icon: 'arrow-diamond',
+        label: 'Diamond',
+        value: 'diamond'
+      },
+      {
+        icon: 'arrow-diamond-outline',
+        label: 'Diamond Outline',
+        value: 'diamond-outline'
+      }
+    ]
+  },
+  {
     datasetKey: 'pathfindingMethod',
     label: 'Pathfinding Method',
     options: [
