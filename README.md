@@ -57,7 +57,7 @@ All features can be enabled/disabled in the settings.
     - Dotted
     - Short-dashed
     - Long-dashed
-  - Arrow Styles
+  - [Arrow Styles](#arrow-styles)
     - Triangle Outline
     - Halved Triangle
     - Thin Triangle
@@ -65,7 +65,7 @@ All features can be enabled/disabled in the settings.
     - Diamond Outline
     - Circle
     - Circle Outline
-  - Path Styles
+  - [Pathfinding Methods](#pathfinding-methods)
     - Default
     - Straight
     - Square
@@ -73,8 +73,6 @@ All features can be enabled/disabled in the settings.
 - [Custom colors](#custom-colors) in the color picker
 - [Properties Support](#properties-support)
   - Set properties for the canvas file
-- [Stickers](#stickers)
-  - Convert image nodes to stickers (transparent background and no border)
 - [Presentation mode](#presentation-mode)
   - Create presentations by connecting nodes with arrows
 - [Portals](#portals)
@@ -111,6 +109,43 @@ If you want to support me and my work, consider starring ⭐ the repository, or,
   - The cloned node will have the same dimensions and color as the original node
 - `Advanced Canvas: Expand node up/down/left/right`
   - Expand the selected node in the direction of the arrow keys
+
+## Custom Styles
+Custom styles for nodes and edges can easily be added.
+
+1. Add a popup menu option
+   - Open the `<VAULT-PATH>/.obsidian/plugins/obsidian-advanced-canvas/data.json` file
+   - If you want to add an option to node popup menu, search for `customNodeStyleSettings` property, otherwise search for `customEdgeStyleSettings` property. (Create it if it doesn't exist yet)
+   - Add the custom popup menu option (Remove the comments!)
+   ```json
+    "customNodeStyleSettings": [
+        {
+            "datasetKey": "exampleStyleAttribute", // Must be unique and written in camelCase
+            "label": "Example Style Attribute",
+            "options": [
+                {
+                    "icon": "cloud-sun", // Choose an icon from lucide.dev
+                    "label": "Sunny Appearance",
+                    "value": null // Null means default
+                },
+                {
+                    "icon": "cloud-rain-wind", // Choose an icon from lucide.dev
+                    "label": "Rainy Appearance",
+                    "value": "rainy" // The value that gets set
+                }
+            ]   
+        }
+        // You can add more categories here
+    ]
+   ```
+2. Create a new CSS snippet in your vault (And enable it in the settings)
+    ```css	
+    .canvas-node[data-<DATASET-KEY>="rainy"] { /* The dataset key is now written in kebab-case */
+        background-color: #7f7f7f;
+    }
+    ```
+3. Reload Obsidian and enjoy your new custom style!
+    <br><img src="./assets/custom-style-attribute-example.png" alt="Custom Style Attribute Example"/>
 
 ## Node Styles
 ### Node Shapes
@@ -180,12 +215,20 @@ Set the style of the edges (arrows) to dotted, short-dashed or long-dashed.
     <img src="./assets/edge-styles.png" alt="Edge Styles Example"/>
 </details>
 
-### Path Styles
-Set the path style of the edges (arrows) to default, straight or A*.
+### Arrow Styles
+Set the style of the arrows to triangle outline, halved triangle, thin triangle, diamond, diamond outline, circle or circle outline.
+
+<details>
+    <summary>Arrow Styles Example</summary>
+    <img src="./assets/edge-arrow-styles.png" alt="Edge Arrow Styles Example"/>
+</details>
+
+### Pathfinding Methods
+Set the pathfinding method of the edges (arrows) to default, straight, squared or A*.
 
 <details>
     <summary>Path Styles Example</summary>
-    <img src="./assets/edge-path-styles.png" alt="Edge Path Styles Example"/>
+    <img src="./assets/edge-pathfinding-methods.png" alt="Edge Pathfinding Methods Example"/>
 </details>
 
 ## Custom Colors
@@ -220,14 +263,6 @@ Supported properties:
     filter: blur(5px) brightness(0.8);
 }
 ```
-
-## Stickers
-Convert image nodes to stickers. Stickers have a transparent background and no border.
-
-<details>
-    <summary>Sticker Example</summary>
-    <img src="./assets/stickers.png" alt="Sticker Example"/>
-</details>
 
 ## Presentation Mode
 In presentation mode, you can navigate through the nodes using the arrow keys or the PageUp/PageDown keys (Compatible with most presentation remotes). The different slides/nodes are connected using arrows. If you want to have multiple arrows pointing from the same node, you can number them in the order you want to navigate through them. While in presentation mode, the canvas is in readonly mode (So [better readonly](#better-readonly) effects the presentation mode as well!). You can exit the presentation mode using the `ESC` key or the corresponding command. If you want to continue the presentation from the last slide you were on, you can use the `Advanced Canvas: Continue presentation` command.

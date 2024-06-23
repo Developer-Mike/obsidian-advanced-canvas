@@ -216,12 +216,30 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       'nodeStylingFeatureEnabled'
     )
 
+    new Setting(containerEl)
+      .setName("Custom node style settings")
+      .setDesc("Add custom style settings for nodes. (Go to GitHub for more information)")
+      .addButton((button) =>
+        button
+          .setButtonText("Open Tutorial")
+          .onClick(() => window.open("https://github.com/Developer-Mike/obsidian-advanced-canvas/blob/main/README.md#custom-styles"))
+      )
+
     this.createFeatureHeading(
       containerEl,
       "Edges styling",
       "Style your edges with different path styles.",
       'edgesStylingFeatureEnabled'
     )
+
+    new Setting(containerEl)
+      .setName("Custom edge style settings")
+      .setDesc("Add custom style settings for edges. (Go to GitHub for more information)")
+      .addButton((button) =>
+        button
+          .setButtonText("Open Tutorial")
+          .onClick(() => window.open("https://github.com/Developer-Mike/obsidian-advanced-canvas/blob/main/README.md#custom-styles"))
+      )
 
     new Setting(containerEl)
       .setName("A* grid resolution")
