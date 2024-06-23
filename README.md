@@ -110,43 +110,6 @@ If you want to support me and my work, consider starring ⭐ the repository, or,
 - `Advanced Canvas: Expand node up/down/left/right`
   - Expand the selected node in the direction of the arrow keys
 
-## Custom Styles
-Custom styles for nodes and edges can easily be added.
-
-1. Add a popup menu option
-   - Open the `<VAULT-PATH>/.obsidian/plugins/obsidian-advanced-canvas/data.json` file
-   - If you want to add an option to node popup menu, search for `customNodeStyleSettings` property, otherwise search for `customEdgeStyleSettings` property. (Create it if it doesn't exist yet)
-   - Add the custom popup menu option (Remove the comments!)
-   ```json
-    "customNodeStyleSettings": [
-        {
-            "datasetKey": "exampleStyleAttribute", // Must be unique and written in camelCase
-            "label": "Example Style Attribute",
-            "options": [
-                {
-                    "icon": "cloud-sun", // Choose an icon from lucide.dev
-                    "label": "Sunny Appearance",
-                    "value": null // Null means default
-                },
-                {
-                    "icon": "cloud-rain-wind", // Choose an icon from lucide.dev
-                    "label": "Rainy Appearance",
-                    "value": "rainy" // The value that gets set
-                }
-            ]   
-        }
-        // You can add more categories here
-    ]
-   ```
-2. Create a new CSS snippet in your vault (And enable it in the settings)
-    ```css	
-    .canvas-node[data-<DATASET-KEY>="rainy"] { /* The dataset key is now written in kebab-case */
-        background-color: #7f7f7f;
-    }
-    ```
-3. Reload Obsidian and enjoy your new custom style!
-    <br><img src="./assets/custom-style-attribute-example.png" alt="Custom Style Attribute Example"/>
-
 ## Node Styles
 ### Node Shapes
 <details>
@@ -230,6 +193,43 @@ Set the pathfinding method of the edges (arrows) to default, straight, squared o
     <summary>Path Styles Example</summary>
     <img src="./assets/edge-pathfinding-methods.png" alt="Edge Pathfinding Methods Example"/>
 </details>
+
+## Custom Styles
+Custom styles for nodes and edges can easily be added.
+
+1. Add a popup menu option
+   - Open the `<VAULT-PATH>/.obsidian/plugins/obsidian-advanced-canvas/data.json` file
+   - If you want to add an option to node popup menu, search for `customNodeStyleSettings` property, otherwise search for `customEdgeStyleSettings` property. (Create it if it doesn't exist yet)
+   - Add the custom popup menu option (Remove the comments!)
+   ```json
+    "customNodeStyleSettings": [
+        {
+            "datasetKey": "exampleStyleAttribute", // Must be unique and written in camelCase
+            "label": "Example Style Attribute",
+            "options": [
+                {
+                    "icon": "cloud-sun", // Choose an icon from lucide.dev
+                    "label": "Sunny Appearance",
+                    "value": null // Null means default
+                },
+                {
+                    "icon": "cloud-rain-wind", // Choose an icon from lucide.dev
+                    "label": "Rainy Appearance",
+                    "value": "rainy" // The value that gets set
+                }
+            ]   
+        }
+        // You can add more categories here
+    ]
+   ```
+2. Create a new CSS snippet in your vault (And enable it in the settings)
+    ```css	
+    .canvas-node[data-<DATASET-KEY>="rainy"] { /* The dataset key is now written in kebab-case */
+        background-color: #7f7f7f;
+    }
+    ```
+3. Reload Obsidian and enjoy your new custom style!
+    <br><img src="./assets/custom-style-attribute-example.png" alt="Custom Style Attribute Example"/>
 
 ## Custom Colors
 Add custom colors to the color picker. You can add them using the following css snippet:
