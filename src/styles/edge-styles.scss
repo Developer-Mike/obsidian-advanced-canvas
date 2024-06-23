@@ -1,14 +1,14 @@
 //#region Edge
-.canvas-edges {
-  [data-edge='dotted'] {
+.canvas-edges path {
+  &[data-edge='dotted'] {
     stroke-dasharray: calc(3px * var(--zoom-multiplier));
   }
 
-  [data-edge='short-dashed'] {
+  &[data-edge='short-dashed'] {
     stroke-dasharray: 9px;
   }
 
-  [data-edge='long-dashed'] {
+  &[data-edge='long-dashed'] {
     stroke-dasharray: 18px;
   }
 }
