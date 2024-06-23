@@ -153,6 +153,11 @@ export const DEFAULT_EDGE_STYLE_SETTINGS = [
         value: 'triangle-outline'
       },
       {
+        icon: 'arrow-triangle-halved',
+        label: 'Triangle Halved',
+        value: 'triangle-halved'
+      },
+      {
         icon: 'arrow-diamond',
         label: 'Diamond',
         value: 'diamond'

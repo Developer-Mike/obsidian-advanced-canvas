@@ -96,13 +96,24 @@ export default class EdgeStylesExtension extends CanvasExtension {
   }
 
   private onEdgeChanged(canvas: Canvas, edge: CanvasEdge) {
-    if (!edge.bezier) return
+    const edgeData = edge.getData()
     
     // Reset path to default
+    if (!edge.bezier) return
     edge.updatePath()
     edge.center = undefined
 
-    const pathRouteType = edge.getData().styleAttributes?.pathfindingMethod
+    // Set arrow style
+    const arrowStyle = edgeData.styleAttributes?.arrow
+    if (arrowStyle) {
+      const arrowPolygonPoints = this.getArrowPolygonPoints(arrowStyle)
+
+      if (edge.fromLineEnd?.el) edge.fromLineEnd.el.querySelector('polygon')?.setAttribute('points', arrowPolygonPoints)
+      if (edge.toLineEnd?.el) edge.toLineEnd.el.querySelector('polygon')?.setAttribute('points', arrowPolygonPoints)
+    }
+
+    // Set pathfinding method
+    const pathRouteType = edgeData.styleAttributes?.pathfindingMethod
     if (!pathRouteType) {
       // Update label position
       edge.labelElement?.render() 
@@ -183,6 +194,9 @@ export default class EdgeStylesExtension extends CanvasExtension {
     edge.path.interaction.setAttr("d", newPath)
     edge.path.display.setAttr("d", newPath)
 
+    // Update label position
+    edge.labelElement?.render()
+
     // Rotate arrows accordingly
     const edgeRotation = Math.atan2(edge.bezier.to.y - edge.bezier.from.y, edge.bezier.to.x - edge.bezier.from.x) - (Math.PI / 2)
     const setArrowRotation = (element: HTMLElement, side: Side, rotation: number) => {
@@ -200,12 +214,23 @@ export default class EdgeStylesExtension extends CanvasExtension {
       if (edge.fromLineEnd?.el) edge.fromLineEnd.el.style.translate = ""
       if (edge.toLineEnd?.el) edge.toLineEnd.el.style.translate = ""
     }
-
-    edge.labelElement?.render()
   }
 
   private onEdgeCenterRequested(_canvas: Canvas, edge: CanvasEdge, center: Position) {
     center.x = edge.center?.x ?? center.x
     center.y = edge.center?.y ?? center.y
+  }
+
+  private getArrowPolygonPoints(arrowStyle: string): string {
+    if (arrowStyle === 'triangle-halved') {
+      return `-2,0 7.5,12 -2,12`
+    }
+
+    if (arrowStyle === 'diamond' || arrowStyle === 'diamond-outline') {
+      return `0,0 5,10 0,20 -5,10`
+    }
+
+    // Fallback to triangle
+    return `0,0 6.5,10.4 -6.5,10.4`
   }
 }
