@@ -153,9 +153,14 @@ export const DEFAULT_EDGE_STYLE_SETTINGS = [
         value: 'triangle-outline'
       },
       {
-        icon: 'arrow-triangle-halved',
-        label: 'Triangle Halved',
-        value: 'triangle-halved'
+        icon: 'arrow-thin-triangle',
+        label: 'Thin Triangle',
+        value: 'thin-triangle'
+      },
+      {
+        icon: 'arrow-halved-triangle',
+        label: 'Halved Triangle',
+        value: 'halved-triangle'
       },
       {
         icon: 'arrow-diamond',
@@ -166,6 +171,16 @@ export const DEFAULT_EDGE_STYLE_SETTINGS = [
         icon: 'arrow-diamond-outline',
         label: 'Diamond Outline',
         value: 'diamond-outline'
+      },
+      {
+        icon: 'arrow-circle',
+        label: 'Circle',
+        value: 'circle'
+      },
+      {
+        icon: 'arrow-circle-outline',
+        label: 'Circle Outline',
+        value: 'circle-outline'
       }
     ]
   },

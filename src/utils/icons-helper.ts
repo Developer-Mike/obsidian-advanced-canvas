@@ -29,9 +29,12 @@ const CUSTOM_ICONS = {
 
   'arrow-triangle': `<path stroke="currentColor" fill="currentColor" d="M 15 10 L 85 50 L 15 90 Z"/>`,
   'arrow-triangle-outline': `<path stroke="currentColor" stroke-width="8.5" fill="none" d="M 15 10 L 85 50 L 15 90 Z"/>`,
-  'arrow-triangle-halved': `<path stroke="currentColor" fill="currentColor" d="M 15 50 L 85 50 L 15 90 Z"/>`,
+  'arrow-thin-triangle': `<path stroke="currentColor" stroke-width="8.5" fill="none" d="M 15 10 L 85 50 L 15 90"/>`,
+  'arrow-halved-triangle': `<path stroke="currentColor" fill="currentColor" d="M 15 50 L 85 50 L 15 90 Z"/>`,
   'arrow-diamond': `<path stroke="currentColor" fill="currentColor" d="M 50 0 L 100 50 L 50 100 L 0 50 Z"/>`,
   'arrow-diamond-outline': `<path stroke="currentColor" stroke-width="8.5" fill="none" d="M 50 0 L 100 50 L 50 100 L 0 50 Z"/>`,
+  'arrow-circle': `<circle stroke="currentColor" fill="currentColor" cx="50" cy="50" r="45"/>`,
+  'arrow-circle-outline': `<circle stroke="currentColor" stroke-width="8.5" fill="none" cx="50" cy="50" r="45"/>`,
 
   'pathfinding-method-bezier': `<path stroke="currentColor" fill="none" stroke-width="8.5" d="M37.5 79.1667h35.4167a14.5833 14.5833 90 000-29.1667h-45.8333a14.5833 14.5833 90 010-29.1667H62.5"/>`,
   'pathfinding-method-square': `<path stroke="currentColor" fill="none" stroke-width="8.5" d="M72.9167 79.1667 72.9167 50 27.0833 50 27.0833 20.8333"/>`,

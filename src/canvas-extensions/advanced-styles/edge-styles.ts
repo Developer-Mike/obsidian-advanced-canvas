@@ -114,85 +114,80 @@ export default class EdgeStylesExtension extends CanvasExtension {
 
     // Set pathfinding method
     const pathRouteType = edgeData.styleAttributes?.pathfindingMethod
-    if (!pathRouteType) {
-      // Update label position
-      edge.labelElement?.render() 
+    if (pathRouteType) {
+      const fromPos = edge.from.end === 'none' ? 
+        BBoxHelper.getCenterOfBBoxSide(edge.from.node.getBBox(), edge.from.side) :
+        edge.bezier.from
 
-      return
-    }
+      const toPos = edge.to.end === 'none' ? 
+        BBoxHelper.getCenterOfBBoxSide(edge.to.node.getBBox(), edge.to.side) :
+        edge.bezier.to
 
-    const fromPos = edge.from.end === 'none' ? 
-      BBoxHelper.getCenterOfBBoxSide(edge.from.node.getBBox(), edge.from.side) :
-      edge.bezier.from
-
-    const toPos = edge.to.end === 'none' ? 
-      BBoxHelper.getCenterOfBBoxSide(edge.to.node.getBBox(), edge.to.side) :
-      edge.bezier.to
-
-    let newPath = edge.path.display.getAttribute("d")
-  
-    if (pathRouteType === 'direct') {
-      newPath = SvgPathHelper.pathArrayToSvgPath([fromPos, toPos], false)
-      edge.center = {
-        x: (fromPos.x + toPos.x) / 2,
-        y: (fromPos.y + toPos.y) / 2
-      }
-    } else if (pathRouteType === 'square') {
-      let pathArray: Position[] = []
-      if (edge.from.side === 'bottom' || edge.from.side === 'top') {
-        pathArray = [
-          fromPos, 
-          { x: fromPos.x, y: fromPos.y + (toPos.y - fromPos.y) / 2 },
-          { x: toPos.x, y: fromPos.y + (toPos.y - fromPos.y) / 2 },
-          toPos
-        ]
-      } else {
-        pathArray = [
-          fromPos, 
-          { x: fromPos.x + (toPos.x - fromPos.x) / 2, y: fromPos.y },
-          { x: fromPos.x + (toPos.x - fromPos.x) / 2, y: toPos.y },
-          toPos
-        ]
-      }
-
-      newPath = SvgPathHelper.pathArrayToSvgPath(pathArray, false)
-      edge.center = { 
-        x: (fromPos.x + toPos.x) / 2, 
-        y: (fromPos.y + toPos.y) / 2 
-      }
-    } else if (pathRouteType === 'a-star') {
-      if (canvas.isDragging && !this.plugin.settings.getSetting('edgeStylePathfinderPathLiveUpdate')) return
-      
-      const nodeBBoxes = [...canvas.nodes.values()]
-        .filter(node => {
-          const nodeData = node.getData()
-          
-          const isGroup = nodeData.type === 'group' // Exclude group nodes
-          const isOpenPortal = nodeData.portalToFile !== undefined // Exclude open portals
-          
-          return !isGroup && !isOpenPortal
-        }).map(node => node.getBBox())
-      
-      const fromPosWithMargin = BBoxHelper.moveInDirection(fromPos, edge.from.side, 10)
-      const toPosWithMargin = BBoxHelper.moveInDirection(toPos, edge.to.side, 10)
-
-      const gridResolution = this.plugin.settings.getSetting('edgeStylePathfinderGridResolution')
-      const pathArray = AStarHelper.aStar(fromPosWithMargin, edge.from.side, toPosWithMargin, edge.to.side, nodeBBoxes, gridResolution)
-      if (!pathArray) return // No path found - use default path
-
-      // Make connection points to the node removing the margin
-      pathArray.splice(0, 0, fromPos)
-      pathArray.splice(pathArray.length, 0, toPos)
-
-      const roundedPath = this.plugin.settings.getSetting('edgeStylePathfinderPathRounded')
-      const svgPath = SvgPathHelper.pathArrayToSvgPath(pathArray, roundedPath)
-
-      newPath = svgPath
-      edge.center = pathArray[Math.floor(pathArray.length / 2)]
-    }
+      let newPath = edge.path.display.getAttribute("d")
     
-    edge.path.interaction.setAttr("d", newPath)
-    edge.path.display.setAttr("d", newPath)
+      if (pathRouteType === 'direct') {
+        newPath = SvgPathHelper.pathArrayToSvgPath([fromPos, toPos], false)
+        edge.center = {
+          x: (fromPos.x + toPos.x) / 2,
+          y: (fromPos.y + toPos.y) / 2
+        }
+      } else if (pathRouteType === 'square') {
+        let pathArray: Position[] = []
+        if (edge.from.side === 'bottom' || edge.from.side === 'top') {
+          pathArray = [
+            fromPos, 
+            { x: fromPos.x, y: fromPos.y + (toPos.y - fromPos.y) / 2 },
+            { x: toPos.x, y: fromPos.y + (toPos.y - fromPos.y) / 2 },
+            toPos
+          ]
+        } else {
+          pathArray = [
+            fromPos, 
+            { x: fromPos.x + (toPos.x - fromPos.x) / 2, y: fromPos.y },
+            { x: fromPos.x + (toPos.x - fromPos.x) / 2, y: toPos.y },
+            toPos
+          ]
+        }
+
+        newPath = SvgPathHelper.pathArrayToSvgPath(pathArray, false)
+        edge.center = { 
+          x: (fromPos.x + toPos.x) / 2, 
+          y: (fromPos.y + toPos.y) / 2 
+        }
+      } else if (pathRouteType === 'a-star') {
+        if (canvas.isDragging && !this.plugin.settings.getSetting('edgeStylePathfinderPathLiveUpdate')) return
+        
+        const nodeBBoxes = [...canvas.nodes.values()]
+          .filter(node => {
+            const nodeData = node.getData()
+            
+            const isGroup = nodeData.type === 'group' // Exclude group nodes
+            const isOpenPortal = nodeData.portalToFile !== undefined // Exclude open portals
+            
+            return !isGroup && !isOpenPortal
+          }).map(node => node.getBBox())
+        
+        const fromPosWithMargin = BBoxHelper.moveInDirection(fromPos, edge.from.side, 10)
+        const toPosWithMargin = BBoxHelper.moveInDirection(toPos, edge.to.side, 10)
+
+        const gridResolution = this.plugin.settings.getSetting('edgeStylePathfinderGridResolution')
+        const pathArray = AStarHelper.aStar(fromPosWithMargin, edge.from.side, toPosWithMargin, edge.to.side, nodeBBoxes, gridResolution)
+        if (!pathArray) return // No path found - use default path
+
+        // Make connection points to the node removing the margin
+        pathArray.splice(0, 0, fromPos)
+        pathArray.splice(pathArray.length, 0, toPos)
+
+        const roundedPath = this.plugin.settings.getSetting('edgeStylePathfinderPathRounded')
+        const svgPath = SvgPathHelper.pathArrayToSvgPath(pathArray, roundedPath)
+
+        newPath = svgPath
+        edge.center = pathArray[Math.floor(pathArray.length / 2)]
+      }
+      
+      edge.path.interaction.setAttr("d", newPath)
+      edge.path.display.setAttr("d", newPath)
+    }
 
     // Update label position
     edge.labelElement?.render()
@@ -222,15 +217,15 @@ export default class EdgeStylesExtension extends CanvasExtension {
   }
 
   private getArrowPolygonPoints(arrowStyle: string): string {
-    if (arrowStyle === 'triangle-halved') {
+    if (arrowStyle === 'halved-triangle')
       return `-2,0 7.5,12 -2,12`
-    }
-
-    if (arrowStyle === 'diamond' || arrowStyle === 'diamond-outline') {
+    else if (arrowStyle === 'thin-triangle')
+      return `0,0 7,10 0,0 0,10 0,0 -7,10`
+    else if (arrowStyle === 'diamond' || arrowStyle === 'diamond-outline')
       return `0,0 5,10 0,20 -5,10`
-    }
-
-    // Fallback to triangle
-    return `0,0 6.5,10.4 -6.5,10.4`
+    else if (arrowStyle === 'circle' || arrowStyle === 'circle-outline')
+      return `0 0, 4.95 1.8, 7.5 6.45, 6.6 11.7, 2.7 15, -2.7 15, -6.6 11.7, -7.5 6.45, -4.95 1.8`
+    else // Default triangle
+      return `0,0 6.5,10.4 -6.5,10.4`
   }
 }

@@ -48,14 +48,27 @@ All features can be enabled/disabled in the settings.
     - Dotted
     - Dashed
     - Invisible
+  - Text Alignment
+    - Left
+    - Center
+    - Right
 - [Edge Styles](#edge-styles)
-  - Edge styles
+  - Edge Styles
     - Dotted
     - Short-dashed
     - Long-dashed
-  - Path styles
+  - Arrow Styles
+    - Triangle Outline
+    - Halved Triangle
+    - Thin Triangle
+    - Diamond
+    - Diamond Outline
+    - Circle
+    - Circle Outline
+  - Path Styles
     - Default
     - Straight
+    - Square
     - A*
 - [Custom colors](#custom-colors) in the color picker
 - [Properties Support](#properties-support)
