@@ -1,6 +1,6 @@
 import { Notice, PluginSettingTab, Setting } from "obsidian"
 import AdvancedCanvasPlugin from "./main"
-import { DEFAULT_EDGE_STYLE_SETTINGS, DEFAULT_NODE_STYLE_SETTINGS, StylableAttribute } from "./canvas-extensions/advanced-styles/style-config"
+import { DEFAULT_EDGE_STYLE_SETTINGS as BUILTIN_EDGE_STYLE_SETTINGS, DEFAULT_NODE_STYLE_SETTINGS as BUILTIN_NODE_STYLE_SETTINGS, StylableAttribute } from "./canvas-extensions/advanced-styles/style-config"
 
 const NODE_TYPES_ON_DOUBLE_CLICK = {
   'text': 'Text',
@@ -18,9 +18,11 @@ export interface AdvancedCanvasPluginSettings {
 
   nodeStylingFeatureEnabled: boolean
   customNodeStyleSettings: StylableAttribute[]
+  defaultNodeStyleSettings: { [key: string]: string }
 
   edgesStylingFeatureEnabled: boolean
   customEdgeStyleSettings: StylableAttribute[]
+  defaultEdgeStyleSettings: { [key: string]: string }
   edgeStyleDirectRotateArrow: boolean
   edgeStylePathfinderGridResolution: number
   edgeStylePathfinderPathLiveUpdate: boolean
@@ -67,9 +69,11 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
 
   nodeStylingFeatureEnabled: true,
   customNodeStyleSettings: [],
+  defaultNodeStyleSettings: {},
 
   edgesStylingFeatureEnabled: true,
   customEdgeStyleSettings: [],
+  defaultEdgeStyleSettings: {},
   edgeStyleDirectRotateArrow: false,
   edgeStylePathfinderGridResolution: 10,
   edgeStylePathfinderPathLiveUpdate: true,
@@ -227,6 +231,8 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           .onClick(() => window.open("https://github.com/Developer-Mike/obsidian-advanced-canvas/blob/main/README.md#custom-styles"))
       )
 
+    this.createDefaultStylesSection(containerEl, 'Default node styles', 'defaultNodeStyleSettings', [ ...BUILTIN_NODE_STYLE_SETTINGS, ...this.settingsManager.getSetting('customNodeStyleSettings') ])
+
     this.createFeatureHeading(
       containerEl,
       "Edges styling",
@@ -242,6 +248,8 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           .setButtonText("Open Tutorial")
           .onClick(() => window.open("https://github.com/Developer-Mike/obsidian-advanced-canvas/blob/main/README.md#custom-styles"))
       )
+
+    this.createDefaultStylesSection(containerEl, 'Default edge styles', 'defaultEdgeStyleSettings', [ ...BUILTIN_EDGE_STYLE_SETTINGS, ...this.settingsManager.getSetting('customEdgeStyleSettings') ])
 
     new Setting(containerEl)
       .setName("Rotate arrow if pathfinding method is \"Direct\"")
@@ -474,5 +482,36 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
             new Notice("Reload obsidian to apply the changes.")
           })
       )
+  }
+
+  private createDefaultStylesSection(containerEl: HTMLElement, label: string, settingsKey: keyof AdvancedCanvasPluginSettings, allStylableAttributes: StylableAttribute[]) {
+    const defaultNodeStylesEl = document.createElement('details')
+    defaultNodeStylesEl.classList.add('setting-item')
+
+    const defaultNodeStylesSummaryEl = document.createElement('summary')
+    defaultNodeStylesSummaryEl.textContent = label
+    defaultNodeStylesEl.appendChild(defaultNodeStylesSummaryEl)
+
+    for (const stylableAttribute of allStylableAttributes) {
+      new Setting(defaultNodeStylesEl)
+        .setName(stylableAttribute.label)
+        .addDropdown((dropdown) =>
+          dropdown
+            .addOptions(Object.fromEntries(stylableAttribute.options.map((option) => [option.value, option.label])))
+            .setValue((this.settingsManager.getSetting(settingsKey) as { [key: string]: string })[stylableAttribute.datasetKey] ?? 'null')
+            .onChange(async (value) => {
+              const newValue = this.settingsManager.getSetting(settingsKey) as { [key: string]: string }
+
+              if (value === 'null') delete newValue[stylableAttribute.datasetKey]
+              else newValue[stylableAttribute.datasetKey] = value
+
+              await this.settingsManager.setSetting({
+                [settingsKey]: newValue
+              })
+            })
+        )
+    }
+
+    containerEl.appendChild(defaultNodeStylesEl)
   }
 }

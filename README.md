@@ -351,6 +351,12 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
   - `advanced-canvas:dragging-state-changed`
     - Fired when the dragging state of the canvas changes
     - Payload: `Canvas`, `boolean`
+  - `advanced-canvas:node-created`
+    - Fired when a new node gets created
+    - Payload: `Canvas`, `Node`
+  - `advanced-canvas:edge-created`
+    - Fired when a new edge gets created
+    - Payload: `Canvas`, `Edge`
   - `advanced-canvas:node-added`
     - Fired when a new node gets added
     - Payload: `Canvas`, `Node`
