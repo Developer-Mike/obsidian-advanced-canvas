@@ -32,7 +32,7 @@ OR
 ## Features
 All features can be enabled/disabled in the settings.
 
-- Create groups independently of the nodes (Updated card menu)
+- Create groups independently of the nodes
 - More [canvas commands](#canvas-commands)
 - [Node Styles](#node-styles)
   - (Flowchart) [Node Shapes](#node-shapes)
@@ -53,7 +53,7 @@ All features can be enabled/disabled in the settings.
     - Center
     - Right
 - [Edge Styles](#edge-styles)
-  - Edge Styles
+  - [Path Styles](#path-styles)
     - Dotted
     - Short-dashed
     - Long-dashed
@@ -170,12 +170,12 @@ Set the style of the border to dotted, dashed or invisible.
 </details>
 
 ## Edge Styles
-### Edge Styles
-Set the style of the edges (arrows) to dotted, short-dashed or long-dashed.
+### Path Styles
+Set the style of the edge paths to dotted, short-dashed or long-dashed.
 
 <details>
     <summary>Edge Styles Example</summary>
-    <img src="./assets/edge-styles.png" alt="Edge Styles Example"/>
+    <img src="./assets/edge-path-styles.png" alt="Edge Path Styles Example"/>
 </details>
 
 ### Arrow Styles

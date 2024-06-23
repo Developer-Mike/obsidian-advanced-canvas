@@ -2,7 +2,7 @@ import App, { Modal, Setting } from "obsidian"
 import { Canvas } from "src/@types/Canvas"
 import { CanvasEvent } from "src/core/events"
 import * as CanvasHelper from "src/utils/canvas-helper"
-import CanvasExtension from "./canvas-extension"
+import CanvasExtension from "../core/canvas-extension"
 
 export default class PropertiesCanvasExtension extends CanvasExtension {
   isEnabled() { return true }

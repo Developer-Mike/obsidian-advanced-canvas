@@ -1,7 +1,7 @@
 import { Canvas } from "src/@types/Canvas"
 import { CanvasEvent } from "src/core/events"
 import SettingsManager, { AdvancedCanvasPluginSettings } from "src/settings"
-import CanvasExtension from "../canvas-extension"
+import CanvasExtension from "../../core/canvas-extension"
 
 const EXPOSED_SETTINGS: (keyof AdvancedCanvasPluginSettings)[] = [
   'performanceOptimizationEnabled',

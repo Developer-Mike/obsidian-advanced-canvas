@@ -2,7 +2,7 @@ import { Canvas } from "src/@types/Canvas"
 import * as CanvasHelper from "src/utils/canvas-helper"
 import { CanvasEvent } from "src/core/events"
 import { AdvancedCanvasPluginSettings } from "src/settings"
-import CanvasExtension from "./canvas-extension"
+import CanvasExtension from "../core/canvas-extension"
 
 export default class BetterReadonlyCanvasExtension extends CanvasExtension {
   isEnabled() { return 'betterReadonlyEnabled' as const }

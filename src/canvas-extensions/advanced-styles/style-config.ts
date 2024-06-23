@@ -113,26 +113,26 @@ export const DEFAULT_NODE_STYLE_SETTINGS = [
 
 export const DEFAULT_EDGE_STYLE_SETTINGS = [
   {
-    datasetKey: 'edge',
-    label: 'Edge Style',
+    datasetKey: 'path',
+    label: 'Path Style',
     options: [
       {
-        icon: 'edge-solid',
+        icon: 'path-solid',
         label: 'Solid (default)',
         value: null
       },
       {
-        icon: 'edge-dotted',
+        icon: 'path-dotted',
         label: 'Dotted',
         value: 'dotted'
       },
       {
-        icon: 'edge-short-dashed',
+        icon: 'path-short-dashed',
         label: 'Short Dashed',
         value: 'short-dashed'
       },
       {
-        icon: 'edge-long-dashed',
+        icon: 'path-long-dashed',
         label: 'Long Dashed',
         value: 'long-dashed'
       }

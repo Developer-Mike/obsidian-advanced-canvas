@@ -38,7 +38,7 @@
 }
 
 details.setting-item {
-  & > summary {
+  &[open] > summary {
     margin-bottom: 0.75em;
   }
 

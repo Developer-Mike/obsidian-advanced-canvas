@@ -1,7 +1,7 @@
 import { Canvas } from "src/@types/Canvas"
 import * as CanvasHelper from "src/utils/canvas-helper"
 import { CanvasEvent } from "src/core/events"
-import CanvasExtension from "../canvas-extension"
+import CanvasExtension from "../../core/canvas-extension"
 import { DEFAULT_NODE_STYLE_SETTINGS, StylableAttribute } from "./style-config"
 import SettingsManager from "src/settings"
 

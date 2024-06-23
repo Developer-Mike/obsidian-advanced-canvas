@@ -11,7 +11,7 @@ import SettingsManager from './settings'
 import WindowsManager from './windows-manager'
 
 // Canvas Extensions
-import CanvasExtension from './canvas-extensions/canvas-extension'
+import CanvasExtension from './core/canvas-extension'
 import GroupCanvasExtension from './canvas-extensions/group-canvas-extension'
 import PresentationCanvasExtension from './canvas-extensions/presentation-canvas-extension'
 import BetterReadonlyCanvasExtension from './canvas-extensions/better-readonly-canvas-extension'

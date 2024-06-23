@@ -3,7 +3,7 @@ import { BBox, Canvas, CanvasEdge, CanvasElement, CanvasNode, Position, Size } f
 import { CanvasEvent } from 'src/core/events'
 import * as CanvasHelper from "src/utils/canvas-helper"
 import * as BBoxHelper from "src/utils/bbox-helper"
-import CanvasExtension from './canvas-extension'
+import CanvasExtension from '../core/canvas-extension'
 
 const START_SLIDE_NAME = 'Start Slide'
 const DEFAULT_SLIDE_NAME = 'New Slide'
