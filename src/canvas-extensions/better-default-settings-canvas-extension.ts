@@ -79,12 +79,13 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
 
   private applyDefaultNodeStyles(_canvas: Canvas, node: CanvasNode) {
     const nodeData = node.getData()
+    if (nodeData.type !== 'text') return
 
     node.setData({
       ...nodeData,
       styleAttributes: {
         ...nodeData.styleAttributes,
-        ...this.plugin.settings.getSetting('defaultNodeStyleSettings')
+        ...this.plugin.settings.getSetting('defaultTextNodeStyleAttributes')
       }
     })
   }
@@ -96,7 +97,7 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
       ...edgeData,
       styleAttributes: {
         ...edgeData.styleAttributes,
-        ...this.plugin.settings.getSetting('defaultEdgeStyleSettings')
+        ...this.plugin.settings.getSetting('defaultEdgeStyleAttributes')
       }
     })
   }

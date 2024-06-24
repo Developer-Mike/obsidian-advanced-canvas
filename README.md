@@ -195,14 +195,14 @@ Set the pathfinding method of the edges (arrows) to default, straight, squared o
 </details>
 
 ## Custom Styles
-Custom styles for nodes and edges can easily be added.
+Custom style attributes for nodes and edges can easily be added.
 
 1. Add a popup menu option
    - Open the `<VAULT-PATH>/.obsidian/plugins/obsidian-advanced-canvas/data.json` file
-   - If you want to add an option to node popup menu, search for `customNodeStyleSettings` property, otherwise search for `customEdgeStyleSettings` property. (Create it if it doesn't exist yet)
+   - If you want to add an option to node popup menu, search for `customNodeStyleAttributes` property, otherwise search for `customEdgeStyleAttributes` property. (Create it if it doesn't exist yet)
    - Add the custom popup menu option (Remove the comments!)
    ```json
-    "customNodeStyleSettings": [
+    "customNodeStyleAttributes": [
         {
             "datasetKey": "exampleStyleAttribute", // Must be unique and written in camelCase
             "label": "Example Style Attribute",

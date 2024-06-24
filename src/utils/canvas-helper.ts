@@ -1,6 +1,6 @@
 import { addIcon, setIcon, setTooltip } from "obsidian"
 import { BBox, Canvas, CanvasNode, CanvasNodeData, Position, Size } from "src/@types/Canvas"
-import { StylableAttribute } from "src/canvas-extensions/advanced-styles/style-config"
+import { StyleAttribute } from "src/canvas-extensions/advanced-styles/style-config"
 import AdvancedCanvasPlugin from "src/main"
 import * as BBoxHelper from "src/utils/bbox-helper"
 
@@ -160,7 +160,7 @@ export function zoomToBBox(canvas: Canvas, bbox: BBox) {
   canvas.tZoom = Math.log2(scaleFactor)
 }
 
-export function createStyleDropdownMenu(canvas: Canvas, stylableAttributes: StylableAttribute[], currentStyleAttributes: { [key: string]: string | null }, setStyleAttribute: (attribute: StylableAttribute, value: string | null) => void) {
+export function createStyleDropdownMenu(canvas: Canvas, stylableAttributes: StyleAttribute[], currentStyleAttributes: { [key: string]: string | null }, setStyleAttribute: (attribute: StyleAttribute, value: string | null) => void) {
   const STYLE_MENU_ID = 'style-menu'
   const STYLE_MENU_DROPDOWN_ID = 'style-menu-dropdown'
   const STYLE_MENU_DROPDOWN_SUBMENU_ID = 'style-menu-dropdown-submenu'

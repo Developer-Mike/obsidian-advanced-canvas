@@ -5,19 +5,19 @@ import * as SvgPathHelper from "src/utils/svg-path-helper"
 import { CanvasEvent } from "src/core/events"
 import * as BBoxHelper from "src/utils/bbox-helper"
 import CanvasExtension from "../../core/canvas-extension"
-import { DEFAULT_EDGE_STYLE_SETTINGS, StylableAttribute } from "./style-config"
+import { BUILTIN_EDGE_STYLE_ATTRIBUTES, StyleAttribute } from "./style-config"
 import SettingsManager from "src/settings"
 
 export default class EdgeStylesExtension extends CanvasExtension {
-  allEdgeStyles: StylableAttribute[]
+  allEdgeStyleAttributes: StyleAttribute[]
 
   isEnabled() { return 'edgesStylingFeatureEnabled' as const }
 
   init() {
-    this.allEdgeStyles = [...DEFAULT_EDGE_STYLE_SETTINGS, ...this.plugin.settings.getSetting('customEdgeStyleSettings')]
+    this.allEdgeStyleAttributes = [...BUILTIN_EDGE_STYLE_ATTRIBUTES, ...this.plugin.settings.getSetting('customEdgeStyleAttributes')]
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       SettingsManager.SETTINGS_CHANGED_EVENT,
-      () => this.allEdgeStyles = [...DEFAULT_EDGE_STYLE_SETTINGS, ...this.plugin.settings.getSetting('customEdgeStyleSettings')]
+      () => this.allEdgeStyleAttributes = [...BUILTIN_EDGE_STYLE_ATTRIBUTES, ...this.plugin.settings.getSetting('customEdgeStyleAttributes')]
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
@@ -65,13 +65,13 @@ export default class EdgeStylesExtension extends CanvasExtension {
       return
 
     CanvasHelper.createStyleDropdownMenu(
-      canvas, this.allEdgeStyles,
+      canvas, this.allEdgeStyleAttributes,
       selectedEdges[0].getData().styleAttributes ?? {},
       (attribute, value) => this.setStyleAttributeForSelection(canvas, attribute, value)
     )
   }
 
-  private setStyleAttributeForSelection(canvas: Canvas, attribute: StylableAttribute, value: string | null): void {
+  private setStyleAttributeForSelection(canvas: Canvas, attribute: StyleAttribute, value: string | null): void {
     const selectedEdges = [...canvas.selection].filter((item: any) => item.path !== undefined) as CanvasEdge[]
 
     for (const edge of selectedEdges) {

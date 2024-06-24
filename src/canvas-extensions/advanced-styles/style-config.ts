@@ -1,19 +1,19 @@
 import { CanvasNodeType } from "src/@types/Canvas"
 
-export interface StylableAttributeOption {
+export interface StyleAttributeOption {
   icon: string
   label: string
   value: string | null // The element with the null value is the default
 }
 
-export interface StylableAttribute {
+export interface StyleAttribute {
   datasetKey: string
   label: string
   nodeTypes?: CanvasNodeType[]
-  options: StylableAttributeOption[]
+  options: StyleAttributeOption[]
 }
 
-export const DEFAULT_NODE_STYLE_SETTINGS = [
+export const BUILTIN_NODE_STYLE_ATTRIBUTES = [
   {
     datasetKey: 'textAlign',
     label: 'Text Alignment',
@@ -109,9 +109,9 @@ export const DEFAULT_NODE_STYLE_SETTINGS = [
       }
     ]
   }
-] as StylableAttribute[]
+] as StyleAttribute[]
 
-export const DEFAULT_EDGE_STYLE_SETTINGS = [
+export const BUILTIN_EDGE_STYLE_ATTRIBUTES = [
   {
     datasetKey: 'path',
     label: 'Path Style',
@@ -210,4 +210,4 @@ export const DEFAULT_EDGE_STYLE_SETTINGS = [
       }
     ]
   }
-] as StylableAttribute[]
+] as StyleAttribute[]

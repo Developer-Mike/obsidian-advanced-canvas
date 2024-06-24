@@ -2,19 +2,19 @@ import { Canvas } from "src/@types/Canvas"
 import * as CanvasHelper from "src/utils/canvas-helper"
 import { CanvasEvent } from "src/core/events"
 import CanvasExtension from "../../core/canvas-extension"
-import { DEFAULT_NODE_STYLE_SETTINGS, StylableAttribute } from "./style-config"
+import { BUILTIN_NODE_STYLE_ATTRIBUTES, StyleAttribute } from "./style-config"
 import SettingsManager from "src/settings"
 
 export default class NodeStylesExtension extends CanvasExtension {
-  allNodeStyles: StylableAttribute[]
+  allNodeStyles: StyleAttribute[]
 
   isEnabled() { return 'nodeStylingFeatureEnabled' as const }
 
   init() {
-    this.allNodeStyles = [...DEFAULT_NODE_STYLE_SETTINGS, ...this.plugin.settings.getSetting('customNodeStyleSettings')]
+    this.allNodeStyles = [...BUILTIN_NODE_STYLE_ATTRIBUTES, ...this.plugin.settings.getSetting('customNodeStyleAttributes')]
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       SettingsManager.SETTINGS_CHANGED_EVENT,
-      () => this.allNodeStyles = [...DEFAULT_NODE_STYLE_SETTINGS, ...this.plugin.settings.getSetting('customNodeStyleSettings')]
+      () => this.allNodeStyles = [...BUILTIN_NODE_STYLE_ATTRIBUTES, ...this.plugin.settings.getSetting('customNodeStyleAttributes')]
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
@@ -38,7 +38,7 @@ export default class NodeStylesExtension extends CanvasExtension {
     )
   }
 
-  private setStyleAttributeForSelection(canvas: Canvas, attribute: StylableAttribute, value: string | null): void {
+  private setStyleAttributeForSelection(canvas: Canvas, attribute: StyleAttribute, value: string | null): void {
     const selectionNodeData = canvas.getSelectionData().nodes
     for (const nodeData of selectionNodeData) {
       const node = canvas.nodes.get(nodeData.id)

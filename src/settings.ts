@@ -1,6 +1,6 @@
 import { Notice, PluginSettingTab, Setting } from "obsidian"
 import AdvancedCanvasPlugin from "./main"
-import { DEFAULT_EDGE_STYLE_SETTINGS as BUILTIN_EDGE_STYLE_SETTINGS, DEFAULT_NODE_STYLE_SETTINGS as BUILTIN_NODE_STYLE_SETTINGS, StylableAttribute } from "./canvas-extensions/advanced-styles/style-config"
+import { BUILTIN_EDGE_STYLE_ATTRIBUTES, BUILTIN_NODE_STYLE_ATTRIBUTES, StyleAttribute } from "./canvas-extensions/advanced-styles/style-config"
 
 const NODE_TYPES_ON_DOUBLE_CLICK = {
   'text': 'Text',
@@ -17,12 +17,12 @@ export interface AdvancedCanvasPluginSettings {
   performanceOptimizationEnabled: boolean
 
   nodeStylingFeatureEnabled: boolean
-  customNodeStyleSettings: StylableAttribute[]
-  defaultNodeStyleSettings: { [key: string]: string }
+  customNodeStyleAttributes: StyleAttribute[]
+  defaultTextNodeStyleAttributes: { [key: string]: string }
 
   edgesStylingFeatureEnabled: boolean
-  customEdgeStyleSettings: StylableAttribute[]
-  defaultEdgeStyleSettings: { [key: string]: string }
+  customEdgeStyleAttributes: StyleAttribute[]
+  defaultEdgeStyleAttributes: { [key: string]: string }
   edgeStyleDirectRotateArrow: boolean
   edgeStylePathfinderGridResolution: number
   edgeStylePathfinderPathLiveUpdate: boolean
@@ -68,12 +68,12 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   performanceOptimizationEnabled: false,
 
   nodeStylingFeatureEnabled: true,
-  customNodeStyleSettings: [],
-  defaultNodeStyleSettings: {},
+  customNodeStyleAttributes: [],
+  defaultTextNodeStyleAttributes: {},
 
   edgesStylingFeatureEnabled: true,
-  customEdgeStyleSettings: [],
-  defaultEdgeStyleSettings: {},
+  customEdgeStyleAttributes: [],
+  defaultEdgeStyleAttributes: {},
   edgeStyleDirectRotateArrow: false,
   edgeStylePathfinderGridResolution: 10,
   edgeStylePathfinderPathLiveUpdate: true,
@@ -231,7 +231,9 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           .onClick(() => window.open("https://github.com/Developer-Mike/obsidian-advanced-canvas/blob/main/README.md#custom-styles"))
       )
 
-    this.createDefaultStylesSection(containerEl, 'Default node styles', 'defaultNodeStyleSettings', [ ...BUILTIN_NODE_STYLE_SETTINGS, ...this.settingsManager.getSetting('customNodeStyleSettings') ])
+    const allNodeStyleAttributes = [ ...BUILTIN_NODE_STYLE_ATTRIBUTES, ...this.settingsManager.getSetting('customNodeStyleAttributes') ]
+      .filter((setting) => setting.nodeTypes === undefined || setting.nodeTypes?.includes('text'))
+    this.createDefaultStylesSection(containerEl, 'Default text node style attributes', 'defaultTextNodeStyleAttributes', allNodeStyleAttributes)
 
     this.createFeatureHeading(
       containerEl,
@@ -249,7 +251,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           .onClick(() => window.open("https://github.com/Developer-Mike/obsidian-advanced-canvas/blob/main/README.md#custom-styles"))
       )
 
-    this.createDefaultStylesSection(containerEl, 'Default edge styles', 'defaultEdgeStyleSettings', [ ...BUILTIN_EDGE_STYLE_SETTINGS, ...this.settingsManager.getSetting('customEdgeStyleSettings') ])
+    this.createDefaultStylesSection(containerEl, 'Default edge style attributes', 'defaultEdgeStyleAttributes', [ ...BUILTIN_EDGE_STYLE_ATTRIBUTES, ...this.settingsManager.getSetting('customEdgeStyleAttributes') ])
 
     new Setting(containerEl)
       .setName("Rotate arrow if pathfinding method is \"Direct\"")
@@ -484,7 +486,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       )
   }
 
-  private createDefaultStylesSection(containerEl: HTMLElement, label: string, settingsKey: keyof AdvancedCanvasPluginSettings, allStylableAttributes: StylableAttribute[]) {
+  private createDefaultStylesSection(containerEl: HTMLElement, label: string, settingsKey: keyof AdvancedCanvasPluginSettings, allStylableAttributes: StyleAttribute[]) {
     const defaultNodeStylesEl = document.createElement('details')
     defaultNodeStylesEl.classList.add('setting-item')
 
