@@ -18,16 +18,22 @@
 </p>
 
 ## Installation
-Recommended:
-- Open the Community Plugins tab in the settings and search for "Advanced Canvas"
+Open the Community Plugins tab in the settings and search for "Advanced Canvas" (or click [here](https://obsidian.md/plugins?id=advanced-canvas)).
 
-OR
-- Install it using [BRAT](https://github.com/TfTHacker/obsidian42-brat)
-
-OR
-- Create a folder named `advanced-canvas` in your vault's plugins folder (`<vault>/.obsidian/plugins/`).
-- Download `main.js`, `styles.css` and `manifest.json` from the latest release and put them in the `advanced-canvas` folder.
-- Enable the plugin in Settings -> Community plugins -> Installed plugins
+<details>
+    <summary>Other installation methods</summary>
+    <br/>
+    <ul>
+        <li>Install it using <a href="https://github.com/TfTHacker/obsidian42-brat">BRAT</a></li>
+        <li>Manual folder creation
+            <ol>
+                <li>Create a folder named <code>obsidian-advanced-canvas</code> in your vault's plugins folder (<code>&lt;vault&gt;/.obsidian/plugins/</code>).</li>
+                <li>Download <code>main.js</code>, <code>styles.css</code> and <code>manifest.json</code> from the latest release and put them in the <code>obsidian-advanced-canvas</code> folder.</li>
+                <li>Enable the plugin in Settings -> Community plugins -> Installed plugins</li>
+            </ol>
+        </li>
+    </ul>
+</details>
 
 ## Features
 All features can be enabled/disabled in the settings.
@@ -91,9 +97,10 @@ All features can be enabled/disabled in the settings.
 - Expose node data to style them using CSS
 
 ## Support
-If you want to support me and my work, consider starring ⭐ the repository, or, if you want to support me financially, you can donate any amount on [Ko-fi](https://ko-fi.com/X8X27IA08) ❤️
+Please consider supporting the plugin. There are many hours of work and effort behind it. The two easiest ways to support the plugin are either by starring ⭐ the repository or by donating any amount on [Ko-fi](https://ko-fi.com/X8X27IA08) ❤️. Thank you!
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/X8X27IA08)
+<img src="https://img.shields.io/endpoint?url=https://wakapi.dev/api/compat/shields/v1/Developer-Mike/interval:all_time/project:obsidian-advanced-canvas&label=Time%20Spent&style=for-the-badge&colorA=ffffff&colorB=ff5e5b" alt="Time Spent">
 
 ## Canvas Commands
 - `Advanced Canvas: Create text node`
