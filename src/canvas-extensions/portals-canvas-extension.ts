@@ -1,20 +1,16 @@
 import { TFile } from "obsidian"
 import { BBox, Canvas, CanvasData, CanvasEdge, CanvasElement, CanvasNode, CanvasNodeData } from "src/@types/Canvas"
 import { CanvasEvent } from "src/core/events"
-import AdvancedCanvasPlugin from "src/main"
 import * as CanvasHelper from "src/utils/canvas-helper"
+import CanvasExtension from "../core/canvas-extension"
 
 const PORTAL_PADDING = 50
 const MIN_OPEN_PORTAL_SIZE = { width: 200, height: 200 }
 
-export default class PortalsCanvasExtension {
-  plugin: AdvancedCanvasPlugin
+export default class PortalsCanvasExtension extends CanvasExtension {
+  isEnabled() { return 'portalsFeatureEnabled' as const }
 
-  constructor(plugin: AdvancedCanvasPlugin) {
-    this.plugin = plugin
-
-    if (!this.plugin.settings.getSetting('portalsFeatureEnabled')) return
-
+  init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.PopupMenuCreated,
       (canvas: Canvas) => this.updatePopupMenu(canvas)

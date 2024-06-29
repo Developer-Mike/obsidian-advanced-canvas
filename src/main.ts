@@ -1,57 +1,79 @@
 import { ItemView, Plugin } from 'obsidian'
-import SettingsManager from './settings'
-import NodeStylesCanvasExtension from './canvas-extensions/node-styles-canvas-extension'
-import { Canvas, CanvasView } from './@types/Canvas'
 import CanvasPatcher from './core/canvas-patcher'
+import { Canvas, CanvasView } from './@types/Canvas'
+
+// Utils
+import IconsHelper from './utils/icons-helper'
+import DebugHelper from './utils/debug-helper'
+
+// Managers
+import SettingsManager from './settings'
+import WindowsManager from './windows-manager'
+
+// Canvas Extensions
+import CanvasExtension from './core/canvas-extension'
 import GroupCanvasExtension from './canvas-extensions/group-canvas-extension'
 import PresentationCanvasExtension from './canvas-extensions/presentation-canvas-extension'
-import InteractionTaggerCanvasExtension from './canvas-extensions/interaction-tagger-canvas-extension'
-import NodeDataTaggerCanvasExtension from './canvas-extensions/node-data-tagger-canvas-extension'
-import ReadonlyCanvasExtension from './canvas-extensions/readonly-canvas-extension'
+import BetterReadonlyCanvasExtension from './canvas-extensions/better-readonly-canvas-extension'
 import EncapsulateCanvasExtension from './canvas-extensions/encapsulate-canvas-extension'
 import CommandsCanvasExtension from './canvas-extensions/commands-canvas-extension'
 import PortalsCanvasExtension from './canvas-extensions/portals-canvas-extension'
-import IconsHelper from './utils/icons-helper'
-import StickersCanvasExtension from './canvas-extensions/stickers-canvas-extension'
-import EdgeStylesCanvasExtension from './canvas-extensions/edge-styles-canvas-extension'
-import EdgeDataTaggerCanvasExtension from './canvas-extensions/edge-data-tagger-canvas-extension'
-import DebugHelper from './utils/debug-helper'
 import BetterDefaultSettingsCanvasExtension from './canvas-extensions/better-default-settings-canvas-extension'
 import ColorPaletteCanvasExtension from './canvas-extensions/color-palette-canvas-extension'
 import CollapsibleGroupsCanvasExtension from './canvas-extensions/collapsible-groups-canvas-extension'
-import WindowsManager from './windows-manager'
-import CanvasWrapperDataTaggerCanvasExtension from './canvas-extensions/canvas-wrapper-data-tagger-canvas-extension'
 import PropertiesCanvasExtension from './canvas-extensions/properties-canvas-extension'
 
-const CANVAS_EXTENSIONS: any[] = [
-  CanvasWrapperDataTaggerCanvasExtension,
-  NodeDataTaggerCanvasExtension,
-  EdgeDataTaggerCanvasExtension,
-  InteractionTaggerCanvasExtension,
+// Advanced Styles
+import NodeStylesExtension from './canvas-extensions/advanced-styles/node-styles'
+import EdgeStylesExtension from './canvas-extensions/advanced-styles/edge-styles'
+
+// Dataset Exposers
+import NodeInteractionExposerExtension from './canvas-extensions/dataset-exposers/node-interaction-exposer'
+import NodeExposerExtension from './canvas-extensions/dataset-exposers/node-exposer'
+import EdgeExposerExtension from './canvas-extensions/dataset-exposers/edge-exposer'
+import CanvasWrapperExposerExtension from './canvas-extensions/dataset-exposers/canvas-wrapper-exposer'
+import MigrationHelper from './utils/migration-helper'
+
+const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
+  // Dataset Exposers
+  CanvasWrapperExposerExtension,
+  NodeExposerExtension,
+  EdgeExposerExtension,
+  NodeInteractionExposerExtension,
+
+  // Advanced Styles
+  NodeStylesExtension,
+  EdgeStylesExtension,
+
+  // Basic Extensions
   BetterDefaultSettingsCanvasExtension,
   CommandsCanvasExtension,
   PropertiesCanvasExtension,
-  ReadonlyCanvasExtension,
+  BetterReadonlyCanvasExtension,
   GroupCanvasExtension,
+
+  // More Advanced Extensions
   CollapsibleGroupsCanvasExtension,
   EncapsulateCanvasExtension,
   ColorPaletteCanvasExtension,
-  StickersCanvasExtension,
-  NodeStylesCanvasExtension,
-  EdgeStylesCanvasExtension,
   PresentationCanvasExtension,
   PortalsCanvasExtension
 ]
 
 export default class AdvancedCanvasPlugin extends Plugin {
-  settings: SettingsManager
-  windowsManager: WindowsManager
+  migrationHelper: MigrationHelper
   debugHelper: DebugHelper
 
-  canvasEventEmitter: CanvasPatcher
-  canvasExtensions: any[]
+  settings: SettingsManager
+  windowsManager: WindowsManager
+
+  canvasPatcher: CanvasPatcher
+  canvasExtensions: CanvasExtension[]
 
 	async onload() {
+    this.migrationHelper = new MigrationHelper(this)
+    await this.migrationHelper.migrate()
+
     IconsHelper.addIcons()
     
     this.settings = new SettingsManager(this)
@@ -60,8 +82,8 @@ export default class AdvancedCanvasPlugin extends Plugin {
 
     this.windowsManager = new WindowsManager(this)
 
-    this.canvasEventEmitter = new CanvasPatcher(this)
-    this.canvasExtensions = CANVAS_EXTENSIONS.map((Extension) => new Extension(this))
+    this.canvasPatcher = new CanvasPatcher(this)
+    this.canvasExtensions = CANVAS_EXTENSIONS.map((Extension: any) => new Extension(this))
 	}
 
   onunload() {}

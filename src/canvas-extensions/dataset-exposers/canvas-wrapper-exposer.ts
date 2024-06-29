@@ -1,7 +1,7 @@
 import { Canvas } from "src/@types/Canvas"
 import { CanvasEvent } from "src/core/events"
-import AdvancedCanvasPlugin from "src/main"
 import SettingsManager, { AdvancedCanvasPluginSettings } from "src/settings"
+import CanvasExtension from "../../core/canvas-extension"
 
 const EXPOSED_SETTINGS: (keyof AdvancedCanvasPluginSettings)[] = [
   'performanceOptimizationEnabled',
@@ -9,12 +9,10 @@ const EXPOSED_SETTINGS: (keyof AdvancedCanvasPluginSettings)[] = [
   'collapsedGroupPreviewOnDrag'
 ]
 
-export default class CanvasWrapperDataTaggerCanvasExtension {
-  plugin: AdvancedCanvasPlugin
+export default class CanvasWrapperExposerExtension extends CanvasExtension {
+  isEnabled() { return true }
 
-  constructor(plugin: AdvancedCanvasPlugin) {
-    this.plugin = plugin
-
+  init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       SettingsManager.SETTINGS_CHANGED_EVENT,
       () => this.updateExposedSettings(this.plugin.getCurrentCanvas())

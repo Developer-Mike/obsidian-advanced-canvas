@@ -1,5 +1,6 @@
-import { setIcon, setTooltip } from "obsidian"
+import { addIcon, setIcon, setTooltip } from "obsidian"
 import { BBox, Canvas, CanvasNode, CanvasNodeData, Position, Size } from "src/@types/Canvas"
+import { StyleAttribute } from "src/canvas-extensions/advanced-styles/style-config"
 import AdvancedCanvasPlugin from "src/main"
 import * as BBoxHelper from "src/utils/bbox-helper"
 
@@ -157,4 +158,187 @@ export function zoomToBBox(canvas: Canvas, bbox: BBox) {
   )
 
   canvas.tZoom = Math.log2(scaleFactor)
+}
+
+export function createStyleDropdownMenu(canvas: Canvas, stylableAttributes: StyleAttribute[], currentStyleAttributes: { [key: string]: string | null }, setStyleAttribute: (attribute: StyleAttribute, value: string | null) => void) {
+  const STYLE_MENU_ID = 'style-menu'
+  const STYLE_MENU_DROPDOWN_ID = 'style-menu-dropdown'
+  const STYLE_MENU_DROPDOWN_SUBMENU_ID = 'style-menu-dropdown-submenu'
+
+  // Check if popup menu exists
+  const popupMenuElement = canvas?.menu?.menuEl
+  if (!popupMenuElement) return
+  
+  // Remove previous style menu
+  popupMenuElement.querySelector(`#${STYLE_MENU_ID}`)?.remove()
+
+  const styleMenuButtonElement = document.createElement('button')
+  styleMenuButtonElement.id = STYLE_MENU_ID
+  styleMenuButtonElement.classList.add('clickable-icon')
+
+  setIcon(styleMenuButtonElement, 'paintbrush')
+  setTooltip(styleMenuButtonElement, 'Style', { placement: 'top' })
+  
+  // Add style menu to popup menu
+  popupMenuElement.appendChild(styleMenuButtonElement)
+
+  // Add click event
+  styleMenuButtonElement.addEventListener('click', () => {
+    const isOpen = styleMenuButtonElement.classList.toggle('has-active-menu')
+    if (!isOpen) {
+      popupMenuElement.querySelector(`#${STYLE_MENU_DROPDOWN_ID}`)?.remove()
+      popupMenuElement.querySelector(`#${STYLE_MENU_DROPDOWN_SUBMENU_ID}`)?.remove()
+      
+      return
+    }
+
+    const styleMenuDropdownElement = document.createElement('div')
+    styleMenuDropdownElement.id = STYLE_MENU_DROPDOWN_ID
+    styleMenuDropdownElement.classList.add('menu')
+
+    // Position correctly
+    styleMenuDropdownElement.style.position = 'absolute'
+    styleMenuDropdownElement.style.maxHeight = 'initial'
+
+    styleMenuDropdownElement.style.top = `${popupMenuElement.getBoundingClientRect().height}px`
+
+    const canvasWrapperCenterX = canvas.wrapperEl.getBoundingClientRect().left + canvas.wrapperEl.getBoundingClientRect().width / 2
+
+    const leftPosition = styleMenuButtonElement.getBoundingClientRect().left - popupMenuElement.getBoundingClientRect().left
+    const rightPosition = popupMenuElement.getBoundingClientRect().right - styleMenuButtonElement.getBoundingClientRect().right
+
+    // Swap sides if it is too close to the edge
+    if (popupMenuElement.getBoundingClientRect().left + leftPosition < canvasWrapperCenterX)
+      styleMenuDropdownElement.style.left = `${leftPosition}px`
+    else styleMenuDropdownElement.style.right = `${rightPosition}px`
+
+    // Add style options
+    for (const stylableAttribute of stylableAttributes) {
+      const stylableAttributeElement = document.createElement('div')
+      stylableAttributeElement.classList.add('menu-item')
+      stylableAttributeElement.classList.add('tappable')
+
+      // Add icon
+      const iconElement = document.createElement('div')
+      iconElement.classList.add('menu-item-icon')
+
+      const selectedStyle = stylableAttribute.options
+        .find(option => currentStyleAttributes[stylableAttribute.datasetKey] === option.value) ??
+        stylableAttribute.options.find(value => value.value === null)!!
+      setIcon(iconElement, selectedStyle.icon)
+
+      stylableAttributeElement.appendChild(iconElement)
+
+      // Add label
+      const labelElement = document.createElement('div')
+      labelElement.classList.add('menu-item-title')
+      labelElement.textContent = stylableAttribute.label
+      stylableAttributeElement.appendChild(labelElement)
+
+      // Add expand icon
+      const expandIconElement = document.createElement('div')
+      expandIconElement.classList.add('menu-item-icon')
+      setIcon(expandIconElement, 'chevron-right')
+      stylableAttributeElement.appendChild(expandIconElement)
+
+      // Append to dropdown
+      styleMenuDropdownElement.appendChild(stylableAttributeElement)
+
+      // Add hover effect
+      stylableAttributeElement.addEventListener('pointerenter', () => {
+        stylableAttributeElement.classList.add('selected')
+      })
+
+      stylableAttributeElement.addEventListener('pointerleave', () => {
+        stylableAttributeElement.classList.remove('selected')
+      })
+
+      // Add click event
+      stylableAttributeElement.addEventListener('click', () => {
+        // Remove previous submenu
+        popupMenuElement.querySelector(`#${STYLE_MENU_DROPDOWN_SUBMENU_ID}`)?.remove()
+
+        const styleMenuDropdownSubmenuElement = document.createElement('div')
+        styleMenuDropdownSubmenuElement.id = STYLE_MENU_DROPDOWN_SUBMENU_ID
+        styleMenuDropdownSubmenuElement.classList.add('menu')
+    
+        // Position correctly
+        styleMenuDropdownSubmenuElement.style.position = 'absolute'
+        styleMenuDropdownSubmenuElement.style.maxHeight = 'initial'
+
+        const topOffset = parseFloat(window.getComputedStyle(styleMenuDropdownElement).getPropertyValue('padding-top')) + (styleMenuDropdownElement.offsetHeight - styleMenuDropdownElement.clientHeight) / 2
+        styleMenuDropdownSubmenuElement.style.top = `${stylableAttributeElement.getBoundingClientRect().top - topOffset - popupMenuElement.getBoundingClientRect().top}px`
+
+        // Swap sides if it is too close to the edge
+        const leftPosition = styleMenuDropdownElement.getBoundingClientRect().right - popupMenuElement.getBoundingClientRect().left
+        const rightPosition = popupMenuElement.getBoundingClientRect().right - styleMenuDropdownElement.getBoundingClientRect().left
+
+        // Swap sides if it is too close to the edge
+        if (popupMenuElement.getBoundingClientRect().left + leftPosition < canvasWrapperCenterX)
+          styleMenuDropdownSubmenuElement.style.left = `${leftPosition}px`
+        else styleMenuDropdownSubmenuElement.style.right = `${rightPosition}px`
+
+        // Add style options
+        for (const value of stylableAttribute.options) {
+          const styleMenuDropdownSubmenuOptionElement = document.createElement('div')
+          styleMenuDropdownSubmenuOptionElement.classList.add('menu-item')
+          styleMenuDropdownSubmenuOptionElement.classList.add('tappable')
+
+          // Add icon
+          const submenuIconElement = document.createElement('div')
+          submenuIconElement.classList.add('menu-item-icon')
+          setIcon(submenuIconElement, value.icon)
+          styleMenuDropdownSubmenuOptionElement.appendChild(submenuIconElement)
+
+          // Add label
+          const submenuLabelElement = document.createElement('div')
+          submenuLabelElement.classList.add('menu-item-title')
+          submenuLabelElement.textContent = value.label
+          styleMenuDropdownSubmenuOptionElement.appendChild(submenuLabelElement)
+
+          // Add selected icon
+          if (selectedStyle === value) {
+            styleMenuDropdownSubmenuOptionElement.classList.add('mod-selected')
+
+            const selectedIconElement = document.createElement('div')
+            selectedIconElement.classList.add('menu-item-icon')
+            selectedIconElement.classList.add('mod-selected')
+
+            setIcon(selectedIconElement, 'check')
+            styleMenuDropdownSubmenuOptionElement.appendChild(selectedIconElement)
+          }
+
+          // Add to dropdown submenu
+          styleMenuDropdownSubmenuElement.appendChild(styleMenuDropdownSubmenuOptionElement)
+
+          // Add hover effect
+          styleMenuDropdownSubmenuOptionElement.addEventListener('pointerenter', () => {
+            styleMenuDropdownSubmenuOptionElement.classList.add('selected')
+          })
+
+          styleMenuDropdownSubmenuOptionElement.addEventListener('pointerleave', () => {
+            styleMenuDropdownSubmenuOptionElement.classList.remove('selected')
+          })
+
+          // Add click event
+          styleMenuDropdownSubmenuOptionElement.addEventListener('click', () => {
+            // Set style attribute
+            setStyleAttribute(stylableAttribute, value.value)
+
+            // Keep correct reference
+            currentStyleAttributes[stylableAttribute.datasetKey] = value.value
+
+            // Close menu
+            styleMenuButtonElement.dispatchEvent(new Event('click'))
+          })
+        }
+
+        // Append to body
+        popupMenuElement.appendChild(styleMenuDropdownSubmenuElement)
+      })
+    }
+
+    // Append to body
+    popupMenuElement.appendChild(styleMenuDropdownElement)
+  })
 }

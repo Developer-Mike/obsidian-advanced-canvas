@@ -11,28 +11,34 @@
     <a href="https://github.com/Developer-Mike/obsidian-advanced-canvas/issues"><img src="https://img.shields.io/github/issues/Developer-Mike/obsidian-advanced-canvas?colorA=363a4f&colorB=e93147&style=for-the-badge" alt="Open issues on GitHub"></a>
     <a href="https://github.com/Developer-Mike/obsidian-advanced-canvas/contributors"><img src="https://img.shields.io/github/contributors/Developer-Mike/obsidian-advanced-canvas?colorA=363a4f&colorB=08b94e&style=for-the-badge" alt="List of contributors"></a>
     <br/>
-	<a href="https://obsidian.md/plugins?id=advanced-canvas"><img src="https://img.shields.io/github/downloads/Developer-Mike/obsidian-advanced-canvas/total?style=for-the-badge&colorA=363a4f&colorB=d53984"/></a>
+	<a href="https://obsidian.md/plugins?id=advanced-canvas"><img src="https://img.shields.io/endpoint?url=https://scambier.xyz/obsidian-endpoints/advanced-canvas.json&style=for-the-badge&colorA=363a4f&colorB=d53984"/></a>
     <a href="./LICENSE"><img src="https://img.shields.io/static/v1.svg?style=for-the-badge&label=License&message=GPL-3.0&colorA=363a4f&colorB=b7bdf8" alt="GPL-3.0 license"/></a>
     <br/><br/>
     <b>⚡ Supercharge</b> your canvas experience! Create presentations, flowcharts and more!
 </p>
 
 ## Installation
-Recommended:
-- Open the Community Plugins tab in the settings and search for "Advanced Canvas"
+Open the Community Plugins tab in the settings and search for "Advanced Canvas" (or click [here](https://obsidian.md/plugins?id=advanced-canvas)).
 
-OR
-- Install it using [BRAT](https://github.com/TfTHacker/obsidian42-brat)
-
-OR
-- Create a folder named `advanced-canvas` in your vault's plugins folder (`<vault>/.obsidian/plugins/`).
-- Download `main.js`, `styles.css` and `manifest.json` from the latest release and put them in the `advanced-canvas` folder.
-- Enable the plugin in Settings -> Community plugins -> Installed plugins
+<details>
+    <summary>Other installation methods</summary>
+    <br/>
+    <ul>
+        <li>Install it using <a href="https://github.com/TfTHacker/obsidian42-brat">BRAT</a></li>
+        <li>Manual folder creation
+            <ol>
+                <li>Create a folder named <code>obsidian-advanced-canvas</code> in your vault's plugins folder (<code>&lt;vault&gt;/.obsidian/plugins/</code>).</li>
+                <li>Download <code>main.js</code>, <code>styles.css</code> and <code>manifest.json</code> from the latest release and put them in the <code>obsidian-advanced-canvas</code> folder.</li>
+                <li>Enable the plugin in Settings -> Community plugins -> Installed plugins</li>
+            </ol>
+        </li>
+    </ul>
+</details>
 
 ## Features
 All features can be enabled/disabled in the settings.
 
-- Create groups independently of the nodes (Updated card menu)
+- Create groups independently of the nodes
 - More [canvas commands](#canvas-commands)
 - [Node Styles](#node-styles)
   - (Flowchart) [Node Shapes](#node-shapes)
@@ -48,12 +54,24 @@ All features can be enabled/disabled in the settings.
     - Dotted
     - Dashed
     - Invisible
+  - Text Alignment
+    - Left
+    - Center
+    - Right
 - [Edge Styles](#edge-styles)
-  - Edge styles
+  - [Path Styles](#path-styles)
     - Dotted
     - Short-dashed
     - Long-dashed
-  - Path styles
+  - [Arrow Styles](#arrow-styles)
+    - Triangle Outline
+    - Halved Triangle
+    - Thin Triangle
+    - Diamond
+    - Diamond Outline
+    - Circle
+    - Circle Outline
+  - [Pathfinding Methods](#pathfinding-methods)
     - Default
     - Straight
     - Square
@@ -61,8 +79,6 @@ All features can be enabled/disabled in the settings.
 - [Custom colors](#custom-colors) in the color picker
 - [Properties Support](#properties-support)
   - Set properties for the canvas file
-- [Stickers](#stickers)
-  - Convert image nodes to stickers (transparent background and no border)
 - [Presentation mode](#presentation-mode)
   - Create presentations by connecting nodes with arrows
 - [Portals](#portals)
@@ -81,9 +97,10 @@ All features can be enabled/disabled in the settings.
 - Expose node data to style them using CSS
 
 ## Support
-If you want to support me and my work, consider starring ⭐ the repository, or, if you want to support me financially, you can donate any amount on [Ko-fi](https://ko-fi.com/X8X27IA08) ❤️
+Please consider supporting the plugin. There are many hours of work and effort behind it. The two easiest ways to support the plugin are either by starring ⭐ the repository or by donating any amount on [Ko-fi](https://ko-fi.com/X8X27IA08) ❤️. Thank you!
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/X8X27IA08)
+<img src="https://img.shields.io/endpoint?url=https://wakapi.dev/api/compat/shields/v1/Developer-Mike/interval:all_time/project:obsidian-advanced-canvas&label=Time%20Spent&style=for-the-badge&colorA=ffffff&colorB=ff5e5b" alt="Time Spent">
 
 ## Canvas Commands
 - `Advanced Canvas: Create text node`
@@ -160,21 +177,66 @@ Set the style of the border to dotted, dashed or invisible.
 </details>
 
 ## Edge Styles
-### Edge Styles
-Set the style of the edges (arrows) to dotted, short-dashed or long-dashed.
+### Path Styles
+Set the style of the edge paths to dotted, short-dashed or long-dashed.
 
 <details>
     <summary>Edge Styles Example</summary>
-    <img src="./assets/edge-styles.png" alt="Edge Styles Example"/>
+    <img src="./assets/edge-path-styles.png" alt="Edge Path Styles Example"/>
 </details>
 
-### Path Styles
-Set the path style of the edges (arrows) to default, straight or A*.
+### Arrow Styles
+Set the style of the arrows to triangle outline, halved triangle, thin triangle, diamond, diamond outline, circle or circle outline.
+
+<details>
+    <summary>Arrow Styles Example</summary>
+    <img src="./assets/edge-arrow-styles.png" alt="Edge Arrow Styles Example"/>
+</details>
+
+### Pathfinding Methods
+Set the pathfinding method of the edges (arrows) to default, straight, squared or A*.
 
 <details>
     <summary>Path Styles Example</summary>
-    <img src="./assets/edge-path-styles.png" alt="Edge Path Styles Example"/>
+    <img src="./assets/edge-pathfinding-methods.png" alt="Edge Pathfinding Methods Example"/>
 </details>
+
+## Custom Styles
+Custom style attributes for nodes and edges can easily be added.
+
+1. Add a popup menu option
+   - Open the `<VAULT-PATH>/.obsidian/plugins/obsidian-advanced-canvas/data.json` file
+   - If you want to add an option to node popup menu, search for `customNodeStyleAttributes` property, otherwise search for `customEdgeStyleAttributes` property. (Create it if it doesn't exist yet)
+   - Add the custom popup menu option (Remove the comments!)
+   ```json
+    "customNodeStyleAttributes": [
+        {
+            "datasetKey": "exampleStyleAttribute", // Must be unique and written in camelCase
+            "label": "Example Style Attribute",
+            "options": [
+                {
+                    "icon": "cloud-sun", // Choose an icon from lucide.dev
+                    "label": "Sunny Appearance",
+                    "value": null // Null means default
+                },
+                {
+                    "icon": "cloud-rain-wind", // Choose an icon from lucide.dev
+                    "label": "Rainy Appearance",
+                    "value": "rainy" // The value that gets set
+                }
+            ]   
+        }
+        // You can add more categories here
+    ]
+   ```
+2. Create a new CSS snippet in your vault (And enable it in the settings)
+    ```css	
+    .canvas-node[data-<DATASET-KEY>="rainy"] { /* The dataset key is now written in kebab-case */
+        background-color: #7f7f7f;
+    }
+    ```
+3. Reload Obsidian and enjoy your new custom style!
+    <br><img src="./assets/custom-style-attribute-example.png" alt="Custom Style Attribute Example"/>
 
 ## Custom Colors
 Add custom colors to the color picker. You can add them using the following css snippet:
@@ -208,14 +270,6 @@ Supported properties:
     filter: blur(5px) brightness(0.8);
 }
 ```
-
-## Stickers
-Convert image nodes to stickers. Stickers have a transparent background and no border.
-
-<details>
-    <summary>Sticker Example</summary>
-    <img src="./assets/stickers.png" alt="Sticker Example"/>
-</details>
 
 ## Presentation Mode
 In presentation mode, you can navigate through the nodes using the arrow keys or the PageUp/PageDown keys (Compatible with most presentation remotes). The different slides/nodes are connected using arrows. If you want to have multiple arrows pointing from the same node, you can number them in the order you want to navigate through them. While in presentation mode, the canvas is in readonly mode (So [better readonly](#better-readonly) effects the presentation mode as well!). You can exit the presentation mode using the `ESC` key or the corresponding command. If you want to continue the presentation from the last slide you were on, you can use the `Advanced Canvas: Continue presentation` command.
@@ -304,6 +358,12 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
   - `advanced-canvas:dragging-state-changed`
     - Fired when the dragging state of the canvas changes
     - Payload: `Canvas`, `boolean`
+  - `advanced-canvas:node-created`
+    - Fired when a new node gets created
+    - Payload: `Canvas`, `Node`
+  - `advanced-canvas:edge-created`
+    - Fired when a new edge gets created
+    - Payload: `Canvas`, `Edge`
   - `advanced-canvas:node-added`
     - Fired when a new node gets added
     - Payload: `Canvas`, `Node`

@@ -82,6 +82,7 @@ export interface Canvas {
   getContainingNodes(bbox: BBox): CanvasNode[]
 
   history: CanvasHistory
+  pushHistory(data: CanvasData): void
   undo(): void
   redo(): void
 
@@ -188,9 +189,8 @@ export interface CanvasNodeData {
   label?: string
   file?: string
 
-  isSticker?: boolean
-  shape?: string | null
-  borderStyle?: string
+  // TODO: needsToBeInitialized?: boolean
+  styleAttributes?: { [key: string]: string | null }
 
   isCollapsed?: boolean
   collapsedData?: CanvasData
@@ -245,12 +245,13 @@ export interface CanvasEdgeData {
 
   fromSide: Side
   toSide: Side
-  
-  edgeStyle?: 'long-dashed' | 'short-dashed' | 'dotted'
-  edgePathRoute?: 'direct' | 'square' | 'a-star'
+
+  styleAttributes?: { [key: string]: string | null }
 
   portalId?: string
   isUnsaved?: boolean
+
+  [key: string]: any
 }
 
 type EndType = 'none' | 'arrow'
@@ -262,10 +263,19 @@ export interface CanvasEdge extends CanvasElement {
     side: Side
     end: EndType
   }
+  fromLineEnd: {
+    el: HTMLElement
+    type: 'arrow'
+  }
+
   to: {
     node: CanvasNode
     side: Side
     end: EndType
+  }
+  toLineEnd: {
+    el: HTMLElement
+    type: 'arrow'
   }
 
   bezier: {

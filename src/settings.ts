@@ -1,5 +1,6 @@
 import { Notice, PluginSettingTab, Setting } from "obsidian"
 import AdvancedCanvasPlugin from "./main"
+import { BUILTIN_EDGE_STYLE_ATTRIBUTES, BUILTIN_NODE_STYLE_ATTRIBUTES, StyleAttribute } from "./canvas-extensions/advanced-styles/style-config"
 
 const NODE_TYPES_ON_DOUBLE_CLICK = {
   'text': 'Text',
@@ -16,10 +17,13 @@ export interface AdvancedCanvasPluginSettings {
   performanceOptimizationEnabled: boolean
 
   nodeStylingFeatureEnabled: boolean
-  shapesFeatureEnabled: boolean
-  borderStyleFeatureEnabled: boolean
+  customNodeStyleAttributes: StyleAttribute[]
+  defaultTextNodeStyleAttributes: { [key: string]: string }
 
   edgesStylingFeatureEnabled: boolean
+  customEdgeStyleAttributes: StyleAttribute[]
+  defaultEdgeStyleAttributes: { [key: string]: string }
+  edgeStyleDirectRotateArrow: boolean
   edgeStylePathfinderGridResolution: number
   edgeStylePathfinderPathLiveUpdate: boolean
   edgeStylePathfinderPathRounded: boolean
@@ -37,9 +41,8 @@ export interface AdvancedCanvasPluginSettings {
   collapsibleGroupsFeatureEnabled: boolean
   collapsedGroupPreviewOnDrag: boolean
 
-  stickersFeatureEnabled: boolean
-
   presentationFeatureEnabled: boolean
+  showSetStartNodeInPopup: boolean
   defaultSlideSize: string
   wrapInSlidePadding: number
   useArrowKeysToChangeSlides: boolean
@@ -64,11 +67,14 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
 
   performanceOptimizationEnabled: false,
 
-  shapesFeatureEnabled: true,
   nodeStylingFeatureEnabled: true,
-  borderStyleFeatureEnabled: true,
+  customNodeStyleAttributes: [],
+  defaultTextNodeStyleAttributes: {},
 
   edgesStylingFeatureEnabled: true,
+  customEdgeStyleAttributes: [],
+  defaultEdgeStyleAttributes: {},
+  edgeStyleDirectRotateArrow: false,
   edgeStylePathfinderGridResolution: 10,
   edgeStylePathfinderPathLiveUpdate: true,
   edgeStylePathfinderPathRounded: true,
@@ -86,9 +92,8 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   collapsibleGroupsFeatureEnabled: true,
   collapsedGroupPreviewOnDrag: true,
 
-  stickersFeatureEnabled: true,
-
   presentationFeatureEnabled: true,
+  showSetStartNodeInPopup: false,
   defaultSlideSize: '1200x675',
   wrapInSlidePadding: 20,
   useArrowKeysToChangeSlides: true,
@@ -218,22 +223,17 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
     )
 
     new Setting(containerEl)
-      .setName("Node Shapes")
-      .setDesc("Shape your nodes for creating e.g. mind maps or flow charts.")
-      .addToggle((toggle) =>
-        toggle
-          .setValue(this.settingsManager.getSetting('shapesFeatureEnabled'))
-          .onChange(async (value) => await this.settingsManager.setSetting({ shapesFeatureEnabled: value }))
+      .setName("Custom node style settings")
+      .setDesc("Add custom style settings for nodes. (Go to GitHub for more information)")
+      .addButton((button) =>
+        button
+          .setButtonText("Open Tutorial")
+          .onClick(() => window.open("https://github.com/Developer-Mike/obsidian-advanced-canvas/blob/main/README.md#custom-styles"))
       )
 
-    new Setting(containerEl)
-      .setName("Border styles")
-      .setDesc("Style your nodes with different border styles.")
-      .addToggle((toggle) =>
-        toggle
-          .setValue(this.settingsManager.getSetting('borderStyleFeatureEnabled'))
-          .onChange(async (value) => await this.settingsManager.setSetting({ borderStyleFeatureEnabled: value }))
-      )
+    const allNodeStyleAttributes = [ ...BUILTIN_NODE_STYLE_ATTRIBUTES, ...this.settingsManager.getSetting('customNodeStyleAttributes') ]
+      .filter((setting) => setting.nodeTypes === undefined || setting.nodeTypes?.includes('text'))
+    this.createDefaultStylesSection(containerEl, 'Default text node style attributes', 'defaultTextNodeStyleAttributes', allNodeStyleAttributes)
 
     this.createFeatureHeading(
       containerEl,
@@ -241,6 +241,26 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       "Style your edges with different path styles.",
       'edgesStylingFeatureEnabled'
     )
+
+    new Setting(containerEl)
+      .setName("Custom edge style settings")
+      .setDesc("Add custom style settings for edges. (Go to GitHub for more information)")
+      .addButton((button) =>
+        button
+          .setButtonText("Open Tutorial")
+          .onClick(() => window.open("https://github.com/Developer-Mike/obsidian-advanced-canvas/blob/main/README.md#custom-styles"))
+      )
+
+    this.createDefaultStylesSection(containerEl, 'Default edge style attributes', 'defaultEdgeStyleAttributes', [ ...BUILTIN_EDGE_STYLE_ATTRIBUTES, ...this.settingsManager.getSetting('customEdgeStyleAttributes') ])
+
+    new Setting(containerEl)
+      .setName("Rotate arrow if pathfinding method is \"Direct\"")
+      .setDesc("When enabled, the arrow will be rotated to the direction of the edge if the pathfinding method is set to \"Direct\".")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.settingsManager.getSetting('edgeStyleDirectRotateArrow'))
+          .onChange(async (value) => await this.settingsManager.setSetting({ edgeStyleDirectRotateArrow: value }))
+      )
 
     new Setting(containerEl)
       .setName("A* grid resolution")
@@ -328,16 +348,18 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
 
     this.createFeatureHeading(
       containerEl,
-      "Stickers",
-      "Convert an image node to a sticker by supporting transparency and removing the border.",
-      'stickersFeatureEnabled'
-    )
-
-    this.createFeatureHeading(
-      containerEl,
       "Presentations",
       "Create a presentation from your canvas.",
       'presentationFeatureEnabled'
+    )
+
+    new Setting(containerEl)
+    .setName("Show \"Set Start Node\" in node popup")
+    .setDesc("If turned off, you can still set the start node using the corresponding command.")
+    .addToggle((toggle) =>
+      toggle
+        .setValue(this.settingsManager.getSetting('showSetStartNodeInPopup'))
+        .onChange(async (value) => await this.settingsManager.setSetting({ showSetStartNodeInPopup: value }))
     )
 
     new Setting(containerEl)
@@ -462,5 +484,36 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
             new Notice("Reload obsidian to apply the changes.")
           })
       )
+  }
+
+  private createDefaultStylesSection(containerEl: HTMLElement, label: string, settingsKey: keyof AdvancedCanvasPluginSettings, allStylableAttributes: StyleAttribute[]) {
+    const defaultNodeStylesEl = document.createElement('details')
+    defaultNodeStylesEl.classList.add('setting-item')
+
+    const defaultNodeStylesSummaryEl = document.createElement('summary')
+    defaultNodeStylesSummaryEl.textContent = label
+    defaultNodeStylesEl.appendChild(defaultNodeStylesSummaryEl)
+
+    for (const stylableAttribute of allStylableAttributes) {
+      new Setting(defaultNodeStylesEl)
+        .setName(stylableAttribute.label)
+        .addDropdown((dropdown) =>
+          dropdown
+            .addOptions(Object.fromEntries(stylableAttribute.options.map((option) => [option.value, option.label])))
+            .setValue((this.settingsManager.getSetting(settingsKey) as { [key: string]: string })[stylableAttribute.datasetKey] ?? 'null')
+            .onChange(async (value) => {
+              const newValue = this.settingsManager.getSetting(settingsKey) as { [key: string]: string }
+
+              if (value === 'null') delete newValue[stylableAttribute.datasetKey]
+              else newValue[stylableAttribute.datasetKey] = value
+
+              await this.settingsManager.setSetting({
+                [settingsKey]: newValue
+              })
+            })
+        )
+    }
+
+    containerEl.appendChild(defaultNodeStylesEl)
   }
 }

@@ -9,6 +9,8 @@ export const CanvasEvent = {
   NodeMoved: `${PLUGIN_EVENT_PREFIX}:node-moved`,
   DoubleClick: `${PLUGIN_EVENT_PREFIX}:double-click`,
   DraggingStateChanged: `${PLUGIN_EVENT_PREFIX}:dragging-state-changed`,
+  NodeCreated: `${PLUGIN_EVENT_PREFIX}:node-created`,
+  EdgeCreated: `${PLUGIN_EVENT_PREFIX}:edge-created`,
   NodeAdded: `${PLUGIN_EVENT_PREFIX}:node-added`,
   EdgeAdded: `${PLUGIN_EVENT_PREFIX}:edge-added`,
   NodeRemoved: `${PLUGIN_EVENT_PREFIX}:node-removed`,

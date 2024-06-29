@@ -1,23 +1,23 @@
-import { Canvas } from "src/@types/Canvas"
+import { Canvas, CanvasEdge, CanvasNode } from "src/@types/Canvas"
 import { CanvasEvent } from "src/core/events"
-import AdvancedCanvasPlugin from "src/main"
 import SettingsManager from "src/settings"
 import { FileSelectModal } from "src/utils/modal-helper"
+import CanvasExtension from "../core/canvas-extension"
 
-export default class BetterDefaultSettingsCanvasExtension {
-  plugin: AdvancedCanvasPlugin
+export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtension {
+  isEnabled() { return true }
 
-  constructor(plugin: AdvancedCanvasPlugin) {
-    this.plugin = plugin
+  init() {
+    this.modifyCanvasSettings(this.plugin.getCurrentCanvas())
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       SettingsManager.SETTINGS_CHANGED_EVENT,
-      () => this.applySettings(this.plugin.getCurrentCanvas())
+      () => this.modifyCanvasSettings(this.plugin.getCurrentCanvas())
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.CanvasChanged,
-      (canvas: Canvas) => this.applySettings(canvas)
+      (canvas: Canvas) => this.modifyCanvasSettings(canvas)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
@@ -25,10 +25,18 @@ export default class BetterDefaultSettingsCanvasExtension {
       (canvas: Canvas, event: MouseEvent, preventDefault: { value: boolean }) => this.onDoubleClick(canvas, event, preventDefault)
     ))
 
-    this.applySettings(this.plugin.getCurrentCanvas())
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.NodeCreated,
+      (canvas: Canvas, node: CanvasNode) => this.applyDefaultNodeStyles(canvas, node)
+    ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.EdgeCreated,
+      (canvas: Canvas, edge: CanvasEdge) => this.applyDefaultEdgeStyles(canvas, edge)
+    ))
   }
 
-  private applySettings(canvas: Canvas | null) {
+  private modifyCanvasSettings(canvas: Canvas | null) {
     if (!canvas) return
 
     canvas.config.defaultTextNodeDimensions = {
@@ -67,5 +75,30 @@ export default class BetterDefaultSettingsCanvasExtension {
 
         break
     }
+  }
+
+  private applyDefaultNodeStyles(_canvas: Canvas, node: CanvasNode) {
+    const nodeData = node.getData()
+    if (nodeData.type !== 'text') return
+
+    node.setData({
+      ...nodeData,
+      styleAttributes: {
+        ...nodeData.styleAttributes,
+        ...this.plugin.settings.getSetting('defaultTextNodeStyleAttributes')
+      }
+    })
+  }
+
+  private applyDefaultEdgeStyles(_canvas: Canvas, edge: CanvasEdge) {
+    const edgeData = edge.getData()
+
+    edge.setData({
+      ...edgeData,
+      styleAttributes: {
+        ...edgeData.styleAttributes,
+        ...this.plugin.settings.getSetting('defaultEdgeStyleAttributes')
+      }
+    })
   }
 }

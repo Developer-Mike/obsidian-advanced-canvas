@@ -4,6 +4,7 @@ import { patchObjectInstance, patchObjectPrototype } from "src/utils/patch-helpe
 import { CanvasEvent } from "./events"
 import { WorkspaceLeaf } from "obsidian"
 import { around } from "monkey-around"
+import { create } from "domain"
 
 export default class CanvasPatcher {
   plugin: AdvancedCanvasPlugin
@@ -89,12 +90,38 @@ export default class CanvasPatcher {
         that.triggerWorkspaceEvent(CanvasEvent.SelectionChanged, this, oldSelection, ((update: () => void) => next.call(this, update)))
         return result
       },
+      createTextNode: (next: any) => function (...args: any) {
+        const node = next.call(this, ...args)
+        that.triggerWorkspaceEvent(CanvasEvent.NodeCreated, this, node)
+        return node
+      },
+      createFileNode: (next: any) => function (...args: any) {
+        const node = next.call(this, ...args)
+        that.triggerWorkspaceEvent(CanvasEvent.NodeCreated, this, node)
+        return node
+      },
+      createFileNodes: (next: any) => function (...args: any) {
+        const nodes = next.call(this, ...args)
+        nodes.forEach((node: CanvasNode) => that.triggerWorkspaceEvent(CanvasEvent.NodeCreated, this, node))
+        return nodes
+      },
+      createGroupNode: (next: any) => function (...args: any) {
+        const node = next.call(this, ...args)
+        that.triggerWorkspaceEvent(CanvasEvent.NodeCreated, this, node)
+        return node
+      },
+      createLinkNode: (next: any) => function (...args: any) {
+        const node = next.call(this, ...args)
+        that.triggerWorkspaceEvent(CanvasEvent.NodeCreated, this, node)
+        return node
+      },
       addNode: (next: any) => function (node: CanvasNode) {
         that.patchNode(node)
         return next.call(this, node)
       },
       addEdge: (next: any) => function (edge: CanvasEdge) {
         that.patchEdge(edge)
+        if (!this.viewportChanged) that.triggerWorkspaceEvent(CanvasEvent.EdgeCreated, this, edge)
         return next.call(this, edge)
       },
       removeNode: (next: any) => function (node: CanvasNode) {
@@ -130,6 +157,12 @@ export default class CanvasPatcher {
         that.triggerWorkspaceEvent(CanvasEvent.Redo, this)
         return result
       },
+      /*setData: (next: any) => function (...args: any) {
+        //
+        const result = next.call(this, ...args)
+        //
+        return result
+      },*/
       getData: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
         that.triggerWorkspaceEvent(CanvasEvent.DataRequested, this, result)

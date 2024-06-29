@@ -1,19 +1,15 @@
 import { Canvas } from "src/@types/Canvas"
-import AdvancedCanvasPlugin from "src/main"
 import * as CanvasHelper from "src/utils/canvas-helper"
 import { FileSelectModal } from "src/utils/modal-helper"
+import CanvasExtension from "../core/canvas-extension"
 
 type Direction = 'up' | 'down' | 'left' | 'right'
 const DIRECTIONS = ['up', 'down', 'left', 'right'] as Direction[]
 
-export default class CommandsCanvasExtension {
-  plugin: AdvancedCanvasPlugin
+export default class CommandsCanvasExtension extends CanvasExtension {
+  isEnabled() { return 'commandsFeatureEnabled' as const }
 
-  constructor(plugin: AdvancedCanvasPlugin) {
-    this.plugin = plugin
-
-    if (!this.plugin.settings.getSetting('commandsFeatureEnabled')) return
-
+  init() {
     this.plugin.addCommand({
       id: 'create-text-node',
       name: 'Create text node',
