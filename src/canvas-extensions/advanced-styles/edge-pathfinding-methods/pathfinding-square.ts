@@ -6,7 +6,7 @@ import BBoxHelper from "src/utils/bbox-helper"
 import CanvasHelper from "src/utils/canvas-helper"
 
 export default class EdgePathfindingSquare extends EdgePathfindingMethod {
-  getPath(_plugin: AdvancedCanvasPlugin, _canvas: Canvas, fromPos: Position, fromSide: Side, toPos: Position, toSide: Side, _isDragging: boolean): EdgePath {
+  getPath(_plugin: AdvancedCanvasPlugin, _canvas: Canvas, fromPos: Position, fromBBoxSidePos: Position, fromSide: Side, toPos: Position, toBBoxSidePos: Position, toSide: Side, _isDragging: boolean): EdgePath {
     let pathArray: Position[] = []
 
     if (fromSide === toSide) {
@@ -16,15 +16,15 @@ export default class EdgePathfindingSquare extends EdgePathfindingMethod {
       if (BBoxHelper.isHorizontal(fromSide)) {
         pathArray = [
           fromPos,
-          { x: Math.max(fromPos.x, toPos.x) + direction * CanvasHelper.GRID_SIZE, y: fromPos.y },
-          { x: Math.max(fromPos.x, toPos.x) + direction * CanvasHelper.GRID_SIZE, y: toPos.y },
+          { x: Math.max(fromBBoxSidePos.x, toBBoxSidePos.x) + direction * CanvasHelper.GRID_SIZE, y: fromBBoxSidePos.y },
+          { x: Math.max(fromBBoxSidePos.x, toBBoxSidePos.x) + direction * CanvasHelper.GRID_SIZE, y: toBBoxSidePos.y },
           toPos
         ]
       } else {
         pathArray = [
           fromPos,
-          { x: fromPos.x, y: Math.max(fromPos.y, toPos.y) + direction * CanvasHelper.GRID_SIZE },
-          { x: toPos.x, y: Math.max(fromPos.y, toPos.y) + direction * CanvasHelper.GRID_SIZE },
+          { x: fromBBoxSidePos.x, y: Math.max(fromBBoxSidePos.y, toBBoxSidePos.y) + direction * CanvasHelper.GRID_SIZE },
+          { x: toBBoxSidePos.x, y: Math.max(fromBBoxSidePos.y, toBBoxSidePos.y) + direction * CanvasHelper.GRID_SIZE },
           toPos
         ]
       }
@@ -33,15 +33,15 @@ export default class EdgePathfindingSquare extends EdgePathfindingMethod {
       if (BBoxHelper.isHorizontal(fromSide)) {
         pathArray = [
           fromPos,
-          { x: fromPos.x + (toPos.x - fromPos.x) / 2, y: fromPos.y },
-          { x: fromPos.x + (toPos.x - fromPos.x) / 2, y: toPos.y },
+          { x: fromBBoxSidePos.x + (toBBoxSidePos.x - fromBBoxSidePos.x) / 2, y: fromBBoxSidePos.y },
+          { x: fromBBoxSidePos.x + (toBBoxSidePos.x - fromBBoxSidePos.x) / 2, y: toBBoxSidePos.y },
           toPos
         ]
       } else {
         pathArray = [
           fromPos,
-          { x: fromPos.x, y: fromPos.y + (toPos.y - fromPos.y) / 2 },
-          { x: toPos.x, y: fromPos.y + (toPos.y - fromPos.y) / 2 },
+          { x: fromBBoxSidePos.x, y: fromBBoxSidePos.y + (toBBoxSidePos.y - fromBBoxSidePos.y) / 2 },
+          { x: toBBoxSidePos.x, y: fromBBoxSidePos.y + (toBBoxSidePos.y - fromBBoxSidePos.y) / 2 },
           toPos
         ]
       }
@@ -50,13 +50,13 @@ export default class EdgePathfindingSquare extends EdgePathfindingMethod {
       if (BBoxHelper.isHorizontal(fromSide)) {
         pathArray = [
           fromPos,
-          { x: toPos.x, y: fromPos.y },
+          { x: toBBoxSidePos.x, y: fromBBoxSidePos.y },
           toPos
         ]
       } else {
         pathArray = [
           fromPos,
-          { x: fromPos.x, y: toPos.y },
+          { x: fromBBoxSidePos.x, y: toBBoxSidePos.y },
           toPos
         ]
       }
@@ -65,8 +65,8 @@ export default class EdgePathfindingSquare extends EdgePathfindingMethod {
     return {
       svgPath: SvgPathHelper.pathArrayToSvgPath(pathArray, false),
       center: { 
-        x: (fromPos.x + toPos.x) / 2, 
-        y: (fromPos.y + toPos.y) / 2 
+        x: (fromBBoxSidePos.x + toBBoxSidePos.x) / 2, 
+        y: (fromBBoxSidePos.y + toBBoxSidePos.y) / 2 
       },
       rotateArrows: false
     }

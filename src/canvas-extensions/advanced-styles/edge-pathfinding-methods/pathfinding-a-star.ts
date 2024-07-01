@@ -35,7 +35,7 @@ class Node {
 }
 
 export default class EdgePathfindingAStar extends EdgePathfindingMethod {
-  getPath(plugin: AdvancedCanvasPlugin, canvas: Canvas, fromPos: Position, fromSide: Side, toPos: Position, toSide: Side, isDragging: boolean): EdgePath | null {
+  getPath(plugin: AdvancedCanvasPlugin, canvas: Canvas, fromPos: Position, _fromBBoxSidePos: Position, fromSide: Side, toPos: Position, _toBBoxSidePos: Position, toSide: Side, isDragging: boolean): EdgePath | null {
     if (isDragging && !plugin.settings.getSetting('edgeStylePathfinderPathLiveUpdate')) return null
         
     const nodeBBoxes = [...canvas.nodes.values()]

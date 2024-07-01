@@ -114,14 +114,17 @@ export default class EdgeStylesExtension extends CanvasExtension {
     // Set pathfinding method
     const pathfindingMethod = edgeData.styleAttributes?.pathfindingMethod
     if (pathfindingMethod) {
+      const fromBBoxSidePos = BBoxHelper.getCenterOfBBoxSide(edge.from.node.getBBox(), edge.from.side)
       const fromPos = edge.from.end === 'none' ? 
-        BBoxHelper.getCenterOfBBoxSide(edge.from.node.getBBox(), edge.from.side) :
+        fromBBoxSidePos :
         edge.bezier.from
+      
+      const toBBoxSidePos = BBoxHelper.getCenterOfBBoxSide(edge.to.node.getBBox(), edge.to.side)
       const toPos = edge.to.end === 'none' ? 
-        BBoxHelper.getCenterOfBBoxSide(edge.to.node.getBBox(), edge.to.side) :
+        toBBoxSidePos :
         edge.bezier.to
 
-      const path = new EDGE_PATHFINDING_METHODS[pathfindingMethod]().getPath(this.plugin, canvas, fromPos, edge.from.side, toPos, edge.to.side, canvas.isDragging)
+      const path = new EDGE_PATHFINDING_METHODS[pathfindingMethod]().getPath(this.plugin, canvas, fromPos, fromBBoxSidePos, edge.from.side, toPos, toBBoxSidePos, edge.to.side, canvas.isDragging)
       if (!path) return
 
       edge.center = path.center
