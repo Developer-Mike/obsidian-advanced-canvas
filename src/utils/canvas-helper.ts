@@ -12,16 +12,18 @@ export interface MenuOption {
 }
 
 export default class CanvasHelper {
-static canvasCommand(plugin: AdvancedCanvasPlugin, check: (canvas: Canvas) => boolean, run: (canvas: Canvas) => void): (checking: boolean) => boolean {
-  return (checking: boolean) => {
-    const canvas = plugin.getCurrentCanvas()
-    if (checking) return canvas !== null && check(canvas)
+  static readonly GRID_SIZE = 20
 
-    if (canvas) run(canvas)
+  static canvasCommand(plugin: AdvancedCanvasPlugin, check: (canvas: Canvas) => boolean, run: (canvas: Canvas) => void): (checking: boolean) => boolean {
+    return (checking: boolean) => {
+      const canvas = plugin.getCurrentCanvas()
+      if (checking) return canvas !== null && check(canvas)
 
-    return true
+      if (canvas) run(canvas)
+
+      return true
+    }
   }
-}
 
   static createQuickSettingsButton(menuOption: MenuOption): HTMLElement {
     const quickSetting = document.createElement('div')
@@ -128,7 +130,7 @@ static canvasCommand(plugin: AdvancedCanvasPlugin, check: (canvas: Canvas) => bo
     }
   }
 
-  static getBBox(canvasNodes: (CanvasNode|CanvasNodeData)[]) {
+  static getBBox(canvasNodes: (CanvasNode | CanvasNodeData)[]) {
     let minX = Infinity
     let minY = Infinity
     let maxX = -Infinity

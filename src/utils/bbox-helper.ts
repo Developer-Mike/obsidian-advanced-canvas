@@ -91,12 +91,11 @@ export default class BBoxHelper {
     }
   }
 
-  static bboxFromNodeData(nodeData: CanvasNodeData): BBox {
-    return {
-      minX: nodeData.x,
-      minY: nodeData.y,
-      maxX: nodeData.x + nodeData.width,
-      maxY: nodeData.y + nodeData.height
-    }
+  static isHorizontal(side: Side): boolean {
+    return side === 'left' || side === 'right'
+  }
+
+  static direction(side: Side): number {
+    return (side === 'right' || side === 'bottom') ? 1 : -1
   }
 }

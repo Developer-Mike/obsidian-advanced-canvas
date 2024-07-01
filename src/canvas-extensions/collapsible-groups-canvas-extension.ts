@@ -3,6 +3,7 @@ import { BBox, Canvas, CanvasData, CanvasNode } from "src/@types/Canvas"
 import { CanvasEvent } from "src/core/events"
 import BBoxHelper from "src/utils/bbox-helper"
 import CanvasExtension from "../core/canvas-extension"
+import CanvasHelper from "src/utils/canvas-helper"
 
 const COLLAPSE_BUTTON_ID = 'group-collapse-button'
 
@@ -87,9 +88,9 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
     data.nodes.forEach((groupNodeData) => {
       if (!groupNodeData.isCollapsed) return
 
-      const groupNodeBBox = BBoxHelper.bboxFromNodeData(groupNodeData)
+      const groupNodeBBox = CanvasHelper.getBBox([groupNodeData])
       const containedNodesData = data.nodes.filter((nodeData) =>
-        nodeData.id !== groupNodeData.id && BBoxHelper.insideBBox(BBoxHelper.bboxFromNodeData(nodeData), groupNodeBBox, false)
+        nodeData.id !== groupNodeData.id && BBoxHelper.insideBBox(CanvasHelper.getBBox([nodeData]), groupNodeBBox, false)
       )
       const containedEdgesData = data.edges.filter((edgeData) => {
         return containedNodesData.some((nodeData) => nodeData.id === edgeData.fromNode) || 

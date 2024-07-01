@@ -3,6 +3,7 @@ import { CanvasEvent } from "src/core/events"
 import SettingsManager from "src/settings"
 import { FileSelectModal } from "src/utils/modal-helper"
 import CanvasExtension from "../core/canvas-extension"
+import CanvasHelper from "src/utils/canvas-helper"
 
 export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtension {
   isEnabled() { return true }
@@ -61,8 +62,8 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
         const file = await new FileSelectModal(this.plugin.app, undefined, true).awaitInput()
 
         if (this.plugin.settings.getSetting('alignDoubleClickedNodeToGrid')) pos = {
-          x: Math.round((pos.x - (canvas.config.defaultFileNodeDimensions.width / 2)) / 20) * 20 + (canvas.config.defaultFileNodeDimensions.width / 2),
-          y: Math.round((pos.y - (canvas.config.defaultFileNodeDimensions.height / 2)) / 20) * 20 + (canvas.config.defaultFileNodeDimensions.height / 2)
+          x: Math.round((pos.x - (canvas.config.defaultFileNodeDimensions.width / 2)) / CanvasHelper.GRID_SIZE) * CanvasHelper.GRID_SIZE + (canvas.config.defaultFileNodeDimensions.width / 2),
+          y: Math.round((pos.y - (canvas.config.defaultFileNodeDimensions.height / 2)) / CanvasHelper.GRID_SIZE) * CanvasHelper.GRID_SIZE + (canvas.config.defaultFileNodeDimensions.height / 2)
         }
 
         canvas.createFileNode({
@@ -74,8 +75,8 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
         break
       default:
         if (this.plugin.settings.getSetting('alignDoubleClickedNodeToGrid')) pos = {
-          x: Math.round((pos.x - (canvas.config.defaultTextNodeDimensions.width / 2)) / 20) * 20 + (canvas.config.defaultTextNodeDimensions.width / 2),
-          y: Math.round((pos.y - (canvas.config.defaultTextNodeDimensions.height / 2)) / 20) * 20 + (canvas.config.defaultTextNodeDimensions.height / 2)
+          x: Math.round((pos.x - (canvas.config.defaultTextNodeDimensions.width / 2)) / CanvasHelper.GRID_SIZE) * CanvasHelper.GRID_SIZE + (canvas.config.defaultTextNodeDimensions.width / 2),
+          y: Math.round((pos.y - (canvas.config.defaultTextNodeDimensions.height / 2)) / CanvasHelper.GRID_SIZE) * CanvasHelper.GRID_SIZE + (canvas.config.defaultTextNodeDimensions.height / 2)
         }
 
         canvas.createTextNode({
