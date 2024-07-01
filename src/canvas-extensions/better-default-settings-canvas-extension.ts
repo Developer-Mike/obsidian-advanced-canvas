@@ -54,11 +54,16 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
     if (event.defaultPrevented || event.target !== canvas.wrapperEl || canvas.isDragging || canvas.readonly) return
     preventDefault.value = true
 
-    var pos = canvas.posFromEvt(event)
+    let pos = canvas.posFromEvt(event)
 
     switch (this.plugin.settings.getSetting('nodeTypeOnDoubleClick')) {
       case 'file':
         const file = await new FileSelectModal(this.plugin.app, undefined, true).awaitInput()
+
+        if (this.plugin.settings.getSetting('alignDoubleClickedNodeToGrid')) pos = {
+          x: Math.round((pos.x - (canvas.config.defaultFileNodeDimensions.width / 2)) / 20) * 20 + (canvas.config.defaultFileNodeDimensions.width / 2),
+          y: Math.round((pos.y - (canvas.config.defaultFileNodeDimensions.height / 2)) / 20) * 20 + (canvas.config.defaultFileNodeDimensions.height / 2)
+        }
 
         canvas.createFileNode({
           pos: pos,
@@ -68,6 +73,11 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
 
         break
       default:
+        if (this.plugin.settings.getSetting('alignDoubleClickedNodeToGrid')) pos = {
+          x: Math.round((pos.x - (canvas.config.defaultTextNodeDimensions.width / 2)) / 20) * 20 + (canvas.config.defaultTextNodeDimensions.width / 2),
+          y: Math.round((pos.y - (canvas.config.defaultTextNodeDimensions.height / 2)) / 20) * 20 + (canvas.config.defaultTextNodeDimensions.height / 2)
+        }
+
         canvas.createTextNode({
           pos: pos,
           position: 'center'

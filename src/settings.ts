@@ -9,6 +9,7 @@ const NODE_TYPES_ON_DOUBLE_CLICK = {
 
 export interface AdvancedCanvasPluginSettings {
   nodeTypeOnDoubleClick: string
+  alignDoubleClickedNodeToGrid: boolean
   defaultTextNodeWidth: number
   defaultTextNodeHeight: number
   defaultFileNodeWidth: number
@@ -60,6 +61,7 @@ export interface AdvancedCanvasPluginSettings {
 
 export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   nodeTypeOnDoubleClick: Object.keys(NODE_TYPES_ON_DOUBLE_CLICK).first(),
+  alignDoubleClickedNodeToGrid: true,
   defaultTextNodeWidth: 260,
   defaultTextNodeHeight: 60,
   defaultFileNodeWidth: 400,
@@ -171,6 +173,15 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           .setValue(this.settingsManager.getSetting('nodeTypeOnDoubleClick'))
           .onChange(async (value) => await this.settingsManager.setSetting({ nodeTypeOnDoubleClick: value }))
         )
+
+    new Setting(containerEl)
+      .setName("Align node, created by double click, to grid")
+      .setDesc("When enabled, a node created by double clicking will be aligned to the grid.")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.settingsManager.getSetting('alignDoubleClickedNodeToGrid'))
+          .onChange(async (value) => await this.settingsManager.setSetting({ alignDoubleClickedNodeToGrid: value }))
+      )
     
     new Setting(containerEl)
       .setName("Default text node width")
