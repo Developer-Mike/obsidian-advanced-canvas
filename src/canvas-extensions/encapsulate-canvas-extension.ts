@@ -1,7 +1,7 @@
 import { Menu } from "obsidian"
 import { Canvas } from "src/@types/Canvas"
 import { FileNameModal } from "src/utils/modal-helper"
-import * as CanvasHelper from "src/utils/canvas-helper"
+import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "../core/canvas-extension"
 
 const ENCAPSULATED_FILE_NODE_SIZE = { width: 300, height: 300 }

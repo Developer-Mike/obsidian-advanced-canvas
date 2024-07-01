@@ -1,6 +1,6 @@
 import AdvancedCanvasPlugin from "src/main"
 import { BBox, Canvas, CanvasData, CanvasEdge, CanvasEdgeData, CanvasElement, CanvasNode, CanvasNodeData, CanvasView } from "src/@types/Canvas"
-import { patchObjectInstance, patchObjectPrototype } from "src/utils/patch-helper"
+import PatchHelper from "src/utils/patch-helper"
 import { CanvasEvent } from "./events"
 import { WorkspaceLeaf } from "obsidian"
 import { around } from "monkey-around"
@@ -37,7 +37,7 @@ export default class CanvasPatcher {
     ) as CanvasView
     
     // Patch canvas view
-    patchObjectPrototype(this.plugin, canvasView, {
+    PatchHelper.patchObjectPrototype(this.plugin, canvasView, {
       getViewData: (_next: any) => function (..._args: any) {
         const canvasData = this.canvas.getData()
         canvasData.metadata = this.canvas.metadata ?? {}
@@ -57,7 +57,7 @@ export default class CanvasPatcher {
     })
 
     // Patch canvas
-    patchObjectPrototype(this.plugin, canvasView.canvas, {
+    PatchHelper.patchObjectPrototype(this.plugin, canvasView.canvas, {
       markViewportChanged: (next: any) => function (...args: any) {
         that.triggerWorkspaceEvent(CanvasEvent.ViewportChanged.Before, this)
         const result = next.call(this, ...args)
@@ -192,7 +192,7 @@ export default class CanvasPatcher {
     })
 
     // Patch canvas popup menu
-    patchObjectPrototype(this.plugin, canvasView.canvas.menu, {
+    PatchHelper.patchObjectPrototype(this.plugin, canvasView.canvas.menu, {
       render: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
         that.triggerWorkspaceEvent(CanvasEvent.PopupMenuCreated, this.canvas)
@@ -202,7 +202,7 @@ export default class CanvasPatcher {
     })
 
     // Patch interaction layer
-    patchObjectPrototype(this.plugin, canvasView.canvas.nodeInteractionLayer, {
+    PatchHelper.patchObjectPrototype(this.plugin, canvasView.canvas.nodeInteractionLayer, {
       setTarget: (next: any) => function (node: CanvasNode) {
         const result = next.call(this, node)
         that.triggerWorkspaceEvent(CanvasEvent.NodeInteraction, this.canvas, node)
@@ -223,7 +223,7 @@ export default class CanvasPatcher {
   private patchNode(node: CanvasNode) {
     const that = this
 
-    patchObjectInstance(this.plugin, node, {
+    PatchHelper.patchObjectInstance(this.plugin, node, {
       setData: (next: any) => function (data: CanvasNodeData, addHistory?: boolean) {
         const result = next.call(this, data)
 
@@ -258,7 +258,7 @@ export default class CanvasPatcher {
   private patchEdge(edge: CanvasEdge) {
     const that = this
 
-    patchObjectInstance(this.plugin, edge, {
+    PatchHelper.patchObjectInstance(this.plugin, edge, {
       setData: (next: any) => function (data: CanvasEdgeData, addHistory?: boolean) {
         const result = next.call(this, data)
 

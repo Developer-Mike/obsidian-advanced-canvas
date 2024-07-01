@@ -1,7 +1,7 @@
 import { TFile } from "obsidian"
 import { BBox, Canvas, CanvasData, CanvasEdge, CanvasElement, CanvasNode, CanvasNodeData } from "src/@types/Canvas"
 import { CanvasEvent } from "src/core/events"
-import * as CanvasHelper from "src/utils/canvas-helper"
+import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "../core/canvas-extension"
 
 const PORTAL_PADDING = 50

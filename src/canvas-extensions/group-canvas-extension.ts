@@ -1,6 +1,5 @@
 import { Canvas, Position } from "src/@types/Canvas"
-import * as CanvasHelper from "src/utils/canvas-helper"
-import AdvancedCanvasPlugin from "src/main"
+import CanvasHelper from "src/utils/canvas-helper"
 import { CanvasEvent } from "src/core/events"
 import CanvasExtension from "../core/canvas-extension"
 

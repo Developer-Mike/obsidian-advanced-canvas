@@ -1,5 +1,5 @@
 import App, { SuggestModal, TFile } from 'obsidian'
-import * as PathHelper from 'src/utils/path-helper'
+import PathHelper from 'src/utils/path-helper'
 
 export class FileNameModal extends SuggestModal<string> {
   parentPath: string

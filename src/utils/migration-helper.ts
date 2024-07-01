@@ -1,6 +1,6 @@
-import { Canvas } from "src/@types/Canvas";
-import { CanvasEvent } from "src/core/events";
-import AdvancedCanvasPlugin from "src/main";
+import { Canvas } from "src/@types/Canvas"
+import { CanvasEvent } from "src/core/events"
+import AdvancedCanvasPlugin from "src/main"
 
 export default class MigrationHelper {
   private plugin: AdvancedCanvasPlugin

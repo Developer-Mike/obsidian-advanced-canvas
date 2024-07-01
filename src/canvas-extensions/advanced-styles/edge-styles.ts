@@ -1,12 +1,20 @@
 import { Canvas, CanvasEdge, CanvasNode, Position, Side } from "src/@types/Canvas"
-import * as CanvasHelper from "src/utils/canvas-helper"
-import * as AStarHelper from "src/utils/a-star-helper"
-import * as SvgPathHelper from "src/utils/svg-path-helper"
+import CanvasHelper from "src/utils/canvas-helper"
 import { CanvasEvent } from "src/core/events"
-import * as BBoxHelper from "src/utils/bbox-helper"
+import BBoxHelper from "src/utils/bbox-helper"
 import CanvasExtension from "../../core/canvas-extension"
 import { BUILTIN_EDGE_STYLE_ATTRIBUTES, StyleAttribute } from "./style-config"
 import SettingsManager from "src/settings"
+import EdgePathfindingMethod from "./edge-pathfinding-methods/edge-pathfinding-method"
+import EdgePathfindingDirect from "./edge-pathfinding-methods/pathfinding-direct"
+import EdgePathfindingSquare from "./edge-pathfinding-methods/pathfinding-square"
+import EdgePathfindingAStar from "./edge-pathfinding-methods/pathfinding-a-star"
+
+const EDGE_PATHFINDING_METHODS: { [key: string]: new() => EdgePathfindingMethod } = {
+  'direct': EdgePathfindingDirect,
+  'square': EdgePathfindingSquare,
+  'a-star': EdgePathfindingAStar
+}
 
 export default class EdgeStylesExtension extends CanvasExtension {
   allEdgeStyleAttributes: StyleAttribute[]
@@ -53,7 +61,7 @@ export default class EdgeStylesExtension extends CanvasExtension {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.DraggingStateChanged,
       (canvas: Canvas, isDragging: boolean) => {
-        if (isDragging || this.plugin.settings.getSetting('edgeStylePathfinderPathLiveUpdate')) return
+        if (isDragging) return
         this.updateAllEdges(canvas)
       }
     ))
@@ -100,113 +108,38 @@ export default class EdgeStylesExtension extends CanvasExtension {
     
     // Reset path to default
     if (!edge.bezier) return
-    edge.updatePath()
     edge.center = undefined
-
-    // Set arrow style
-    const arrowPolygonPoints = this.getArrowPolygonPoints(edgeData.styleAttributes?.arrow)
-
-    if (edge.fromLineEnd?.el) edge.fromLineEnd.el.querySelector('polygon')?.setAttribute('points', arrowPolygonPoints)
-    if (edge.toLineEnd?.el) edge.toLineEnd.el.querySelector('polygon')?.setAttribute('points', arrowPolygonPoints)
+    edge.updatePath()
 
     // Set pathfinding method
-    const pathRouteType = edgeData.styleAttributes?.pathfindingMethod
-    if (pathRouteType) {
+    const pathfindingMethod = edgeData.styleAttributes?.pathfindingMethod
+    if (pathfindingMethod) {
       const fromPos = edge.from.end === 'none' ? 
         BBoxHelper.getCenterOfBBoxSide(edge.from.node.getBBox(), edge.from.side) :
         edge.bezier.from
-
       const toPos = edge.to.end === 'none' ? 
         BBoxHelper.getCenterOfBBoxSide(edge.to.node.getBBox(), edge.to.side) :
         edge.bezier.to
 
-      let newPath = edge.path.display.getAttribute("d")
-    
-      if (pathRouteType === 'direct') {
-        newPath = SvgPathHelper.pathArrayToSvgPath([fromPos, toPos], false)
-        edge.center = {
-          x: (fromPos.x + toPos.x) / 2,
-          y: (fromPos.y + toPos.y) / 2
-        }
-      } else if (pathRouteType === 'square') {
-        let pathArray: Position[] = []
-        if (edge.from.side === 'bottom' || edge.from.side === 'top') {
-          pathArray = [
-            fromPos, 
-            { x: fromPos.x, y: fromPos.y + (toPos.y - fromPos.y) / 2 },
-            { x: toPos.x, y: fromPos.y + (toPos.y - fromPos.y) / 2 },
-            toPos
-          ]
-        } else {
-          pathArray = [
-            fromPos, 
-            { x: fromPos.x + (toPos.x - fromPos.x) / 2, y: fromPos.y },
-            { x: fromPos.x + (toPos.x - fromPos.x) / 2, y: toPos.y },
-            toPos
-          ]
-        }
+      const path = new EDGE_PATHFINDING_METHODS[pathfindingMethod]().getPath(this.plugin, canvas, fromPos, edge.from.side, toPos, edge.to.side, canvas.isDragging)
+      if (!path) return
 
-        newPath = SvgPathHelper.pathArrayToSvgPath(pathArray, false)
-        edge.center = { 
-          x: (fromPos.x + toPos.x) / 2, 
-          y: (fromPos.y + toPos.y) / 2 
-        }
-      } else if (pathRouteType === 'a-star') {
-        if (canvas.isDragging && !this.plugin.settings.getSetting('edgeStylePathfinderPathLiveUpdate')) return
-        
-        const nodeBBoxes = [...canvas.nodes.values()]
-          .filter(node => {
-            const nodeData = node.getData()
-            
-            const isGroup = nodeData.type === 'group' // Exclude group nodes
-            const isOpenPortal = nodeData.portalToFile !== undefined // Exclude open portals
-            
-            return !isGroup && !isOpenPortal
-          }).map(node => node.getBBox())
-        
-        const fromPosWithMargin = BBoxHelper.moveInDirection(fromPos, edge.from.side, 10)
-        const toPosWithMargin = BBoxHelper.moveInDirection(toPos, edge.to.side, 10)
-
-        const gridResolution = this.plugin.settings.getSetting('edgeStylePathfinderGridResolution')
-        const pathArray = AStarHelper.aStar(fromPosWithMargin, edge.from.side, toPosWithMargin, edge.to.side, nodeBBoxes, gridResolution)
-        if (!pathArray) return // No path found - use default path
-
-        // Make connection points to the node removing the margin
-        pathArray.splice(0, 0, fromPos)
-        pathArray.splice(pathArray.length, 0, toPos)
-
-        const roundedPath = this.plugin.settings.getSetting('edgeStylePathfinderPathRounded')
-        const svgPath = SvgPathHelper.pathArrayToSvgPath(pathArray, roundedPath)
-
-        newPath = svgPath
-        edge.center = pathArray[Math.floor(pathArray.length / 2)]
-      }
-      
-      edge.path.interaction.setAttr("d", newPath)
-      edge.path.display.setAttr("d", newPath)
+      edge.center = path.center
+      edge.path.interaction.setAttr("d", path?.svgPath)
+      edge.path.display.setAttr("d", path?.svgPath)
     }
 
     // Update label position
     edge.labelElement?.render()
 
+    // Set arrow polygon
+    const arrowPolygonPoints = this.getArrowPolygonPoints(edgeData.styleAttributes?.arrow)
+    if (edge.fromLineEnd?.el) edge.fromLineEnd.el.querySelector('polygon')?.setAttribute('points', arrowPolygonPoints)
+    if (edge.toLineEnd?.el) edge.toLineEnd.el.querySelector('polygon')?.setAttribute('points', arrowPolygonPoints)
+
     // Rotate arrows accordingly
     if (this.plugin.settings.getSetting('edgeStyleDirectRotateArrow')) {
-      const edgeRotation = Math.atan2(edge.bezier.to.y - edge.bezier.from.y, edge.bezier.to.x - edge.bezier.from.x) - (Math.PI / 2)
-      const setArrowRotation = (element: HTMLElement, side: Side, rotation: number) => {
-        element.style.transform = element.style.transform
-          .replace(/rotate\([-\d]+(deg|rad)\)/g, `rotate(${rotation}rad)`)
-
-        const offset = BBoxHelper.getSideVector(side)
-        element.style.translate = `${offset.x * 7}px ${offset.y * -7}px`
-      }
-
-      if (pathRouteType === 'direct') {
-        if (edge.fromLineEnd?.el) setArrowRotation(edge.fromLineEnd.el, edge.from.side, edgeRotation)
-        if (edge.toLineEnd?.el) setArrowRotation(edge.toLineEnd.el, edge.to.side, edgeRotation - Math.PI)
-      } else {
-        if (edge.fromLineEnd?.el) edge.fromLineEnd.el.style.translate = ""
-        if (edge.toLineEnd?.el) edge.toLineEnd.el.style.translate = ""
-      }
+      this.rotateArrows(edge, pathfindingMethod)
     }
   }
 
@@ -226,5 +159,28 @@ export default class EdgeStylesExtension extends CanvasExtension {
       return `0 0, 4.95 1.8, 7.5 6.45, 6.6 11.7, 2.7 15, -2.7 15, -6.6 11.7, -7.5 6.45, -4.95 1.8`
     else // Default triangle
       return `0,0 6.5,10.4 -6.5,10.4`
+  }
+
+  private rotateArrows(edge: CanvasEdge, pathRouteType?: string | null) {
+    // Reset arrow rotation
+    if (pathRouteType !== 'direct') {
+      if (edge.fromLineEnd?.el) edge.fromLineEnd.el.style.translate = ""
+      if (edge.toLineEnd?.el) edge.toLineEnd.el.style.translate = ""
+
+      return
+    }
+    
+    const setArrowRotation = (element: HTMLElement, side: Side, rotation: number) => {
+      element.style.transform = element.style.transform
+        .replace(/rotate\([-\d]+(deg|rad)\)/g, `rotate(${rotation}rad)`)
+
+      const offset = BBoxHelper.getSideVector(side)
+      element.style.translate = `${offset.x * 7}px ${offset.y * -7}px`
+    }
+
+    const edgeRotation = Math.atan2(edge.bezier.to.y - edge.bezier.from.y, edge.bezier.to.x - edge.bezier.from.x) - (Math.PI / 2)
+
+    if (edge.fromLineEnd?.el) setArrowRotation(edge.fromLineEnd.el, edge.from.side, edgeRotation)
+    if (edge.toLineEnd?.el) setArrowRotation(edge.toLineEnd.el, edge.to.side, edgeRotation - Math.PI)
   }
 }

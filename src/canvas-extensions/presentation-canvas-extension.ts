@@ -1,8 +1,8 @@
 import { Menu, Notice } from 'obsidian'
 import { BBox, Canvas, CanvasEdge, CanvasElement, CanvasNode, Position, Size } from 'src/@types/Canvas'
 import { CanvasEvent } from 'src/core/events'
-import * as CanvasHelper from "src/utils/canvas-helper"
-import * as BBoxHelper from "src/utils/bbox-helper"
+import CanvasHelper from "src/utils/canvas-helper"
+import BBoxHelper from "src/utils/bbox-helper"
 import CanvasExtension from '../core/canvas-extension'
 
 const START_SLIDE_NAME = 'Start Slide'

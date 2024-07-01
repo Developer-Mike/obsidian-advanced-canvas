@@ -1,5 +1,5 @@
 import { Canvas } from "src/@types/Canvas"
-import * as CanvasHelper from "src/utils/canvas-helper"
+import CanvasHelper from "src/utils/canvas-helper"
 import { FileSelectModal } from "src/utils/modal-helper"
 import CanvasExtension from "../core/canvas-extension"
 
