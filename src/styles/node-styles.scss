@@ -114,7 +114,7 @@
     }
   }
   
-  &[data-shape='predefined']-process {
+  &[data-shape='predefined-process'] {
     @extend .reactive-node;
   
     $line-padding: 10px;
