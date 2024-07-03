@@ -7,7 +7,6 @@ export function getExposedEdgeData(settings: SettingsManager): (keyof CanvasEdge
   const exposedData: (keyof CanvasEdgeData)[] = []
 
   if (settings.getSetting('edgesStylingFeatureEnabled')) exposedData.push('styleAttributes')
-  if (settings.getSetting('portalsFeatureEnabled')) exposedData.push('isUnsaved')
 
   return exposedData
 }

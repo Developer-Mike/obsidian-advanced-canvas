@@ -40,12 +40,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
       CanvasEvent.SelectionChanged,
       (canvas: Canvas, oldSelection: Set<CanvasElement>, updateSelection: (update: () => void) => void) => this.onSelectionChanged(canvas, oldSelection, updateSelection)
     ))
-
-    this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.EdgeChanged,
-      (canvas: Canvas, edge: CanvasEdge) => this.onEdgeChanged(canvas, edge)
-    ))
-
+    
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.DataRequested,
       (canvas: Canvas, data: CanvasData) => this.removePortalCanvasData(canvas, data)
@@ -128,17 +123,6 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     Object.keys(nodeData.portalIdMaps?.edgeIdMap ?? {}).map(refEdgeId => canvas.edges.get(refEdgeId))
       .filter(edge => edge !== undefined)
       .forEach(edge => canvas.removeEdge(edge!))
-  }
-
-  private onEdgeChanged(_canvas: Canvas, edge: CanvasEdge) {
-    const isUnsaved = (edge.from.node !== undefined && edge.to.node !== undefined) && // Edge not fully connected
-      (edge.from.node.getData().portalId !== undefined && edge.to.node.getData().portalId !== undefined) && // Both nodes are from portal
-      edge.getData().portalId === undefined // Edge is not from portal
-
-    edge.setData({
-      ...edge.getData(), 
-      isUnsaved: isUnsaved ? true : undefined
-    })
   }
 
   private onContainingNodesRequested(_canvas: Canvas, _bbox: BBox, nodes: CanvasNode[]) {
