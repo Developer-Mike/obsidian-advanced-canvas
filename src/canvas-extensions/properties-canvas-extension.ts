@@ -69,7 +69,7 @@ class PropertiesModal extends Modal {
         text
           .setValue(this.canvas.metadata.properties?.cssclasses?.join(' '))
           .onChange((value) => {
-            this.canvas.metadata.properties = this.canvas.metadata.properties || {}
+            this.canvas.metadata.properties = this.canvas.metadata?.properties ?? {}
             this.canvas.metadata.properties.cssclasses = value.split(' ')
           })
       ).settingEl.classList.add('properties-field')
