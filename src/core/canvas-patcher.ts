@@ -4,7 +4,7 @@ import PatchHelper from "src/utils/patch-helper"
 import { CanvasEvent } from "./events"
 import { WorkspaceLeaf } from "obsidian"
 import { around } from "monkey-around"
-import { create } from "domain"
+import JSONC from "tiny-jsonc"
 
 export default class CanvasPatcher {
   plugin: AdvancedCanvasPlugin
@@ -37,6 +37,7 @@ export default class CanvasPatcher {
     ) as CanvasView
     
     // Patch canvas view
+    const fixBrokenCanvasFiles = this.plugin.settings.getSetting('fixBrokenCanvasFiles')
     PatchHelper.patchObjectPrototype(this.plugin, canvasView, {
       getViewData: (_next: any) => function (..._args: any) {
         const canvasData = this.canvas.getData()
@@ -45,9 +46,21 @@ export default class CanvasPatcher {
         return JSON.stringify(canvasData, null, 2)
       },
       setViewData: (next: any) => function (json: string, ...args: any) {
-        const result = next.call(this, json, ...args)
+        let validJson = json
+        let parsedJson
 
-        try { this.canvas.metadata = JSON.parse(json).metadata }
+        // Check for SyntaxError
+        try { parsedJson = JSON.parse(json) }
+        catch (e) {
+          if (fixBrokenCanvasFiles) {
+            parsedJson = JSONC.parse(json)
+            validJson = JSON.stringify(parsedJson, null, 2)
+          }
+        }
+
+        const result = next.call(this, validJson, ...args)
+
+        try { this.canvas.metadata = parsedJson.metadata }
         catch (_e) { this.canvas.metadata = {} }
 
         that.triggerWorkspaceEvent(CanvasEvent.CanvasChanged, this.canvas)
