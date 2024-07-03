@@ -257,7 +257,7 @@ Add custom colors to the color picker. You can add them using the following css 
 Support for properties in canvas files just like in md files. You can edit the properties using the updated control menu.
 
 Supported properties:
-- `cssclasses`
+- `cssclasses` (Separate multiple classes with a space)
 
 ### Custom Background Example (cssclasses)
 ```css
