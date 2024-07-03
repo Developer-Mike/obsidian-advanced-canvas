@@ -63,6 +63,7 @@ class PropertiesModal extends Modal {
     .setName("Properties")
 
     new Setting(this.contentEl)
+      .setClass("properties-field")
       .setName("cssclasses")
       .setTooltip("Add classes to the canvas wrapper element. Separate multiple classes with spaces.")
       .addText((text) =>
@@ -72,7 +73,7 @@ class PropertiesModal extends Modal {
             this.canvas.metadata.properties = this.canvas.metadata?.properties ?? {}
             this.canvas.metadata.properties.cssclasses = value.split(' ')
           })
-      ).settingEl.classList.add('properties-field')
+      )
   }
 
   onClose() {}
