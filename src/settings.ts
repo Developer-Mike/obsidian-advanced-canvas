@@ -15,7 +15,6 @@ export interface AdvancedCanvasPluginSettings {
   defaultFileNodeWidth: number
   defaultFileNodeHeight: number
 
-  fixBrokenCanvasFiles: boolean
   performanceOptimizationEnabled: boolean
 
   nodeStylingFeatureEnabled: boolean
@@ -68,7 +67,6 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   defaultFileNodeWidth: 400,
   defaultFileNodeHeight: 400,
 
-  fixBrokenCanvasFiles: false,
   performanceOptimizationEnabled: false,
 
   nodeStylingFeatureEnabled: true,
@@ -220,13 +218,6 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           .setValue(this.settingsManager.getSetting('defaultFileNodeHeight').toString())
           .onChange(async (value) => await this.settingsManager.setSetting({ defaultFileNodeHeight: Math.max(1, parseInt(value)) }))
       )
-
-    this.createFeatureHeading(
-      containerEl,
-      "Fix broken canvas files",
-      "Fix broken canvas files by removing trailing commas. (This is a workaround for a bug in Obsidian. It happens if you edit an advanced canvas file without the plugin enabled. I suggest you to only enable this if you encounter the error: Failed to open \"\")",
-      'fixBrokenCanvasFiles'
-    )
 
     this.createFeatureHeading(
       containerEl,

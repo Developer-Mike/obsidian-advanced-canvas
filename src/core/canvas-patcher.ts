@@ -37,7 +37,6 @@ export default class CanvasPatcher {
     ) as CanvasView
     
     // Patch canvas view
-    const fixBrokenCanvasFiles = this.plugin.settings.getSetting('fixBrokenCanvasFiles')
     PatchHelper.patchObjectPrototype(this.plugin, canvasView, {
       getViewData: (_next: any) => function (..._args: any) {
         const canvasData = this.canvas.getData()
@@ -52,10 +51,12 @@ export default class CanvasPatcher {
         // Check for SyntaxError
         try { parsedJson = JSON.parse(json) }
         catch (e) {
-          if (fixBrokenCanvasFiles) {
-            parsedJson = JSONC.parse(json)
-            validJson = JSON.stringify(parsedJson, null, 2)
-          }
+          // Invalid JSON
+          that.plugin.createFileSnapshot(this.file.path, json)
+          
+          // Try to parse it with trailing commas
+          parsedJson = JSONC.parse(json)
+          validJson = JSON.stringify(parsedJson, null, 2)
         }
 
         const result = next.call(this, validJson, ...args)

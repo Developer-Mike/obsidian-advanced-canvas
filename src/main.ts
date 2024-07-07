@@ -88,14 +88,21 @@ export default class AdvancedCanvasPlugin extends Plugin {
 
   onunload() {}
 
-  getCurrentCanvasView(): CanvasView|null {
+  getCurrentCanvasView(): CanvasView | null {
     const canvasView = this.app.workspace.getActiveViewOfType(ItemView)
     if (canvasView?.getViewType() !== 'canvas') return null
     return canvasView as CanvasView
   }
 
-  getCurrentCanvas(): Canvas|null {
+  getCurrentCanvas(): Canvas | null {
     return this.getCurrentCanvasView()?.canvas || null
+  }
+
+  createFileSnapshot(path: string, content: string) {
+    const fileRecoveryPlugin = this.app.internalPlugins.plugins['file-recovery']?.instance
+    if (!fileRecoveryPlugin) return
+
+    fileRecoveryPlugin.forceAdd(path, content)
   }
 
   // this.app.plugins.plugins["advanced-canvas"].enableDebugMode()
