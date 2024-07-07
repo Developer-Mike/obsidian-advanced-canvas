@@ -19,7 +19,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
   init() {
     /* Add wrap in slide option to context menu */
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      'canvas:selection-menu',
+      CanvasEvent.SelectionContextMenu,
       (menu: Menu, canvas: Canvas) => {
         menu.addItem((item) =>
           item

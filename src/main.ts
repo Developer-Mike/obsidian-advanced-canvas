@@ -13,6 +13,7 @@ import WindowsManager from './windows-manager'
 // Canvas Extensions
 import CanvasExtension from './core/canvas-extension'
 import GroupCanvasExtension from './canvas-extensions/group-canvas-extension'
+import EdgePathAnchorCanvasExtension from './canvas-extensions/edge-path-anchor-canvas-extension'
 import PresentationCanvasExtension from './canvas-extensions/presentation-canvas-extension'
 import BetterReadonlyCanvasExtension from './canvas-extensions/better-readonly-canvas-extension'
 import EncapsulateCanvasExtension from './canvas-extensions/encapsulate-canvas-extension'
@@ -50,6 +51,7 @@ const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   CommandsCanvasExtension,
   PropertiesCanvasExtension,
   BetterReadonlyCanvasExtension,
+  EdgePathAnchorCanvasExtension,
   GroupCanvasExtension,
 
   // More Advanced Extensions

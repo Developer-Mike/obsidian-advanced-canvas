@@ -14,6 +14,8 @@ export interface AdvancedCanvasPluginSettings {
   defaultTextNodeHeight: number
   defaultFileNodeWidth: number
   defaultFileNodeHeight: number
+  defaultGroupNodeWidth: number
+  defaultGroupNodeHeight: number
 
   fixBrokenCanvasFiles: boolean
   performanceOptimizationEnabled: boolean
@@ -67,6 +69,8 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   defaultTextNodeHeight: 60,
   defaultFileNodeWidth: 400,
   defaultFileNodeHeight: 400,
+  defaultGroupNodeWidth: 300,
+  defaultGroupNodeHeight: 300,
 
   fixBrokenCanvasFiles: false,
   performanceOptimizationEnabled: false,
@@ -219,6 +223,24 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
         text
           .setValue(this.settingsManager.getSetting('defaultFileNodeHeight').toString())
           .onChange(async (value) => await this.settingsManager.setSetting({ defaultFileNodeHeight: Math.max(1, parseInt(value)) }))
+      )
+
+    new Setting(containerEl)
+      .setName("Default group node width")
+      .setDesc("The default width of a group node.")
+      .addText((text) =>
+        text
+          .setValue(this.settingsManager.getSetting('defaultGroupNodeWidth').toString())
+          .onChange(async (value) => await this.settingsManager.setSetting({ defaultGroupNodeWidth: Math.max(1, parseInt(value)) }))
+      )
+
+    new Setting(containerEl)
+      .setName("Default group node height")
+      .setDesc("The default height of a group node.")
+      .addText((text) =>
+        text
+          .setValue(this.settingsManager.getSetting('defaultGroupNodeHeight').toString())
+          .onChange(async (value) => await this.settingsManager.setSetting({ defaultGroupNodeHeight: Math.max(1, parseInt(value)) }))
       )
 
     this.createFeatureHeading(

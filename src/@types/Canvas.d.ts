@@ -40,6 +40,9 @@ export interface Canvas {
   quickSettingsButton: HTMLElement
   nodeInteractionLayer: NodeInteractionLayer
 
+  pointer: Position
+  posFromClient(clientPos: Position): Position
+
   canvasRect: DOMRect
   getViewportBBox(): BBox
   setViewport(tx: number, ty: number, tZoom: number): void
@@ -76,7 +79,7 @@ export interface Canvas {
 
   addNode(node: CanvasNode): void
   removeNode(node: CanvasNode): void
-  addEdge(edge: CanvasEdge): void
+  addEdge(edge: CanvasEdgeData): void
   removeEdge(edge: CanvasEdge): void
 
   getContainingNodes(bbox: BBox): CanvasNode[]
@@ -174,6 +177,9 @@ export interface CanvasElement {
   isDirty?: boolean // Custom for Change event
 
   initialize(): void
+  startEditing(): void
+  blur(): void
+  
   setColor(color: string): void
   
   getBBox(): BBox
@@ -189,7 +195,7 @@ export interface CanvasNodeData {
   label?: string
   file?: string
 
-  // TODO: needsToBeInitialized?: boolean
+  isEdgePathAnchor?: boolean
   styleAttributes?: { [key: string]: string | null }
 
   isCollapsed?: boolean
@@ -304,6 +310,7 @@ export interface CanvasEdge extends CanvasElement {
   /** Custom field */
   center?: Position
   getCenter(): Position
+  
   render(): void
   updatePath(): void
   
@@ -312,7 +319,10 @@ export interface CanvasEdge extends CanvasElement {
 }
 
 export interface NodeInteractionLayer {
+  canvas: Canvas
   interactionEl: HTMLElement
+
+  target?: CanvasNode
   setTarget(node: CanvasNode): void
 }
 

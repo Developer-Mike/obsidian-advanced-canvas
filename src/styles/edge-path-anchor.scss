@@ -1,0 +1,28 @@
+// Hide popup menu for edge path anchors
+.canvas-wrapper:has(.canvas-node[data-is-edge-path-anchor="true"].is-focused),
+.canvas-wrapper:not(:has(.canvas-node.is-focused)):not(:has(.canvas-node:not([data-is-edge-path-anchor="true"]).is-selected)):not(:has(.canvas-edges > g.is-focused)) {
+  .canvas-menu-container {
+    display: none;
+  }
+}
+
+// Disable resizing of edge path anchors
+.canvas-node-interaction-layer[data-target-is-edge-path-anchor="true"] .canvas-node-resizer {
+  pointer-events: none;
+}
+
+.canvas-node[data-is-edge-path-anchor="true"] {
+  &.is-selected, &.is-focused {
+    .canvas-node-container {
+      border-color: var(--color-accent);
+      background-color: var(--color-accent);
+    }
+  }
+
+  .canvas-node-container {
+    box-shadow: none !important;
+
+    background-color: rgb(var(--canvas-color));
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  }
+}

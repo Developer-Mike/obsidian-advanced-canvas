@@ -23,7 +23,7 @@
   }
 }
 
-.canvas-node {
+.canvas-node:not([data-is-edge-path-anchor="true"]) {
   //#region Text Alignment
   &[data-text-align='center'] {
     .markdown-preview-view {

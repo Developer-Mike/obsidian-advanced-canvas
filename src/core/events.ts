@@ -1,6 +1,14 @@
+const CANVAS_EVENT_PREFIX = 'canvas'
 const PLUGIN_EVENT_PREFIX = 'advanced-canvas'
 
 export const CanvasEvent = {
+  // Built-in events
+  SelectionContextMenu: `${CANVAS_EVENT_PREFIX}:selection-menu`,
+  NodeContextMenu: `${CANVAS_EVENT_PREFIX}:node-menu`,
+  EdgeContextMenu: `${CANVAS_EVENT_PREFIX}:edge-menu`,
+  NodeConnectionDropContextMenu: `${CANVAS_EVENT_PREFIX}:node-connection-drop-menu`,
+
+  // Custom events
   CanvasChanged: `${PLUGIN_EVENT_PREFIX}:canvas-changed`,
   ViewportChanged: {
     Before: `${PLUGIN_EVENT_PREFIX}:viewport-changed:before`,
@@ -17,6 +25,11 @@ export const CanvasEvent = {
   EdgeRemoved: `${PLUGIN_EVENT_PREFIX}:edge-removed`,
   NodeChanged: `${PLUGIN_EVENT_PREFIX}:node-changed`,
   EdgeChanged: `${PLUGIN_EVENT_PREFIX}:edge-changed`,
+  NodeInteraction: `${PLUGIN_EVENT_PREFIX}:node-interaction`,
+  NodeEditingStarted: {
+    Before: `${PLUGIN_EVENT_PREFIX}:node-editing-started:before`
+  },
+  NodeInteractionLayerRender: `${PLUGIN_EVENT_PREFIX}:node-interaction-layer-render`,
   NodeBBoxRequested: `${PLUGIN_EVENT_PREFIX}:node-bbox-requested`,
   EdgeCenterRequested: `${PLUGIN_EVENT_PREFIX}:edge-center-requested`,
   ContainingNodesRequested: `${PLUGIN_EVENT_PREFIX}:containing-nodes-requested`,
@@ -26,7 +39,6 @@ export const CanvasEvent = {
     After: `${PLUGIN_EVENT_PREFIX}:zoom-to-bbox:after`
   },
   PopupMenuCreated: `${PLUGIN_EVENT_PREFIX}:popup-menu-created`,
-  NodeInteraction: `${PLUGIN_EVENT_PREFIX}:node-interaction`,
   Undo: `${PLUGIN_EVENT_PREFIX}:undo`,
   Redo: `${PLUGIN_EVENT_PREFIX}:redo`,
   ReadonlyChanged: `${PLUGIN_EVENT_PREFIX}:readonly-changed`,

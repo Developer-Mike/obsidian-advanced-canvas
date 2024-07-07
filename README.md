@@ -340,7 +340,7 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
 
 <details>
     <summary>
-        All Events (27)
+        All Events (28)
     </summary>
 
   - `advanced-canvas:canvas-changed`
@@ -354,7 +354,7 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
     - Payload: `Canvas`, `Node`
   - `advanced-canvas:double-click`
     - Fired when the canvas gets double-clicked
-    - Payload: `Canvas`, `MouseEvent`, `preventDefault: { value: Boolean }`
+    - Payload: `Canvas`, `MouseEvent`, `preventDefault: { value: Boolean } (Reference!)`
   - `advanced-canvas:dragging-state-changed`
     - Fired when the dragging state of the canvas changes
     - Payload: `Canvas`, `boolean`
@@ -382,6 +382,15 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
   - `advanced-canvas:edge-changed`
     - Fired when any edge gets changed
     - Payload: `Canvas`, `Edge`
+  - `advanced-canvas:node-interaction`
+    - Fired when a node gets hovered over
+    - Payload: `Canvas`, `Node`
+  - `advanced-canvas:node-editing-started:before`
+    - Fired before the node editing gets started
+    - Payload: `Canvas`, `Node`, `cancelled: { value: boolean } (Reference!)`
+  - `advanced-canvas:node-interaction-layer-render`
+    - Fired when the interaction overlay gets rendered
+    - Payload: `Canvas`, `NodeInteractionLayer`
   - `advanced-canvas:node-bbox-requested`
     - Fired when the bounding box of a node gets requested (e.g. for the edge path or when dragging a group)
     - Payload: `Canvas`, `Node`, `BBox (Reference!)`
@@ -400,9 +409,6 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
   - `advanced-canvas:popup-menu-created`
     - Fired when the a node popup menu gets created (Not firing multiple times if it gets moved between nodes of the same type)
     - Payload: `Canvas`
-  - `advanced-canvas:node-interaction`
-    - Fired when a node gets hovered over
-    - Payload: `Canvas`, `Node`
   - `advanced-canvas:undo`
     - Fired when undo gets called
     - Payload: `Canvas`

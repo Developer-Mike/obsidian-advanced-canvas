@@ -28,7 +28,7 @@ export default class NodeStylesExtension extends CanvasExtension {
     if (canvas.readonly || selectionNodeData.length === 0 || selectionNodeData.length !== canvas.selection.size)
       return
 
-    const selectedNodeTypes = new Set(selectionNodeData.map(node => node.type))
+    const selectedNodeTypes = new Set(selectionNodeData.map(nodeData => nodeData.type))
     const availableNodeStyles = this.allNodeStyles.filter(style => !style.nodeTypes || style.nodeTypes.some(type => selectedNodeTypes.has(type)))
 
     CanvasHelper.createStyleDropdownMenu(

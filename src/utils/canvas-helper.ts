@@ -121,6 +121,12 @@ export default class CanvasHelper {
     popupMenuEl.insertAfter(element, sisterElement)
   }
 
+  static generateRandomId(): string {
+    for (var id = [], i = 0; i < 16; i++)
+        id.push((16 * Math.random() | 0).toString(16))
+    return id.join("")
+  }
+
   static getCenterCoordinates(canvas: Canvas, nodeSize: Size): Position {
     const viewBounds = canvas.getViewportBBox()
 

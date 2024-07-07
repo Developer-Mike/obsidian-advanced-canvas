@@ -138,14 +138,12 @@ export default class CanvasPatcher {
         return next.call(this, edge)
       },
       removeNode: (next: any) => function (node: CanvasNode) {
-        const result = next.call(this, node)
         that.triggerWorkspaceEvent(CanvasEvent.NodeRemoved, this, node)
-        return result
+        return next.call(this, node)
       },
       removeEdge: (next: any) => function (edge: CanvasEdge) {
-        const result = next.call(this, edge)
         that.triggerWorkspaceEvent(CanvasEvent.EdgeRemoved, this, edge)
-        return result
+        return next.call(this, edge)
       },
       zoomToBbox: (next: any) => function (bbox: BBox) {
         that.triggerWorkspaceEvent(CanvasEvent.ZoomToBbox.Before, this, bbox)
@@ -170,12 +168,6 @@ export default class CanvasPatcher {
         that.triggerWorkspaceEvent(CanvasEvent.Redo, this)
         return result
       },
-      /*setData: (next: any) => function (...args: any) {
-        //
-        const result = next.call(this, ...args)
-        //
-        return result
-      },*/
       getData: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
         that.triggerWorkspaceEvent(CanvasEvent.DataRequested, this, result)
@@ -220,6 +212,23 @@ export default class CanvasPatcher {
         const result = next.call(this, node)
         that.triggerWorkspaceEvent(CanvasEvent.NodeInteraction, this.canvas, node)
         return result
+      },
+      render: (next: any) => function (...args: any) {
+        const result = next.call(this, ...args)
+
+        // Use BBox instead of node properties
+        /* if (this.target) {
+          const bbox = this.target.getBBox()
+
+          this.interactionEl?.setCssStyles({
+            transform: `translate(${bbox.minX}px, ${bbox.minY}px)`,
+            width: `${bbox.maxX - bbox.minX}px`,
+            height: `${bbox.maxY - bbox.minY}px`
+          })
+        } */
+
+        that.triggerWorkspaceEvent(CanvasEvent.NodeInteractionLayerRender, this.canvas, this)
+        return result
       }
     })
 
@@ -240,10 +249,10 @@ export default class CanvasPatcher {
       setData: (next: any) => function (data: CanvasNodeData, addHistory?: boolean) {
         const result = next.call(this, data)
 
-        if (node.initialized && !node.isDirty) {
-          node.isDirty = true
-          that.triggerWorkspaceEvent(CanvasEvent.NodeChanged, this.canvas, node)
-          delete node.isDirty
+        if (this.initialized && !this.isDirty) {
+          this.isDirty = true
+          that.triggerWorkspaceEvent(CanvasEvent.NodeChanged, this.canvas, this)
+          delete this.isDirty
         }
 
         // Save the data to the file
@@ -257,8 +266,15 @@ export default class CanvasPatcher {
       },
       getBBox: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
-        that.triggerWorkspaceEvent(CanvasEvent.NodeBBoxRequested, this.canvas, node, result)
+        that.triggerWorkspaceEvent(CanvasEvent.NodeBBoxRequested, this.canvas, this, result)
         return result
+      },
+      startEditing: (next: any) => function (...args: any) {
+        const cancelled = { value: false }
+        that.triggerWorkspaceEvent(CanvasEvent.NodeEditingStarted.Before, this.canvas, this, cancelled)
+
+        if (cancelled.value) return
+        return next.call(this, ...args)
       }
     })
     
@@ -275,10 +291,10 @@ export default class CanvasPatcher {
       setData: (next: any) => function (data: CanvasEdgeData, addHistory?: boolean) {
         const result = next.call(this, data)
 
-        if (edge.initialized && !edge.isDirty) {
-          edge.isDirty = true
-          that.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, this.canvas, edge)
-          delete edge.isDirty
+        if (this.initialized && !this.isDirty) {
+          this.isDirty = true
+          that.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, this.canvas, this)
+          delete this.isDirty
         }
 
         // Save the data to the file
@@ -292,12 +308,12 @@ export default class CanvasPatcher {
       },
       render: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
-        that.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, this.canvas, edge)
+        that.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, this.canvas, this)
         return result
       },
       getCenter: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
-        that.triggerWorkspaceEvent(CanvasEvent.EdgeCenterRequested, this.canvas, edge, result)
+        that.triggerWorkspaceEvent(CanvasEvent.EdgeCenterRequested, this.canvas, this, result)
         return result
       }
     })

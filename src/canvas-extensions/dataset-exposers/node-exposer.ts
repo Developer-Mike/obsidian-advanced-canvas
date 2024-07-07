@@ -5,6 +5,7 @@ import CanvasExtension from "../../core/canvas-extension"
 
 export function getExposedNodeData(settings: SettingsManager): (keyof CanvasNodeData)[] {
   const exposedData: (keyof CanvasNodeData)[] = []
+  exposedData.push('isEdgePathAnchor')
 
   if (settings.getSetting('nodeStylingFeatureEnabled')) exposedData.push('styleAttributes')
   if (settings.getSetting('collapsibleGroupsFeatureEnabled')) exposedData.push('isCollapsed')
