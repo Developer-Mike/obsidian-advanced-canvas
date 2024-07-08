@@ -363,7 +363,10 @@ export default class PortalsCanvasExtension extends CanvasExtension {
       return addedData
     }
 
-    const portalFileData = JSON.parse(await this.plugin.app.vault.cachedRead(portalFile))
+    const portalFileDataString = await this.plugin.app.vault.cachedRead(portalFile)
+    if (portalFileDataString === '') return addedData
+
+    const portalFileData = JSON.parse(portalFileDataString) as CanvasData
     if (!portalFileData) {
       portalNodeData.portalToFile = undefined
       return addedData
@@ -411,6 +414,8 @@ export default class PortalsCanvasExtension extends CanvasExtension {
         .find(([_refNodeId, nodeId]) => nodeId === edgeDataFromPortal.fromNode)?.[0]
       const toRefNode = Object.entries(portalNodeData.portalIdMaps.nodeIdMap)
         .find(([_refNodeId, nodeId]) => nodeId === edgeDataFromPortal.toNode)?.[0]
+
+      if (!fromRefNode || !toRefNode) continue
 
       addedData.edges.push({
         ...edgeDataFromPortal,

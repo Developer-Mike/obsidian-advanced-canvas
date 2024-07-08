@@ -85,12 +85,13 @@ export default class EdgeStylesExtension extends CanvasExtension {
     for (const edge of selectedEdges) {
       const edgeData = edge.getData()
 
+      const newStyleAttributes = { ...edgeData.styleAttributes }
+      if (value !== null) newStyleAttributes[attribute.datasetKey] = value
+      else delete newStyleAttributes[attribute.datasetKey]
+
       edge.setData({
         ...edgeData,
-        styleAttributes: {
-          ...edgeData.styleAttributes,
-          [attribute.datasetKey]: value
-        }
+        styleAttributes: newStyleAttributes
       })
     }
     

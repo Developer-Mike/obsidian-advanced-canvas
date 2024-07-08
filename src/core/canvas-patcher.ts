@@ -45,17 +45,17 @@ export default class CanvasPatcher {
         return JSON.stringify(canvasData, null, 2)
       },
       setViewData: (next: any) => function (json: string, ...args: any) {
-        let validJson = json
+        let validJson = json !== '' ? json : '{}'
         let parsedJson
 
         // Check for SyntaxError
-        try { parsedJson = JSON.parse(json) }
+        try { parsedJson = JSON.parse(validJson) }
         catch (e) {
           // Invalid JSON
           that.plugin.createFileSnapshot(this.file.path, json)
           
           // Try to parse it with trailing commas
-          parsedJson = JSONC.parse(json)
+          parsedJson = JSONC.parse(validJson)
           validJson = JSON.stringify(parsedJson, null, 2)
         }
 

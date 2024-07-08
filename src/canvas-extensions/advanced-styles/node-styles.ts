@@ -47,12 +47,13 @@ export default class NodeStylesExtension extends CanvasExtension {
       // Only apply the attribute if the node type is allowed
       if (attribute.nodeTypes && !attribute.nodeTypes.includes(nodeData.type)) continue
 
+      const newStyleAttributes = { ...nodeData.styleAttributes }
+      if (value !== null) newStyleAttributes[attribute.datasetKey] = value
+      else delete newStyleAttributes[attribute.datasetKey]
+
       node.setData({
         ...nodeData,
-        styleAttributes: {
-          ...nodeData.styleAttributes,
-          [attribute.datasetKey]: value
-        }
+        styleAttributes: newStyleAttributes
       })
     }
     
