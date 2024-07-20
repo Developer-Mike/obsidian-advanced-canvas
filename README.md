@@ -1,3 +1,6 @@
+>[!IMPORTANT]
+> Due to a high-priority project and other reasons, **development of Advanced Canvas is paused** until 20th Nov.
+
 <h3 align="center">
     <picture>
         <source media="(prefers-color-scheme: dark)" srcset="./assets/logo-dark.svg">
