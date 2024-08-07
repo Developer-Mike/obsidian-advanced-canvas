@@ -17,6 +17,8 @@ export interface AdvancedCanvasPluginSettings {
 
   performanceOptimizationEnabled: boolean
 
+  combineCustomStylesInDropdown: boolean
+
   nodeStylingFeatureEnabled: boolean
   customNodeStyleAttributes: StyleAttribute[]
   defaultTextNodeStyleAttributes: { [key: string]: string }
@@ -68,6 +70,8 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   defaultFileNodeHeight: 400,
 
   performanceOptimizationEnabled: false,
+
+  combineCustomStylesInDropdown: false,
 
   nodeStylingFeatureEnabled: true,
   customNodeStyleAttributes: [],
@@ -224,6 +228,13 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       "Performance optimization",
       "Optimize the performance of the canvas (Side effect is some amount of blurriness).",
       'performanceOptimizationEnabled'
+    )
+
+    this.createFeatureHeading(
+      containerEl,
+      "Combine custom styles",
+      "Combine all style attributes of Advanced Canvas in a single dropdown.",
+      'combineCustomStylesInDropdown'
     )
 
     this.createFeatureHeading(
