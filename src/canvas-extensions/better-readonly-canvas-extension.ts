@@ -73,7 +73,7 @@ export default class BetterReadonlyCanvasExtension extends CanvasExtension {
     const settingsContainer = canvas.quickSettingsButton?.parentElement
     if (!settingsContainer) return
 
-    CanvasHelper.addQuickSettingsButton(
+    CanvasHelper.addControlMenuButton(
       settingsContainer,
       this.createToggle({
         id: 'disable-node-popup',
@@ -83,7 +83,7 @@ export default class BetterReadonlyCanvasExtension extends CanvasExtension {
       }, 'disableNodePopup')
     )
 
-    CanvasHelper.addQuickSettingsButton(
+    CanvasHelper.addControlMenuButton(
       settingsContainer,
       this.createToggle({
         id: 'disable-zoom',
@@ -93,7 +93,7 @@ export default class BetterReadonlyCanvasExtension extends CanvasExtension {
       }, 'disableZoom')
     )
 
-    CanvasHelper.addQuickSettingsButton(
+    CanvasHelper.addControlMenuButton(
       settingsContainer,
       this.createToggle({
         id: 'disable-pan',
@@ -105,7 +105,7 @@ export default class BetterReadonlyCanvasExtension extends CanvasExtension {
   }
 
   private createToggle(menuOption: MenuOption, settingKey: keyof AdvancedCanvasPluginSettings): HTMLElement {
-    const toggle = CanvasHelper.createQuickSettingsButton({
+    const toggle = CanvasHelper.createControlMenuButton({
       ...menuOption,
       callback: () => (async () => {
         const newValue = !this.plugin.settings.getSetting(settingKey)

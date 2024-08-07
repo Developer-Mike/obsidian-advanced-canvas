@@ -20,9 +20,9 @@ export default class PropertiesCanvasExtension extends CanvasExtension {
     const settingsContainer = canvas.quickSettingsButton?.parentElement
     if (!settingsContainer) return
 
-    CanvasHelper.addQuickSettingsButton(
+    CanvasHelper.addControlMenuButton(
       settingsContainer,
-      CanvasHelper.createQuickSettingsButton({
+      CanvasHelper.createControlMenuButton({
         id: 'properties',
         label: 'Properties',
         icon: 'settings-2',

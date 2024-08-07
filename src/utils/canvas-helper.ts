@@ -25,7 +25,7 @@ export default class CanvasHelper {
     }
   }
 
-  static createQuickSettingsButton(menuOption: MenuOption): HTMLElement {
+  static createControlMenuButton(menuOption: MenuOption): HTMLElement {
     const quickSetting = document.createElement('div')
     if (menuOption.id) quickSetting.id = menuOption.id
     quickSetting.classList.add('canvas-control-item')
@@ -36,7 +36,7 @@ export default class CanvasHelper {
     return quickSetting
   }
 
-  static addQuickSettingsButton(controlGroup: HTMLElement, element: HTMLElement) {
+  static addControlMenuButton(controlGroup: HTMLElement, element: HTMLElement) {
     if (element.id) controlGroup.querySelector(`#${element.id}`)?.remove()
     controlGroup.appendChild(element)
   }

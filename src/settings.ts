@@ -44,6 +44,8 @@ export interface AdvancedCanvasPluginSettings {
   collapsibleGroupsFeatureEnabled: boolean
   collapsedGroupPreviewOnDrag: boolean
 
+  focusModeFeatureEnabled: boolean
+
   presentationFeatureEnabled: boolean
   showSetStartNodeInPopup: boolean
   defaultSlideSize: string
@@ -97,6 +99,8 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
 
   collapsibleGroupsFeatureEnabled: true,
   collapsedGroupPreviewOnDrag: true,
+
+  focusModeFeatureEnabled: true,
 
   presentationFeatureEnabled: true,
   showSetStartNodeInPopup: false,
@@ -367,6 +371,13 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           .setValue(this.settingsManager.getSetting('collapsedGroupPreviewOnDrag'))
           .onChange(async (value) => await this.settingsManager.setSetting({ collapsedGroupPreviewOnDrag: value }))
       )
+
+    this.createFeatureHeading(
+      containerEl,
+      "Focus mode",
+      "Focus on a single node and blur all other nodes.",
+      'focusModeFeatureEnabled'
+    )
 
     this.createFeatureHeading(
       containerEl,
