@@ -1,3 +1,6 @@
+>[!IMPORTANT]
+> Due to a high-priority project and other reasons, **development of Advanced Canvas is paused** until 20th Nov.
+
 <h3 align="center">
     <picture>
         <source media="(prefers-color-scheme: dark)" srcset="./assets/logo-dark.svg">
@@ -435,6 +438,5 @@ All contributions are welcome! Here's how you can help:
 - Create a pull request
 - Wait for the review
 
-## Known Issues - Create an issue if you find any!
-- [ ] Shapes are not shown in the preview
-- [ ] Edges from portals can still be dragged
+## Star History
+[![Star History Chart](https://api.star-history.com/svg?repos=Developer-Mike/obsidian-advanced-canvas&type=Date)](https://star-history.com/#Developer-Mike/obsidian-advanced-canvas&Date)
