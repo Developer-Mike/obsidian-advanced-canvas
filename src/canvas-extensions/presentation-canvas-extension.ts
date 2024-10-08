@@ -358,7 +358,9 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     if (document.fullscreenElement) document.exitFullscreen()
 
     // Reset viewport
-    canvas.setViewport(this.savedViewport.x, this.savedViewport.y, this.savedViewport.zoom)
+    if (this.plugin.settings.getSetting('resetViewportOnPresentationEnd'))
+      canvas.setViewport(this.savedViewport.x, this.savedViewport.y, this.savedViewport.zoom)
+    
     this.isPresentationMode = false
   }
 

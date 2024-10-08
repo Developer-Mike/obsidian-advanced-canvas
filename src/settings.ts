@@ -50,6 +50,7 @@ export interface AdvancedCanvasPluginSettings {
   showSetStartNodeInPopup: boolean
   defaultSlideSize: string
   wrapInSlidePadding: number
+  resetViewportOnPresentationEnd: boolean
   useArrowKeysToChangeSlides: boolean
   usePgUpPgDownKeysToChangeSlides: boolean
   zoomToSlideWithoutPadding: boolean
@@ -106,6 +107,7 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   showSetStartNodeInPopup: false,
   defaultSlideSize: '1200x675',
   wrapInSlidePadding: 20,
+  resetViewportOnPresentationEnd: true,
   useArrowKeysToChangeSlides: true,
   usePgUpPgDownKeysToChangeSlides: true,
   zoomToSlideWithoutPadding: true,
@@ -411,6 +413,15 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
         text
           .setValue(this.settingsManager.getSetting('wrapInSlidePadding').toString())
           .onChange(async (value) => await this.settingsManager.setSetting({ wrapInSlidePadding: parseInt(value) }))
+      )
+
+    new Setting(containerEl)
+      .setName("Reset viewport on presentation end")
+      .setDesc("When enabled, the viewport will be reset to the original position after the presentation ends.")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.settingsManager.getSetting('resetViewportOnPresentationEnd'))
+          .onChange(async (value) => await this.settingsManager.setSetting({ resetViewportOnPresentationEnd: value }))
       )
 
     new Setting(containerEl)
