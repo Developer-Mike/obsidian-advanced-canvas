@@ -14,6 +14,7 @@ export interface AdvancedCanvasPluginSettings {
   defaultTextNodeHeight: number
   defaultFileNodeWidth: number
   defaultFileNodeHeight: number
+  disableFontSizeRelativeToZoom: boolean
 
   performanceOptimizationEnabled: boolean
 
@@ -71,6 +72,7 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   defaultTextNodeHeight: 60,
   defaultFileNodeWidth: 400,
   defaultFileNodeHeight: 400,
+  disableFontSizeRelativeToZoom: false,
 
   performanceOptimizationEnabled: false,
 
@@ -227,6 +229,15 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
         text
           .setValue(this.settingsManager.getSetting('defaultFileNodeHeight').toString())
           .onChange(async (value) => await this.settingsManager.setSetting({ defaultFileNodeHeight: Math.max(1, parseInt(value)) }))
+      )
+
+    new Setting(containerEl)
+      .setName("Disable font size relative to zoom")
+      .setDesc("When enabled, the font size of e.g. group node titles and edge labels will not increase when zooming out.")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.settingsManager.getSetting('disableFontSizeRelativeToZoom'))
+          .onChange(async (value) => await this.settingsManager.setSetting({ disableFontSizeRelativeToZoom: value }))
       )
 
     this.createFeatureHeading(
