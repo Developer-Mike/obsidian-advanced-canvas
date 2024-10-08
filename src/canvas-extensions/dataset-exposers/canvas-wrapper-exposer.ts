@@ -5,7 +5,6 @@ import CanvasExtension from "../../core/canvas-extension"
 
 const EXPOSED_SETTINGS: (keyof AdvancedCanvasPluginSettings)[] = [
   'disableFontSizeRelativeToZoom',
-  'performanceOptimizationEnabled',
   'collapsibleGroupsFeatureEnabled',
   'collapsedGroupPreviewOnDrag',
 ]

@@ -16,8 +16,6 @@ export interface AdvancedCanvasPluginSettings {
   defaultFileNodeHeight: number
   disableFontSizeRelativeToZoom: boolean
 
-  performanceOptimizationEnabled: boolean
-
   combineCustomStylesInDropdown: boolean
 
   nodeStylingFeatureEnabled: boolean
@@ -73,8 +71,6 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   defaultFileNodeWidth: 400,
   defaultFileNodeHeight: 400,
   disableFontSizeRelativeToZoom: false,
-
-  performanceOptimizationEnabled: false,
 
   combineCustomStylesInDropdown: false,
 
@@ -239,13 +235,6 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           .setValue(this.settingsManager.getSetting('disableFontSizeRelativeToZoom'))
           .onChange(async (value) => await this.settingsManager.setSetting({ disableFontSizeRelativeToZoom: value }))
       )
-
-    this.createFeatureHeading(
-      containerEl,
-      "Performance optimization",
-      "Optimize the performance of the canvas (Side effect is some amount of blurriness).",
-      'performanceOptimizationEnabled'
-    )
 
     this.createFeatureHeading(
       containerEl,
