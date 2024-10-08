@@ -2,7 +2,7 @@ import AdvancedCanvasPlugin from "src/main"
 import { BBox, Canvas, CanvasData, CanvasEdge, CanvasEdgeData, CanvasElement, CanvasNode, CanvasNodeData, CanvasView } from "src/@types/Canvas"
 import PatchHelper from "src/utils/patch-helper"
 import { CanvasEvent } from "./events"
-import { WorkspaceLeaf } from "obsidian"
+import { requireApiVersion, WorkspaceLeaf } from "obsidian"
 import { around } from "monkey-around"
 import JSONC from "tiny-jsonc"
 
@@ -18,8 +18,11 @@ export default class CanvasPatcher {
     const that = this
 
     // Get the current canvas view or wait for it to be created
+    const canvasLeaf = this.plugin.app.workspace.getLeavesOfType('canvas')?.first()
+    if (canvasLeaf && requireApiVersion('1.7.2')) await canvasLeaf.loadIfDeferred() // Ensure view is fully loaded
+    
     const canvasView = (
-      this.plugin.app.workspace.getLeavesOfType('canvas')?.first()?.view ??
+      canvasLeaf?.view ??
       await new Promise<CanvasView>((resolve) => {
         // @ts-ignore
         const uninstall = around(this.plugin.app.internalPlugins.plugins.canvas.views, {
