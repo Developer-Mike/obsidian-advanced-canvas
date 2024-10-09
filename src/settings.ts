@@ -6,9 +6,14 @@ const NODE_TYPES_ON_DOUBLE_CLICK = {
   'text': 'Text',
   'file': 'File'
 }
+const EDGE_LINE_DIRECTIONS = {
+  'nondirectional': 'Nondirectional',
+  'unidirectional': 'Unidirectional',
+  'bidirectional': 'Bidirectional'
+}
 
 export interface AdvancedCanvasPluginSettings {
-  nodeTypeOnDoubleClick: string
+  nodeTypeOnDoubleClick: keyof typeof NODE_TYPES_ON_DOUBLE_CLICK
   alignDoubleClickedNodeToGrid: boolean
   defaultTextNodeWidth: number
   defaultTextNodeHeight: number
@@ -24,6 +29,7 @@ export interface AdvancedCanvasPluginSettings {
 
   edgesStylingFeatureEnabled: boolean
   customEdgeStyleAttributes: StyleAttribute[]
+  defaultEdgeLineDirection: keyof typeof EDGE_LINE_DIRECTIONS
   defaultEdgeStyleAttributes: { [key: string]: string }
   edgeStyleDirectRotateArrow: boolean
   edgeStylePathfinderGridResolution: number
@@ -64,7 +70,7 @@ export interface AdvancedCanvasPluginSettings {
 }
 
 export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
-  nodeTypeOnDoubleClick: Object.keys(NODE_TYPES_ON_DOUBLE_CLICK).first(),
+  nodeTypeOnDoubleClick: 'text',
   alignDoubleClickedNodeToGrid: true,
   defaultTextNodeWidth: 260,
   defaultTextNodeHeight: 60,
@@ -80,6 +86,7 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
 
   edgesStylingFeatureEnabled: true,
   customEdgeStyleAttributes: [],
+  defaultEdgeLineDirection: 'unidirectional',
   defaultEdgeStyleAttributes: {},
   edgeStyleDirectRotateArrow: false,
   edgeStylePathfinderGridResolution: 10,
@@ -179,7 +186,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
         dropdown
           .addOptions(NODE_TYPES_ON_DOUBLE_CLICK)
           .setValue(this.settingsManager.getSetting('nodeTypeOnDoubleClick'))
-          .onChange(async (value) => await this.settingsManager.setSetting({ nodeTypeOnDoubleClick: value }))
+          .onChange(async (value) => await this.settingsManager.setSetting({ nodeTypeOnDoubleClick: value as keyof typeof NODE_TYPES_ON_DOUBLE_CLICK }))
         )
 
     new Setting(containerEl)
@@ -277,6 +284,16 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
         button
           .setButtonText("Open Tutorial")
           .onClick(() => window.open("https://github.com/Developer-Mike/obsidian-advanced-canvas/blob/main/README.md#custom-styles"))
+      )
+
+    new Setting(containerEl)
+      .setName("Default edge line direction")
+      .setDesc("The default line direction of an edge.")
+      .addDropdown((dropdown) =>
+        dropdown
+          .addOptions(EDGE_LINE_DIRECTIONS)
+          .setValue(this.settingsManager.getSetting('defaultEdgeLineDirection'))
+          .onChange(async (value) => await this.settingsManager.setSetting({ defaultEdgeLineDirection: value as keyof typeof EDGE_LINE_DIRECTIONS }))
       )
 
     this.createDefaultStylesSection(containerEl, 'Default edge style attributes', 'defaultEdgeStyleAttributes', [ ...BUILTIN_EDGE_STYLE_ATTRIBUTES, ...this.settingsManager.getSetting('customEdgeStyleAttributes') ])

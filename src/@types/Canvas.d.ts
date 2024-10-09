@@ -237,6 +237,7 @@ export interface CanvasNode extends CanvasElement {
 }
 
 type Side = 'top' | 'right' | 'bottom' | 'left'
+type EndType = 'none' | 'arrow'
 export interface CanvasEdgeData {
   id: string
 
@@ -245,6 +246,9 @@ export interface CanvasEdgeData {
 
   fromSide: Side
   toSide: Side
+  
+  fromEnd?: EndType
+  toEnd?: EndType
 
   styleAttributes?: { [key: string]: string | null }
 
@@ -254,7 +258,6 @@ export interface CanvasEdgeData {
   [key: string]: any
 }
 
-type EndType = 'none' | 'arrow'
 export interface CanvasEdge extends CanvasElement {
   label: string
 
