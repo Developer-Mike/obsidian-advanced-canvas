@@ -112,7 +112,7 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
       }
     })
 
-    // Wait until the connecting class is removed (else, the direction will be reset on mousemove)
+    // Wait until the connecting class is removed (else, the direction will be reset on mousemove (onConnectionPointerdown))
     if (canvas.canvasEl.hasClass('is-connecting')) {
       await new Promise<void>(resolve => {
         new MutationObserver(() => {
