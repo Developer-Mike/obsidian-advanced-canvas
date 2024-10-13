@@ -17,27 +17,33 @@ export default class CanvasPatcher {
   private async applyPatches() {
     const that = this
 
+    // Wait for layout ready -> Support deferred view initialization
+    await new Promise<void>(resolve => this.plugin.app.workspace.onLayoutReady(() => resolve()))
+
+    // Get the current canvas view fully loaded
+    const getCanvasView = async (): Promise<CanvasView | null> => {
+      const canvasLeaf = this.plugin.app.workspace.getLeavesOfType('canvas')?.first()
+      if (!canvasLeaf) return null
+
+      if (requireApiVersion('1.7.2')) await canvasLeaf.loadIfDeferred() // Load the canvas if the view is deferred
+      return canvasLeaf.view as CanvasView
+    }
+
     // Get the current canvas view or wait for it to be created
-    const canvasLeaf = this.plugin.app.workspace.getLeavesOfType('canvas')?.first()
-    if (canvasLeaf && requireApiVersion('1.7.2')) await canvasLeaf.loadIfDeferred() // Ensure view is fully loaded
-    
-    const canvasView = (
-      canvasLeaf?.view ??
-      await new Promise<CanvasView>((resolve) => {
-        // @ts-ignore
-        const uninstall = around(this.plugin.app.internalPlugins.plugins.canvas.views, {
-          canvas: (next: any) => function (...args: any) {
-            const result = next.call(this, ...args)
+    let canvasView = await getCanvasView()
+    canvasView ??= await new Promise<CanvasView>(resolve => {
+      const event = this.plugin.app.workspace.on('layout-change', async () => {
+        const newCanvasView = await getCanvasView()
+        if (!newCanvasView) return
 
-            resolve(result)
-            uninstall() // Uninstall the patch
-
-            return result
-          }
-        })
-        this.plugin.register(uninstall)
+        resolve(newCanvasView)
+        this.plugin.app.workspace.offref(event)
       })
-    ) as CanvasView
+
+      this.plugin.registerEvent(event)
+    })
+
+    console.log('Patching canvas view:', canvasView)
     
     // Patch canvas view
     PatchHelper.patchObjectPrototype(this.plugin, canvasView, {
