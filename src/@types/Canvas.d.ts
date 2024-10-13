@@ -34,6 +34,7 @@ export interface Canvas {
   getEdgesForNode(node: CanvasNode): CanvasEdge[]
 
   wrapperEl: HTMLElement
+  canvasEl: HTMLElement
   menu: PopupMenu
   cardMenuEl: HTMLElement
   canvasControlsEl: HTMLElement

@@ -1,10 +1,9 @@
-import { Canvas, CanvasEdge, CanvasEdgeData, CanvasNode } from "src/@types/Canvas"
+import { Canvas, CanvasEdge, CanvasNode } from "src/@types/Canvas"
 import { CanvasEvent } from "src/core/events"
 import SettingsManager from "src/settings"
 import { FileSelectModal } from "src/utils/modal-helper"
 import CanvasExtension from "../core/canvas-extension"
 import CanvasHelper from "src/utils/canvas-helper"
-import { dir } from "console"
 
 export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtension {
   isEnabled() { return true }
@@ -102,23 +101,8 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
     })
   }
 
-  private applyDefaultEdgeStyles(_canvas: Canvas, edge: CanvasEdge) {
+  private async applyDefaultEdgeStyles(canvas: Canvas, edge: CanvasEdge) {
     const edgeData = edge.getData()
-
-    switch (this.plugin.settings.getSetting('defaultEdgeLineDirection')) {
-      case 'nondirectional':
-        delete edgeData.fromEnd
-        edgeData.toEnd = 'none'
-        break
-      case 'unidirectional':
-        delete edgeData.fromEnd
-        delete edgeData.toEnd
-        break
-      case 'bidirectional':
-        edgeData.fromEnd = 'arrow'
-        delete edgeData.toEnd
-        break
-    }
 
     edge.setData({
       ...edgeData,
@@ -126,6 +110,22 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
         ...edgeData.styleAttributes,
         ...this.plugin.settings.getSetting('defaultEdgeStyleAttributes')
       }
+    })
+
+    // Wait until the connecting class is removed (else, the direction will be reset on mousemove)
+    if (canvas.canvasEl.hasClass('is-connecting')) {
+      await new Promise<void>(resolve => {
+        new MutationObserver(() => {
+          if (!canvas.canvasEl.hasClass('is-connecting')) resolve()
+        }).observe(canvas.canvasEl, { attributes: true, attributeFilter: ['class'] })
+      })
+    }
+
+    const lineDirection = this.plugin.settings.getSetting('defaultEdgeLineDirection')
+    edge.setData({
+      ...edge.getData(),
+      fromEnd: lineDirection === 'bidirectional' ? 'arrow' : 'none',
+      toEnd: lineDirection === 'nondirectional' ? 'none' : 'arrow',
     })
   }
 }
