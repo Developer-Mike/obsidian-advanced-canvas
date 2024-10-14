@@ -20,7 +20,7 @@ export default class MetadataCachePatcher {
         let result = next.call(this, path)
 
         // Also support .canvas files
-        if (path.endsWith('.canvas')) {
+        if (path?.endsWith('.canvas')) {
           if (!this.fileCache.hasOwnProperty(path))
             return null
 
@@ -30,17 +30,8 @@ export default class MetadataCachePatcher {
 
         return result
       },
-      initialize: (next: any) => function () {
-        const result = next.call(this)
-
-        console.log('Initializing metadata cache', this.fileCache)
-
-        return result
-      },
       onCreateOrModify: (next: any) => function (file: TFile) {
         const result = next.call(this, file)
-
-        console.log('Computing metadata for', file.path)
 
         if (file.extension === 'canvas') {
           // Check if the file is already in the cache
@@ -50,14 +41,12 @@ export default class MetadataCachePatcher {
             const hasMetadata = fileCache.hash && !!this.metadataCache[fileCache.hash]
 
             if (sameMTimeAndSize && hasMetadata) {
-              console.log('Skipping metadata computation for', file.path)
-              this.resolveLinks(file.path) // Trigger link resolver
+              // Trigger link resolver
+              this.linkResolverQueue.add(file)
 
               return result
             }
           }
-
-          console.log('Computing metadata for', file.path)
 
           // Compute metadata
           this.workQueue.queue(() => that.computeMetadataAsync(this, file))
@@ -67,14 +56,31 @@ export default class MetadataCachePatcher {
       }
     })
 
-    // Patch linkResolverQueue
-    PatchHelper.patchObjectPrototype(this.plugin, this.plugin.app.metadataCache.linkResolverQueue, {
+    // Patch linkResolverQueue (trigger link resolver for .canvas files)
+    const metadataCache = this.plugin.app.metadataCache as any
+    PatchHelper.patchObjectPrototype(this.plugin, metadataCache.linkResolverQueue, {
       add: (next: any) => function (file: TFile) {
-        if (file.extension === 'canvas') that.plugin.app.metadataCache.resolveLinks(file.path)
+        const result = next.call(this, file)
 
-        return next.call(this, file)
+        // Also resolve links for .canvas files
+        if (file.extension === 'canvas') {
+          metadataCache.resolveLinks(file.path)
+          metadataCache.trigger('resolve', file.path)
+        }
+
+        return result
       }
     })
+
+    // Patch outgoing-links plugin
+    PatchHelper.tryPatchWorkspacePrototype(this.plugin, () => (this.plugin.app.workspace.getLeavesOfType("outgoing-link").first()?.view as any)?._children?.first(), {
+      recomputeLinks: (next: any) => function () {
+        // Also recompute links for .canvas files
+        if (this.file.path.endsWith('.canvas')) this.file.extension = 'md'
+        
+        return next.call(this)
+      }
+    }).then(outgoingLinkChild => outgoingLinkChild?.recomputeLinks())
   }
 
   private async computeMetadataAsync(metadataCache: any, file: TFile) {
@@ -116,7 +122,7 @@ export default class MetadataCachePatcher {
       metadataCache.saveMetaCache(fileHash, metadata)
 
       // Trigger link resolver
-      metadataCache.resolveLinks(file.path)
+      metadataCache.linkResolverQueue.add(file)
     } catch (error) { console.error(error) }
   }
 
