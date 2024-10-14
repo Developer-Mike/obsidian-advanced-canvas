@@ -34,6 +34,7 @@ import NodeExposerExtension from './canvas-extensions/dataset-exposers/node-expo
 import EdgeExposerExtension from './canvas-extensions/dataset-exposers/edge-exposer'
 import CanvasWrapperExposerExtension from './canvas-extensions/dataset-exposers/canvas-wrapper-exposer'
 import MigrationHelper from './utils/migration-helper'
+import MetadataCachePatcher from './core/metadata-cache-patcher'
 
 const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   // Dataset Exposers
@@ -69,6 +70,7 @@ export default class AdvancedCanvasPlugin extends Plugin {
   settings: SettingsManager
   windowsManager: WindowsManager
 
+  metadataCachePatcher: MetadataCachePatcher
   canvasPatcher: CanvasPatcher
   canvasExtensions: CanvasExtension[]
 
@@ -84,6 +86,7 @@ export default class AdvancedCanvasPlugin extends Plugin {
 
     this.windowsManager = new WindowsManager(this)
 
+    this.metadataCachePatcher = new MetadataCachePatcher(this)
     this.canvasPatcher = new CanvasPatcher(this)
     this.canvasExtensions = CANVAS_EXTENSIONS.map((Extension: any) => new Extension(this))
 	}

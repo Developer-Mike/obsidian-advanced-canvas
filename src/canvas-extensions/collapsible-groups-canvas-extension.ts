@@ -1,6 +1,6 @@
 import { setIcon } from "obsidian"
 import { BBox, Canvas, CanvasData, CanvasNode } from "src/@types/Canvas"
-import { CanvasEvent } from "src/core/events"
+import { CanvasEvent } from "src/core/canvas-events"
 import BBoxHelper from "src/utils/bbox-helper"
 import CanvasExtension from "../core/canvas-extension"
 import CanvasHelper from "src/utils/canvas-helper"

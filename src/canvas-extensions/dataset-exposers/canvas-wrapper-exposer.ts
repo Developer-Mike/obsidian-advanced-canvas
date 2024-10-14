@@ -1,5 +1,5 @@
 import { Canvas } from "src/@types/Canvas"
-import { CanvasEvent } from "src/core/events"
+import { CanvasEvent } from "src/core/canvas-events"
 import SettingsManager, { AdvancedCanvasPluginSettings } from "src/settings"
 import CanvasExtension from "../../core/canvas-extension"
 

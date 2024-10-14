@@ -1,6 +1,6 @@
 import { TFile } from "obsidian"
 import { BBox, Canvas, CanvasData, CanvasEdge, CanvasElement, CanvasNode, CanvasNodeData } from "src/@types/Canvas"
-import { CanvasEvent } from "src/core/events"
+import { CanvasEvent } from "src/core/canvas-events"
 import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "../core/canvas-extension"
 

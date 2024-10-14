@@ -1,6 +1,6 @@
 import App, { Modal, Setting } from "obsidian"
 import { Canvas } from "src/@types/Canvas"
-import { CanvasEvent } from "src/core/events"
+import { CanvasEvent } from "src/core/canvas-events"
 import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "../core/canvas-extension"
 
@@ -37,7 +37,7 @@ export default class PropertiesCanvasExtension extends CanvasExtension {
       canvas.wrapperEl.classList.remove(cssclass)
     })
 
-    this.previousCssclasses = canvas.metadata?.properties?.cssclasses || []
+    this.previousCssclasses = canvas.metadata?.frontmatter?.cssclasses || []
     this.previousCssclasses.forEach((cssclass) => {
       canvas.wrapperEl.classList.add(cssclass)
     })
@@ -68,10 +68,12 @@ class PropertiesModal extends Modal {
       .setTooltip("Add classes to the canvas wrapper element. Separate multiple classes with spaces.")
       .addText((text) =>
         text
-          .setValue(this.canvas.metadata.properties?.cssclasses?.join(' '))
+          .setValue(this.canvas.metadata.frontmatter?.cssclasses?.join(' '))
           .onChange((value) => {
-            this.canvas.metadata.properties = this.canvas.metadata?.properties ?? {}
-            this.canvas.metadata.properties.cssclasses = value.split(' ')
+            this.canvas.metadata.frontmatter = this.canvas.metadata?.frontmatter ?? {}
+            this.canvas.metadata.frontmatter.cssclasses = value.split(' ')
+
+            this.canvas.requestSave()
           })
       )
   }

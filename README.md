@@ -343,7 +343,7 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
 
 <details>
     <summary>
-        All Events (27)
+        All Workspace Events
     </summary>
 
   - `advanced-canvas:canvas-changed`

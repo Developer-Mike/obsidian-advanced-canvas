@@ -1,7 +1,7 @@
 import AdvancedCanvasPlugin from "src/main"
 import { BBox, Canvas, CanvasData, CanvasEdge, CanvasEdgeData, CanvasElement, CanvasNode, CanvasNodeData, CanvasView } from "src/@types/Canvas"
 import PatchHelper from "src/utils/patch-helper"
-import { CanvasEvent } from "./events"
+import { CanvasEvent } from "./canvas-events"
 import { requireApiVersion, WorkspaceLeaf } from "obsidian"
 import { around } from "monkey-around"
 import JSONC from "tiny-jsonc"
@@ -70,8 +70,8 @@ export default class CanvasPatcher {
 
         const result = next.call(this, validJson, ...args)
 
-        try { this.canvas.metadata = parsedJson.metadata }
-        catch (_e) { this.canvas.metadata = {} }
+        // Load the metadata
+        this.canvas.metadata = parsedJson.metadata ?? {}
 
         that.triggerWorkspaceEvent(CanvasEvent.CanvasChanged, this.canvas)
 

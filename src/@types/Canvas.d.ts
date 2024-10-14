@@ -104,7 +104,7 @@ export interface CanvasOptions {
 }
 
 export interface CanvasMetadata {
-  properties: { [key: string]: any }
+  frontmatter: { [key: string]: any }
 }
 
 export interface CanvasHistory {
@@ -165,8 +165,13 @@ export interface FileNodeOptions extends NodeOptions {
 }
 
 export interface CanvasData {
+  metadata: CanvasMetadata
   nodes: CanvasNodeData[]
   edges: CanvasEdgeData[]
+}
+
+export interface CanvasMetadata {
+  frontmatter: { [key: string]: any }
 }
 
 export interface CanvasElement {
