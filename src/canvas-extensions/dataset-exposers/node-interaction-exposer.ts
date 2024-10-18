@@ -1,6 +1,6 @@
 import { Canvas, CanvasNode } from "src/@types/Canvas"
 import { getExposedNodeData } from "./node-exposer"
-import { CanvasEvent } from "src/core/events"
+import { CanvasEvent } from "src/core/canvas-events"
 import CanvasExtension from "../../core/canvas-extension"
 
 export const TARGET_NODE_DATASET_PREFIX = "target"

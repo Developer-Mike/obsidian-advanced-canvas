@@ -1,6 +1,7 @@
 import { ItemView, Plugin } from 'obsidian'
-import CanvasPatcher from './core/canvas-patcher'
 import { Canvas, CanvasView } from './@types/Canvas'
+import FrontmatterPatcher from './core/frontmatter-patcher'
+import CanvasPatcher from './core/canvas-patcher'
 
 // Utils
 import IconsHelper from './utils/icons-helper'
@@ -69,6 +70,7 @@ export default class AdvancedCanvasPlugin extends Plugin {
   settings: SettingsManager
   windowsManager: WindowsManager
 
+  frontmatterPatcher: FrontmatterPatcher
   canvasPatcher: CanvasPatcher
   canvasExtensions: CanvasExtension[]
 
@@ -84,6 +86,7 @@ export default class AdvancedCanvasPlugin extends Plugin {
 
     this.windowsManager = new WindowsManager(this)
 
+    this.frontmatterPatcher = new FrontmatterPatcher(this)
     this.canvasPatcher = new CanvasPatcher(this)
     this.canvasExtensions = CANVAS_EXTENSIONS.map((Extension: any) => new Extension(this))
 	}

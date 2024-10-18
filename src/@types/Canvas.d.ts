@@ -21,7 +21,6 @@ export interface Canvas {
   view: CanvasView
   config: CanvasConfig
   options: CanvasOptions
-  metadata: CanvasMetadata
 
   getData(): CanvasData
   setData(data: CanvasData): void
@@ -101,10 +100,6 @@ export interface Canvas {
 export interface CanvasOptions {
   snapToObjects: boolean
   snapToGrid: boolean
-}
-
-export interface CanvasMetadata {
-  properties: { [key: string]: any }
 }
 
 export interface CanvasHistory {

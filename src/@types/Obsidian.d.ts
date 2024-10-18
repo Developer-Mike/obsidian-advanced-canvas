@@ -10,8 +10,6 @@ declare module "obsidian" {
     vault: Vault
     /** @public */
     metadataCache: MetadataCache
-    /** @public */
-    fileManager: FileManager
     /**
      * The last known user interaction event, to help commands find out what modifier keys are pressed.
      * @public
@@ -23,6 +21,12 @@ declare module "obsidian" {
     // Custom
     /** @public */
     workspace: Workspace & ExtendedWorkspace
+    /** @public */
+    fileManager: FileManager & ExtendedFileManager
+  }
+
+  export interface ExtendedFileManager {
+    getCanvasFrontmatterFile(canvas: TFile | null): Promise<TFile | null>
   }
 
   export interface ExtendedWorkspace {
