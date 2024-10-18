@@ -1,10 +1,11 @@
-import { FrontMatterCache, TAbstractFile, TFile, TFolder } from "obsidian"
+import { CachedMetadata, FrontMatterCache, TAbstractFile, TFile, TFolder } from "obsidian"
 import AdvancedCanvasPlugin from "src/main"
 import PatchHelper from "src/utils/patch-helper"
 import { FrontmatterEvent } from "./frontmatter-events"
 
 export const CANVAS_FRONTMATTER_FILES_FOLDER = '-canvas-frontmatter'
 export const CANVAS_FRONTMATTER_REF_PROPERTY = 'canvas-file'
+export const CANVAS_FRONTMATTER_EMBEDS_PROPERTY = 'embeds'
 
 export default class FrontmatterPatcher {
   plugin: AdvancedCanvasPlugin
@@ -44,19 +45,17 @@ export default class FrontmatterPatcher {
           })
         }
       },
-      processFrontMatter: (next: any) => async function (path: string, transaction: (frontmatter: FrontMatterCache) => void, ...args: any[]) {
-        let frontmatterFilePath = path
+      processFrontMatter: (next: any) => async function (file: TFile, transaction: (frontmatter: FrontMatterCache) => void, ...args: any[]) {
+        let frontmatterFile = file
 
         // Reroute frontmatter processing to the canvas frontmatter file
-        const isCanvas = path.endsWith('.canvas')
+        const isCanvas = file?.path?.endsWith('.canvas')
         if (isCanvas) {
-          const canvasFrontmatterFile = await this.getCanvasFrontmatterFile(that.plugin.app.vault.getAbstractFileByPath(path) as TFile)
-
-          // Should always be true
-          if (canvasFrontmatterFile) frontmatterFilePath = canvasFrontmatterFile.path
+          const canvasFrontmatterFile = await this.getCanvasFrontmatterFile(file)
+          if (canvasFrontmatterFile) frontmatterFile = canvasFrontmatterFile
         }
 
-        return await next.call(this, frontmatterFilePath, transaction, ...args)
+        return await next.call(this, frontmatterFile, transaction, ...args)
       }
     })
 
@@ -100,7 +99,7 @@ export default class FrontmatterPatcher {
         const fileCache = this.plugin.app.metadataCache.getFileCache(file)
         if (!fileCache) return
 
-        const canvasPath = fileCache.frontmatterLinks?.find(link => link.key === CANVAS_FRONTMATTER_REF_PROPERTY)?.link
+        const canvasPath = this.getCanvasRefFromFrontmatter(fileCache)
         if (!canvasPath) return
 
         const frontmatter = fileCache.frontmatter ?? {}
@@ -125,12 +124,14 @@ export default class FrontmatterPatcher {
         await this.cleanupEmptyFolders(parent)
       }
     ))
-
-    // TODO: Intercept opening of frontmatter files and redirect to canvas file
   }
 
   private getFrontmatterFilePath(path: string) {
     return `${CANVAS_FRONTMATTER_FILES_FOLDER}/${path.replace(/\\/g, '/')}.md`
+  }
+
+  private getCanvasRefFromFrontmatter(fileCache: CachedMetadata): string | undefined {
+    return fileCache.frontmatterLinks?.find(link => link.key === CANVAS_FRONTMATTER_REF_PROPERTY)?.link
   }
 
   private async createParentFolders(path: string) {
