@@ -26,7 +26,7 @@ declare module "obsidian" {
   }
 
   export interface ExtendedFileManager {
-    getCanvasFrontmatterFile(canvas: TFile | null): Promise<TFile | null>
+    getCanvasFrontmatterFile(canvas: TFile | null, create?: boolean): Promise<TFile | null>
   }
 
   export interface ExtendedWorkspace {
