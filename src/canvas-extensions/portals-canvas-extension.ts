@@ -1,5 +1,5 @@
 import { TFile } from "obsidian"
-import { BBox, Canvas, CanvasData, CanvasEdge, CanvasElement, CanvasNode, CanvasNodeData } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasData, CanvasEdge, CanvasElement, CanvasNode, CanvasNodeData, CanvasView } from "src/@types/Canvas"
 import { CanvasEvent } from "src/core/events"
 import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "../core/canvas-extension"
@@ -57,6 +57,20 @@ export default class PortalsCanvasExtension extends CanvasExtension {
           })
       }
     ))
+
+    this.plugin.registerEvent(this.plugin.app.vault.on('modify', (file: TFile) => {
+      const canvases = this.plugin.app.workspace.getLeavesOfType('canvas').map(leaf => (leaf.view as CanvasView).canvas)
+
+      for (const canvas of canvases) {
+        const hasPortalsToFile = canvas.getData().nodes.filter(nodeData => 
+          nodeData.type === 'file' && 
+          nodeData.portalToFile === file.path
+        ).length > 0
+
+        // Update whole canvas data
+        if (hasPortalsToFile) canvas.setData(canvas.getData())
+      }
+    }))
   }
 
   private updatePopupMenu(canvas: Canvas) {
