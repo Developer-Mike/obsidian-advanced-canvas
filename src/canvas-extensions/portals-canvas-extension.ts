@@ -11,6 +11,26 @@ export default class PortalsCanvasExtension extends CanvasExtension {
   isEnabled() { return 'portalsFeatureEnabled' as const }
 
   init() {
+    this.plugin.registerEvent(this.plugin.app.vault.on('modify', (file: TFile) => {
+      const canvases = this.plugin.app.workspace.getLeavesOfType('canvas').map(leaf => (leaf.view as CanvasView).canvas)
+
+      for (const canvas of canvases) {
+        const hasPortalsToFile = canvas.getData().nodes.filter(nodeData => 
+          nodeData.type === 'file' && 
+          nodeData.portalToFile === file.path
+        ).length > 0
+
+        // Update whole canvas data
+        if (hasPortalsToFile) {
+          canvas.setData(canvas.getData())
+
+          // Maintain history
+          canvas.history.current--
+          canvas.history.data.pop()
+        }
+      }
+    }))
+
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.PopupMenuCreated,
       (canvas: Canvas) => this.updatePopupMenu(canvas)
@@ -57,20 +77,6 @@ export default class PortalsCanvasExtension extends CanvasExtension {
           })
       }
     ))
-
-    this.plugin.registerEvent(this.plugin.app.vault.on('modify', (file: TFile) => {
-      const canvases = this.plugin.app.workspace.getLeavesOfType('canvas').map(leaf => (leaf.view as CanvasView).canvas)
-
-      for (const canvas of canvases) {
-        const hasPortalsToFile = canvas.getData().nodes.filter(nodeData => 
-          nodeData.type === 'file' && 
-          nodeData.portalToFile === file.path
-        ).length > 0
-
-        // Update whole canvas data
-        if (hasPortalsToFile) canvas.setData(canvas.getData())
-      }
-    }))
   }
 
   private updatePopupMenu(canvas: Canvas) {
