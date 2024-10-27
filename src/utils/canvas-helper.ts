@@ -25,7 +25,7 @@ export default class CanvasHelper {
     }
   }
 
-  static createQuickSettingsButton(menuOption: MenuOption): HTMLElement {
+  static createControlMenuButton(menuOption: MenuOption): HTMLElement {
     const quickSetting = document.createElement('div')
     if (menuOption.id) quickSetting.id = menuOption.id
     quickSetting.classList.add('canvas-control-item')
@@ -36,7 +36,7 @@ export default class CanvasHelper {
     return quickSetting
   }
 
-  static addQuickSettingsButton(controlGroup: HTMLElement, element: HTMLElement) {
+  static addControlMenuButton(controlGroup: HTMLElement, element: HTMLElement) {
     if (element.id) controlGroup.querySelector(`#${element.id}`)?.remove()
     controlGroup.appendChild(element)
   }
@@ -169,7 +169,46 @@ export default class CanvasHelper {
     canvas.tZoom = Math.log2(scaleFactor)
   }
 
-  static createStyleDropdownMenu(canvas: Canvas, stylableAttributes: StyleAttribute[], currentStyleAttributes: { [key: string]: string | null }, setStyleAttribute: (attribute: StyleAttribute, value: string | null) => void) {
+  static addStyleAttributesToPopup(plugin: AdvancedCanvasPlugin, canvas: Canvas, styleAttributes: StyleAttribute[], currentStyleAttributes: { [key: string]: string | null }, setStyleAttribute: (attribute: StyleAttribute, value: string | null) => void) {
+    if (!plugin.settings.getSetting('combineCustomStylesInDropdown')) 
+      this.addStyleAttributesButtons(canvas, styleAttributes, currentStyleAttributes, setStyleAttribute)
+    else this.addStyleAttributesDropdownMenu(canvas, styleAttributes, currentStyleAttributes, setStyleAttribute)
+  }
+
+  static addStyleAttributesButtons(canvas: Canvas, stylableAttributes: StyleAttribute[], currentStyleAttributes: { [key: string]: string | null }, setStyleAttribute: (attribute: StyleAttribute, value: string | null) => void) {
+    for (const stylableAttribute of stylableAttributes) {
+      const selectedStyle = stylableAttribute.options
+        .find(option => currentStyleAttributes[stylableAttribute.datasetKey] === option.value) ??
+        stylableAttribute.options.find(value => value.value === null)!!
+
+      const menuOption = CanvasHelper.createExpandablePopupMenuOption({
+        id: `menu-option-${stylableAttribute.datasetKey}`,
+        label: stylableAttribute.label,
+        icon: selectedStyle.icon
+      }, stylableAttribute.options.map((styleOption) => ({
+        label: styleOption.label,
+        icon: styleOption.icon,
+        callback: () => {
+          // Set style attribute
+          setStyleAttribute(stylableAttribute, styleOption.value)
+
+          // Keep correct reference
+          currentStyleAttributes[stylableAttribute.datasetKey] = styleOption.value
+
+          // Update icon
+         setIcon(menuOption, styleOption.icon)
+
+          // Close menu
+          menuOption.dispatchEvent(new Event('click'))
+        }
+      })))
+
+      // Add menu option to menu bar
+      CanvasHelper.addPopupMenuOption(canvas, menuOption)
+    }
+  }
+
+  static addStyleAttributesDropdownMenu(canvas: Canvas, stylableAttributes: StyleAttribute[], currentStyleAttributes: { [key: string]: string | null }, setStyleAttribute: (attribute: StyleAttribute, value: string | null) => void) {
     const STYLE_MENU_ID = 'style-menu'
     const STYLE_MENU_DROPDOWN_ID = 'style-menu-dropdown'
     const STYLE_MENU_DROPDOWN_SUBMENU_ID = 'style-menu-dropdown-submenu'
@@ -231,7 +270,7 @@ export default class CanvasHelper {
         const iconElement = document.createElement('div')
         iconElement.classList.add('menu-item-icon')
 
-        const selectedStyle = stylableAttribute.options
+        let selectedStyle = stylableAttribute.options
           .find(option => currentStyleAttributes[stylableAttribute.datasetKey] === option.value) ??
           stylableAttribute.options.find(value => value.value === null)!!
         setIcon(iconElement, selectedStyle.icon)
@@ -288,7 +327,7 @@ export default class CanvasHelper {
           else styleMenuDropdownSubmenuElement.style.right = `${rightPosition}px`
 
           // Add style options
-          for (const value of stylableAttribute.options) {
+          for (const styleOption of stylableAttribute.options) {
             const styleMenuDropdownSubmenuOptionElement = document.createElement('div')
             styleMenuDropdownSubmenuOptionElement.classList.add('menu-item')
             styleMenuDropdownSubmenuOptionElement.classList.add('tappable')
@@ -296,17 +335,17 @@ export default class CanvasHelper {
             // Add icon
             const submenuIconElement = document.createElement('div')
             submenuIconElement.classList.add('menu-item-icon')
-            setIcon(submenuIconElement, value.icon)
+            setIcon(submenuIconElement, styleOption.icon)
             styleMenuDropdownSubmenuOptionElement.appendChild(submenuIconElement)
 
             // Add label
             const submenuLabelElement = document.createElement('div')
             submenuLabelElement.classList.add('menu-item-title')
-            submenuLabelElement.textContent = value.label
+            submenuLabelElement.textContent = styleOption.label
             styleMenuDropdownSubmenuOptionElement.appendChild(submenuLabelElement)
 
             // Add selected icon
-            if (selectedStyle === value) {
+            if (selectedStyle === styleOption) {
               styleMenuDropdownSubmenuOptionElement.classList.add('mod-selected')
 
               const selectedIconElement = document.createElement('div')
@@ -332,13 +371,17 @@ export default class CanvasHelper {
             // Add click event
             styleMenuDropdownSubmenuOptionElement.addEventListener('click', () => {
               // Set style attribute
-              setStyleAttribute(stylableAttribute, value.value)
+              setStyleAttribute(stylableAttribute, styleOption.value)
 
               // Keep correct reference
-              currentStyleAttributes[stylableAttribute.datasetKey] = value.value
+              currentStyleAttributes[stylableAttribute.datasetKey] = styleOption.value
+              selectedStyle = styleOption
+
+              // Update icon
+              setIcon(iconElement, styleOption.icon)
 
               // Close menu
-              styleMenuButtonElement.dispatchEvent(new Event('click'))
+              styleMenuDropdownSubmenuElement.remove()
             })
           }
 

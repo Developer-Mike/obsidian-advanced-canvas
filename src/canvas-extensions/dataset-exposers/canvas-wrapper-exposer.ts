@@ -4,9 +4,9 @@ import SettingsManager, { AdvancedCanvasPluginSettings } from "src/settings"
 import CanvasExtension from "../../core/canvas-extension"
 
 const EXPOSED_SETTINGS: (keyof AdvancedCanvasPluginSettings)[] = [
-  'performanceOptimizationEnabled',
+  'disableFontSizeRelativeToZoom',
   'collapsibleGroupsFeatureEnabled',
-  'collapsedGroupPreviewOnDrag'
+  'collapsedGroupPreviewOnDrag',
 ]
 
 export default class CanvasWrapperExposerExtension extends CanvasExtension {

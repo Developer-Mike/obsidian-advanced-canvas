@@ -18,6 +18,8 @@ declare module "obsidian" {
      */
     lastEvent: UserEvent | null
 
+    internalPlugins: any
+
     // Custom
     /** @public */
     workspace: Workspace & ExtendedWorkspace

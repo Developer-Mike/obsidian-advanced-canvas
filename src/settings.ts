@@ -6,9 +6,14 @@ const NODE_TYPES_ON_DOUBLE_CLICK = {
   'text': 'Text',
   'file': 'File'
 }
+const EDGE_LINE_DIRECTIONS = {
+  'nondirectional': 'Nondirectional',
+  'unidirectional': 'Unidirectional',
+  'bidirectional': 'Bidirectional'
+}
 
 export interface AdvancedCanvasPluginSettings {
-  nodeTypeOnDoubleClick: string
+  nodeTypeOnDoubleClick: keyof typeof NODE_TYPES_ON_DOUBLE_CLICK
   alignDoubleClickedNodeToGrid: boolean
   defaultTextNodeWidth: number
   defaultTextNodeHeight: number
@@ -16,9 +21,9 @@ export interface AdvancedCanvasPluginSettings {
   defaultFileNodeHeight: number
   defaultGroupNodeWidth: number
   defaultGroupNodeHeight: number
+  disableFontSizeRelativeToZoom: boolean
 
-  fixBrokenCanvasFiles: boolean
-  performanceOptimizationEnabled: boolean
+  combineCustomStylesInDropdown: boolean
 
   nodeStylingFeatureEnabled: boolean
   customNodeStyleAttributes: StyleAttribute[]
@@ -26,6 +31,7 @@ export interface AdvancedCanvasPluginSettings {
 
   edgesStylingFeatureEnabled: boolean
   customEdgeStyleAttributes: StyleAttribute[]
+  defaultEdgeLineDirection: keyof typeof EDGE_LINE_DIRECTIONS
   defaultEdgeStyleAttributes: { [key: string]: string }
   edgeStyleDirectRotateArrow: boolean
   edgeStylePathfinderGridResolution: number
@@ -45,10 +51,13 @@ export interface AdvancedCanvasPluginSettings {
   collapsibleGroupsFeatureEnabled: boolean
   collapsedGroupPreviewOnDrag: boolean
 
+  focusModeFeatureEnabled: boolean
+
   presentationFeatureEnabled: boolean
   showSetStartNodeInPopup: boolean
   defaultSlideSize: string
   wrapInSlidePadding: number
+  resetViewportOnPresentationEnd: boolean
   useArrowKeysToChangeSlides: boolean
   usePgUpPgDownKeysToChangeSlides: boolean
   zoomToSlideWithoutPadding: boolean
@@ -63,7 +72,7 @@ export interface AdvancedCanvasPluginSettings {
 }
 
 export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
-  nodeTypeOnDoubleClick: Object.keys(NODE_TYPES_ON_DOUBLE_CLICK).first(),
+  nodeTypeOnDoubleClick: 'text',
   alignDoubleClickedNodeToGrid: true,
   defaultTextNodeWidth: 260,
   defaultTextNodeHeight: 60,
@@ -71,9 +80,9 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   defaultFileNodeHeight: 400,
   defaultGroupNodeWidth: 300,
   defaultGroupNodeHeight: 300,
+  disableFontSizeRelativeToZoom: false,
 
-  fixBrokenCanvasFiles: false,
-  performanceOptimizationEnabled: false,
+  combineCustomStylesInDropdown: false,
 
   nodeStylingFeatureEnabled: true,
   customNodeStyleAttributes: [],
@@ -81,6 +90,7 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
 
   edgesStylingFeatureEnabled: true,
   customEdgeStyleAttributes: [],
+  defaultEdgeLineDirection: 'unidirectional',
   defaultEdgeStyleAttributes: {},
   edgeStyleDirectRotateArrow: false,
   edgeStylePathfinderGridResolution: 10,
@@ -100,10 +110,13 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   collapsibleGroupsFeatureEnabled: true,
   collapsedGroupPreviewOnDrag: true,
 
+  focusModeFeatureEnabled: true,
+
   presentationFeatureEnabled: true,
   showSetStartNodeInPopup: false,
   defaultSlideSize: '1200x675',
   wrapInSlidePadding: 20,
+  resetViewportOnPresentationEnd: true,
   useArrowKeysToChangeSlides: true,
   usePgUpPgDownKeysToChangeSlides: true,
   zoomToSlideWithoutPadding: true,
@@ -177,7 +190,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
         dropdown
           .addOptions(NODE_TYPES_ON_DOUBLE_CLICK)
           .setValue(this.settingsManager.getSetting('nodeTypeOnDoubleClick'))
-          .onChange(async (value) => await this.settingsManager.setSetting({ nodeTypeOnDoubleClick: value }))
+          .onChange(async (value) => await this.settingsManager.setSetting({ nodeTypeOnDoubleClick: value as keyof typeof NODE_TYPES_ON_DOUBLE_CLICK }))
         )
 
     new Setting(containerEl)
@@ -243,18 +256,20 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           .onChange(async (value) => await this.settingsManager.setSetting({ defaultGroupNodeHeight: Math.max(1, parseInt(value)) }))
       )
 
-    this.createFeatureHeading(
-      containerEl,
-      "Fix broken canvas files",
-      "Fix broken canvas files by removing trailing commas. (This is a workaround for a bug in Obsidian. It happens if you edit an advanced canvas file without the plugin enabled. I suggest you to only enable this if you encounter the error: Failed to open \"\")",
-      'fixBrokenCanvasFiles'
-    )
+    new Setting(containerEl)
+      .setName("Disable font size relative to zoom")
+      .setDesc("When enabled, the font size of e.g. group node titles and edge labels will not increase when zooming out.")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.settingsManager.getSetting('disableFontSizeRelativeToZoom'))
+          .onChange(async (value) => await this.settingsManager.setSetting({ disableFontSizeRelativeToZoom: value }))
+      )
 
     this.createFeatureHeading(
       containerEl,
-      "Performance optimization",
-      "Optimize the performance of the canvas (Side effect is some amount of blurriness).",
-      'performanceOptimizationEnabled'
+      "Combine custom styles",
+      "Combine all style attributes of Advanced Canvas in a single dropdown.",
+      'combineCustomStylesInDropdown'
     )
 
     this.createFeatureHeading(
@@ -291,6 +306,16 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
         button
           .setButtonText("Open Tutorial")
           .onClick(() => window.open("https://github.com/Developer-Mike/obsidian-advanced-canvas/blob/main/README.md#custom-styles"))
+      )
+
+    new Setting(containerEl)
+      .setName("Default edge line direction")
+      .setDesc("The default line direction of an edge.")
+      .addDropdown((dropdown) =>
+        dropdown
+          .addOptions(EDGE_LINE_DIRECTIONS)
+          .setValue(this.settingsManager.getSetting('defaultEdgeLineDirection'))
+          .onChange(async (value) => await this.settingsManager.setSetting({ defaultEdgeLineDirection: value as keyof typeof EDGE_LINE_DIRECTIONS }))
       )
 
     this.createDefaultStylesSection(containerEl, 'Default edge style attributes', 'defaultEdgeStyleAttributes', [ ...BUILTIN_EDGE_STYLE_ATTRIBUTES, ...this.settingsManager.getSetting('customEdgeStyleAttributes') ])
@@ -390,6 +415,13 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
 
     this.createFeatureHeading(
       containerEl,
+      "Focus mode",
+      "Focus on a single node and blur all other nodes.",
+      'focusModeFeatureEnabled'
+    )
+
+    this.createFeatureHeading(
+      containerEl,
       "Presentations",
       "Create a presentation from your canvas.",
       'presentationFeatureEnabled'
@@ -420,6 +452,15 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
         text
           .setValue(this.settingsManager.getSetting('wrapInSlidePadding').toString())
           .onChange(async (value) => await this.settingsManager.setSetting({ wrapInSlidePadding: parseInt(value) }))
+      )
+
+    new Setting(containerEl)
+      .setName("Reset viewport on presentation end")
+      .setDesc("When enabled, the viewport will be reset to the original position after the presentation ends.")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.settingsManager.getSetting('resetViewportOnPresentationEnd'))
+          .onChange(async (value) => await this.settingsManager.setSetting({ resetViewportOnPresentationEnd: value }))
       )
 
     new Setting(containerEl)

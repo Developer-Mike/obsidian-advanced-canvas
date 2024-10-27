@@ -72,8 +72,8 @@ export default class EdgeStylesExtension extends CanvasExtension {
     if (canvas.readonly || selectedEdges.length === 0 || selectedEdges.length !== canvas.selection.size)
       return
 
-    CanvasHelper.createStyleDropdownMenu(
-      canvas, this.allEdgeStyleAttributes,
+    CanvasHelper.addStyleAttributesToPopup(
+      this.plugin, canvas, this.allEdgeStyleAttributes,
       selectedEdges[0].getData().styleAttributes ?? {},
       (attribute, value) => this.setStyleAttributeForSelection(canvas, attribute, value)
     )

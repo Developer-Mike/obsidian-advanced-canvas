@@ -1,10 +1,11 @@
 {
 	"id": "advanced-canvas",
 	"name": "Advanced Canvas",
-	"version": "3.0.3",
+	"version": "3.1.3",
 	"minAppVersion": "1.1.0",
 	"description": "Supercharge your canvas experience! Create presentations, flowcharts and more!",
 	"author": "Developer-Mike",
 	"authorUrl": "https://github.com/Developer-Mike",
+    "fundingUrl": "https://ko-fi.com/X8X27IA08",
 	"isDesktopOnly": false
 }

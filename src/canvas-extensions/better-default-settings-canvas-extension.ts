@@ -101,7 +101,7 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
     })
   }
 
-  private applyDefaultEdgeStyles(_canvas: Canvas, edge: CanvasEdge) {
+  private async applyDefaultEdgeStyles(canvas: Canvas, edge: CanvasEdge) {
     const edgeData = edge.getData()
 
     edge.setData({
@@ -110,6 +110,22 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
         ...edgeData.styleAttributes,
         ...this.plugin.settings.getSetting('defaultEdgeStyleAttributes')
       }
+    })
+
+    // Wait until the connecting class is removed (else, the direction will be reset on mousemove (onConnectionPointerdown))
+    if (canvas.canvasEl.hasClass('is-connecting')) {
+      await new Promise<void>(resolve => {
+        new MutationObserver(() => {
+          if (!canvas.canvasEl.hasClass('is-connecting')) resolve()
+        }).observe(canvas.canvasEl, { attributes: true, attributeFilter: ['class'] })
+      })
+    }
+
+    const lineDirection = this.plugin.settings.getSetting('defaultEdgeLineDirection')
+    edge.setData({
+      ...edge.getData(),
+      fromEnd: lineDirection === 'bidirectional' ? 'arrow' : 'none',
+      toEnd: lineDirection === 'nondirectional' ? 'none' : 'arrow',
     })
   }
 }

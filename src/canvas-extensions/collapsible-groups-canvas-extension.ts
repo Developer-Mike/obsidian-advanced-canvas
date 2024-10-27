@@ -44,7 +44,9 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
     collapseButton.id = COLLAPSE_BUTTON_ID
     setIcon(collapseButton, groupNodeData.isCollapsed ? 'plus-circle' : 'minus-circle')
 
-    collapseButton.onclick = () => { this.setCollapsed(canvas, groupNode, groupNode.getData().isCollapsed ? undefined : true) }
+    collapseButton.onclick = () => { 
+      this.setCollapsed(canvas, groupNode, groupNode.getData().isCollapsed ? undefined : true)
+    }
 
     groupNode.labelEl?.insertAdjacentElement('afterend', collapseButton)
   }
@@ -52,6 +54,9 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
   private setCollapsed(canvas: Canvas, groupNode: CanvasNode, collapsed: boolean | undefined) {
     groupNode.setData({ ...groupNode.getData(), isCollapsed: collapsed })
     canvas.setData(canvas.getData())
+
+    canvas.history.current--
+    canvas.pushHistory(canvas.getData())
   }
 
   onNodeBBoxRequested(_canvas: Canvas, node: CanvasNode, bbox: BBox) {

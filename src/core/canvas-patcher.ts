@@ -2,7 +2,7 @@ import AdvancedCanvasPlugin from "src/main"
 import { BBox, Canvas, CanvasData, CanvasEdge, CanvasEdgeData, CanvasElement, CanvasNode, CanvasNodeData, CanvasView } from "src/@types/Canvas"
 import PatchHelper from "src/utils/patch-helper"
 import { CanvasEvent } from "./events"
-import { WorkspaceLeaf } from "obsidian"
+import { requireApiVersion, WorkspaceLeaf } from "obsidian"
 import { around } from "monkey-around"
 import JSONC from "tiny-jsonc"
 
@@ -17,27 +17,35 @@ export default class CanvasPatcher {
   private async applyPatches() {
     const that = this
 
+    // Wait for layout ready -> Support deferred view initialization
+    await new Promise<void>(resolve => this.plugin.app.workspace.onLayoutReady(() => resolve()))
+
+    // Get the current canvas view fully loaded
+    const getCanvasView = async (): Promise<CanvasView | null> => {
+      const canvasLeaf = this.plugin.app.workspace.getLeavesOfType('canvas')?.first()
+      if (!canvasLeaf) return null
+
+      if (requireApiVersion('1.7.2')) await canvasLeaf.loadIfDeferred() // Load the canvas if the view is deferred
+      return canvasLeaf.view as CanvasView
+    }
+
     // Get the current canvas view or wait for it to be created
-    const canvasView = (
-      this.plugin.app.workspace.getLeavesOfType('canvas')?.first()?.view ??
-      await new Promise<CanvasView>((resolve) => {
-        // @ts-ignore
-        const uninstall = around(this.plugin.app.internalPlugins.plugins.canvas.views, {
-          canvas: (next: any) => function (...args: any) {
-            const result = next.call(this, ...args)
+    let canvasView = await getCanvasView()
+    canvasView ??= await new Promise<CanvasView>(resolve => {
+      const event = this.plugin.app.workspace.on('layout-change', async () => {
+        const newCanvasView = await getCanvasView()
+        if (!newCanvasView) return
 
-            resolve(result)
-            uninstall() // Uninstall the patch
-
-            return result
-          }
-        })
-        this.plugin.register(uninstall)
+        resolve(newCanvasView)
+        this.plugin.app.workspace.offref(event)
       })
-    ) as CanvasView
+
+      this.plugin.registerEvent(event)
+    })
+
+    console.log('Patching canvas view:', canvasView)
     
     // Patch canvas view
-    const fixBrokenCanvasFiles = this.plugin.settings.getSetting('fixBrokenCanvasFiles')
     PatchHelper.patchObjectPrototype(this.plugin, canvasView, {
       getViewData: (_next: any) => function (..._args: any) {
         const canvasData = this.canvas.getData()
@@ -46,16 +54,18 @@ export default class CanvasPatcher {
         return JSON.stringify(canvasData, null, 2)
       },
       setViewData: (next: any) => function (json: string, ...args: any) {
-        let validJson = json
+        let validJson = json !== '' ? json : '{}'
         let parsedJson
 
         // Check for SyntaxError
-        try { parsedJson = JSON.parse(json) }
+        try { parsedJson = JSON.parse(validJson) }
         catch (e) {
-          if (fixBrokenCanvasFiles) {
-            parsedJson = JSONC.parse(json)
-            validJson = JSON.stringify(parsedJson, null, 2)
-          }
+          // Invalid JSON
+          that.plugin.createFileSnapshot(this.file.path, json)
+          
+          // Try to parse it with trailing commas
+          parsedJson = JSONC.parse(validJson)
+          validJson = JSON.stringify(parsedJson, null, 2)
         }
 
         const result = next.call(this, validJson, ...args)
