@@ -15,6 +15,7 @@ import CanvasExtension from './core/canvas-extension'
 import GroupCanvasExtension from './canvas-extensions/group-canvas-extension'
 import PresentationCanvasExtension from './canvas-extensions/presentation-canvas-extension'
 import BetterReadonlyCanvasExtension from './canvas-extensions/better-readonly-canvas-extension'
+import EmbedPropertiesCanvasExtension from './canvas-extensions/embed-properties-canvas-extension'
 import EncapsulateCanvasExtension from './canvas-extensions/encapsulate-canvas-extension'
 import CommandsCanvasExtension from './canvas-extensions/commands-canvas-extension'
 import PortalsCanvasExtension from './canvas-extensions/portals-canvas-extension'
@@ -56,6 +57,7 @@ const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   // More Advanced Extensions
   CollapsibleGroupsCanvasExtension,
   FocusModeCanvasExtension,
+  EmbedPropertiesCanvasExtension,
   EncapsulateCanvasExtension,
   ColorPaletteCanvasExtension,
   PresentationCanvasExtension,
