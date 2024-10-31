@@ -13,13 +13,13 @@ export default class EdgePathAnchorCanvasExtension extends CanvasExtension {
 
   init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.CanvasChanged,
-      (canvas: Canvas) => this.onCanvasChanged(canvas)
+      CanvasEvent.EdgeContextMenu,
+      (menu: Menu, edge: CanvasEdge) => this.onEdgeContextMenu(menu, edge)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.EdgeContextMenu,
-      (menu: Menu, edge: CanvasEdge) => this.onEdgeContextMenu(menu, edge)
+      CanvasEvent.NodeConnectionDropContextMenu,
+      (menu: Menu, node: CanvasNode, edge: CanvasEdge) => this.onEdgeContextMenu(menu, edge)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
@@ -38,9 +38,23 @@ export default class EdgePathAnchorCanvasExtension extends CanvasExtension {
     ))
   }
 
-  private createEdgePathAnchor(canvas: Canvas, pos: Position, edge?: CanvasEdge) {
-    console.log(canvas)
+  private onEdgeContextMenu(menu: Menu, edge: CanvasEdge) {
+    const canvas = edge.canvas
+    const mousePos = canvas.pointer
+    const pos = {
+      x: Math.round((mousePos.x - EDGE_PATH_ANCHOR_SIZE / 2) / CanvasHelper.GRID_SIZE) * CanvasHelper.GRID_SIZE,
+      y: Math.round((mousePos.y - EDGE_PATH_ANCHOR_SIZE / 2) / CanvasHelper.GRID_SIZE) * CanvasHelper.GRID_SIZE
+    }
 
+    menu.addItem((item) =>
+      item.setSection('canvas')
+        .setTitle('Add anchor point')
+        .setIcon('diamond')
+        .onClick(() => this.createEdgePathAnchor(canvas, pos, edge))
+    )
+  }
+
+  private createEdgePathAnchor(canvas: Canvas, pos: Position, edge?: CanvasEdge) {
     const anchorNode = canvas.createTextNode({
       pos: pos,
       size: { width: EDGE_PATH_ANCHOR_SIZE, height: EDGE_PATH_ANCHOR_SIZE },
@@ -56,7 +70,8 @@ export default class EdgePathAnchorCanvasExtension extends CanvasExtension {
     if (!edge) return
     edge.blur()
 
-    /* const newEdge = edge.constructor(
+    const edgeData = edge.getData()
+    const newEdge = edge.constructor(
       canvas, 
       CanvasHelper.generateRandomId(), 
       {
@@ -69,10 +84,9 @@ export default class EdgePathAnchorCanvasExtension extends CanvasExtension {
         node: edge.to.node,
         side: edge.to.side
       }
-    )
-    console.log(newEdge) */
+    ) as CanvasEdge
 
-    edge.update(canvas, 
+    /*edge.update(canvas, 
       {
         end: edge.from.end,
         node: edge.from.node,
@@ -83,40 +97,9 @@ export default class EdgePathAnchorCanvasExtension extends CanvasExtension {
         node: anchorNode,
         side: edge.to.side
       }
-    )
+    )*/
 
     // canvas.pushHistory(canvas.getData())
-  }
-
-  private onCanvasChanged(canvas: Canvas) {
-    const cardMenuOption = CanvasHelper.createCardMenuOption(
-      canvas,
-      {
-        id: 'create-edge-path-anchor',
-        label: 'Drag to create edge path anchor',
-        icon: 'diamond'
-      },
-      () => { return { width: EDGE_PATH_ANCHOR_SIZE, height: EDGE_PATH_ANCHOR_SIZE } },
-      (canvas: Canvas, pos: Position) => this.createEdgePathAnchor(canvas, pos)
-    )
-
-    CanvasHelper.addCardMenuOption(canvas, cardMenuOption)
-  }
-
-  private onEdgeContextMenu(menu: Menu, edge: CanvasEdge) {
-    const canvas = edge.canvas
-    const mousePos = canvas.pointer
-    const pos = {
-      x: Math.round((mousePos.x - EDGE_PATH_ANCHOR_SIZE / 2) / CanvasHelper.GRID_SIZE) * CanvasHelper.GRID_SIZE,
-      y: Math.round((mousePos.y - EDGE_PATH_ANCHOR_SIZE / 2) / CanvasHelper.GRID_SIZE) * CanvasHelper.GRID_SIZE
-    }
-
-    menu.addItem((item) =>
-      item.setSection('canvas')
-        .setTitle('Add anchor point')
-        .setIcon('diamond')
-        .onClick(() => this.createEdgePathAnchor(canvas, pos, edge))
-    )
   }
 
   private onNodeEditingStarted(_canvas: Canvas, node: CanvasNode, cancelled: { value: boolean }) {
