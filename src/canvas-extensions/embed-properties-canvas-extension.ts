@@ -107,9 +107,14 @@ export default class EmbedPropertiesCanvasExtension extends CanvasExtension {
           Object.keys(frontmatter).length === 0 || // Either no frontmatter with which to overwrite
           !this.plugin.settings.getSetting('embedPropertiesShowOverwriteWarning') || // Or the user has disabled the warning
           await this.showWarningDialog() // Or the user has confirmed the warning
-        if (!confirmed) return frontmatter
+        if (!confirmed) return
 
-        return this.getNewProperties(node, connectedNodes)
+        // Delete all properties
+        for (const key of Object.keys(frontmatter)) delete frontmatter[key]
+
+        // Push new properties
+        const newProperties = this.getNewProperties(connectedNodes)
+        Object.assign(frontmatter, newProperties)
       })
     }
   }
@@ -119,14 +124,66 @@ export default class EmbedPropertiesCanvasExtension extends CanvasExtension {
     const edges = canvas.getEdgesForNode(node)
     if (!edges) return {}
 
-    // TODO
+    const connectedNodes: ConnectedNodes = {}
+    for (const edge of edges) {
+      const edgeData = edge.getData()
+      if (edgeData.label === undefined) continue
 
-    return {}
+      // Check if the edge is nondirectional
+      const isNondirectional = edgeData?.toEnd === 'none'
+      if (isNondirectional && !this.plugin.settings.getSetting('embedPropertiesAddNondirectionalEdges')) continue
+
+      let targetNode = edge.to.node
+
+      // Get the target node of the edge
+      const isBidirectional = edgeData?.fromEnd === 'arrow'
+      const hasNoDirection = isNondirectional || isBidirectional
+      if (hasNoDirection && node.getData().id === targetNode.getData().id) targetNode = edge.from.node
+
+      let targetNodes = [targetNode]
+
+      // Check if the target node is a group
+      const targetNodeData = targetNode.getData()
+      if (targetNodeData.type === 'group') {
+        targetNodes = canvas.getContainingNodes(targetNode.getBBox())
+          .filter(node => node.getData().id !== targetNodeData.id)
+      }
+
+      connectedNodes[edgeData.label] = targetNodes
+    }
+
+    return connectedNodes
   }
 
-  private getNewProperties(node: CanvasNode, connectedNodes: ConnectedNodes) {
-    // TODO
-    return {}
+  private getNewProperties(connectedNodes: ConnectedNodes) {
+    const properties = {} as Record<string, string | string[]>
+    for (const [edgeLabel, nodes] of Object.entries(connectedNodes)) {
+      const values = []
+
+      // Add all values of the connected nodes
+      for (const connectedNode of nodes) {
+        const connectedNodeData = connectedNode.getData()
+        if (!connectedNodeData) continue
+
+        switch (connectedNodeData.type) {
+          case 'text':
+            values.push(connectedNodeData.text ?? '')
+            break
+          case 'file':
+            values.push(`[[${connectedNodeData.file}]]`)
+            break
+          case 'link':
+            values.push(connectedNodeData.url ?? '')
+            break
+        }
+      }
+
+      // If there are multiple values, store them as an array
+      if (values.length > 1) properties[edgeLabel] = values
+      else if (values.length === 1) properties[edgeLabel] = values[0]
+    }
+
+    return properties
   }
 
   private async showWarningDialog() {

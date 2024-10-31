@@ -186,11 +186,13 @@ export interface CanvasElement {
 export type CanvasNodeType = 'text' | 'group' | 'file' | 'link'
 export interface CanvasNodeData {
   type: CanvasNodeType
+  id: string
+
   text?: string
   label?: string
   file?: string
+  url?: string
 
-  // TODO: needsToBeInitialized?: boolean
   styleAttributes?: { [key: string]: string | null }
 
   isCollapsed?: boolean
@@ -222,6 +224,7 @@ export interface CanvasNode extends CanvasElement {
   labelEl?: HTMLElement
   file?: TFile
 
+  id: string
   x: number
   y: number
   width: number
@@ -241,6 +244,7 @@ type Side = 'top' | 'right' | 'bottom' | 'left'
 type EndType = 'none' | 'arrow'
 export interface CanvasEdgeData {
   id: string
+  label?: string
 
   fromNode: string
   toNode: string
