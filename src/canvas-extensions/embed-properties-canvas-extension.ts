@@ -1,6 +1,5 @@
 import { Canvas, CanvasNode } from "src/@types/Canvas"
 import CanvasHelper from "src/utils/canvas-helper"
-import { FileSelectModal } from "src/utils/modal-helper"
 import CanvasExtension from "../core/canvas-extension"
 import { CanvasEvent } from "src/core/events"
 import { Menu } from "obsidian"
@@ -29,11 +28,48 @@ export default class EmbedPropertiesCanvasExtension extends CanvasExtension {
       CanvasEvent.NodeContextMenu,
       (menu: Menu, node: CanvasNode) => this.onNodeContextMenu(menu, node)
     ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.SelectionContextMenu,
+      (menu: Menu, canvas: Canvas) => this.onSelectionContextMenu(menu, canvas)
+    ))
   }
 
   private hasMarkdownFileNodeSelected(canvas: Canvas) {
     const selectionData = canvas.getSelectionData()
-    return selectionData.nodes.some(node => node.type === 'file' && node.getData().type === 'file')
+    return selectionData.nodes.some(node => node.type === 'file' && node.file?.endsWith('.md'))
+  }
+
+  private onNodeContextMenu(menu: Menu, node: CanvasNode) {
+    const canvas = node.canvas
+    if (!this.hasMarkdownFileNodeSelected(canvas)) return
+
+    this.addContextMenuItems(menu, canvas)
+  }
+
+  private onSelectionContextMenu(menu: Menu, canvas: Canvas) {
+    console.log('onSelectionContextMenu', menu, canvas)
+    if (!this.hasMarkdownFileNodeSelected(canvas)) return
+
+    this.addContextMenuItems(menu, canvas)
+  }
+
+  private addContextMenuItems(menu: Menu, canvas: Canvas) {
+    menu.addSeparator()
+
+    menu.addItem(item => {
+      item.setTitle('Pull Properties from Embed')
+      item.setIcon('download')
+      item.onClick(() => this.pullPropertiesFromEmbed(canvas))
+    })
+
+    menu.addItem(item => {
+      item.setTitle('Push Properties to Embed')
+      item.setIcon('upload')
+      item.onClick(() => this.pushPropertiesToEmbed(canvas))
+    })
+
+    menu.addSeparator()
   }
 
   private pullPropertiesFromEmbed(canvas: Canvas) {
@@ -42,22 +78,5 @@ export default class EmbedPropertiesCanvasExtension extends CanvasExtension {
 
   private pushPropertiesToEmbed(canvas: Canvas) {
     
-  }
-
-  private onNodeContextMenu(menu: Menu, node: CanvasNode) {
-    const nodeData = node.getData()
-    if (nodeData.type !== 'file') return
-    
-    menu.addItem(item => {
-      item.setTitle('Pull Properties from Embed')
-      item.setIcon('download')
-      item.onClick(() => this.pullPropertiesFromEmbed(node.canvas))
-    })
-
-    menu.addItem(item => {
-      item.setTitle('Push Properties to Embed')
-      item.setIcon('upload')
-      item.onClick(() => this.pushPropertiesToEmbed(node.canvas))
-    })
   }
 }

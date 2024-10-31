@@ -127,7 +127,7 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
 
   embedPropertiesEnabled: true,
   embedPropertiesShowOverwriteWarning: true,
-  embedPropertiesAddNondirectionalEdges: true,
+  embedPropertiesAddNondirectionalEdges: false,
   embedPropertiesAddUnlabelledEdges: true,
   embedPropertiesUnlabelledEdgesPropertyKey: 'unnamed',
 
