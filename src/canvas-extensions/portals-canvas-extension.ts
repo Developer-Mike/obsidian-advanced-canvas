@@ -15,6 +15,8 @@ export default class PortalsCanvasExtension extends CanvasExtension {
       const canvases = this.plugin.app.workspace.getLeavesOfType('canvas').map(leaf => (leaf.view as CanvasView).canvas)
 
       for (const canvas of canvases) {
+        if (canvas === undefined) continue
+        
         const hasPortalsToFile = canvas.getData().nodes.filter(nodeData => 
           nodeData.type === 'file' && 
           nodeData.portalToFile === file.path
