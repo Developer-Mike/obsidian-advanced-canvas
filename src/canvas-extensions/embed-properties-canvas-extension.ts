@@ -10,6 +10,8 @@ import { Menu } from "obsidian"
 // embedPropertiesAddUnlabelledEdges: true
 // embedPropertiesUnlabelledEdgesPropertyKey: 'unnamed'
 
+type ConnectedNodes = { [edgeLabel: string]: CanvasNode[] }
+
 export default class EmbedPropertiesCanvasExtension extends CanvasExtension {
   isEnabled() { return 'embedPropertiesEnabled' as const }
 
@@ -19,7 +21,7 @@ export default class EmbedPropertiesCanvasExtension extends CanvasExtension {
       name: 'Pull Properties from Embed',
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
-        (canvas: Canvas) => !canvas.readonly && this.hasMarkdownFileNodeSelected(canvas),
+        (canvas: Canvas) => !canvas.readonly && this.getSelectedMarkdownFileNodes(canvas).length > 0,
         (canvas: Canvas) => this.pullPropertiesFromEmbed(canvas)
       )
     })
@@ -35,21 +37,22 @@ export default class EmbedPropertiesCanvasExtension extends CanvasExtension {
     ))
   }
 
-  private hasMarkdownFileNodeSelected(canvas: Canvas) {
-    const selectionData = canvas.getSelectionData()
-    return selectionData.nodes.some(node => node.type === 'file' && node.file?.endsWith('.md'))
+  private getSelectedMarkdownFileNodes(canvas: Canvas) {
+    return [...canvas.selection].filter(node => {
+      const nodeData = node.getData()
+      return nodeData?.type === 'file' && nodeData?.file?.endsWith('.md')
+    }) as CanvasNode[]
   }
 
   private onNodeContextMenu(menu: Menu, node: CanvasNode) {
     const canvas = node.canvas
-    if (!this.hasMarkdownFileNodeSelected(canvas)) return
+    if (this.getSelectedMarkdownFileNodes(canvas).length === 0) return
 
     this.addContextMenuItems(menu, canvas)
   }
 
   private onSelectionContextMenu(menu: Menu, canvas: Canvas) {
-    console.log('onSelectionContextMenu', menu, canvas)
-    if (!this.hasMarkdownFileNodeSelected(canvas)) return
+    if (this.getSelectedMarkdownFileNodes(canvas).length === 0) return
 
     this.addContextMenuItems(menu, canvas)
   }
@@ -72,11 +75,61 @@ export default class EmbedPropertiesCanvasExtension extends CanvasExtension {
     menu.addSeparator()
   }
 
-  private pullPropertiesFromEmbed(canvas: Canvas) {
+  private async pullPropertiesFromEmbed(canvas: Canvas) {
+    const selectedFileNodes = this.getSelectedMarkdownFileNodes(canvas)
+    
+    for (const node of selectedFileNodes) {
+      const nodeData = node.getData()
 
+      // Remove all current edges (only those with labels)
+      const connectedNodes = this.getConnectedNodes(node)
+      for (const connectedNode of Object.values(connectedNodes).flat())
+        canvas.removeNode(connectedNode)
+
+      // TODO: Add new nodes
+      // TODO: Add new edges
+    }
   }
 
-  private pushPropertiesToEmbed(canvas: Canvas) {
-    
+  private async pushPropertiesToEmbed(canvas: Canvas) {
+    const selectedFileNodes = this.getSelectedMarkdownFileNodes(canvas)
+
+    for (const node of selectedFileNodes) {
+      const nodeData = node.getData()
+
+      const connectedNodes = this.getConnectedNodes(node)
+
+      const file = await this.plugin.app.vault.getFileByPath(nodeData.file!)
+      if (!file) continue
+
+      this.plugin.app.fileManager.processFrontMatter(file, async frontmatter => {
+        const confirmed = 
+          Object.keys(frontmatter).length === 0 || // Either no frontmatter with which to overwrite
+          !this.plugin.settings.getSetting('embedPropertiesShowOverwriteWarning') || // Or the user has disabled the warning
+          await this.showWarningDialog() // Or the user has confirmed the warning
+        if (!confirmed) return frontmatter
+
+        return this.getNewProperties(node, connectedNodes)
+      })
+    }
+  }
+
+  private getConnectedNodes(node: CanvasNode): ConnectedNodes {
+    const canvas = node.canvas
+    const edges = canvas.getEdgesForNode(node)
+    if (!edges) return {}
+
+    // TODO
+
+    return {}
+  }
+
+  private getNewProperties(node: CanvasNode, connectedNodes: ConnectedNodes) {
+    // TODO
+    return {}
+  }
+
+  private async showWarningDialog() {
+    return false
   }
 }

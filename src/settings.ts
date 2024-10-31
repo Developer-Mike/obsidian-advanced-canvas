@@ -65,8 +65,6 @@ export interface AdvancedCanvasPluginSettings {
   embedPropertiesEnabled: boolean
   embedPropertiesShowOverwriteWarning: boolean
   embedPropertiesAddNondirectionalEdges: boolean
-  embedPropertiesAddUnlabelledEdges: boolean
-  embedPropertiesUnlabelledEdgesPropertyKey: string
 
   canvasEncapsulationEnabled: boolean
 
@@ -128,8 +126,6 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   embedPropertiesEnabled: true,
   embedPropertiesShowOverwriteWarning: true,
   embedPropertiesAddNondirectionalEdges: false,
-  embedPropertiesAddUnlabelledEdges: true,
-  embedPropertiesUnlabelledEdgesPropertyKey: 'unnamed',
 
   canvasEncapsulationEnabled: true,
 
@@ -521,24 +517,6 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
         toggle
           .setValue(this.settingsManager.getSetting('embedPropertiesAddNondirectionalEdges'))
           .onChange(async (value) => await this.settingsManager.setSetting({ embedPropertiesAddNondirectionalEdges: value }))
-      )
-
-    new Setting(containerEl)
-      .setName("Add unlabelled edges")
-      .setDesc("When enabled, an unlabelled edge also gets added to the properties with the default property key.")
-      .addToggle((toggle) =>
-        toggle
-          .setValue(this.settingsManager.getSetting('embedPropertiesAddUnlabelledEdges'))
-          .onChange(async (value) => await this.settingsManager.setSetting({ embedPropertiesAddUnlabelledEdges: value }))
-      )
-
-    new Setting(containerEl)
-      .setName("Unlabelled edges property key")
-      .setDesc("The property key for unlabelled edges.")
-      .addText((text) =>
-        text
-          .setValue(this.settingsManager.getSetting('embedPropertiesUnlabelledEdgesPropertyKey'))
-          .onChange(async (value) => await this.settingsManager.setSetting({ embedPropertiesUnlabelledEdgesPropertyKey: value }))
       )
 
     this.createFeatureHeading(
