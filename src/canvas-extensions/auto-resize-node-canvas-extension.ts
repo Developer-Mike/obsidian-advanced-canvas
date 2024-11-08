@@ -24,8 +24,7 @@ export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
 
     const selectedNodes = [...canvas.selection].filter(element => {
       const elementData = element.getData()
-
-      return elementData.type === 'text' || elementData.type === 'file'
+      return elementData.type === 'text'
     }) as CanvasNode[]
     if (selectedNodes.length === 0) return
 
