@@ -385,9 +385,9 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
     - Payload: `Canvas`, `Node`
   - `advanced-canvas:edge-removed`
     - Fired when an edge gets removed
-  - `advanced-canvas:copy:before` and `advanced-canvas:copy:after`
+  - `advanced-canvas:copy`
     - Fired when the selection gets copied
-    - Payload: `Canvas`, `ClipboardEvent`
+    - Payload: `Canvas`, `SelectionData (Reference!)`
   - `advanced-canvas:node-bbox-requested`
     - Fired when the bounding box of a node gets requested (e.g. for the edge path or when dragging a group)
     - Payload: `Canvas`, `Node`, `BBox (Reference!)`

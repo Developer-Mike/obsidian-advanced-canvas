@@ -1,5 +1,5 @@
 import { setIcon } from "obsidian"
-import { BBox, Canvas, CanvasData, CanvasNode } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasData, CanvasNode, SelectionData } from "src/@types/Canvas"
 import { CanvasEvent } from "src/core/events"
 import BBoxHelper from "src/utils/bbox-helper"
 import CanvasExtension from "../core/canvas-extension"
@@ -22,8 +22,8 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.OnCopy.Before,
-      (canvas: Canvas, event: ClipboardEvent) => this.onCopy(canvas, event)
+      CanvasEvent.OnCopy,
+      (canvas: Canvas, selectionData: SelectionData) => this.onCopy(canvas, selectionData)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
@@ -56,27 +56,18 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
     groupNode.labelEl?.insertAdjacentElement('afterend', collapseButton)
   }
 
-  private onCopy(canvas: Canvas, event: ClipboardEvent) {
-    const selectedCollapsedGroups = canvas.getSelectionData().nodes
-      .filter(nodeData => nodeData.type === 'group' && nodeData.isCollapsed)
-      .map(nodeData => canvas.nodes.get(nodeData.id))
-      .filter(node => node !== undefined) as CanvasNode[]
+  private onCopy(canvas: Canvas, selectionData: SelectionData) {
+    for (const collapsedGroupData of selectionData.nodes) {
+      if (collapsedGroupData.type !== 'group' || !collapsedGroupData.isCollapsed || !collapsedGroupData.collapsedData) continue
 
-    // Expand all collapsed groups before copying
-    for (const collapsedGroup of selectedCollapsedGroups)
-      this.setCollapsed(canvas, collapsedGroup, false)
-
-    // Wait until after the copy event to collapse the groups again
-    const onAfterCopy = this.plugin.app.workspace.on(
-      CanvasEvent.OnCopy.After,
-      () => {
-        for (const collapsedGroup of selectedCollapsedGroups)
-          this.setCollapsed(canvas, collapsedGroup, true)
-
-        this.plugin.app.workspace.offref(onAfterCopy)
-      }
-    )
-    this.plugin.registerEvent(onAfterCopy)
+      selectionData.nodes.push(...collapsedGroupData.collapsedData.nodes.map(nodeData => ({ 
+        ...nodeData,
+        // Restore the relative position of the node to the group
+        x: nodeData.x + collapsedGroupData.x,
+        y: nodeData.y + collapsedGroupData.y
+      })))
+      selectionData.edges.push(...collapsedGroupData.collapsedData.edges)
+    }
   }
 
   private setCollapsed(canvas: Canvas, groupNode: CanvasNode, collapsed: boolean | undefined) {

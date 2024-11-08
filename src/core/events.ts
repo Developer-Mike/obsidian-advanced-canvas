@@ -26,10 +26,7 @@ export const CanvasEvent = {
   NodeTextContentChanged: `${PLUGIN_EVENT_PREFIX}:node-text-content-changed`,
   NodeRemoved: `${PLUGIN_EVENT_PREFIX}:node-removed`,
   EdgeRemoved: `${PLUGIN_EVENT_PREFIX}:edge-removed`,
-  OnCopy: {
-    Before: `${PLUGIN_EVENT_PREFIX}:copy:before`,
-    After: `${PLUGIN_EVENT_PREFIX}:copy:after`
-  },
+  OnCopy: `${PLUGIN_EVENT_PREFIX}:copy`,
   NodeBBoxRequested: `${PLUGIN_EVENT_PREFIX}:node-bbox-requested`,
   EdgeCenterRequested: `${PLUGIN_EVENT_PREFIX}:edge-center-requested`,
   ContainingNodesRequested: `${PLUGIN_EVENT_PREFIX}:containing-nodes-requested`,

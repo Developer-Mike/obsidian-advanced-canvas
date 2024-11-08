@@ -93,6 +93,7 @@ export interface Canvas {
   requestSave(): void
 
   // Custom
+  isCopying: boolean
   lockedX: number
   lockedY: number
   lockedZoom: number
