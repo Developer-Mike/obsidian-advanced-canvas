@@ -186,6 +186,12 @@ export interface CanvasElement {
 
 export type CanvasNodeType = 'text' | 'group' | 'file' | 'link'
 export interface CanvasNodeData {
+  id: string
+  x: number
+  y: number
+  width: number
+  height: number
+
   type: CanvasNodeType
   text?: string
   label?: string
@@ -215,8 +221,6 @@ export interface CanvasNodeData {
 
   // Node from portal
   portalId?: string
-
-  [key: string]: any
 }
 
 export interface CanvasNode extends CanvasElement {

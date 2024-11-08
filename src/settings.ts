@@ -14,7 +14,7 @@ const EDGE_LINE_DIRECTIONS = {
 
 export interface AdvancedCanvasPluginSettings {
   nodeTypeOnDoubleClick: keyof typeof NODE_TYPES_ON_DOUBLE_CLICK
-  alignDoubleClickedNodeToGrid: boolean
+  alignNewNodesToGrid: boolean
   defaultTextNodeWidth: number
   defaultTextNodeHeight: number
   defaultFileNodeWidth: number
@@ -75,7 +75,7 @@ export interface AdvancedCanvasPluginSettings {
 
 export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   nodeTypeOnDoubleClick: 'text',
-  alignDoubleClickedNodeToGrid: true,
+  alignNewNodesToGrid: true,
   defaultTextNodeWidth: 260,
   defaultTextNodeHeight: 60,
   defaultFileNodeWidth: 400,
@@ -198,12 +198,12 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
         )
 
     new Setting(containerEl)
-      .setName("Align node, created by double click, to grid")
-      .setDesc("When enabled, a node created by double clicking will be aligned to the grid.")
+      .setName("Always align new nodes to grid")
+      .setDesc("When enabled, new nodes will be aligned to the grid.")
       .addToggle((toggle) =>
         toggle
-          .setValue(this.settingsManager.getSetting('alignDoubleClickedNodeToGrid'))
-          .onChange(async (value) => await this.settingsManager.setSetting({ alignDoubleClickedNodeToGrid: value }))
+          .setValue(this.settingsManager.getSetting('alignNewNodesToGrid'))
+          .onChange(async (value) => await this.settingsManager.setSetting({ alignNewNodesToGrid: value }))
       )
     
     new Setting(containerEl)
