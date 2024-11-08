@@ -370,11 +370,6 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
   - `advanced-canvas:edge-added`
     - Fired when a new edge gets added
     - Payload: `Canvas`, `Edge`
-  - `advanced-canvas:node-removed`
-    - Fired when a node gets removed
-    - Payload: `Canvas`, `Node`
-  - `advanced-canvas:edge-removed`
-    - Fired when an edge gets removed
     - Payload: `Canvas`, `Edge`
   - `advanced-canvas:node-changed`
     - Fired when any node gets changed
@@ -385,6 +380,14 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
   - `advanced-canvas:node-text-content-changed`
     - Fired when the text content of a node gets changed (While typing)
     - Payload: `Canvas`, `Node`, `ViewUpdate (From CodeMirror)`
+  - `advanced-canvas:node-removed`
+    - Fired when a node gets removed
+    - Payload: `Canvas`, `Node`
+  - `advanced-canvas:edge-removed`
+    - Fired when an edge gets removed
+  - `advanced-canvas:copy:before` and `advanced-canvas:copy:after`
+    - Fired when the selection gets copied
+    - Payload: `Canvas`, `ClipboardEvent`
   - `advanced-canvas:node-bbox-requested`
     - Fired when the bounding box of a node gets requested (e.g. for the edge path or when dragging a group)
     - Payload: `Canvas`, `Node`, `BBox (Reference!)`

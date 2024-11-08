@@ -22,6 +22,11 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.OnCopy.Before,
+      (canvas: Canvas, event: ClipboardEvent) => this.onCopy(canvas, event)
+    ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.DataRequested,
       (_canvas: Canvas, data: CanvasData) => this.expandCollapsedNodes(data)
     ))
@@ -49,6 +54,29 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
     }
 
     groupNode.labelEl?.insertAdjacentElement('afterend', collapseButton)
+  }
+
+  private onCopy(canvas: Canvas, event: ClipboardEvent) {
+    const selectedCollapsedGroups = canvas.getSelectionData().nodes
+      .filter(nodeData => nodeData.type === 'group' && nodeData.isCollapsed)
+      .map(nodeData => canvas.nodes.get(nodeData.id))
+      .filter(node => node !== undefined) as CanvasNode[]
+
+    // Expand all collapsed groups before copying
+    for (const collapsedGroup of selectedCollapsedGroups)
+      this.setCollapsed(canvas, collapsedGroup, false)
+
+    // Wait until after the copy event to collapse the groups again
+    const onAfterCopy = this.plugin.app.workspace.on(
+      CanvasEvent.OnCopy.After,
+      () => {
+        for (const collapsedGroup of selectedCollapsedGroups)
+          this.setCollapsed(canvas, collapsedGroup, true)
+
+        this.plugin.app.workspace.offref(onAfterCopy)
+      }
+    )
+    this.plugin.registerEvent(onAfterCopy)
   }
 
   private setCollapsed(canvas: Canvas, groupNode: CanvasNode, collapsed: boolean | undefined) {

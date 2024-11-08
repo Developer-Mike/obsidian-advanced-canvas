@@ -21,11 +21,15 @@ export const CanvasEvent = {
   EdgeCreated: `${PLUGIN_EVENT_PREFIX}:edge-created`,
   NodeAdded: `${PLUGIN_EVENT_PREFIX}:node-added`,
   EdgeAdded: `${PLUGIN_EVENT_PREFIX}:edge-added`,
-  NodeRemoved: `${PLUGIN_EVENT_PREFIX}:node-removed`,
-  EdgeRemoved: `${PLUGIN_EVENT_PREFIX}:edge-removed`,
   NodeChanged: `${PLUGIN_EVENT_PREFIX}:node-changed`,
   EdgeChanged: `${PLUGIN_EVENT_PREFIX}:edge-changed`,
   NodeTextContentChanged: `${PLUGIN_EVENT_PREFIX}:node-text-content-changed`,
+  NodeRemoved: `${PLUGIN_EVENT_PREFIX}:node-removed`,
+  EdgeRemoved: `${PLUGIN_EVENT_PREFIX}:edge-removed`,
+  OnCopy: {
+    Before: `${PLUGIN_EVENT_PREFIX}:copy:before`,
+    After: `${PLUGIN_EVENT_PREFIX}:copy:after`
+  },
   NodeBBoxRequested: `${PLUGIN_EVENT_PREFIX}:node-bbox-requested`,
   EdgeCenterRequested: `${PLUGIN_EVENT_PREFIX}:edge-center-requested`,
   ContainingNodesRequested: `${PLUGIN_EVENT_PREFIX}:containing-nodes-requested`,

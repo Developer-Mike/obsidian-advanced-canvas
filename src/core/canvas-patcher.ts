@@ -158,6 +158,12 @@ export default class CanvasPatcher {
         that.triggerWorkspaceEvent(CanvasEvent.EdgeRemoved, this, edge)
         return result
       },
+      handleCopy: (next: any) => function (event: ClipboardEvent) {
+        that.triggerWorkspaceEvent(CanvasEvent.OnCopy.Before, this, event)
+        const result = next.call(this, event)
+        that.triggerWorkspaceEvent(CanvasEvent.OnCopy.After, this, event)
+        return result
+      },
       zoomToBbox: (next: any) => function (bbox: BBox) {
         that.triggerWorkspaceEvent(CanvasEvent.ZoomToBbox.Before, this, bbox)
         const result = next.call(this, bbox)
