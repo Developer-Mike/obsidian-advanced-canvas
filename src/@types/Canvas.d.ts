@@ -193,6 +193,8 @@ export interface CanvasNodeData {
   // TODO: needsToBeInitialized?: boolean
   styleAttributes?: { [key: string]: string | null }
 
+  lockedHeight?: boolean
+
   isCollapsed?: boolean
   collapsedData?: CanvasData
 
@@ -217,7 +219,10 @@ export interface CanvasNodeData {
 }
 
 export interface CanvasNode extends CanvasElement {
+  isEditing: boolean
+
   nodeEl: HTMLElement
+  contentEl: HTMLElement
 
   labelEl?: HTMLElement
   file?: TFile

@@ -382,6 +382,9 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
   - `advanced-canvas:edge-changed`
     - Fired when any edge gets changed
     - Payload: `Canvas`, `Edge`
+  - `advanced-canvas:node-text-content-changed`
+    - Fired when the text content of a node gets changed (While typing)
+    - Payload: `Canvas`, `Node`, `ViewUpdate (From CodeMirror)`
   - `advanced-canvas:node-bbox-requested`
     - Fired when the bounding box of a node gets requested (e.g. for the edge path or when dragging a group)
     - Payload: `Canvas`, `Node`, `BBox (Reference!)`

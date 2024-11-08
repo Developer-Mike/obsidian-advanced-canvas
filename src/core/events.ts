@@ -17,6 +17,7 @@ export const CanvasEvent = {
   EdgeRemoved: `${PLUGIN_EVENT_PREFIX}:edge-removed`,
   NodeChanged: `${PLUGIN_EVENT_PREFIX}:node-changed`,
   EdgeChanged: `${PLUGIN_EVENT_PREFIX}:edge-changed`,
+  NodeTextContentChanged: `${PLUGIN_EVENT_PREFIX}:node-text-content-changed`,
   NodeBBoxRequested: `${PLUGIN_EVENT_PREFIX}:node-bbox-requested`,
   EdgeCenterRequested: `${PLUGIN_EVENT_PREFIX}:edge-center-requested`,
   ContainingNodesRequested: `${PLUGIN_EVENT_PREFIX}:containing-nodes-requested`,

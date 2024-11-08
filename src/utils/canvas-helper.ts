@@ -115,7 +115,11 @@ export default class CanvasHelper {
     const popupMenuEl = canvas?.menu?.menuEl
     if (!popupMenuEl) return
 
-    if (element.id) popupMenuEl.querySelector(`#${element.id}`)?.remove()
+    if (element.id) {
+      const optionToReplace = popupMenuEl.querySelector(`#${element.id}`)
+      if (optionToReplace && index === -1) index = Array.from(popupMenuEl.children).indexOf(optionToReplace) - 1
+      optionToReplace?.remove()
+    }
 
     const sisterElement = index >= 0 ? popupMenuEl.children[index] : popupMenuEl.children[popupMenuEl.children.length + index]
     popupMenuEl.insertAfter(element, sisterElement)

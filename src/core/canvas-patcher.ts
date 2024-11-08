@@ -2,7 +2,8 @@ import AdvancedCanvasPlugin from "src/main"
 import { BBox, Canvas, CanvasData, CanvasEdge, CanvasEdgeData, CanvasElement, CanvasNode, CanvasNodeData, CanvasView } from "src/@types/Canvas"
 import PatchHelper from "src/utils/patch-helper"
 import { CanvasEvent } from "./events"
-import { requireApiVersion, WorkspaceLeaf } from "obsidian"
+import { requireApiVersion, WorkspaceLeaf, editorInfoField } from "obsidian"
+import { EditorView, ViewUpdate } from "@codemirror/view"
 import { around } from "monkey-around"
 import JSONC from "tiny-jsonc"
 
@@ -232,6 +233,17 @@ export default class CanvasPatcher {
         return result
       }
     })
+
+    // Add editor extension for node text content change listener
+    this.plugin.registerEditorExtension([EditorView.updateListener.of((update: ViewUpdate) => {
+      if (!update.docChanged) return
+
+      const editor = update.state.field(editorInfoField) as any
+      const node = editor.node as CanvasNode | undefined
+      if (!node) return
+
+      that.triggerWorkspaceEvent(CanvasEvent.NodeTextContentChanged, node.canvas, node, update)
+    })])
 
     // Canvas is now patched - update all open canvas views
     this.plugin.app.workspace.iterateAllLeaves((leaf: WorkspaceLeaf) => {
