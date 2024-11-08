@@ -49,6 +49,8 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
       width: this.plugin.settings.getSetting('defaultFileNodeWidth'),
       height: this.plugin.settings.getSetting('defaultFileNodeHeight')
     }
+
+    canvas.config.minContainerDimension = this.plugin.settings.getSetting('minNodeSize')
   }
 
   private async onDoubleClick(canvas: Canvas, event: MouseEvent, preventDefault: { value: boolean }) {

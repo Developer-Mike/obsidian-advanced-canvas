@@ -19,6 +19,7 @@ export interface AdvancedCanvasPluginSettings {
   defaultTextNodeHeight: number
   defaultFileNodeWidth: number
   defaultFileNodeHeight: number
+  minNodeSize: number
   disableFontSizeRelativeToZoom: boolean
 
   combineCustomStylesInDropdown: boolean
@@ -79,6 +80,7 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   defaultTextNodeHeight: 60,
   defaultFileNodeWidth: 400,
   defaultFileNodeHeight: 400,
+  minNodeSize: 60,
   disableFontSizeRelativeToZoom: false,
 
   combineCustomStylesInDropdown: false,
@@ -238,6 +240,15 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
         text
           .setValue(this.settingsManager.getSetting('defaultFileNodeHeight').toString())
           .onChange(async (value) => await this.settingsManager.setSetting({ defaultFileNodeHeight: Math.max(1, parseInt(value)) }))
+      )
+
+    new Setting(containerEl)
+      .setName("Minimum node size")
+      .setDesc("The minimum size of a node.")
+      .addText((text) =>
+        text
+          .setValue(this.settingsManager.getSetting('minNodeSize').toString())
+          .onChange(async (value) => await this.settingsManager.setSetting({ minNodeSize: Math.max(1, parseInt(value)) }))
       )
 
     new Setting(containerEl)
