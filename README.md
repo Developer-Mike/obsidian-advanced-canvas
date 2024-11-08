@@ -39,6 +39,7 @@ Open the Community Plugins tab in the settings and search for "Advanced Canvas" 
 All features can be enabled/disabled in the settings.
 
 - Create groups independently of the nodes
+- [Better default settings](#better-default-settings)
 - More [canvas commands](#canvas-commands)
 - [Node Styles](#node-styles)
   - (Flowchart) [Node Shapes](#node-shapes)
@@ -76,6 +77,7 @@ All features can be enabled/disabled in the settings.
     - Straight
     - Square
     - A*
+- Add [custom styles](#custom-styles) to nodes and edges for unlimited possibilities
 - [Custom colors](#custom-colors) in the color picker
 - [Properties Support](#properties-support)
   - Set properties for the canvas file
@@ -86,6 +88,10 @@ All features can be enabled/disabled in the settings.
   - Create edges (arrows) to the embedded canvas
 - [Collapsible groups](#collapsible-groups)
   - Collapse and expand groups to organize your canvas
+- [Auto node resizing](#auto-node-resizing)
+  - Resize nodes automatically when the text content changes
+- [Focus mode](#focus-mode)
+  - Focus on a single node and blur all other nodes
 - [Better readonly](#better-readonly)
   - Disable node popup menus
   - Lock the canvas' position
@@ -101,6 +107,13 @@ Please consider supporting the plugin. There are many hours of work and effort b
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/X8X27IA08)
 <img src="https://img.shields.io/endpoint?url=https://wakapi.dev/api/compat/shields/v1/Developer-Mike/interval:all_time/project:obsidian-advanced-canvas&label=Time%20Spent&style=for-the-badge&colorA=ffffff&colorB=ff5e5b" alt="Time Spent">
+
+## Better Default Settings
+- Enforce all new nodes to be aligned to the grid
+- Customize default text node size
+- Customize default file node size
+- Modify the minimum node size
+- Disable the font scaling relative to the zoom level
 
 ## Canvas Commands
 - `Advanced Canvas: Create text node`
@@ -118,6 +131,8 @@ Please consider supporting the plugin. There are many hours of work and effort b
   - Expand the selected node in the direction of the arrow keys
 
 ## Node Styles
+You can customize the default node styles using the settings.
+
 ### Node Shapes
 <details>
     <summary>Flowchart Example</summary>
@@ -177,6 +192,8 @@ Set the style of the border to dotted, dashed or invisible.
 </details>
 
 ## Edge Styles
+You can customize the default edge styles using the settings.
+
 ### Path Styles
 Set the style of the edge paths to dotted, short-dashed or long-dashed.
 
@@ -318,6 +335,22 @@ Collapse and expand groups to organize your canvas.
     <img src="./assets/collapsible-groups.png" alt="Collapsible Groups Example"/>
 </details>
 
+## Auto Node Resizing
+Resize nodes automatically when the text content changes.
+
+<details>
+    <summary>Auto Node Resizing Example</summary>
+    <img src="./assets/auto-node-resizing.gif" alt="Auto Node Resizing Example"/>
+</details>
+
+## Focus Mode
+Focus on a single node and blur all other nodes.
+
+<details>
+    <summary>Focus Mode Example</summary>
+    <img src="./assets/focus-mode.png" alt="Focus Mode"/>
+</details>
+
 ## Better Readonly
 - Disable node popup menus
 - Lock the canvas' position
@@ -340,7 +373,7 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
 
 <details>
     <summary>
-        All Events (27)
+        All Events
     </summary>
 
   - `advanced-canvas:canvas-changed`
