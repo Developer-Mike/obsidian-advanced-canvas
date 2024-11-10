@@ -22,6 +22,9 @@ export interface AdvancedCanvasPluginSettings {
   minNodeSize: number
   disableFontSizeRelativeToZoom: boolean
 
+  zOrderingFeatureEnabled: boolean
+  zOrderingShowOneLayerShiftOptions: boolean
+
   combineCustomStylesInDropdown: boolean
 
   nodeStylingFeatureEnabled: boolean
@@ -82,6 +85,9 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   defaultFileNodeHeight: 400,
   minNodeSize: 60,
   disableFontSizeRelativeToZoom: false,
+
+  zOrderingFeatureEnabled: true,
+  zOrderingShowOneLayerShiftOptions: false,
 
   combineCustomStylesInDropdown: false,
 
@@ -258,6 +264,22 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
         toggle
           .setValue(this.settingsManager.getSetting('disableFontSizeRelativeToZoom'))
           .onChange(async (value) => await this.settingsManager.setSetting({ disableFontSizeRelativeToZoom: value }))
+      )
+
+    this.createFeatureHeading(
+      containerEl,
+      "Z-Ordering",
+      "Change the z-order of nodes.",
+      'zOrderingFeatureEnabled'
+    )
+
+    new Setting(containerEl)
+      .setName("Show one layer shift options")
+      .setDesc("When enabled, you can shift the node one layer up or down. Otherwise, you can only bring the node to front or send it to back.")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.settingsManager.getSetting('zOrderingShowOneLayerShiftOptions'))
+          .onChange(async (value) => await this.settingsManager.setSetting({ zOrderingShowOneLayerShiftOptions: value }))
       )
 
     this.createFeatureHeading(
