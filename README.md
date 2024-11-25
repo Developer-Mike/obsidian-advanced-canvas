@@ -466,13 +466,9 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
 Every feature can be enabled/disabled in the settings. All features were made to be as customizable as possible.
 
 ## Contributing
-All contributions are welcome! Here's how you can help:
-- Create a fork of the repository
-- Create a branch with a descriptive name
-- Make your changes
-- Debug the plugin using `npm run dev`
-- Create a pull request
-- Wait for the review
+All contributions are welcome!
+You may want to check out issues with the `only PRs` label to find issues that won't be worked on by me.
+But feel free to work on any issue or non-issue you want to work on!
 
 ## Star History
 [![Star History Chart](https://api.star-history.com/svg?repos=Developer-Mike/obsidian-advanced-canvas&type=Date)](https://star-history.com/#Developer-Mike/obsidian-advanced-canvas&Date)
