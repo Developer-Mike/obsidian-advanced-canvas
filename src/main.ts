@@ -15,6 +15,7 @@ import CanvasExtension from './core/canvas-extension'
 import GroupCanvasExtension from './canvas-extensions/group-canvas-extension'
 import PresentationCanvasExtension from './canvas-extensions/presentation-canvas-extension'
 import BetterReadonlyCanvasExtension from './canvas-extensions/better-readonly-canvas-extension'
+import ToolsCanvasExtension from './canvas-extensions/tools-canvas-extension'
 import EncapsulateCanvasExtension from './canvas-extensions/encapsulate-canvas-extension'
 import CommandsCanvasExtension from './canvas-extensions/commands-canvas-extension'
 import AutoResizeNodeCanvasExtension from './canvas-extensions/auto-resize-node-canvas-extension'
@@ -51,6 +52,7 @@ const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   BetterDefaultSettingsCanvasExtension,
   CommandsCanvasExtension,
   BetterReadonlyCanvasExtension,
+  ToolsCanvasExtension,
   AutoResizeNodeCanvasExtension,
   PropertiesCanvasExtension,
   GroupCanvasExtension,

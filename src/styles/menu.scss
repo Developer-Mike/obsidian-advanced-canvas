@@ -3,7 +3,7 @@
   display: none;
 }
 
-.canvas-control-item[data-toggled="true"] {
+.canvas-control-item.active {
   background-color: var(--color-accent);
 
   svg {

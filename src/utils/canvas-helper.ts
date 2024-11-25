@@ -36,6 +36,15 @@ export default class CanvasHelper {
     return quickSetting
   }
 
+  static createAndAddControlMenuGroup(previousGroup: HTMLElement, id: string) {
+    const controlGroup = document.createElement('div')
+    controlGroup.id = id
+    controlGroup.classList.add('canvas-control-group')
+    previousGroup.after(controlGroup)
+
+    return controlGroup
+  }
+
   static addControlMenuButton(controlGroup: HTMLElement, element: HTMLElement) {
     if (element.id) controlGroup.querySelector(`#${element.id}`)?.remove()
     controlGroup.appendChild(element)
@@ -141,7 +150,7 @@ export default class CanvasHelper {
     let maxY = -Infinity
 
     for (const node of canvasNodes) {
-      const nodeData = node.getData ? node.getData() : node
+      const nodeData = (node as any).getData ? (node as CanvasNode).getData() : node
 
       minX = Math.min(minX, nodeData.x)
       minY = Math.min(minY, nodeData.y)

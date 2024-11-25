@@ -56,6 +56,7 @@ export interface Canvas {
 
   isDragging: boolean
   setDragging(dragging: boolean): void
+  handleMoverPointerdown(event: PointerEvent): void
   
   zoomToBbox(bbox: BBox): void
   zoomToSelection(): void
@@ -97,6 +98,9 @@ export interface Canvas {
   lockedX: number
   lockedY: number
   lockedZoom: number
+
+  toolEls: HTMLElement[]
+  activeTool: string
 }
 
 export interface CanvasOptions {

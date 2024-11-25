@@ -47,6 +47,12 @@ export interface AdvancedCanvasPluginSettings {
   disableZoom: boolean
   disablePan: boolean
 
+  toolsFeatureEnabled: boolean
+  toolsShortcutKeys: {
+    hand: string
+    select: string
+  }
+
   autoResizeNodeFeatureEnabled: boolean
   autoResizeNodeSnapToGrid: boolean
 
@@ -107,6 +113,12 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   disableNodePopup: false,
   disableZoom: false,
   disablePan: false,
+
+  toolsFeatureEnabled: false,
+  toolsShortcutKeys: {
+    hand: 'h',
+    select: 'v'
+  },
 
   autoResizeNodeFeatureEnabled: true,
   autoResizeNodeSnapToGrid: true,
@@ -391,6 +403,41 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       "Improve the readonly mode.",
       'betterReadonlyEnabled'
     )
+
+    this.createFeatureHeading(
+      containerEl,
+      "Tools Control",
+      "Add tools to the control menu of the canvas.",
+      'toolsFeatureEnabled'
+    )
+
+    new Setting(containerEl)
+      .setName("Hand tool shortcut key")
+      .setDesc("The shortcut key to activate the hand tool (Leave empty to disable).")
+      .addText((text) =>
+        text
+          .setValue(this.settingsManager.getSetting('toolsShortcutKeys').hand)
+          .onChange(async (value) => await this.settingsManager.setSetting({ 
+            toolsShortcutKeys: { 
+              ...this.settingsManager.getSetting('toolsShortcutKeys'), 
+              hand: value 
+            } 
+          }))
+      )
+
+    new Setting(containerEl)
+      .setName("Select tool shortcut key")
+      .setDesc("The shortcut key to activate the select tool (Leave empty to disable).")
+      .addText((text) =>
+        text
+          .setValue(this.settingsManager.getSetting('toolsShortcutKeys').select)
+          .onChange(async (value) => await this.settingsManager.setSetting({ 
+            toolsShortcutKeys: { 
+              ...this.settingsManager.getSetting('toolsShortcutKeys'), 
+              select: value 
+            } 
+          }))
+      )
 
     this.createFeatureHeading(
       containerEl,
