@@ -35,6 +35,7 @@ import NodeExposerExtension from './canvas-extensions/dataset-exposers/node-expo
 import EdgeExposerExtension from './canvas-extensions/dataset-exposers/edge-exposer'
 import CanvasWrapperExposerExtension from './canvas-extensions/dataset-exposers/canvas-wrapper-exposer'
 import MigrationHelper from './utils/migration-helper'
+import Quicksettings from './quicksettings'
 
 const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   // Dataset Exposers
@@ -69,6 +70,7 @@ export default class AdvancedCanvasPlugin extends Plugin {
   debugHelper: DebugHelper
 
   settings: SettingsManager
+  quicksettings: Quicksettings
   windowsManager: WindowsManager
 
   canvasPatcher: CanvasPatcher
@@ -83,6 +85,8 @@ export default class AdvancedCanvasPlugin extends Plugin {
     this.settings = new SettingsManager(this)
     await this.settings.loadSettings()
     this.settings.addSettingsTab()
+    
+    this.quicksettings = new Quicksettings(this)
 
     this.windowsManager = new WindowsManager(this)
 
