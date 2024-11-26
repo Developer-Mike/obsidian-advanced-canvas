@@ -25,13 +25,12 @@ export default class Quicksettings {
 }
 
 export class SearchSettingModal extends SuggestModal<string> {
-  allSettings: AdvancedCanvasPluginSettingsValues
+  settingsManager: SettingsManager
 
   constructor(app: App, settingsManager: SettingsManager) {
     super(app)
 
-    this.allSettings = settingsManager.getAllSettings()
-      .filter(setting => setting.key !== 'settings')
+    this.settingsManager = settingsManager
 
     this.setPlaceholder('Type to search...')
     this.setInstructions([{
@@ -47,7 +46,7 @@ export class SearchSettingModal extends SuggestModal<string> {
   }
 
   getSuggestions(query: string): string[] {
-    const suggestions = Object.keys(this.allSettings)
+    const suggestions = Object.keys(this.settingsManager.SETTINGS)
       .filter(settingKey => settingKey.toLowerCase().includes(query.toLowerCase()))
 
     return suggestions

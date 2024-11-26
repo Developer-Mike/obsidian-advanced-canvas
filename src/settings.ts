@@ -3,321 +3,6 @@ import AdvancedCanvasPlugin from "./main"
 import { BUILTIN_EDGE_STYLE_ATTRIBUTES, BUILTIN_NODE_STYLE_ATTRIBUTES, StyleAttribute } from "./canvas-extensions/advanced-styles/style-config"
 import { ButtonSetting, DropdownSetting, StyleAttributesSetting, SettingsHeading, Setting, TextSetting, BooleanSetting, NumberSetting } from "./@types/Settings"
 
-export const SETTINGS = {
-  general: {
-    label: 'General',
-    description: 'General settings of the Advanced Canvas plugin.',
-    enabledByDefault: true,
-    alwaysEnabled: true,
-    children: {
-      nodeTypeOnDoubleClick: {
-        label: 'Node type on double click',
-        description: 'The type of node that will be created when double clicking on the canvas.',
-        type: 'dropdown',
-        defaultValue: 'text',
-        options: [
-          { value: 'text', label: 'Text' },
-          { value: 'file', label: 'File' }
-        ]
-      } as DropdownSetting,
-      alignNewNodesToGrid: {
-        label: 'Always align new nodes to grid',
-        description: 'When enabled, new nodes will be aligned to the grid.',
-        type: 'boolean',
-        defaultValue: true
-      },
-      defaultTextNodeWidth: {
-        label: 'Default text node width',
-        description: 'The default width of a text node.',
-        type: 'number',
-        defaultValue: 260
-      },
-      defaultTextNodeHeight: {
-        label: 'Default text node height',
-        description: 'The default height of a text node.',
-        type: 'number',
-        defaultValue: 60
-      },
-      defaultFileNodeWidth: {
-        label: 'Default file node width',
-        description: 'The default width of a file node.',
-        type: 'number',
-        defaultValue: 400
-      },
-      defaultFileNodeHeight: {
-        label: 'Default file node height',
-        description: 'The default height of a file node.',
-        type: 'number',
-        defaultValue: 400
-      },
-      minNodeSize: {
-        label: 'Minimum node size',
-        description: 'The minimum size of a node.',
-        type: 'number',
-        defaultValue: 60
-      },
-      disableFontSizeRelativeToZoom: {
-        label: 'Disable font size relative to zoom',
-        description: 'When enabled, the font size of e.g. group node titles and edge labels will not increase when zooming out.',
-        type: 'boolean',
-        defaultValue: false
-      }
-    }
-  },
-  combineCustomStylesInDropdown: {
-    label: 'Combine custom styles',
-    description: 'Combine all style attributes of Advanced Canvas in a single dropdown.',
-    enabledByDefault: false,
-    children: { }
-  },
-  nodeStylingFeatureEnabled: {
-    label: 'Node styling',
-    description: 'Style your nodes with different shapes and borders.',
-    enabledByDefault: true,
-    children: {
-      customNodeStyleAttributes: {
-        label: 'Custom node style settings',
-        description: 'Add custom style settings for nodes. (Go to GitHub for more information)',
-        type: 'button',
-        onClick: () => window.open("https://github.com/Developer-Mike/obsidian-advanced-canvas/blob/main/README.md#custom-styles")
-      } as ButtonSetting,
-      defaultTextNodeStyleAttributes: {
-        label: 'Default text node style attributes',
-        type: 'styles',
-        defaultValue: {},
-        getParameters(settingsManager) {
-          return [ ...BUILTIN_NODE_STYLE_ATTRIBUTES, ...settingsManager.getSetting('customNodeStyleAttributes') ]
-            .filter((setting) => setting.nodeTypes === undefined || setting.nodeTypes?.includes('text'))
-        }
-      } as StyleAttributesSetting
-    }
-  },
-  edgesStylingFeatureEnabled: {
-    label: 'Edges styling',
-    description: 'Style your edges with different path styles.',
-    enabledByDefault: true,
-    children: {
-      customEdgeStyleAttributes: {
-        label: 'Custom edge style settings',
-        description: 'Add custom style settings for edges. (Go to GitHub for more information)',
-        type: 'button',
-        onClick: () => window.open("https://github.com/Developer-Mike/obsidian-advanced-canvas/blob/main/README.md#custom-styles")
-      } as ButtonSetting,
-      defaultEdgeLineDirection: {
-        label: 'Default edge line direction',
-        description: 'The default line direction of an edge.',
-        type: 'dropdown',
-        defaultValue: 'unidirectional',
-        options: [
-          { value: 'nondirectional', label: 'Nondirectional' },
-          { value: 'unidirectional', label: 'Unidirectional' },
-          { value: 'bidirectional', label: 'Bidirectional' }
-        ]
-      } as DropdownSetting,
-      defaultEdgeStyleAttributes: {
-        label: 'Default edge style attributes',
-        type: 'styles',
-        defaultValue: {},
-        getParameters(settingsManager) {
-          return [ ...BUILTIN_EDGE_STYLE_ATTRIBUTES, ...settingsManager.getSetting('customEdgeStyleAttributes') ]
-        }
-      } as StyleAttributesSetting,
-      edgeStyleDirectRotateArrow: {
-        label: 'Rotate arrow if pathfinding method is "Direct"',
-        description: 'When enabled, the arrow will be rotated to the direction of the edge if the pathfinding method is set to "Direct".',
-        type: 'boolean',
-        defaultValue: false
-      },
-      edgeStylePathfinderGridResolution: {
-        label: 'A* grid resolution',
-        description: 'The resolution of the grid when using the A* path style. The lower the value, the more precise the path will be. But it will also take longer to calculate.',
-        type: 'number',
-        defaultValue: 10
-      },
-      edgeStylePathfinderPathLiveUpdate: {
-        label: 'Live update A* path',
-        description: 'When enabled, the A* path style will be updated live while dragging the edge.',
-        type: 'boolean',
-        defaultValue: true
-      },
-      edgeStylePathfinderPathRounded: {
-        label: 'A* rounded path',
-        description: 'When enabled, the A* path style will be rounded.',
-        type: 'boolean',
-        defaultValue: true
-      }
-    }
-  },
-  commandsFeatureEnabled: {
-    label: 'Extended commands',
-    description: 'Add more commands to the canvas.',
-    enabledByDefault: true,
-    children: {
-      zoomToClonedNode: {
-        label: 'Zoom to cloned node',
-        description: 'When enabled, the canvas will zoom to the cloned node.',
-        type: 'boolean',
-        defaultValue: true
-      },
-      cloneNodeMargin: {
-        label: 'Clone node margin',
-        description: 'The margin between the cloned node and the source node.',
-        type: 'number',
-        defaultValue: 20
-      },
-      expandNodeStepSize: {
-        label: 'Expand node step size',
-        description: 'The step size for expanding the node.',
-        type: 'number',
-        defaultValue: 20
-      }
-    }
-  },
-  betterReadonlyEnabled: {
-    label: 'Better readonly',
-    description: 'Improve the readonly mode.',
-    enabledByDefault: true,
-    children: {
-      disableNodePopup: {
-        label: 'Disable node popup',
-        description: 'When enabled, the node popup will be disabled.',
-        type: 'boolean',
-        defaultValue: false
-      },
-      disableZoom: {
-        label: 'Disable zoom',
-        description: 'When enabled, zooming will be disabled.',
-        type: 'boolean',
-        defaultValue: false
-      },
-      disablePan: {
-        label: 'Disable pan',
-        description: 'When enabled, panning will be disabled.',
-        type: 'boolean',
-        defaultValue: false
-      }
-    }
-  },
-  autoResizeNodeFeatureEnabled: {
-    label: 'Auto resize node',
-    description: 'Automatically resize the height of a node to fit the content.',
-    enabledByDefault: true,
-    children: {
-      autoResizeNodeSnapToGrid: {
-        label: 'Snap to grid',
-        description: 'When enabled, the height of the node will snap to the grid.',
-        type: 'boolean',
-        defaultValue: true
-      }
-    }
-  },
-  collapsibleGroupsFeatureEnabled: {
-    label: 'Collapsible groups',
-    description: 'Group nodes can be collapsed and expanded to keep the canvas organized.',
-    enabledByDefault: true,
-    children: {
-      collapsedGroupPreviewOnDrag: {
-        label: 'Collapsed group preview on drag',
-        description: 'When enabled, a group that is collapsed show its border while dragging a node.',
-        type: 'boolean',
-        defaultValue: true
-      }
-    }
-  },
-  focusModeFeatureEnabled: {
-    label: 'Focus mode',
-    description: 'Focus on a single node and blur all other nodes.',
-    enabledByDefault: true,
-    children: { }
-  },
-  presentationFeatureEnabled: {
-    label: 'Presentations',
-    description: 'Create a presentation from your canvas.',
-    enabledByDefault: true,
-    children: {
-      showSetStartNodeInPopup: {
-        label: 'Show "Set Start Node" in node popup',
-        description: 'If turned off, you can still set the start node using the corresponding command.',
-        type: 'boolean',
-        defaultValue: false
-      },
-      defaultSlideSize: {
-        label: 'Default slide ratio',
-        description: 'The default ratio of the slide. For example, 16:9 is 1200x675 and 3:2 is 1350x900.',
-        type: 'text',
-        defaultValue: '1200x675'
-      },
-      wrapInSlidePadding: {
-        label: 'Wrap in slide padding',
-        description: 'The padding of the slide when wrapping the canvas in a slide.',
-        type: 'number',
-        defaultValue: 20
-      },
-      resetViewportOnPresentationEnd: {
-        label: 'Reset viewport on presentation end',
-        description: 'When enabled, the viewport will be reset to the original position after the presentation ends.',
-        type: 'boolean',
-        defaultValue: true
-      },
-      useArrowKeysToChangeSlides: {
-        label: 'Use arrow keys to change slides',
-        description: 'When enabled, you can use the arrow keys to change slides in presentation mode.',
-        type: 'boolean',
-        defaultValue: true
-      },
-      usePgUpPgDownKeysToChangeSlides: {
-        label: 'Use PgUp/PgDown keys to change slides',
-        description: 'When enabled, you can use the PgUp/PgDown keys to change slides in presentation mode (Makes the presentation mode compatible with most presentation remotes).',
-        type: 'boolean',
-        defaultValue: true
-      },
-      zoomToSlideWithoutPadding: {
-        label: 'Zoom to slide without padding',
-        description: 'When enabled, the canvas will zoom to the slide without padding.',
-        type: 'boolean',
-        defaultValue: true
-      },
-      slideTransitionAnimationDuration: {
-        label: 'Slide transition animation duration',
-        description: 'The duration of the slide transition animation in seconds. Set to 0 to disable the animation.',
-        type: 'number',
-        defaultValue: 0.5
-      },
-      slideTransitionAnimationIntensity: {
-        label: 'Slide transition animation intensity',
-        description: 'The intensity of the slide transition animation. The higher the value, the more the canvas will zoom out before zooming in on the next slide.',
-        type: 'number',
-        defaultValue: 1.25
-      }
-    }
-  },
-  canvasEncapsulationEnabled: {
-    label: 'Canvas encapsulation',
-    description: 'Encapsulate a selection of nodes and edges into a new canvas.',
-    enabledByDefault: true,
-    children: { }
-  },
-  portalsFeatureEnabled: {
-    label: 'Portals',
-    description: 'Create portals to other canvases.',
-    enabledByDefault: true,
-    children: {
-      maintainClosedPortalSize: {
-        label: 'Maintain closed portal size',
-        description: 'When enabled, the portal will maintain its size when closed.',
-        type: 'boolean',
-        defaultValue: true
-      },
-      showEdgesIntoDisabledPortals: {
-        label: 'Show edges into disabled portals',
-        description: 'When enabled, edges into disabled portals will be shown.',
-        type: 'boolean',
-        defaultValue: true
-      }
-    }
-  }
-} as const
-
 export interface AdvancedCanvasPluginSettingsValues {
   nodeTypeOnDoubleClick: keyof typeof SETTINGS.general.children.nodeTypeOnDoubleClick.options
   alignNewNodesToGrid: boolean
@@ -379,15 +64,356 @@ export interface AdvancedCanvasPluginSettingsValues {
   showEdgesIntoDisabledPortals: boolean
 }
 
-export const DEFAULT_SETTINGS_VALUES: Partial<AdvancedCanvasPluginSettingsValues> = Object.fromEntries(
-  Object.entries(SETTINGS).map(([key, value]) => {
-    return [key, Object.fromEntries(
-      Object.entries(value.children).map(([childKey, childValue]) => {
-        return [childKey, childValue.defaultValue]
-      })
-    )]
-  })
-)
+// Extend the SettingsHeading type to include the children property with the correct types
+type ValidSettingsHeading = SettingsHeading & { 
+  children: { 
+    [key in keyof AdvancedCanvasPluginSettingsValues]?: Setting 
+  } 
+}
+
+export const SETTINGS = {
+  // @ts-ignore
+  general: {
+    label: 'General',
+    description: 'General settings of the Advanced Canvas plugin.',
+    disableToggle: true,
+    children: {
+      nodeTypeOnDoubleClick: {
+        label: 'Node type on double click',
+        description: 'The type of node that will be created when double clicking on the canvas.',
+        type: 'dropdown',
+        options: {
+          'text': 'Text',
+          'file': 'File'
+        }
+      } as DropdownSetting,
+      alignNewNodesToGrid: {
+        label: 'Always align new nodes to grid',
+        description: 'When enabled, new nodes will be aligned to the grid.',
+        type: 'boolean'
+      },
+      defaultTextNodeWidth: {
+        label: 'Default text node width',
+        description: 'The default width of a text node.',
+        type: 'number',
+        parse: (value: string) => Math.max(1, parseInt(value))
+      },
+      defaultTextNodeHeight: {
+        label: 'Default text node height',
+        description: 'The default height of a text node.',
+        type: 'number',
+        parse: (value: string) => Math.max(1, parseInt(value))
+      },
+      defaultFileNodeWidth: {
+        label: 'Default file node width',
+        description: 'The default width of a file node.',
+        type: 'number',
+        parse: (value: string) => Math.max(1, parseInt(value))
+      },
+      defaultFileNodeHeight: {
+        label: 'Default file node height',
+        description: 'The default height of a file node.',
+        type: 'number',
+        parse: (value: string) => Math.max(1, parseInt(value))
+      },
+      minNodeSize: {
+        label: 'Minimum node size',
+        description: 'The minimum size of a node.',
+        type: 'number',
+        parse: (value: string) => Math.max(1, parseInt(value))
+      },
+      disableFontSizeRelativeToZoom: {
+        label: 'Disable font size relative to zoom',
+        description: 'When enabled, the font size of e.g. group node titles and edge labels will not increase when zooming out.',
+        type: 'boolean'
+      }
+    }
+  },
+  combineCustomStylesInDropdown: {
+    label: 'Combine custom styles',
+    description: 'Combine all style attributes of Advanced Canvas in a single dropdown.',
+    children: { }
+  },
+  nodeStylingFeatureEnabled: {
+    label: 'Node styling',
+    description: 'Style your nodes with different shapes and borders.',
+    children: {
+      customNodeStyleAttributes: {
+        label: 'Custom node style settings',
+        description: 'Add custom style settings for nodes. (Go to GitHub for more information)',
+        type: 'button',
+        onClick: () => window.open("https://github.com/Developer-Mike/obsidian-advanced-canvas/blob/main/README.md#custom-styles")
+      } as ButtonSetting,
+      defaultTextNodeStyleAttributes: {
+        label: 'Default text node style attributes',
+        type: 'styles',
+        getParameters(settingsManager) {
+          return [ ...BUILTIN_NODE_STYLE_ATTRIBUTES, ...settingsManager.getSetting('customNodeStyleAttributes') ]
+            .filter((setting) => setting.nodeTypes === undefined || setting.nodeTypes?.includes('text'))
+        }
+      } as StyleAttributesSetting
+    }
+  },
+  edgesStylingFeatureEnabled: {
+    label: 'Edges styling',
+    description: 'Style your edges with different path styles.',
+    children: {
+      customEdgeStyleAttributes: {
+        label: 'Custom edge style settings',
+        description: 'Add custom style settings for edges. (Go to GitHub for more information)',
+        type: 'button',
+        onClick: () => window.open("https://github.com/Developer-Mike/obsidian-advanced-canvas/blob/main/README.md#custom-styles")
+      } as ButtonSetting,
+      defaultEdgeLineDirection: {
+        label: 'Default edge line direction',
+        description: 'The default line direction of an edge.',
+        type: 'dropdown',
+        options: {
+          'nondirectional': 'Nondirectional',
+          'unidirectional': 'Unidirectional',
+          'bidirectional': 'Bidirectional'
+        }
+      } as DropdownSetting,
+      defaultEdgeStyleAttributes: {
+        label: 'Default edge style attributes',
+        type: 'styles',
+        getParameters(settingsManager) {
+          return [ ...BUILTIN_EDGE_STYLE_ATTRIBUTES, ...settingsManager.getSetting('customEdgeStyleAttributes') ]
+        }
+      } as StyleAttributesSetting,
+      edgeStyleDirectRotateArrow: {
+        label: 'Rotate arrow if pathfinding method is "Direct"',
+        description: 'When enabled, the arrow will be rotated to the direction of the edge if the pathfinding method is set to "Direct".',
+        type: 'boolean'
+      },
+      edgeStylePathfinderGridResolution: {
+        label: 'A* grid resolution',
+        description: 'The resolution of the grid when using the A* path style. The lower the value, the more precise the path will be. But it will also take longer to calculate.',
+        type: 'number',
+        parse: (value: string) => Math.max(5, parseInt(value))
+      },
+      edgeStylePathfinderPathLiveUpdate: {
+        label: 'Live update A* path',
+        description: 'When enabled, the A* path style will be updated live while dragging the edge.',
+        type: 'boolean'
+      },
+      edgeStylePathfinderPathRounded: {
+        label: 'A* rounded path',
+        description: 'When enabled, the A* path style will be rounded.',
+        type: 'boolean'
+      }
+    }
+  },
+  commandsFeatureEnabled: {
+    label: 'Extended commands',
+    description: 'Add more commands to the canvas.',
+    children: {
+      zoomToClonedNode: {
+        label: 'Zoom to cloned node',
+        description: 'When enabled, the canvas will zoom to the cloned node.',
+        type: 'boolean'
+      },
+      cloneNodeMargin: {
+        label: 'Clone node margin',
+        description: 'The margin between the cloned node and the source node.',
+        type: 'number',
+        parse: (value: string) => Math.max(0, parseInt(value))
+      },
+      expandNodeStepSize: {
+        label: 'Expand node step size',
+        description: 'The step size for expanding the node.',
+        type: 'number',
+        parse: (value: string) => Math.max(1, parseInt(value))
+      }
+    }
+  },
+  betterReadonlyEnabled: {
+    label: 'Better readonly',
+    description: 'Improve the readonly mode.',
+    children: {
+      disableNodePopup: {
+        label: 'Disable node popup',
+        description: 'When enabled, the node popup will be disabled.',
+        type: 'boolean'
+      },
+      disableZoom: {
+        label: 'Disable zoom',
+        description: 'When enabled, zooming will be disabled.',
+        type: 'boolean'
+      },
+      disablePan: {
+        label: 'Disable pan',
+        description: 'When enabled, panning will be disabled.',
+        type: 'boolean'
+      }
+    }
+  },
+  autoResizeNodeFeatureEnabled: {
+    label: 'Auto resize node',
+    description: 'Automatically resize the height of a node to fit the content.',
+    children: {
+      autoResizeNodeSnapToGrid: {
+        label: 'Snap to grid',
+        description: 'When enabled, the height of the node will snap to the grid.',
+        type: 'boolean'
+      }
+    }
+  },
+  collapsibleGroupsFeatureEnabled: {
+    label: 'Collapsible groups',
+    description: 'Group nodes can be collapsed and expanded to keep the canvas organized.',
+    children: {
+      collapsedGroupPreviewOnDrag: {
+        label: 'Collapsed group preview on drag',
+        description: 'When enabled, a group that is collapsed show its border while dragging a node.',
+        type: 'boolean'
+      }
+    }
+  },
+  focusModeFeatureEnabled: {
+    label: 'Focus mode',
+    description: 'Focus on a single node and blur all other nodes.',
+    children: { }
+  },
+  presentationFeatureEnabled: {
+    label: 'Presentations',
+    description: 'Create a presentation from your canvas.',
+    children: {
+      showSetStartNodeInPopup: {
+        label: 'Show "Set Start Node" in node popup',
+        description: 'If turned off, you can still set the start node using the corresponding command.',
+        type: 'boolean'
+      },
+      defaultSlideSize: {
+        label: 'Default slide ratio',
+        description: 'The default ratio of the slide. For example, 16:9 is 1200x675 and 3:2 is 1350x900.',
+        type: 'text'
+      },
+      wrapInSlidePadding: {
+        label: 'Wrap in slide padding',
+        description: 'The padding of the slide when wrapping the canvas in a slide.',
+        type: 'number',
+        parse: (value: string) => Math.max(0, parseInt(value))
+      },
+      resetViewportOnPresentationEnd: {
+        label: 'Reset viewport on presentation end',
+        description: 'When enabled, the viewport will be reset to the original position after the presentation ends.',
+        type: 'boolean'
+      },
+      useArrowKeysToChangeSlides: {
+        label: 'Use arrow keys to change slides',
+        description: 'When enabled, you can use the arrow keys to change slides in presentation mode.',
+        type: 'boolean'
+      },
+      usePgUpPgDownKeysToChangeSlides: {
+        label: 'Use PgUp/PgDown keys to change slides',
+        description: 'When enabled, you can use the PgUp/PgDown keys to change slides in presentation mode (Makes the presentation mode compatible with most presentation remotes).',
+        type: 'boolean'
+      },
+      zoomToSlideWithoutPadding: {
+        label: 'Zoom to slide without padding',
+        description: 'When enabled, the canvas will zoom to the slide without padding.',
+        type: 'boolean'
+      },
+      slideTransitionAnimationDuration: {
+        label: 'Slide transition animation duration',
+        description: 'The duration of the slide transition animation in seconds. Set to 0 to disable the animation.',
+        type: 'number',
+        parse: (value: string) => Math.max(0, parseFloat(value))
+      },
+      slideTransitionAnimationIntensity: {
+        label: 'Slide transition animation intensity',
+        description: 'The intensity of the slide transition animation. The higher the value, the more the canvas will zoom out before zooming in on the next slide.',
+        type: 'number',
+        parse: (value: string) => Math.max(0, parseFloat(value))
+      }
+    }
+  },
+  canvasEncapsulationEnabled: {
+    label: 'Canvas encapsulation',
+    description: 'Encapsulate a selection of nodes and edges into a new canvas.',
+    children: { }
+  },
+  portalsFeatureEnabled: {
+    label: 'Portals',
+    description: 'Create portals to other canvases.',
+    children: {
+      maintainClosedPortalSize: {
+        label: 'Maintain closed portal size',
+        description: 'When enabled, the portal will maintain its size when closed.',
+        type: 'boolean'
+      },
+      showEdgesIntoDisabledPortals: {
+        label: 'Show edges into disabled portals',
+        description: 'When enabled, edges into disabled portals will be shown.',
+        type: 'boolean'
+      }
+    }
+  }
+} as const satisfies {
+  [key in keyof AdvancedCanvasPluginSettingsValues]: ValidSettingsHeading
+}
+
+export const DEFAULT_SETTINGS_VALUES: Partial<AdvancedCanvasPluginSettingsValues> = {
+  nodeTypeOnDoubleClick: 'text',
+  alignNewNodesToGrid: true,
+  defaultTextNodeWidth: 260,
+  defaultTextNodeHeight: 60,
+  defaultFileNodeWidth: 400,
+  defaultFileNodeHeight: 400,
+  minNodeSize: 60,
+  disableFontSizeRelativeToZoom: false,
+
+  combineCustomStylesInDropdown: false,
+
+  nodeStylingFeatureEnabled: true,
+  customNodeStyleAttributes: [],
+  defaultTextNodeStyleAttributes: {},
+
+  edgesStylingFeatureEnabled: true,
+  customEdgeStyleAttributes: [],
+  defaultEdgeLineDirection: 'unidirectional',
+  defaultEdgeStyleAttributes: {},
+  edgeStyleDirectRotateArrow: false,
+  edgeStylePathfinderGridResolution: 10,
+  edgeStylePathfinderPathLiveUpdate: true,
+  edgeStylePathfinderPathRounded: true,
+
+  commandsFeatureEnabled: true,
+  zoomToClonedNode: true,
+  cloneNodeMargin: 20,
+  expandNodeStepSize: 20,
+
+  betterReadonlyEnabled: true,
+  disableNodePopup: false,
+  disableZoom: false,
+  disablePan: false,
+
+  autoResizeNodeFeatureEnabled: true,
+  autoResizeNodeSnapToGrid: true,
+
+  collapsibleGroupsFeatureEnabled: true,
+  collapsedGroupPreviewOnDrag: true,
+
+  focusModeFeatureEnabled: true,
+
+  presentationFeatureEnabled: true,
+  showSetStartNodeInPopup: false,
+  defaultSlideSize: '1200x675',
+  wrapInSlidePadding: 20,
+  resetViewportOnPresentationEnd: true,
+  useArrowKeysToChangeSlides: true,
+  usePgUpPgDownKeysToChangeSlides: true,
+  zoomToSlideWithoutPadding: true,
+  slideTransitionAnimationDuration: 0.5,
+  slideTransitionAnimationIntensity: 1.25,
+
+  canvasEncapsulationEnabled: true,
+
+  portalsFeatureEnabled: true,
+  maintainClosedPortalSize: true,
+  showEdgesIntoDisabledPortals: true
+}
 
 export default class SettingsManager {
   static SETTINGS_CHANGED_EVENT = 'advanced-canvas:settings-changed'
@@ -443,7 +469,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
         containerEl, 
         heading.label, 
         heading.description, 
-        heading.alwaysEnabled ? null : headingId as keyof AdvancedCanvasPluginSettingsValues
+        heading.disableToggle ? null : headingId as keyof AdvancedCanvasPluginSettingsValues
       )
 
       for (let [settingId, setting] of Object.entries(heading.children) as [keyof AdvancedCanvasPluginSettingsValues, Setting][]) {
@@ -475,7 +501,6 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
     this.createKoFiBadge(containerEl)
   }
 
-  
   private createFeatureHeading(containerEl: HTMLElement, label: string, description: string, settingsKey: keyof AdvancedCanvasPluginSettingsValues | null): SettingEl {
     if (settingsKey === null) {
       return new SettingEl(containerEl)
@@ -517,9 +542,9 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       .setName(setting.label)
       .setDesc(setting.description)
       .addText(text => text
-        .setValue(this.settingsManager.getSetting(settingId) as string)
+        .setValue(this.settingsManager.getSetting(settingId).toString())
         .onChange(async (value) => {
-          await this.settingsManager.setSetting({ [settingId]: setting.parse ? setting.parse(value) : value })
+          await this.settingsManager.setSetting({ [settingId]: setting.parse(value) })
         })
       )
   }
@@ -541,7 +566,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       .setName(setting.label)
       .setDesc(setting.description)
       .addDropdown(dropdown => dropdown
-        .addOptions(Object.fromEntries(setting.options.map(option => [option.value, option.label])))
+        .addOptions(setting.options)
         .setValue(this.settingsManager.getSetting(settingId) as string)
         .onChange(async (value) => {
           await this.settingsManager.setSetting({ [settingId]: value })
@@ -600,402 +625,4 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
     kofiButton.appendChild(kofiImage)
     containerEl.appendChild(kofiButton)
   }
-
-  /*private createDefaultStylesSection(containerEl: HTMLElement, label: string, settingsKey: keyof AdvancedCanvasPluginSettingsValues, allStylableAttributes: StyleAttribute[]) {
-    const defaultNodeStylesEl = document.createElement('details')
-    defaultNodeStylesEl.classList.add('setting-item')
-
-    const defaultNodeStylesSummaryEl = document.createElement('summary')
-    defaultNodeStylesSummaryEl.textContent = label
-    defaultNodeStylesEl.appendChild(defaultNodeStylesSummaryEl)
-
-    for (const stylableAttribute of allStylableAttributes) {
-      new SettingEl(defaultNodeStylesEl)
-        .setName(stylableAttribute.label)
-        .addDropdown((dropdown) =>
-          dropdown
-            .addOptions(Object.fromEntries(stylableAttribute.options.map((option) => [option.value, option.label])))
-            .setValue((this.settingsManager.getSetting(settingsKey) as { [key: string]: string })[stylableAttribute.datasetKey] ?? 'null')
-            .onChange(async (value) => {
-              const newValue = this.settingsManager.getSetting(settingsKey) as { [key: string]: string }
-
-              if (value === 'null') delete newValue[stylableAttribute.datasetKey]
-              else newValue[stylableAttribute.datasetKey] = value
-
-              await this.settingsManager.setSetting({
-                [settingsKey]: newValue
-              })
-            })
-        )
-    }
-
-    containerEl.appendChild(defaultNodeStylesEl)
-  }*/
-      
-
-   /* new SettingEl(containerEl)
-      .setName("Node type on double click")
-      .setDesc("The type of node that will be created when double clicking on the canvas.")
-      .addDropdown((dropdown) =>
-        dropdown
-          .addOptions(NODE_TYPES_ON_DOUBLE_CLICK)
-          .setValue(this.settingsManager.getSetting('nodeTypeOnDoubleClick'))
-          .onChange(async (value) => await this.settingsManager.setSetting({ nodeTypeOnDoubleClick: value as keyof typeof NODE_TYPES_ON_DOUBLE_CLICK }))
-        )
-
-    new SettingEl(containerEl)
-      .setName("Always align new nodes to grid")
-      .setDesc("When enabled, new nodes will be aligned to the grid.")
-      .addToggle((toggle) =>
-        toggle
-          .setValue(this.settingsManager.getSetting('alignNewNodesToGrid'))
-          .onChange(async (value) => await this.settingsManager.setSetting({ alignNewNodesToGrid: value }))
-      )
-    
-    new SettingEl(containerEl)
-      .setName("Default text node width")
-      .setDesc("The default width of a text node.")
-      .addText((text) =>
-        text
-          .setValue(this.settingsManager.getSetting('defaultTextNodeWidth').toString())
-          .onChange(async (value) => await this.settingsManager.setSetting({ defaultTextNodeWidth: Math.max(1, parseInt(value)) }))
-      )
-    
-    new SettingEl(containerEl)
-      .setName("Default text node height")
-      .setDesc("The default height of a text node.")
-      .addText((text) =>
-        text
-          .setValue(this.settingsManager.getSetting('defaultTextNodeHeight').toString())
-          .onChange(async (value) => await this.settingsManager.setSetting({ defaultTextNodeHeight: Math.max(1, parseInt(value)) }))
-      )
-
-    new SettingEl(containerEl)
-      .setName("Default file node width")
-      .setDesc("The default width of a file node.")
-      .addText((text) =>
-        text
-          .setValue(this.settingsManager.getSetting('defaultFileNodeWidth').toString())
-          .onChange(async (value) => await this.settingsManager.setSetting({ defaultFileNodeWidth: Math.max(1, parseInt(value)) }))
-      )
-
-    new SettingEl(containerEl)
-      .setName("Default file node height")
-      .setDesc("The default height of a file node.")
-      .addText((text) =>
-        text
-          .setValue(this.settingsManager.getSetting('defaultFileNodeHeight').toString())
-          .onChange(async (value) => await this.settingsManager.setSetting({ defaultFileNodeHeight: Math.max(1, parseInt(value)) }))
-      )
-
-    new SettingEl(containerEl)
-      .setName("Minimum node size")
-      .setDesc("The minimum size of a node.")
-      .addText((text) =>
-        text
-          .setValue(this.settingsManager.getSetting('minNodeSize').toString())
-          .onChange(async (value) => await this.settingsManager.setSetting({ minNodeSize: Math.max(1, parseInt(value)) }))
-      )
-
-    new SettingEl(containerEl)
-      .setName("Disable font size relative to zoom")
-      .setDesc("When enabled, the font size of e.g. group node titles and edge labels will not increase when zooming out.")
-      .addToggle((toggle) =>
-        toggle
-          .setValue(this.settingsManager.getSetting('disableFontSizeRelativeToZoom'))
-          .onChange(async (value) => await this.settingsManager.setSetting({ disableFontSizeRelativeToZoom: value }))
-      )
-
-    this.createFeatureHeading(
-      containerEl,
-      "Combine custom styles",
-      "Combine all style attributes of Advanced Canvas in a single dropdown.",
-      'combineCustomStylesInDropdown'
-    )
-
-    this.createFeatureHeading(
-      containerEl,
-      "Node styling",
-      "Style your nodes with different shapes and borders.",
-      'nodeStylingFeatureEnabled'
-    )
-
-    new SettingEl(containerEl)
-      .setName("Custom node style settings")
-      .setDesc("Add custom style settings for nodes. (Go to GitHub for more information)")
-      .addButton((button) =>
-        button
-          .setButtonText("Open Tutorial")
-          .onClick(() => window.open("https://github.com/Developer-Mike/obsidian-advanced-canvas/blob/main/README.md#custom-styles"))
-      )
-
-    const allNodeStyleAttributes = [ ...BUILTIN_NODE_STYLE_ATTRIBUTES, ...this.settingsManager.getSetting('customNodeStyleAttributes') ]
-      .filter((setting) => setting.nodeTypes === undefined || setting.nodeTypes?.includes('text'))
-    this.createDefaultStylesSection(containerEl, 'Default text node style attributes', 'defaultTextNodeStyleAttributes', allNodeStyleAttributes)
-
-    this.createFeatureHeading(
-      containerEl,
-      "Edges styling",
-      "Style your edges with different path styles.",
-      'edgesStylingFeatureEnabled'
-    )
-
-    new SettingEl(containerEl)
-      .setName("Custom edge style settings")
-      .setDesc("Add custom style settings for edges. (Go to GitHub for more information)")
-      .addButton((button) =>
-        button
-          .setButtonText("Open Tutorial")
-          .onClick(() => window.open("https://github.com/Developer-Mike/obsidian-advanced-canvas/blob/main/README.md#custom-styles"))
-      )
-
-    new SettingEl(containerEl)
-      .setName("Default edge line direction")
-      .setDesc("The default line direction of an edge.")
-      .addDropdown((dropdown) =>
-        dropdown
-          .addOptions(EDGE_LINE_DIRECTIONS)
-          .setValue(this.settingsManager.getSetting('defaultEdgeLineDirection'))
-          .onChange(async (value) => await this.settingsManager.setSetting({ defaultEdgeLineDirection: value as keyof typeof EDGE_LINE_DIRECTIONS }))
-      )
-
-    this.createDefaultStylesSection(containerEl, 'Default edge style attributes', 'defaultEdgeStyleAttributes', [ ...BUILTIN_EDGE_STYLE_ATTRIBUTES, ...this.settingsManager.getSetting('customEdgeStyleAttributes') ])
-
-    new SettingEl(containerEl)
-      .setName("Rotate arrow if pathfinding method is \"Direct\"")
-      .setDesc("When enabled, the arrow will be rotated to the direction of the edge if the pathfinding method is set to \"Direct\".")
-      .addToggle((toggle) =>
-        toggle
-          .setValue(this.settingsManager.getSetting('edgeStyleDirectRotateArrow'))
-          .onChange(async (value) => await this.settingsManager.setSetting({ edgeStyleDirectRotateArrow: value }))
-      )
-
-    new SettingEl(containerEl)
-      .setName("A* grid resolution")
-      .setDesc("The resolution of the grid when using the A* path style. The lower the value, the more precise the path will be. But it will also take longer to calculate.")
-      .addText((text) =>
-        text
-          .setValue(this.settingsManager.getSetting('edgeStylePathfinderGridResolution').toString())
-          .onChange(async (value) => await this.settingsManager.setSetting({ edgeStylePathfinderGridResolution: Math.max(5, parseInt(value)) }))
-      )
-
-    new SettingEl(containerEl)
-      .setName("Live update A* path")
-      .setDesc("When enabled, the A* path style will be updated live while dragging the edge.")
-      .addToggle((toggle) =>
-        toggle
-          .setValue(this.settingsManager.getSetting('edgeStylePathfinderPathLiveUpdate'))
-          .onChange(async (value) => await this.settingsManager.setSetting({ edgeStylePathfinderPathLiveUpdate: value }))
-      )
-
-    new SettingEl(containerEl)
-      .setName("A* rounded path")
-      .setDesc("When enabled, the A* path style will be rounded.")
-      .addToggle((toggle) =>
-        toggle
-          .setValue(this.settingsManager.getSetting('edgeStylePathfinderPathRounded'))
-          .onChange(async (value) => await this.settingsManager.setSetting({ edgeStylePathfinderPathRounded: value }))
-      )
-
-    this.createFeatureHeading(
-      containerEl,
-      "Extended commands",
-      "Add more commands to the canvas.",
-      'commandsFeatureEnabled'
-    )
-
-    new SettingEl(containerEl)
-      .setName("Zoom to cloned node")
-      .setDesc("When enabled, the canvas will zoom to the cloned node.")
-      .addToggle((toggle) =>
-        toggle
-          .setValue(this.settingsManager.getSetting('zoomToClonedNode'))
-          .onChange(async (value) => await this.settingsManager.setSetting({ zoomToClonedNode: value }))
-      )
-
-    new SettingEl(containerEl)
-      .setName("Clone node margin")
-      .setDesc("The margin between the cloned node and the source node.")
-      .addText((text) =>
-        text
-          .setValue(this.settingsManager.getSetting('cloneNodeMargin').toString())
-          .onChange(async (value) => await this.settingsManager.setSetting({ cloneNodeMargin: parseInt(value) }))
-      )
-
-    new SettingEl(containerEl)
-      .setName("Expand node step size")
-      .setDesc("The step size for expanding the node.")
-      .addText((text) =>
-        text
-          .setValue(this.settingsManager.getSetting('expandNodeStepSize').toString())
-          .onChange(async (value) => await this.settingsManager.setSetting({ expandNodeStepSize: parseInt(value) }))
-      )
-
-    this.createFeatureHeading(
-      containerEl,
-      "Better readonly",
-      "Improve the readonly mode.",
-      'betterReadonlyEnabled'
-    )
-
-    this.createFeatureHeading(
-      containerEl,
-      "Auto resize node",
-      "Automatically resize the height of a node to fit the content.",
-      'autoResizeNodeFeatureEnabled'
-    )
-
-    new SettingEl(containerEl)
-      .setName("Snap to grid")
-      .setDesc("When enabled, the height of the node will snap to the grid.")
-      .addToggle((toggle) =>
-        toggle
-          .setValue(this.settingsManager.getSetting('autoResizeNodeSnapToGrid'))
-          .onChange(async (value) => await this.settingsManager.setSetting({ autoResizeNodeSnapToGrid: value }))
-      )
-
-    this.createFeatureHeading(
-      containerEl,
-      "Collapsible groups",
-      "Group nodes can be collapsed and expanded to keep the canvas organized.",
-      'collapsibleGroupsFeatureEnabled'
-    )
-
-    new SettingEl(containerEl)
-      .setName("Collapsed group preview on drag")
-      .setDesc("When enabled, a group that is collapsed show its border while dragging a node.")
-      .addToggle((toggle) =>
-        toggle
-          .setValue(this.settingsManager.getSetting('collapsedGroupPreviewOnDrag'))
-          .onChange(async (value) => await this.settingsManager.setSetting({ collapsedGroupPreviewOnDrag: value }))
-      )
-
-    this.createFeatureHeading(
-      containerEl,
-      "Focus mode",
-      "Focus on a single node and blur all other nodes.",
-      'focusModeFeatureEnabled'
-    )
-
-    this.createFeatureHeading(
-      containerEl,
-      "Presentations",
-      "Create a presentation from your canvas.",
-      'presentationFeatureEnabled'
-    )
-
-    new SettingEl(containerEl)
-    .setName("Show \"Set Start Node\" in node popup")
-    .setDesc("If turned off, you can still set the start node using the corresponding command.")
-    .addToggle((toggle) =>
-      toggle
-        .setValue(this.settingsManager.getSetting('showSetStartNodeInPopup'))
-        .onChange(async (value) => await this.settingsManager.setSetting({ showSetStartNodeInPopup: value }))
-    )
-
-    new SettingEl(containerEl)
-      .setName("Default slide ratio")
-      .setDesc("The default ratio of the slide. For example, 16:9 is 1200x675 and 3:2 is 1350x900.")
-      .addText((text) =>
-        text
-          .setValue(this.settingsManager.getSetting('defaultSlideSize'))
-          .onChange(async (value) => await this.settingsManager.setSetting({ defaultSlideSize: value.replace(' ', '') }))
-      )
-
-    new SettingEl(containerEl)
-      .setName("Wrap in slide padding")
-      .setDesc("The padding of the slide when wrapping the canvas in a slide.")
-      .addText((text) =>
-        text
-          .setValue(this.settingsManager.getSetting('wrapInSlidePadding').toString())
-          .onChange(async (value) => await this.settingsManager.setSetting({ wrapInSlidePadding: parseInt(value) }))
-      )
-
-    new SettingEl(containerEl)
-      .setName("Reset viewport on presentation end")
-      .setDesc("When enabled, the viewport will be reset to the original position after the presentation ends.")
-      .addToggle((toggle) =>
-        toggle
-          .setValue(this.settingsManager.getSetting('resetViewportOnPresentationEnd'))
-          .onChange(async (value) => await this.settingsManager.setSetting({ resetViewportOnPresentationEnd: value }))
-      )
-
-    new SettingEl(containerEl)
-      .setName("Use arrow keys to change slides")
-      .setDesc("When enabled, you can use the arrow keys to change slides in presentation mode.")
-      .addToggle((toggle) =>
-        toggle
-          .setValue(this.settingsManager.getSetting('useArrowKeysToChangeSlides'))
-          .onChange(async (value) => await this.settingsManager.setSetting({ useArrowKeysToChangeSlides: value }))
-      )
-
-    new SettingEl(containerEl)
-      .setName("Use PgUp/PgDown keys to change slides")
-      .setDesc("When enabled, you can use the PgUp/PgDown keys to change slides in presentation mode (Makes the presentation mode compatible with most presentation remotes).")
-      .addToggle((toggle) =>
-        toggle
-          .setValue(this.settingsManager.getSetting('usePgUpPgDownKeysToChangeSlides'))
-          .onChange(async (value) => await this.settingsManager.setSetting({ usePgUpPgDownKeysToChangeSlides: value }))
-      )
-
-    new SettingEl(containerEl)
-      .setName("Zoom to slide without padding")
-      .setDesc("When enabled, the canvas will zoom to the slide without padding.")
-      .addToggle((toggle) =>
-        toggle
-          .setValue(this.settingsManager.getSetting('zoomToSlideWithoutPadding'))
-          .onChange(async (value) => await this.settingsManager.setSetting({ zoomToSlideWithoutPadding: value }))
-      )
-
-    new SettingEl(containerEl)
-      .setName("Slide transition animation duration")
-      .setDesc("The duration of the slide transition animation in seconds. Set to 0 to disable the animation.")
-      .addText((text) =>
-        text
-          .setValue(this.settingsManager.getSetting('slideTransitionAnimationDuration').toString())
-          .onChange(async (value) => await this.settingsManager.setSetting({ slideTransitionAnimationDuration: parseFloat(value) }))
-      )
-
-    new SettingEl(containerEl)
-      .setName("Slide transition animation intensity")
-      .setDesc("The intensity of the slide transition animation. The higher the value, the more the canvas will zoom out before zooming in on the next slide.")
-      .addText((text) =>
-        text
-          .setValue(this.settingsManager.getSetting('slideTransitionAnimationIntensity').toString())
-          .onChange(async (value) => await this.settingsManager.setSetting({ slideTransitionAnimationIntensity: parseFloat(value) }))
-      )
-
-    this.createFeatureHeading(
-      containerEl,
-      "Canvas encapsulation",
-      "Encapsulate a selection of nodes and edges into a new canvas.",
-      'canvasEncapsulationEnabled'
-    )
-
-    this.createFeatureHeading(
-      containerEl,
-      "Portals",
-      "Create portals to other canvases.",
-      'portalsFeatureEnabled'
-    )
-
-    new SettingEl(containerEl)
-      .setName("Maintain closed portal size")
-      .setDesc("When enabled, closing a portal will change the size of the portal to the original, closed size.")
-      .addToggle((toggle) =>
-        toggle
-          .setValue(this.settingsManager.getSetting('maintainClosedPortalSize'))
-          .onChange(async (value) => await this.settingsManager.setSetting({ maintainClosedPortalSize: value }))
-      )
-
-    new SettingEl(containerEl)
-      .setName("Show edges into disabled portals")
-      .setDesc("When enabled, edges into disabled portals will be shown by an edge to the portal node.")
-      .addToggle((toggle) =>
-        toggle
-          .setValue(this.settingsManager.getSetting('showEdgesIntoDisabledPortals'))
-          .onChange(async (value) => await this.settingsManager.setSetting({ showEdgesIntoDisabledPortals: value }))
-      )*/
-
-  
 }
