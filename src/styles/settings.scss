@@ -15,20 +15,6 @@
   }
 }
 
-.kofi-button {
-  z-index: 999;
-
-  position: absolute;
-  bottom: var(--size-4-5);
-  right: var(--size-4-5);
-
-  height: 30px;
-
-  img {
-    height: 100%;
-  }
-}
-
 .ac-settings-heading {
   &:not(:first-child) {
     margin-top: var(--size-4-10) !important;
@@ -45,5 +31,77 @@ details.setting-item {
   & > *:not(summary) {
     padding-left: 1em;
     border-left: 1px solid var(--color-accent);
+  }
+}
+
+.kofi-button {
+  height: 30px;
+
+  &.sticky {
+    z-index: 10;
+
+    position: absolute;
+    bottom: var(--size-4-5);
+    right: var(--size-4-5);
+  }
+
+  img {
+    height: 100%;
+  }
+}
+
+.kofi-overlay {
+  z-index: 100;
+
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+
+  background-color: rgba(255, 255, 255, 0.9);
+
+  h1 {
+    margin-bottom: 0;
+  }
+
+  p {
+    max-width: 50%;
+
+    color: var(--text-muted);
+    text-align: center;
+
+    b {
+      color: var(--text-primary);
+    }
+  }
+
+  progress {
+    margin-top: var(--size-4-8);
+    background: transparent;
+
+    &::-webkit-progress-bar {
+      background-color: var(--background-modifier-border);
+      border-radius: var(--input-radius);
+    }
+
+    &::-webkit-progress-value {
+      background-color: var(--color-accent);
+      border-radius: var(--input-radius);
+    }
+  }
+
+  .kofi-button {
+    margin-top: var(--size-4-10);
+    margin-bottom: var(--size-4-5);
+  }
+
+  .no-button {
+    cursor: pointer;
   }
 }
