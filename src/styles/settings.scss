@@ -105,3 +105,17 @@ details.setting-item {
     cursor: pointer;
   }
 }
+
+// Quicksettings
+.quicksettings-suggestion {
+  display: flex;
+  flex-direction: column;
+
+  .quicksettings-suggestion-label {
+    font-weight: 500;
+  }
+  
+  .quicksettings-suggestion-description {
+    color: var(--text-muted);
+  }
+}

@@ -106,31 +106,31 @@ export const SETTINGS = {
         label: 'Default text node width',
         description: 'The default width of a text node.',
         type: 'number',
-        parse: (value: string) => Math.max(1, parseInt(value))
+        parse: (value: string) => Math.max(1, parseInt(value) || 0)
       },
       defaultTextNodeHeight: {
         label: 'Default text node height',
         description: 'The default height of a text node.',
         type: 'number',
-        parse: (value: string) => Math.max(1, parseInt(value))
+        parse: (value: string) => Math.max(1, parseInt(value) || 0)
       },
       defaultFileNodeWidth: {
         label: 'Default file node width',
         description: 'The default width of a file node.',
         type: 'number',
-        parse: (value: string) => Math.max(1, parseInt(value))
+        parse: (value: string) => Math.max(1, parseInt(value) || 0)
       },
       defaultFileNodeHeight: {
         label: 'Default file node height',
         description: 'The default height of a file node.',
         type: 'number',
-        parse: (value: string) => Math.max(1, parseInt(value))
+        parse: (value: string) => Math.max(1, parseInt(value) || 0)
       },
       minNodeSize: {
         label: 'Minimum node size',
         description: 'The minimum size of a node.',
         type: 'number',
-        parse: (value: string) => Math.max(1, parseInt(value))
+        parse: (value: string) => Math.max(1, parseInt(value) || 0)
       },
       disableFontSizeRelativeToZoom: {
         label: 'Disable font size relative to zoom',
@@ -200,7 +200,7 @@ export const SETTINGS = {
         label: 'A* grid resolution',
         description: 'The resolution of the grid when using the A* path style. The lower the value, the more precise the path will be. But it will also take longer to calculate.',
         type: 'number',
-        parse: (value: string) => Math.max(5, parseInt(value))
+        parse: (value: string) => Math.max(5, parseInt(value) || 0)
       },
       edgeStylePathfinderPathLiveUpdate: {
         label: 'Live update A* path',
@@ -227,13 +227,13 @@ export const SETTINGS = {
         label: 'Clone node margin',
         description: 'The margin between the cloned node and the source node.',
         type: 'number',
-        parse: (value: string) => Math.max(0, parseInt(value))
+        parse: (value: string) => Math.max(0, parseInt(value) || 0)
       },
       expandNodeStepSize: {
         label: 'Expand node step size',
         description: 'The step size for expanding the node.',
         type: 'number',
-        parse: (value: string) => Math.max(1, parseInt(value))
+        parse: (value: string) => Math.max(1, parseInt(value) || 0)
       }
     }
   },
@@ -303,7 +303,7 @@ export const SETTINGS = {
         label: 'Wrap in slide padding',
         description: 'The padding of the slide when wrapping the canvas in a slide.',
         type: 'number',
-        parse: (value: string) => Math.max(0, parseInt(value))
+        parse: (value: string) => Math.max(0, parseInt(value) || 0)
       },
       resetViewportOnPresentationEnd: {
         label: 'Reset viewport on presentation end',
@@ -329,13 +329,13 @@ export const SETTINGS = {
         label: 'Slide transition animation duration',
         description: 'The duration of the slide transition animation in seconds. Set to 0 to disable the animation.',
         type: 'number',
-        parse: (value: string) => Math.max(0, parseFloat(value))
+        parse: (value: string) => Math.max(0, parseFloat(value) || 0)
       },
       slideTransitionAnimationIntensity: {
         label: 'Slide transition animation intensity',
         description: 'The intensity of the slide transition animation. The higher the value, the more the canvas will zoom out before zooming in on the next slide.',
         type: 'number',
-        parse: (value: string) => Math.max(0, parseFloat(value))
+        parse: (value: string) => Math.max(0, parseFloat(value) || 0)
       }
     }
   },
