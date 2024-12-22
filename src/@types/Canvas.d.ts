@@ -179,6 +179,7 @@ export interface CanvasElement {
   initialize(): void
   setColor(color: string): void
   
+  setIsEditing(editing: boolean): void
   getBBox(): BBox
   
   getData(): CanvasNodeData | CanvasEdgeData

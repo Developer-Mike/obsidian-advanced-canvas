@@ -14,6 +14,11 @@ export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.NodeEditingStateChanged,
+      (canvas: Canvas, node: CanvasNode, editing: boolean) => this.onNodeEditingStateChanged(canvas, node, editing)
+    ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.NodeTextContentChanged,
       (canvas: Canvas, node: CanvasNode, viewUpdate: ViewUpdate) => this.onNodeTextContentChanged(canvas, node, viewUpdate)
     ))
@@ -51,8 +56,27 @@ export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
 
     this.onPopupMenuCreated(canvas)
   }
+
+  private async onNodeEditingStateChanged(_canvas: Canvas, node: CanvasNode, editing: boolean) {
+    if (editing) return
+    await sleep(10)
+
+    const nodeData = node.getData()
+    if (nodeData.lockedHeight) return
+
+    const renderedMarkdownContainer = node.nodeEl.querySelector(".markdown-preview-view.markdown-rendered") as HTMLElement | null
+    if (!renderedMarkdownContainer) return
+    renderedMarkdownContainer.style.height = "min-content"
+
+    let newHeight = renderedMarkdownContainer.clientHeight
+
+    renderedMarkdownContainer.style.removeProperty("height")
+
+    if (newHeight === 0) return
+    this.setNodeHeight(node, newHeight)
+  }
   
-  private async onNodeTextContentChanged(canvas: Canvas, node: CanvasNode, viewUpdate: ViewUpdate) {
+  private async onNodeTextContentChanged(_canvas: Canvas, node: CanvasNode, viewUpdate: ViewUpdate) {
     const nodeData = node.getData()
     if (nodeData.lockedHeight) return
 
@@ -69,12 +93,20 @@ export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
 
     let newHeight = viewUpdate.view.contentHeight + textPadding + 10
 
+    this.setNodeHeight(node, newHeight)
+  }
+
+  private setNodeHeight(node: CanvasNode, height: number) {
+    const nodeData = node.getData()
+
+    height = Math.max(height, node.canvas.config.minContainerDimension)
+
     if (this.plugin.settings.getSetting('autoResizeNodeSnapToGrid'))
-      newHeight = Math.round(newHeight / CanvasHelper.GRID_SIZE) * CanvasHelper.GRID_SIZE
+      height = Math.ceil(height / CanvasHelper.GRID_SIZE) * CanvasHelper.GRID_SIZE
 
     node.setData({
       ...nodeData,
-      height: newHeight
+      height: height
     })
   }
 }

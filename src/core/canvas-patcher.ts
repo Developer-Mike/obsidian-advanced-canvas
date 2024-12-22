@@ -289,6 +289,11 @@ export default class CanvasPatcher {
 
         return result
       },
+      setIsEditing: (next: any) => function (editing: boolean, ...args: any) {
+        const result = next.call(this, editing, ...args)
+        that.triggerWorkspaceEvent(CanvasEvent.NodeEditingStateChanged, this.canvas, node, editing)
+        return result
+      },
       getBBox: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
         that.triggerWorkspaceEvent(CanvasEvent.NodeBBoxRequested, this.canvas, node, result)
