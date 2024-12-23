@@ -176,6 +176,14 @@ export interface CanvasElement {
   initialized: boolean
   isDirty?: boolean // Custom for Change event
 
+  child: {
+    editMode: {
+      cm: {
+        dom: HTMLElement
+      }
+    }
+  }
+
   initialize(): void
   setColor(color: string): void
   

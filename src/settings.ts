@@ -108,7 +108,7 @@ export const DEFAULT_SETTINGS: Partial<AdvancedCanvasPluginSettings> = {
   disableZoom: false,
   disablePan: false,
 
-  autoResizeNodeFeatureEnabled: true,
+  autoResizeNodeFeatureEnabled: false,
   autoResizeNodeSnapToGrid: true,
 
   collapsibleGroupsFeatureEnabled: true,

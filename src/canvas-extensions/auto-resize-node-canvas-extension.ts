@@ -20,7 +20,7 @@ export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.NodeTextContentChanged,
-      (canvas: Canvas, node: CanvasNode, viewUpdate: ViewUpdate) => this.onNodeTextContentChanged(canvas, node, viewUpdate)
+      (canvas: Canvas, node: CanvasNode, viewUpdate: ViewUpdate) => this.onNodeTextContentChanged(canvas, node, viewUpdate.view.dom)
     ))
   }
 
@@ -58,45 +58,43 @@ export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
   }
 
   private async onNodeEditingStateChanged(_canvas: Canvas, node: CanvasNode, editing: boolean) {
-    if (editing) return
     await sleep(10)
+
+    if (editing) {
+      this.onNodeTextContentChanged(_canvas, node, node.child.editMode.cm.dom)
+      return
+    }
 
     const nodeData = node.getData()
     if (nodeData.lockedHeight) return
 
     const renderedMarkdownContainer = node.nodeEl.querySelector(".markdown-preview-view.markdown-rendered") as HTMLElement | null
     if (!renderedMarkdownContainer) return
+
     renderedMarkdownContainer.style.height = "min-content"
-
     let newHeight = renderedMarkdownContainer.clientHeight
-
     renderedMarkdownContainer.style.removeProperty("height")
 
-    if (newHeight === 0) return
     this.setNodeHeight(node, newHeight)
   }
   
-  private async onNodeTextContentChanged(_canvas: Canvas, node: CanvasNode, viewUpdate: ViewUpdate) {
+  private async onNodeTextContentChanged(_canvas: Canvas, node: CanvasNode, dom: HTMLElement) {
     const nodeData = node.getData()
     if (nodeData.lockedHeight) return
 
-    let textPadding = 0
-    const cmScroller = viewUpdate.view.dom.querySelector(".cm-scroller")
-    if (cmScroller) {
-      for (const pseudo of ["before", "after"]) {
-        const style = window.getComputedStyle(cmScroller, pseudo)
-        const height = parseFloat(style.getPropertyValue("height"))
+    const cmScroller = dom.querySelector(".cm-scroller") as HTMLElement | null
+    if (!cmScroller) return
 
-        textPadding += height
-      }
-    }
-
-    let newHeight = viewUpdate.view.contentHeight + textPadding + 10
+    cmScroller.style.height = "min-content"
+    const newHeight = cmScroller.scrollHeight
+    cmScroller.style.removeProperty("height")
 
     this.setNodeHeight(node, newHeight)
   }
 
   private setNodeHeight(node: CanvasNode, height: number) {
+    if (height === 0) return
+
     const nodeData = node.getData()
 
     height = Math.max(height, node.canvas.config.minContainerDimension)
