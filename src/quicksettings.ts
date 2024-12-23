@@ -21,12 +21,12 @@ export default class Quicksettings {
   }
 }
 
-type Pair<T> = [key: string, value: T]
-abstract class SearchKeyValueSettingModal<T> extends SuggestModal<Pair<T>> {
+type KeyValuePair<T> = [key: string, value: T]
+abstract class SearchKeyValueSettingModal<T> extends SuggestModal<KeyValuePair<T>> {
   settingsManager: SettingsManager
 
   abstract getSearchTitle(): string
-  abstract getAllSuggestions(): Pair<T>[]
+  abstract getAllSuggestions(): KeyValuePair<T>[]
   abstract doesSuggestionMatchQuery(key: string, value: T, query: string): boolean
   abstract displaySuggestion(key: string, value: T, el: HTMLElement): void
   abstract onSelectedSuggestion(key: string, value: T): void
@@ -48,18 +48,18 @@ abstract class SearchKeyValueSettingModal<T> extends SuggestModal<Pair<T>> {
     }])
   }
 
-  getSuggestions(query: string): Pair<T>[] {
+  getSuggestions(query: string): KeyValuePair<T>[] {
     const suggestions = this.getAllSuggestions()
       .filter(([settingKey, _settingValue]) => this.doesSuggestionMatchQuery(settingKey, _settingValue, query))
 
     return suggestions
   }
 
-  renderSuggestion(suggestion: Pair<T>, el: HTMLElement): void {
+  renderSuggestion(suggestion: KeyValuePair<T>, el: HTMLElement): void {
     this.displaySuggestion(suggestion[0], suggestion[1], el)
   }
 
-  onChooseSuggestion(suggestion: Pair<T>, evt: MouseEvent | KeyboardEvent): void {
+  onChooseSuggestion(suggestion: KeyValuePair<T>, evt: MouseEvent | KeyboardEvent): void {
     this.onSelectedSuggestion(suggestion[0], suggestion[1])
   }
 }
@@ -69,7 +69,7 @@ class SearchSettingsHeaderModal extends SearchKeyValueSettingModal<Setting> {
     return 'Type to search settings...'
   }
 
-  getAllSuggestions(): Pair<Setting>[] {
+  getAllSuggestions(): KeyValuePair<Setting>[] {
     return Object.entries(SETTINGS).flatMap(([_key, value]) => 
       Object.entries(value.children)
         .filter(([_key, value]) => value.type !== 'button')
@@ -99,7 +99,7 @@ class SearchSettingsHeaderModal extends SearchKeyValueSettingModal<Setting> {
   onSelectedSuggestion(key: string, value: Setting): void {
     switch (value.type) {
       case 'styles':
-        new SearchStyleAttributesSettingsModal(this.app, this.settingsManager, key, value).open()
+        new SearchStyleAttributeModal(this.app, this.settingsManager, key, value).open()
         break
       case 'text':
         new SetTextOrNumberSettingModal(this.app, this.settingsManager, key, value).open()
@@ -120,74 +120,25 @@ class SearchSettingsHeaderModal extends SearchKeyValueSettingModal<Setting> {
   }
 }
 
-class SearchStyleAttributesSettingsModal extends SearchKeyValueSettingModal<StyleAttributesSetting> {
+class SearchStyleAttributeModal extends SearchKeyValueSettingModal<StyleAttribute> {
   settingsManager: SettingsManager
   settingsKey: string
+  setting: StyleAttributesSetting
 
   constructor(app: App, settingsManager: SettingsManager, settingsKey: string, setting: Setting) {
     super(app, settingsManager)
     this.settingsManager = settingsManager
     this.settingsKey = settingsKey
+    this.setting = setting as StyleAttributesSetting
   }
 
   getSearchTitle(): string {
     return 'Type to search style attributes...'
   }
 
-  getAllSuggestions(): Pair<StyleAttributesSetting>[] {
-    return Object.entries(SETTINGS).flatMap(([_key, value]) => 
-      Object.entries(value.children)
-        .filter(([_key, value]) => value.type === 'styles')
-    )
-  }
-
-  doesSuggestionMatchQuery(key: string, value: StyleAttributesSetting, query: string): boolean {
-    return key.toLowerCase().includes(query.toLowerCase()) || 
-      value.label.toLowerCase().includes(query.toLowerCase()) ||
-      value.description?.toLowerCase()?.includes(query.toLowerCase())
-  }
-
-  displaySuggestion(key: string, value: StyleAttributesSetting, el: HTMLElement): void {
-    el.addClass('quicksettings-suggestion')
-
-    el.createEl('span', {
-      cls: 'quicksettings-suggestion-label',
-      text: value.label
-    })
-
-    el.createEl('span', { 
-      cls: 'quicksettings-suggestion-description',
-      text: value.description 
-    })
-  }
-
-  onSelectedSuggestion(key: string, value: StyleAttributesSetting): void {
-    const styleAttributes = value.getParameters(this.settingsManager)
-    new SearchStyleAttributeSettingsModal(this.app, this.settingsManager, this.settingsKey, key, styleAttributes).open()
-  }
-}
-
-// TODO
-class SearchStyleAttributeSettingsModal extends SearchKeyValueSettingModal<StyleAttribute> {
-  settingsManager: SettingsManager
-  settingsKey: string
-  styleAttributeKey: string
-
-  constructor(app: App, settingsManager: SettingsManager, settingsKey: string, styleAttributeKey: string, styleAttributes: StyleAttribute[]) {
-    super(app, settingsManager)
-    this.settingsManager = settingsManager
-    this.settingsKey = settingsKey
-    this.styleAttributeKey = styleAttributeKey
-  }
-
-  getSearchTitle(): string {
-    return 'Type to search style attribute values...'
-  }
-
-  getAllSuggestions(): Pair<StyleAttribute>[] {
-    // styleattributesetting.getParameters(this.settingsManager)
-    return (this.settingsManager.getSetting(this.settingsKey as keyof AdvancedCanvasPluginSettingsValues) as StyleAttribute[])
-      .map((value, index) => [index.toString(), value])
+  getAllSuggestions(): KeyValuePair<StyleAttribute>[] {
+    return this.setting.getParameters(this.settingsManager)
+      .map(styleAttribute => [styleAttribute.datasetKey, styleAttribute])
   }
 
   doesSuggestionMatchQuery(key: string, value: StyleAttribute, query: string): boolean {
@@ -195,12 +146,51 @@ class SearchStyleAttributeSettingsModal extends SearchKeyValueSettingModal<Style
       value.label.toLowerCase().includes(query.toLowerCase())
   }
 
-  displaySuggestion(_key: string, value: StyleAttribute, el: HTMLElement): void {
-    el.setText(value.label)
+  displaySuggestion(key: string, value: StyleAttribute, el: HTMLElement): void {
+    el.createEl('span', { text: value.label })
   }
 
   onSelectedSuggestion(key: string, value: StyleAttribute): void {
-    new SetTextOrNumberSettingModal(this.app, this.settingsManager, key, value).open()
+    new SetStyleAttributeModal(this.app, this.settingsManager, this.settingsKey, key, value).open()
+  }
+}
+
+class SetStyleAttributeModal extends SearchKeyValueSettingModal<string> {
+  settingsManager: SettingsManager
+  settingsKey: string
+  styleAttributeKey: string
+  styleAttribute: StyleAttribute
+
+  constructor(app: App, settingsManager: SettingsManager, settingsKey: string, styleAttributeKey: string, styleAttribute: StyleAttribute) {
+    super(app, settingsManager)
+    this.settingsManager = settingsManager
+    this.settingsKey = settingsKey
+    this.styleAttributeKey = styleAttributeKey
+    this.styleAttribute = styleAttribute
+  }
+
+  getSearchTitle(): string {
+    return 'Set style attribute value...'
+  }
+
+  getAllSuggestions(): KeyValuePair<string>[] {
+    return this.styleAttribute.options.map(option => [option.value, option.label] as KeyValuePair<string>)
+  }
+
+  doesSuggestionMatchQuery(key: string, value: string, query: string): boolean {
+    return key?.toLowerCase().includes(query.toLowerCase()) || 
+      value.toLowerCase().includes(query.toLowerCase())
+  }
+
+  displaySuggestion(_key: string, value: string, el: HTMLElement): void {
+    el.setText(value)
+  }
+
+  onSelectedSuggestion(key: string, value: string): void {
+    this.settingsManager.setSetting({ [this.settingsKey]: {
+      ...this.settingsManager.getSetting(this.settingsKey as keyof AdvancedCanvasPluginSettingsValues) as Record<string, string>,
+      [this.styleAttributeKey]: key }
+    })
   }
 }
 
@@ -303,7 +293,7 @@ class SetDropdownSettingModal extends SearchKeyValueSettingModal<string> {
     return 'Type to search dropdown values...'
   }
 
-  getAllSuggestions(): Pair<string>[] {
+  getAllSuggestions(): KeyValuePair<string>[] {
     return [
       [this.currentValue, this.setting.options[this.currentValue]],
       ...Object.entries(this.setting.options).filter(([key, _value]) => key !== this.currentValue)
