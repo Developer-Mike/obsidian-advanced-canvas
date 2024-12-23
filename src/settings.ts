@@ -402,7 +402,7 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   disableZoom: false,
   disablePan: false,
 
-  autoResizeNodeFeatureEnabled: true,
+  autoResizeNodeFeatureEnabled: false,
   autoResizeNodeSnapToGrid: true,
 
   collapsibleGroupsFeatureEnabled: true,
