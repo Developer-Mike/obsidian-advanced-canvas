@@ -1,6 +1,6 @@
 import App, { SuggestModal } from "obsidian"
 import AdvancedCanvasPlugin from "./main"
-import SettingsManager, { SETTINGS, AdvancedCanvasPluginSettingsValues } from "./settings"
+import SettingsManager, { SETTINGS, AdvancedCanvasPluginSettingsValues, DEFAULT_SETTINGS_VALUES } from "./settings"
 import { DropdownSetting, Setting, StyleAttributesSetting } from "./@types/Settings"
 import { StyleAttribute } from "./canvas-extensions/advanced-styles/style-config"
 
@@ -160,6 +160,7 @@ class SetStyleAttributeModal extends SearchKeyValueSettingModal<string> {
   settingsKey: string
   styleAttributeKey: string
   styleAttribute: StyleAttribute
+  currentValueKey: string
 
   constructor(app: App, settingsManager: SettingsManager, settingsKey: string, styleAttributeKey: string, styleAttribute: StyleAttribute) {
     super(app, settingsManager)
@@ -167,6 +168,7 @@ class SetStyleAttributeModal extends SearchKeyValueSettingModal<string> {
     this.settingsKey = settingsKey
     this.styleAttributeKey = styleAttributeKey
     this.styleAttribute = styleAttribute
+    this.currentValueKey = (settingsManager.getSetting(settingsKey as keyof AdvancedCanvasPluginSettingsValues) as Record<string, string>)[styleAttributeKey]
   }
 
   getSearchTitle(): string {
@@ -198,12 +200,16 @@ class SetTextOrNumberSettingModal extends SuggestModal<string> {
   settingsManager: SettingsManager
   settingsKey: string
   setting: Setting
+  defaultValue: string
+  currentValue: string
 
   constructor(app: App, settingsManager: SettingsManager, settingsKey: string, setting: Setting) {
     super(app)
     this.settingsManager = settingsManager
     this.settingsKey = settingsKey
     this.setting = setting
+    this.defaultValue = DEFAULT_SETTINGS_VALUES[settingsKey as keyof AdvancedCanvasPluginSettingsValues].toString()
+    this.currentValue = settingsManager.getSetting(settingsKey as keyof AdvancedCanvasPluginSettingsValues).toString()
 
     this.setPlaceholder('Enter new value...')
     this.setInstructions([{
@@ -219,16 +225,20 @@ class SetTextOrNumberSettingModal extends SuggestModal<string> {
   }
 
   getSuggestions(query: string): string[] {
-    if (query.length === 0) return [
-      this.settingsManager.getSetting(this.settingsKey as keyof AdvancedCanvasPluginSettingsValues).toString()
-    ]
-
-    const value = this.setting.parse ? this.setting.parse(query) : query
-    return [value]
+    const parsedInputValue = this.setting.parse ? this.setting.parse(query) : query
+    return [...new Set([parsedInputValue, this.currentValue, this.defaultValue])]
   }
 
   renderSuggestion(value: string, el: HTMLElement): void {
-    el.createEl('span', { text: value?.toString() })
+    let text = value
+    if (value === this.defaultValue.toString() && value === this.currentValue.toString())
+      text = `${value} (default, current)`
+    else if (value === this.defaultValue.toString())
+      text = `${value} (default)`
+    else if (value === this.currentValue.toString())
+      text = `${value} (current)`
+
+    el.createEl('span', { text: text })
   }
 
   onChooseSuggestion(item: string, _evt: MouseEvent | KeyboardEvent): void {
@@ -239,11 +249,15 @@ class SetTextOrNumberSettingModal extends SuggestModal<string> {
 class SetBooleanSettingModal extends SuggestModal<string> {
   settingsManager: SettingsManager
   settingsKey: string
+  defaultValue: boolean
+  currentValue: boolean
 
   constructor(app: App, settingsManager: SettingsManager, settingsKey: string) {
     super(app)
     this.settingsManager = settingsManager
     this.settingsKey = settingsKey
+    this.defaultValue = DEFAULT_SETTINGS_VALUES[settingsKey as keyof AdvancedCanvasPluginSettingsValues] as boolean
+    this.currentValue = settingsManager.getSetting(settingsKey as keyof AdvancedCanvasPluginSettingsValues) as boolean
 
     this.setPlaceholder('Enter new value...')
     this.setInstructions([{
@@ -266,7 +280,15 @@ class SetBooleanSettingModal extends SuggestModal<string> {
   }
 
   renderSuggestion(value: string, el: HTMLElement): void {
-    el.createEl('span', { text: value })
+    let text = value
+    if (value === this.defaultValue.toString() && value === this.currentValue.toString())
+      text = `${value} (default, current)`
+    else if (value === this.defaultValue.toString())
+      text = `${value} (default)`
+    else if (value === this.currentValue.toString())
+      text = `${value} (current)`
+
+    el.createEl('span', { text: text })
   }
 
   onChooseSuggestion(item: string, _evt: MouseEvent | KeyboardEvent): void {
@@ -278,15 +300,16 @@ class SetDropdownSettingModal extends SearchKeyValueSettingModal<string> {
   settingsManager: SettingsManager
   settingsKey: string
   setting: DropdownSetting
-  currentValue: string
+  defaultValueKey: string
+  currentValueKey: string
 
   constructor(app: App, settingsManager: SettingsManager, settingsKey: string, setting: DropdownSetting) {
     super(app, settingsManager)
     this.settingsManager = settingsManager
     this.settingsKey = settingsKey
     this.setting = setting
-
-    this.currentValue = settingsManager.getSetting(settingsKey as keyof AdvancedCanvasPluginSettingsValues) as string
+    this.defaultValueKey = DEFAULT_SETTINGS_VALUES[settingsKey as keyof AdvancedCanvasPluginSettingsValues] as string
+    this.currentValueKey = settingsManager.getSetting(settingsKey as keyof AdvancedCanvasPluginSettingsValues) as string
   }
 
   getSearchTitle(): string {
@@ -294,18 +317,30 @@ class SetDropdownSettingModal extends SearchKeyValueSettingModal<string> {
   }
 
   getAllSuggestions(): KeyValuePair<string>[] {
-    return [
-      [this.currentValue, this.setting.options[this.currentValue]],
-      ...Object.entries(this.setting.options).filter(([key, _value]) => key !== this.currentValue)
-    ]
+    const suggestions: KeyValuePair<string>[] = [[this.currentValueKey, this.setting.options[this.currentValueKey]]]
+
+    if (this.defaultValueKey !== this.currentValueKey)
+      suggestions.push([this.defaultValueKey, this.setting.options[this.defaultValueKey]])
+
+    suggestions.push(...Object.entries(this.setting.options).filter(([key, _value]) => key !== this.currentValueKey && key !== this.defaultValueKey))
+
+    return suggestions
   }
 
   doesSuggestionMatchQuery(key: string, _value: string, query: string): boolean {
     return key.toLowerCase().includes(query.toLowerCase())
   }
 
-  displaySuggestion(_key: string, value: string, el: HTMLElement): void {
-    el.createEl('span', { text: value })
+  displaySuggestion(key: string, value: string, el: HTMLElement): void {
+    let text = value
+    if (key === this.defaultValueKey.toString() && key === this.currentValueKey.toString())
+      text = `${value} (default, current)`
+    else if (key === this.defaultValueKey.toString())
+      text = `${value} (default)`
+    else if (key === this.currentValueKey.toString())
+      text = `${value} (current)`
+
+    el.createEl('span', { text: text })
   }
 
   onSelectedSuggestion(key: string, _value: string): void {
