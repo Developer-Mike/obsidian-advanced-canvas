@@ -160,7 +160,7 @@ class SetStyleAttributeModal extends SearchKeyValueSettingModal<string> {
   settingsKey: string
   styleAttributeKey: string
   styleAttribute: StyleAttribute
-  currentValueKey: string
+  currentValueKey: string | null
 
   constructor(app: App, settingsManager: SettingsManager, settingsKey: string, styleAttributeKey: string, styleAttribute: StyleAttribute) {
     super(app, settingsManager)
@@ -168,7 +168,7 @@ class SetStyleAttributeModal extends SearchKeyValueSettingModal<string> {
     this.settingsKey = settingsKey
     this.styleAttributeKey = styleAttributeKey
     this.styleAttribute = styleAttribute
-    this.currentValueKey = (settingsManager.getSetting(settingsKey as keyof AdvancedCanvasPluginSettingsValues) as Record<string, string>)[styleAttributeKey]
+    this.currentValueKey = (settingsManager.getSetting(settingsKey as keyof AdvancedCanvasPluginSettingsValues) as Record<string, string>)[styleAttributeKey] || null
   }
 
   getSearchTitle(): string {
@@ -184,14 +184,26 @@ class SetStyleAttributeModal extends SearchKeyValueSettingModal<string> {
       value.toLowerCase().includes(query.toLowerCase())
   }
 
-  displaySuggestion(_key: string, value: string, el: HTMLElement): void {
-    el.setText(value)
+  displaySuggestion(key: string, value: string, el: HTMLElement): void {
+    let text = value
+    if (key === null && key === this.currentValueKey)
+      text = `${value} (default, current)`
+    else if (key === null)
+      text = `${value} (default)`
+    else if (key === this.currentValueKey)
+      text = `${value} (current)`
+
+    el.createEl('span', { text: text })
   }
 
-  onSelectedSuggestion(key: string, value: string): void {
-    this.settingsManager.setSetting({ [this.settingsKey]: {
-      ...this.settingsManager.getSetting(this.settingsKey as keyof AdvancedCanvasPluginSettingsValues) as Record<string, string>,
-      [this.styleAttributeKey]: key }
+  onSelectedSuggestion(key: string | null, _value: string): void {
+    const newValue = this.settingsManager.getSetting(this.settingsKey as keyof AdvancedCanvasPluginSettingsValues) as Record<string, string>
+
+    if (key === null) delete newValue[this.styleAttribute.datasetKey]
+    else newValue[this.styleAttribute.datasetKey] = key
+
+    this.settingsManager.setSetting({
+      [this.settingsKey]: newValue
     })
   }
 }
@@ -231,11 +243,11 @@ class SetTextOrNumberSettingModal extends SuggestModal<string> {
 
   renderSuggestion(value: string, el: HTMLElement): void {
     let text = value
-    if (value === this.defaultValue.toString() && value === this.currentValue.toString())
+    if (value === this.defaultValue && value === this.currentValue)
       text = `${value} (default, current)`
-    else if (value === this.defaultValue.toString())
+    else if (value === this.defaultValue)
       text = `${value} (default)`
-    else if (value === this.currentValue.toString())
+    else if (value === this.currentValue)
       text = `${value} (current)`
 
     el.createEl('span', { text: text })
@@ -333,11 +345,11 @@ class SetDropdownSettingModal extends SearchKeyValueSettingModal<string> {
 
   displaySuggestion(key: string, value: string, el: HTMLElement): void {
     let text = value
-    if (key === this.defaultValueKey.toString() && key === this.currentValueKey.toString())
+    if (key === this.defaultValueKey && key === this.currentValueKey)
       text = `${value} (default, current)`
-    else if (key === this.defaultValueKey.toString())
+    else if (key === this.defaultValueKey)
       text = `${value} (default)`
-    else if (key === this.currentValueKey.toString())
+    else if (key === this.currentValueKey)
       text = `${value} (current)`
 
     el.createEl('span', { text: text })
