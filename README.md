@@ -116,6 +116,8 @@ Please consider supporting the plugin. There are many hours of work and effort b
 - Disable the font scaling relative to the zoom level
 
 ## Canvas Commands
+- `Advanced Canvas: Open Quicksettings`
+  - Open the quicksettings menu
 - `Advanced Canvas: Create text node`
   - Create a new text node
 - `Advanced Canvas: Create file node`
@@ -421,6 +423,9 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
   - `advanced-canvas:copy`
     - Fired when the selection gets copied
     - Payload: `Canvas`, `SelectionData (Reference!)`
+  - `advanced-canvas:node-editing-state-changed`
+    - Fired when the editing state of a node changes
+    - Payload: `Canvas`, `Node`, `boolean (isEditing)`
   - `advanced-canvas:node-bbox-requested`
     - Fired when the bounding box of a node gets requested (e.g. for the edge path or when dragging a group)
     - Payload: `Canvas`, `Node`, `BBox (Reference!)`
