@@ -49,6 +49,7 @@ export interface AdvancedCanvasPluginSettingsValues {
   disablePan: boolean
 
   autoResizeNodeFeatureEnabled: boolean
+  autoResizeNodeMaxHeight: number
   autoResizeNodeSnapToGrid: boolean
 
   collapsibleGroupsFeatureEnabled: boolean
@@ -262,6 +263,12 @@ export const SETTINGS = {
     label: 'Auto resize node',
     description: 'Automatically resize the height of a node to fit the content.',
     children: {
+      autoResizeNodeMaxHeight: {
+        label: 'Max height',
+        description: 'The maximum height of the node when auto resizing (-1 for unlimited).',
+        type: 'number',
+        parse: (value: string) => Math.max(-1, parseInt(value) ?? -1)
+      },
       autoResizeNodeSnapToGrid: {
         label: 'Snap to grid',
         description: 'When enabled, the height of the node will snap to the grid.',
@@ -403,6 +410,7 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   disablePan: false,
 
   autoResizeNodeFeatureEnabled: false,
+  autoResizeNodeMaxHeight: -1,
   autoResizeNodeSnapToGrid: true,
 
   collapsibleGroupsFeatureEnabled: true,

@@ -33,40 +33,44 @@ export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
     }) as CanvasNode[]
     if (selectedNodes.length === 0) return
 
-    const hasLockedHeight = selectedNodes.some(node => node.getData().lockedHeight)
+    const autoResizeHeightEnabled = selectedNodes.some(node => node.getData().autoResizeHeight)
     
     CanvasHelper.addPopupMenuOption(
       canvas,
       CanvasHelper.createPopupMenuOption({
-        id: 'lock-height',
-        label: 'Toggle locked height',
-        icon: hasLockedHeight ? 'ruler' : 'pencil-ruler',
-        callback: () => this.setLockedHeight(canvas, selectedNodes, hasLockedHeight)
+        id: 'auto-resize-height',
+        label: autoResizeHeightEnabled ? 'Disable auto-resize' : 'Enable auto-resize',
+        icon: autoResizeHeightEnabled ? 'scan-text' : 'lock',
+        callback: () => this.toggleAutoResizeHeightEnabled(canvas, selectedNodes, autoResizeHeightEnabled)
       })
     )
   }
 
-  private setLockedHeight(canvas: Canvas, nodes: CanvasNode[], lockedHeight: boolean) {
-    const newLockedHeight = lockedHeight ? undefined : true
+  private toggleAutoResizeHeightEnabled(canvas: Canvas, nodes: CanvasNode[], autoResizeHeight: boolean) {
+    const newAutoResizeHeight = autoResizeHeight ? undefined : true
 
     nodes.forEach(node => node.setData({
       ...node.getData(),
-      lockedHeight: newLockedHeight
+      autoResizeHeight: newAutoResizeHeight
     }))
 
     this.onPopupMenuCreated(canvas)
   }
 
+  private canBeResized(node: CanvasNode) {
+    const nodeData = node.getData()
+    return nodeData.autoResizeHeight
+  }
+
   private async onNodeEditingStateChanged(_canvas: Canvas, node: CanvasNode, editing: boolean) {
+    if (!this.canBeResized(node)) return
+
     await sleep(10)
 
     if (editing) {
       this.onNodeTextContentChanged(_canvas, node, node.child.editMode.cm.dom)
       return
     }
-
-    const nodeData = node.getData()
-    if (nodeData.lockedHeight) return
 
     const renderedMarkdownContainer = node.nodeEl.querySelector(".markdown-preview-view.markdown-rendered") as HTMLElement | null
     if (!renderedMarkdownContainer) return
@@ -79,8 +83,7 @@ export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
   }
   
   private async onNodeTextContentChanged(_canvas: Canvas, node: CanvasNode, dom: HTMLElement) {
-    const nodeData = node.getData()
-    if (nodeData.lockedHeight) return
+    if (!this.canBeResized(node)) return
 
     const cmScroller = dom.querySelector(".cm-scroller") as HTMLElement | null
     if (!cmScroller) return
@@ -94,6 +97,10 @@ export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
 
   private setNodeHeight(node: CanvasNode, height: number) {
     if (height === 0) return
+    
+    // Limit the height to the maximum allowed
+    const maxHeight = this.plugin.settings.getSetting('autoResizeNodeMaxHeight')
+    if (maxHeight != -1 && height > maxHeight) height = maxHeight
 
     const nodeData = node.getData()
 

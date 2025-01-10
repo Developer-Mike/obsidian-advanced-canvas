@@ -210,7 +210,7 @@ export interface CanvasNodeData {
   // TODO: needsToBeInitialized?: boolean
   styleAttributes?: { [key: string]: string | null }
 
-  lockedHeight?: boolean
+  autoResizeHeight?: boolean
 
   isCollapsed?: boolean
   collapsedData?: CanvasData
