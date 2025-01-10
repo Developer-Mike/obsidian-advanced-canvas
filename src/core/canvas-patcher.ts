@@ -2,7 +2,8 @@ import AdvancedCanvasPlugin from "src/main"
 import { BBox, Canvas, CanvasData, CanvasEdge, CanvasEdgeData, CanvasElement, CanvasNode, CanvasNodeData, CanvasView } from "src/@types/Canvas"
 import PatchHelper from "src/utils/patch-helper"
 import { CanvasEvent } from "./events"
-import { requireApiVersion, WorkspaceLeaf } from "obsidian"
+import { requireApiVersion, WorkspaceLeaf, editorInfoField } from "obsidian"
+import { EditorView, ViewUpdate } from "@codemirror/view"
 import { around } from "monkey-around"
 import JSONC from "tiny-jsonc"
 
@@ -157,6 +158,18 @@ export default class CanvasPatcher {
         that.triggerWorkspaceEvent(CanvasEvent.EdgeRemoved, this, edge)
         return result
       },
+      handleCopy: (next: any) => function (...args: any) {
+        this.isCopying = true
+        const result = next.call(this, ...args)
+        this.isCopying = false
+
+        return result
+      },
+      getSelectionData: (next: any) => function (...args: any) {
+        const result = next.call(this, ...args)
+        if (this.isCopying) that.triggerWorkspaceEvent(CanvasEvent.OnCopy, this, result)
+        return result
+      },
       zoomToBbox: (next: any) => function (bbox: BBox) {
         that.triggerWorkspaceEvent(CanvasEvent.ZoomToBbox.Before, this, bbox)
         const result = next.call(this, bbox)
@@ -233,6 +246,17 @@ export default class CanvasPatcher {
       }
     })
 
+    // Add editor extension for node text content change listener
+    this.plugin.registerEditorExtension([EditorView.updateListener.of((update: ViewUpdate) => {
+      if (!update.docChanged) return
+
+      const editor = update.state.field(editorInfoField) as any
+      const node = editor.node as CanvasNode | undefined
+      if (!node) return
+
+      that.triggerWorkspaceEvent(CanvasEvent.NodeTextContentChanged, node.canvas, node, update)
+    })])
+
     // Canvas is now patched - update all open canvas views
     this.plugin.app.workspace.iterateAllLeaves((leaf: WorkspaceLeaf) => {
       if (leaf.view.getViewType() !== 'canvas') return
@@ -263,6 +287,11 @@ export default class CanvasPatcher {
         // Add to the undo stack
         if (addHistory) this.canvas.pushHistory(this.canvas.getData())
 
+        return result
+      },
+      setIsEditing: (next: any) => function (editing: boolean, ...args: any) {
+        const result = next.call(this, editing, ...args)
+        that.triggerWorkspaceEvent(CanvasEvent.NodeEditingStateChanged, this.canvas, node, editing)
         return result
       },
       getBBox: (next: any) => function (...args: any) {

@@ -3,6 +3,7 @@ import { Canvas } from "src/@types/Canvas"
 import { FileNameModal } from "src/utils/modal-helper"
 import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "../core/canvas-extension"
+import { CanvasEvent } from "src/core/events"
 
 const ENCAPSULATED_FILE_NODE_SIZE = { width: 300, height: 300 }
 
@@ -23,7 +24,7 @@ export default class EncapsulateCanvasExtension extends CanvasExtension {
 
     /* Add encapsulate option to context menu */
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      'canvas:selection-menu',
+      CanvasEvent.SelectionContextMenu,
       (menu: Menu, canvas: Canvas) => {
         menu.addItem((item) =>
           item

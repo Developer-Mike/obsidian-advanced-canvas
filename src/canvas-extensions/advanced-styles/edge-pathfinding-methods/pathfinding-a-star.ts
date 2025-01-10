@@ -4,6 +4,7 @@ import SvgPathHelper from "src/utils/svg-path-helper"
 import AdvancedCanvasPlugin from "src/main"
 import BBoxHelper from "src/utils/bbox-helper"
 
+const MAX_G_COST = 75
 const DIRECTIONS = [
   { dx: 1, dy: 0 }, { dx: -1, dy: 0 }, { dx: 0, dy: 1 }, { dx: 0, dy: -1 },
   { dx: 1, dy: 1 }, { dx: -1, dy: 1 }, { dx: 1, dy: -1 }, { dx: -1, dy: -1 },
@@ -105,23 +106,26 @@ export default class EdgePathfindingAStar extends EdgePathfindingMethod {
       }
   
       // No path found
-      if (!current) return null
+      if (!current)
+        return null
   
       // Remove the current node from the open set and add it to the closed set
       openSet.splice(openSet.indexOf(current), 1)
       closedSet.push(current)
   
       // Check if we have reached the end
-      if (current.x === end.x && current.y === end.y) {
+      if (current.x === end.x && current.y === end.y)
         return [fromPos, ...this.reconstructPath(current), toPos].map(node => ({ x: node.x, y: node.y }))
-      }
   
       // Location is not start or end, all touching positions are invalid
-      if (!(current.x === start.x && current.y === start.y) && this.isTouchingObstacle(current, obstacles)) continue
+      if (!(current.x === start.x && current.y === start.y) && this.isTouchingObstacle(current, obstacles))
+        continue
   
       // Expand neighbors
       for (const neighbor of this.getPossibleNeighbors(current, obstacles, gridResolution)) {
-        if (neighbor.inList(closedSet)) continue
+        // Skip if already processed
+        if (neighbor.inList(closedSet))
+          continue
   
         // Calculate tentative gCost
         const tentativeGCost = current.gCost + this.getMovementCost({
@@ -135,6 +139,10 @@ export default class EdgePathfindingAStar extends EdgePathfindingMethod {
           neighbor.gCost = tentativeGCost
           neighbor.hCost = this.heuristic(neighbor, end)
           neighbor.fCost = neighbor.gCost + neighbor.hCost
+
+          // Skip if max cost is reached
+          if (neighbor.gCost > MAX_G_COST)
+            continue
   
           // Add neighbor to the open set
           openSet.push(neighbor)

@@ -18,6 +18,7 @@ import BetterReadonlyCanvasExtension from './canvas-extensions/better-readonly-c
 import EmbedPropertiesCanvasExtension from './canvas-extensions/embed-properties-canvas-extension'
 import EncapsulateCanvasExtension from './canvas-extensions/encapsulate-canvas-extension'
 import CommandsCanvasExtension from './canvas-extensions/commands-canvas-extension'
+import AutoResizeNodeCanvasExtension from './canvas-extensions/auto-resize-node-canvas-extension'
 import PortalsCanvasExtension from './canvas-extensions/portals-canvas-extension'
 import BetterDefaultSettingsCanvasExtension from './canvas-extensions/better-default-settings-canvas-extension'
 import ColorPaletteCanvasExtension from './canvas-extensions/color-palette-canvas-extension'
@@ -35,6 +36,7 @@ import NodeExposerExtension from './canvas-extensions/dataset-exposers/node-expo
 import EdgeExposerExtension from './canvas-extensions/dataset-exposers/edge-exposer'
 import CanvasWrapperExposerExtension from './canvas-extensions/dataset-exposers/canvas-wrapper-exposer'
 import MigrationHelper from './utils/migration-helper'
+import Quicksettings from './quicksettings'
 
 const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   // Dataset Exposers
@@ -50,8 +52,9 @@ const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   // Basic Extensions
   BetterDefaultSettingsCanvasExtension,
   CommandsCanvasExtension,
-  PropertiesCanvasExtension,
   BetterReadonlyCanvasExtension,
+  AutoResizeNodeCanvasExtension,
+  PropertiesCanvasExtension,
   GroupCanvasExtension,
 
   // More Advanced Extensions
@@ -69,6 +72,7 @@ export default class AdvancedCanvasPlugin extends Plugin {
   debugHelper: DebugHelper
 
   settings: SettingsManager
+  quicksettings: Quicksettings
   windowsManager: WindowsManager
 
   canvasPatcher: CanvasPatcher
@@ -83,6 +87,8 @@ export default class AdvancedCanvasPlugin extends Plugin {
     this.settings = new SettingsManager(this)
     await this.settings.loadSettings()
     this.settings.addSettingsTab()
+    
+    this.quicksettings = new Quicksettings(this)
 
     this.windowsManager = new WindowsManager(this)
 

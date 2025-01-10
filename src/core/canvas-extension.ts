@@ -1,10 +1,10 @@
 import AdvancedCanvasPlugin from "src/main"
-import { AdvancedCanvasPluginSettings } from "src/settings"
+import { AdvancedCanvasPluginSettingsValues } from "src/settings"
 
 export default abstract class CanvasExtension {
   plugin: AdvancedCanvasPlugin
 
-  abstract isEnabled(): boolean | keyof AdvancedCanvasPluginSettings
+  abstract isEnabled(): boolean | keyof AdvancedCanvasPluginSettingsValues
   abstract init(): void
 
   constructor(plugin: AdvancedCanvasPlugin) {

@@ -305,6 +305,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     const data = JSON.parse(JSON.stringify(dataRef)) as CanvasData
 
     // Open portals
+    this.nestedPortals = {}
     const addedData = await Promise.all(data.nodes.map(nodeData => this.tryOpenPortal(canvas, nodeData)))
     for (const newData of addedData) {
       data.nodes.push(...newData.nodes)
@@ -366,17 +367,29 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     return data
   }
 
-  private async tryOpenPortal(canvas: Canvas, portalNodeData: CanvasNodeData): Promise<CanvasData> {
+  private nestedPortals: { [portalId: string]: string[] } = {}
+  private async tryOpenPortal(canvas: Canvas, portalNodeData: CanvasNodeData, parentPortalId?: string): Promise<CanvasData> {
     const addedData: CanvasData = { nodes: [], edges: [] }
     if (portalNodeData.type !== 'file' || !portalNodeData.portalToFile) return addedData
 
     // Update portal file
     portalNodeData.portalToFile = portalNodeData.file
 
-    // Fix recursive portals
+    // Fix direct recursion
     if (portalNodeData.portalToFile === canvas.view.file.path) {
       portalNodeData.portalToFile = undefined
       return addedData
+    }
+
+    // Fix indirect recursion
+    if (parentPortalId) {
+      if (this.nestedPortals[parentPortalId]?.includes(portalNodeData.portalToFile!)) {
+        portalNodeData.portalToFile = undefined
+        return addedData
+      }
+      
+      this.nestedPortals[parentPortalId] = this.nestedPortals[parentPortalId] ?? []
+      this.nestedPortals[parentPortalId].push(portalNodeData.portalToFile!)
     }
 
     const portalFile = this.plugin.app.vault.getAbstractFileByPath(portalNodeData.file!)
@@ -422,7 +435,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
 
       addedData.nodes.push(addedNode)
 
-      const nestedNodes = await this.tryOpenPortal(canvas, addedNode)
+      const nestedNodes = await this.tryOpenPortal(canvas, addedNode, parentPortalId ?? portalNodeData.id)
       addedData.nodes.push(...nestedNodes.nodes)
       addedData.edges.push(...nestedNodes.edges)
     }

@@ -93,6 +93,7 @@ export interface Canvas {
   requestSave(): void
 
   // Custom
+  isCopying: boolean
   lockedX: number
   lockedY: number
   lockedZoom: number
@@ -128,6 +129,7 @@ export interface SelectionData {
 export interface CanvasConfig {
   defaultTextNodeDimensions: Size
   defaultFileNodeDimensions: Size
+  minContainerDimension: number
 }
 
 export interface CanvasView extends ItemView {
@@ -174,9 +176,18 @@ export interface CanvasElement {
   initialized: boolean
   isDirty?: boolean // Custom for Change event
 
+  child: {
+    editMode: {
+      cm: {
+        dom: HTMLElement
+      }
+    }
+  }
+
   initialize(): void
   setColor(color: string): void
   
+  setIsEditing(editing: boolean): void
   getBBox(): BBox
   
   getData(): CanvasNodeData | CanvasEdgeData
@@ -185,6 +196,12 @@ export interface CanvasElement {
 
 export type CanvasNodeType = 'text' | 'group' | 'file' | 'link'
 export interface CanvasNodeData {
+  id: string
+  x: number
+  y: number
+  width: number
+  height: number
+
   type: CanvasNodeType
   id: string
 
@@ -194,6 +211,8 @@ export interface CanvasNodeData {
   url?: string
 
   styleAttributes?: { [key: string]: string | null }
+
+  lockedHeight?: boolean
 
   isCollapsed?: boolean
   collapsedData?: CanvasData
@@ -214,12 +233,13 @@ export interface CanvasNodeData {
 
   // Node from portal
   portalId?: string
-
-  [key: string]: any
 }
 
 export interface CanvasNode extends CanvasElement {
+  isEditing: boolean
+
   nodeEl: HTMLElement
+  contentEl: HTMLElement
 
   labelEl?: HTMLElement
   file?: TFile
