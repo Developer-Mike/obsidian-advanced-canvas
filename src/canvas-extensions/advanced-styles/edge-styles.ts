@@ -1,4 +1,4 @@
-import { Canvas, CanvasEdge, CanvasNode, Position, Side } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasEdge, CanvasElement, CanvasNode, Position, Side } from "src/@types/Canvas"
 import CanvasHelper from "src/utils/canvas-helper"
 import { CanvasEvent } from "src/core/events"
 import BBoxHelper from "src/utils/bbox-helper"
@@ -45,24 +45,31 @@ export default class EdgeStylesExtension extends CanvasExtension {
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.NodeAdded,
-      (canvas: Canvas, _node: CanvasNode) => this.updateAllEdges(canvas)
+      (canvas: Canvas, node: CanvasNode) => this.updateAllEdgesInArea(canvas, node.getBBox())
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.NodeMoved,
-      (canvas: Canvas, _node: CanvasNode) => this.updateAllEdges(canvas)
+      (canvas: Canvas, node: CanvasNode) => this.updateAllEdgesInArea(canvas, node.getBBox())	
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.NodeRemoved,
-      (canvas: Canvas, _node: CanvasNode) => this.updateAllEdges(canvas)
+      (canvas: Canvas, node: CanvasNode) => this.updateAllEdgesInArea(canvas, node.getBBox())
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.DraggingStateChanged,
       (canvas: Canvas, isDragging: boolean) => {
         if (isDragging) return
-        this.updateAllEdges(canvas)
+
+        const selectedNodes = canvas.getSelectionData().nodes
+          .map(nodeData => canvas.nodes.get(nodeData.id))
+          .filter(node => node !== undefined) as CanvasNode[]
+        const selectedNodeBBoxes = selectedNodes.map(node => node.getBBox())
+        const selectedNodeBBox = BBoxHelper.combineBBoxes(selectedNodeBBoxes)
+
+        this.updateAllEdgesInArea(canvas, selectedNodeBBox)
       }
     ))
   }
@@ -97,13 +104,15 @@ export default class EdgeStylesExtension extends CanvasExtension {
     canvas.pushHistory(canvas.getData())
   }
 
-  private updateAllEdges(canvas: Canvas) {
+  private updateAllEdgesInArea(canvas: Canvas, bbox: BBox) {
     for (const edge of canvas.edges.values()) {
       this.onEdgeChanged(canvas, edge)
     }
   }
 
   private onEdgeChanged(canvas: Canvas, edge: CanvasEdge) {
+    if (canvas.dirty.size > 0 && !canvas.dirty.has(edge)) return
+
     const edgeData = edge.getData()
     
     // Reset path to default
@@ -124,12 +133,14 @@ export default class EdgeStylesExtension extends CanvasExtension {
         toBBoxSidePos :
         edge.bezier.to
 
-      const path = new EDGE_PATHFINDING_METHODS[pathfindingMethod]().getPath(this.plugin, canvas, fromPos, fromBBoxSidePos, edge.from.side, toPos, toBBoxSidePos, edge.to.side, canvas.isDragging)
-      if (!path) return
+      const pathPromise = new EDGE_PATHFINDING_METHODS[pathfindingMethod]().getPath(this.plugin, canvas, fromPos, fromBBoxSidePos, edge.from.side, toPos, toBBoxSidePos, edge.to.side, canvas.isDragging)
+      pathPromise.then(path => {
+        if (!path) return
 
-      edge.center = path.center
-      edge.path.interaction.setAttr("d", path?.svgPath)
-      edge.path.display.setAttr("d", path?.svgPath)
+        edge.center = path.center
+        edge.path.interaction.setAttr("d", path?.svgPath)
+        edge.path.display.setAttr("d", path?.svgPath)
+      })
     }
 
     // Update label position

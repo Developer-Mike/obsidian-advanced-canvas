@@ -33,6 +33,8 @@ export interface Canvas {
   edges: Map<string, CanvasEdge>
   getEdgesForNode(node: CanvasNode): CanvasEdge[]
 
+  dirty: Set<CanvasElement>
+
   wrapperEl: HTMLElement
   canvasEl: HTMLElement
   menu: PopupMenu
@@ -93,7 +95,8 @@ export interface Canvas {
   requestSave(): void
 
   // Custom
-  isCopying: boolean
+  isMassClearing?: boolean
+  isCopying?: boolean
   lockedX: number
   lockedY: number
   lockedZoom: number

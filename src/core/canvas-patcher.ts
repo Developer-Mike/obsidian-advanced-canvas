@@ -50,8 +50,6 @@ export default class CanvasPatcher {
     PatchHelper.patchObjectPrototype(this.plugin, canvasView, {
       getViewData: (_next: any) => function (..._args: any) {
         const canvasData = this.canvas.getData()
-        canvasData.metadata = this.canvas.metadata ?? {}
-
         return JSON.stringify(canvasData, null, 2)
       },
       setViewData: (next: any) => function (json: string, ...args: any) {
@@ -61,6 +59,8 @@ export default class CanvasPatcher {
         try {
           result = next.call(this, json, ...args)
         } catch (e) {
+          console.error('Invalid JSON, repairing through Advanced Canvas:', e)
+
           // Invalid JSON
           that.plugin.createFileSnapshot(this.file.path, json)
 
@@ -144,12 +144,12 @@ export default class CanvasPatcher {
       },
       removeNode: (next: any) => function (node: CanvasNode) {
         const result = next.call(this, node)
-        that.triggerWorkspaceEvent(CanvasEvent.NodeRemoved, this, node)
+        if (!this.isMassClearing) that.triggerWorkspaceEvent(CanvasEvent.NodeRemoved, this, node)
         return result
       },
       removeEdge: (next: any) => function (edge: CanvasEdge) {
         const result = next.call(this, edge)
-        that.triggerWorkspaceEvent(CanvasEvent.EdgeRemoved, this, edge)
+        if (!this.isMassClearing) that.triggerWorkspaceEvent(CanvasEvent.EdgeRemoved, this, edge)
         return result
       },
       handleCopy: (next: any) => function (...args: any) {
@@ -187,6 +187,12 @@ export default class CanvasPatcher {
         that.triggerWorkspaceEvent(CanvasEvent.Redo, this)
         return result
       },
+      clear: (next: any) => function (...args: any) {
+        this.isMassClearing = true
+        const result = next.call(this, ...args)
+        this.isMassClearing = false
+        return result
+      },
       /*setData: (next: any) => function (...args: any) {
         //
         const result = next.call(this, ...args)
@@ -205,12 +211,12 @@ export default class CanvasPatcher {
           if (!this.view.file || this.view.file.path !== targetFilePath) return
 
           this.importData(data, true, true)
-          that.emitEventsForUnknownDataChanges(this)
+          that.emitEventsForUnknownDataChanges(this, true)
         }
 
         if (!silent) that.triggerWorkspaceEvent(CanvasEvent.LoadData, this, data, setData)
         const result = next.call(this, data, clearCanvas)
-        that.emitEventsForUnknownDataChanges(this)
+        that.emitEventsForUnknownDataChanges(this, true)
         return result
       },
       requestSave: (next: any) => function (...args: any) {
@@ -297,7 +303,7 @@ export default class CanvasPatcher {
     
     this.runAfterInitialized(node, () => {
       this.triggerWorkspaceEvent(CanvasEvent.NodeAdded, node.canvas, node)
-      this.triggerWorkspaceEvent(CanvasEvent.NodeChanged, node.canvas, node)
+      // this.triggerWorkspaceEvent(CanvasEvent.NodeChanged, node.canvas, node) - Already triggered by importData -> emitEventsForUnknownDataChanges
     })
   }
 
@@ -337,6 +343,7 @@ export default class CanvasPatcher {
     
     this.runAfterInitialized(edge, () => {
       this.triggerWorkspaceEvent(CanvasEvent.EdgeAdded, edge.canvas, edge)
+      // this.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, edge.canvas, edge) - Already triggered by importData -> emitEventsForUnknownDataChanges
     })
   }
   
@@ -363,16 +370,18 @@ export default class CanvasPatcher {
     that.plugin.register(uninstall)
   }
 
-  private emitEventsForUnknownDataChanges(canvas: Canvas) {
+  private emitEventsForUnknownDataChanges(canvas: Canvas, ignoreEdges: boolean = false) {
     // If node data changed
     canvas.nodes.forEach((node: CanvasNode) => this.runAfterInitialized(node, () => {
       this.triggerWorkspaceEvent(CanvasEvent.NodeChanged, node.canvas, node)
     }))
 
-    // If edge data changed
-    canvas.edges.forEach((edge: CanvasEdge) => this.runAfterInitialized(edge, () => {
-      this.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, edge.canvas, edge)
-    }))
+    if (!ignoreEdges) {
+      // If edge data changed
+      canvas.edges.forEach((edge: CanvasEdge) => this.runAfterInitialized(edge, () => {
+        this.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, edge.canvas, edge)
+      }))
+    }
   }
 
   private triggerWorkspaceEvent(event: string, ...args: any) {

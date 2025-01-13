@@ -4,7 +4,7 @@ import SvgPathHelper from "src/utils/svg-path-helper"
 import AdvancedCanvasPlugin from "src/main"
 import BBoxHelper from "src/utils/bbox-helper"
 
-const MAX_G_COST = 75
+const MAX_MS_CALCULATION = 100
 const DIRECTIONS = [
   { dx: 1, dy: 0 }, { dx: -1, dy: 0 }, { dx: 0, dy: 1 }, { dx: 0, dy: -1 },
   { dx: 1, dy: 1 }, { dx: -1, dy: 1 }, { dx: 1, dy: -1 }, { dx: -1, dy: -1 },
@@ -36,7 +36,7 @@ class Node {
 }
 
 export default class EdgePathfindingAStar extends EdgePathfindingMethod {
-  getPath(plugin: AdvancedCanvasPlugin, canvas: Canvas, fromPos: Position, _fromBBoxSidePos: Position, fromSide: Side, toPos: Position, _toBBoxSidePos: Position, toSide: Side, isDragging: boolean): EdgePath | null {
+  async getPath(plugin: AdvancedCanvasPlugin, canvas: Canvas, fromPos: Position, _fromBBoxSidePos: Position, fromSide: Side, toPos: Position, _toBBoxSidePos: Position, toSide: Side, isDragging: boolean): Promise<EdgePath | null> {
     if (isDragging && !plugin.settings.getSetting('edgeStylePathfinderPathLiveUpdate')) return null
         
     const nodeBBoxes = [...canvas.nodes.values()]
@@ -53,7 +53,7 @@ export default class EdgePathfindingAStar extends EdgePathfindingMethod {
     const toPosWithMargin = BBoxHelper.moveInDirection(toPos, toSide, 10)
 
     const gridResolution = plugin.settings.getSetting('edgeStylePathfinderGridResolution')
-    const pathArray = this.aStarAlgorithm(fromPosWithMargin, fromSide, toPosWithMargin, toSide, nodeBBoxes, gridResolution)
+    const pathArray = await this.aStarAlgorithm(fromPosWithMargin, fromSide, toPosWithMargin, toSide, nodeBBoxes, gridResolution)
     if (!pathArray) return null // No path found - use default path
 
     // Make connection points to the node removing the margin
@@ -70,7 +70,7 @@ export default class EdgePathfindingAStar extends EdgePathfindingMethod {
     }
   }
 
-  private aStarAlgorithm(fromPos: Position, fromSide: Side, toPos: Position, toSide: Side, obstacles: BBox[], gridResolution: number): Position[] | null {
+  private async aStarAlgorithm(fromPos: Position, fromSide: Side, toPos: Position, toSide: Side, obstacles: BBox[], gridResolution: number): Promise<Position[] | null> {
     const start: Node = new Node(
       Math.floor(fromPos.x / gridResolution) * gridResolution,
       Math.floor(fromPos.y / gridResolution) * gridResolution
@@ -92,6 +92,8 @@ export default class EdgePathfindingAStar extends EdgePathfindingMethod {
   
     const openSet: Node[] = [start]
     const closedSet: Node[] = []
+
+    const startTimestamp = performance.now()
   
     while (openSet.length > 0) {
       // Find the node with the lowest fCost in the open set
@@ -104,6 +106,10 @@ export default class EdgePathfindingAStar extends EdgePathfindingMethod {
           lowestFCost = node.fCost
         }
       }
+
+      // Check if the calculation is taking too long
+      if (performance.now() - startTimestamp > MAX_MS_CALCULATION)
+        return null
   
       // No path found
       if (!current)
@@ -139,10 +145,6 @@ export default class EdgePathfindingAStar extends EdgePathfindingMethod {
           neighbor.gCost = tentativeGCost
           neighbor.hCost = this.heuristic(neighbor, end)
           neighbor.fCost = neighbor.gCost + neighbor.hCost
-
-          // Skip if max cost is reached
-          if (neighbor.gCost > MAX_G_COST)
-            continue
   
           // Add neighbor to the open set
           openSet.push(neighbor)
