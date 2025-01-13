@@ -5,7 +5,7 @@ import CanvasHelper from "src/utils/canvas-helper"
 import { ViewUpdate } from "@codemirror/view"
 
 export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
-  isEnabled() { return this.plugin.settings.getSetting('autoResizeNodeFeatureEnabled') }
+  isEnabled() { return 'autoResizeNodeFeatureEnabled' as const }
 
   init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(

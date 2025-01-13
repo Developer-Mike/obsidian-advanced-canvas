@@ -11,7 +11,7 @@ const DEFAULT_SLIDE_NAME = 'New Slide'
 export default class PresentationCanvasExtension extends CanvasExtension {
   savedViewport: any = null
   isPresentationMode: boolean = false
-  visitedNodes: any[] = []
+  visitedNodeIds: string[] = []
   fullscreenModalObserver: MutationObserver | null = null
 
   isEnabled() { return 'presentationFeatureEnabled' as const }
@@ -276,14 +276,14 @@ export default class PresentationCanvasExtension extends CanvasExtension {
 
   private async startPresentation(canvas: Canvas, tryContinue: boolean = false) {
     // Only reset visited nodes if we are not trying to continue
-    if (!tryContinue || this.visitedNodes.length === 0) {
+    if (!tryContinue || this.visitedNodeIds.length === 0) {
       const startNode = this.getStartNode(canvas)
       if (!startNode) {
         new Notice('No start node found. Please mark a node as a start node trough the popup menu.')
         return
       }
       
-      this.visitedNodes = [startNode]
+      this.visitedNodeIds = [startNode.getData().id]
     }
 
     // Save current viewport
@@ -340,7 +340,13 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     await sleep(500)
 
     // Zoom to first node
-    this.animateNodeTransition(canvas, undefined, this.visitedNodes.last())
+    const startNodeId = this.visitedNodeIds.first()
+    if (!startNodeId) return
+
+    const startNode = canvas.nodes.get(startNodeId)
+    if (!startNode) return
+
+    this.animateNodeTransition(canvas, undefined, startNode)
   }
 
   private endPresentation(canvas: Canvas) {
@@ -365,10 +371,13 @@ export default class PresentationCanvasExtension extends CanvasExtension {
   }
 
   private nextNode(canvas: Canvas) {
-    const fromNode = this.visitedNodes.last()
+    const fromNodeId = this.visitedNodeIds.last()
+    if (!fromNodeId) return
+
+    const fromNode = canvas.nodes.get(fromNodeId)
     if (!fromNode) return
 
-    const outgoingEdges = canvas.getEdgesForNode(fromNode).filter((edge: CanvasEdge) => edge.from.node === fromNode)
+    const outgoingEdges = canvas.getEdgesForNode(fromNode).filter((edge: CanvasEdge) => edge.from.node.getData().id === fromNodeId)
     let toNode = outgoingEdges.first()?.to.node
 
     // If there are multiple outgoing edges, we need to look at the edge label
@@ -383,8 +392,8 @@ export default class PresentationCanvasExtension extends CanvasExtension {
         })
 
       // Find which edges already have been traversed
-      const traversedEdgesCount = this.visitedNodes
-        .filter((visitedNode: CanvasNode) => visitedNode == fromNode).length - 1
+      const traversedEdgesCount = this.visitedNodeIds
+        .filter((visitedNodeId: string) => visitedNodeId === fromNodeId).length - 1
 
       // Select next edge
       const nextEdge = sortedEdges[traversedEdgesCount]
@@ -392,7 +401,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     }
 
     if (toNode) {
-      this.visitedNodes.push(toNode)
+      this.visitedNodeIds.push(toNode.getData().id)
       this.animateNodeTransition(canvas, fromNode, toNode)
     } else {
       // No more nodes left, animate to same node
@@ -401,15 +410,22 @@ export default class PresentationCanvasExtension extends CanvasExtension {
   }
 
   private previousNode(canvas: Canvas) {
-    const fromNode = this.visitedNodes.pop()
+    const fromNodeId = this.visitedNodeIds.pop()
+    if (!fromNodeId) return
+
+    const fromNode = canvas.nodes.get(fromNodeId)
     if (!fromNode) return
 
-    let toNode = this.visitedNodes.last()
+    const toNodeId = this.visitedNodeIds.last()
+    if (!toNodeId) return
+
+    let toNode = canvas.nodes.get(toNodeId)
+    if (!toNode) return
 
     // Fall back to same node if there are no more nodes before
     if (!toNode) {
       toNode = fromNode
-      this.visitedNodes.push(fromNode)
+      this.visitedNodeIds.push(fromNodeId)
     }
 
     this.animateNodeTransition(canvas, fromNode, toNode)

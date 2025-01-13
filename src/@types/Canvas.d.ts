@@ -201,6 +201,7 @@ export interface CanvasNodeData {
   y: number
   width: number
   height: number
+  color: string
 
   type: CanvasNodeType
   text?: string
