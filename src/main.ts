@@ -22,7 +22,6 @@ import PortalsCanvasExtension from './canvas-extensions/portals-canvas-extension
 import BetterDefaultSettingsCanvasExtension from './canvas-extensions/better-default-settings-canvas-extension'
 import ColorPaletteCanvasExtension from './canvas-extensions/color-palette-canvas-extension'
 import CollapsibleGroupsCanvasExtension from './canvas-extensions/collapsible-groups-canvas-extension'
-import PropertiesCanvasExtension from './canvas-extensions/properties-canvas-extension'
 import FocusModeCanvasExtension from './canvas-extensions/focus-mode-canvas-extension'
 
 // Advanced Styles
@@ -53,7 +52,6 @@ const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   CommandsCanvasExtension,
   BetterReadonlyCanvasExtension,
   AutoResizeNodeCanvasExtension,
-  // PropertiesCanvasExtension,
   GroupCanvasExtension,
 
   // More Advanced Extensions
