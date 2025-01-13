@@ -55,27 +55,21 @@ export default class CanvasPatcher {
         return JSON.stringify(canvasData, null, 2)
       },
       setViewData: (next: any) => function (json: string, ...args: any) {
-        let validJson = json !== '' ? json : '{}'
-        let parsedJson
+        json = json !== '' ? json : '{}'
 
-        // Check for SyntaxError
-        try { parsedJson = JSON.parse(validJson) }
-        catch (e) {
+        let result
+        try {
+          result = next.call(this, json, ...args)
+        } catch (e) {
           // Invalid JSON
           that.plugin.createFileSnapshot(this.file.path, json)
-          
+
           // Try to parse it with trailing commas
-          parsedJson = JSONC.parse(validJson)
-          validJson = JSON.stringify(parsedJson, null, 2)
+          json = JSON.stringify(JSONC.parse(json), null, 2)
+          result = next.call(this, json, ...args)
         }
 
-        const result = next.call(this, validJson, ...args)
-
-        try { this.canvas.metadata = parsedJson.metadata }
-        catch (_e) { this.canvas.metadata = {} }
-
         that.triggerWorkspaceEvent(CanvasEvent.CanvasChanged, this.canvas)
-
         return result
       }
     })

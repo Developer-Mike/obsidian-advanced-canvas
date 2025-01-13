@@ -53,7 +53,7 @@ const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   CommandsCanvasExtension,
   BetterReadonlyCanvasExtension,
   AutoResizeNodeCanvasExtension,
-  PropertiesCanvasExtension,
+  // PropertiesCanvasExtension,
   GroupCanvasExtension,
 
   // More Advanced Extensions

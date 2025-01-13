@@ -78,8 +78,6 @@ All features can be enabled/disabled in the settings.
     - A*
 - Add [custom styles](#custom-styles) to nodes and edges for unlimited possibilities
 - [Custom colors](#custom-colors) in the color picker
-- [Properties Support](#properties-support)
-  - Set properties for the canvas file
 - [Presentation mode](#presentation-mode)
   - Create presentations by connecting nodes with arrows
 - [Portals](#portals)
@@ -270,24 +268,6 @@ Add custom colors to the color picker. You can add them using the following css 
     <summary>Custom Colors In Palette</summary>
     <img src="./assets/custom-colors.png" alt="Custom Colors In Palette"/>
 </details>
-
-## Properties Support
-Support for properties in canvas files just like in md files. You can edit the properties using the updated control menu.
-
-Supported properties:
-- `cssclasses` (Separate multiple classes with a space)
-
-### Custom Background Example (cssclasses)
-```css
-.canvas-wrapper.<CLASS-NAME> > .canvas-background {
-    background-image: url('<IMAGE-URL>');
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    
-    filter: blur(5px) brightness(0.8);
-}
-```
 
 ## Presentation Mode
 In presentation mode, you can navigate through the nodes using the arrow keys or the PageUp/PageDown keys (Compatible with most presentation remotes). The different slides/nodes are connected using arrows. If you want to have multiple arrows pointing from the same node, you can number them in the order you want to navigate through them. While in presentation mode, the canvas is in readonly mode (So [better readonly](#better-readonly) effects the presentation mode as well!). You can exit the presentation mode using the `ESC` key or the corresponding command. If you want to continue the presentation from the last slide you were on, you can use the `Advanced Canvas: Continue presentation` command.
