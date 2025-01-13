@@ -153,6 +153,10 @@ export default class CanvasHelper {
   }
 
   static zoomToBBox(canvas: Canvas, bbox: BBox) {
+    /* const zoomX = canvas.canvasRect.width / (1.1 * (bbox.maxX - bbox.minX))
+    const zoomY = canvas.canvasRect.height / (1.1 * (bbox.maxY - bbox.minY))
+    const zoom = Math.clamp(Math.min(zoomX, zoomY), -4, 1) */
+
     const PADDING_CORRECTION_FACTOR = 1 / 1.1
     const zoomedBBox = BBoxHelper.scaleBBox(bbox, PADDING_CORRECTION_FACTOR)
 

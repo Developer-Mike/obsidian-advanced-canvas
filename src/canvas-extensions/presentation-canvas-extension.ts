@@ -262,11 +262,14 @@ export default class PresentationCanvasExtension extends CanvasExtension {
 
       await sleep(animationDurationMs / 2)
 
-      const nextNodeBBoxEnlarged = BBoxHelper.scaleBBox(toNode.getBBox(), animationIntensity)
-      if (useCustomZoomFunction) CanvasHelper.zoomToBBox(canvas, nextNodeBBoxEnlarged)
-      else canvas.zoomToBbox(nextNodeBBoxEnlarged)
+      if (fromNode.getData().id !== toNode.getData().id) {
+        // Add 0.1 to fix obsidian bug that causes the animation to skip if the bbox is the same
+        const nextNodeBBoxEnlarged = BBoxHelper.scaleBBox(toNode.getBBox(), animationIntensity + 0.1)
+        if (useCustomZoomFunction) CanvasHelper.zoomToBBox(canvas, nextNodeBBoxEnlarged)
+        else canvas.zoomToBbox(nextNodeBBoxEnlarged)
 
-      await sleep(animationDurationMs / 2)
+        await sleep(animationDurationMs / 2)
+      }
     }
 
     let nodeBBox = toNode.getBBox()
