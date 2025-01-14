@@ -43,9 +43,10 @@ export default class EdgeStylesExtension extends CanvasExtension {
       (canvas: Canvas, edge: CanvasEdge, center: Position) => this.onEdgeCenterRequested(canvas, edge, center)
     ))
 
+    // TODO: Could be optimized and ignore initial node creation
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.NodeAdded,
-      (canvas: Canvas, node: CanvasNode) => canvas.dirty.size <= 1 ? this.updateAllEdgesInArea(canvas, node.getBBox()) : void 0
+      (canvas: Canvas, node: CanvasNode) => this.updateAllEdgesInArea(canvas, node.getBBox())
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
