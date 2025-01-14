@@ -49,6 +49,7 @@ export interface AdvancedCanvasPluginSettingsValues {
   disablePan: boolean
 
   autoResizeNodeFeatureEnabled: boolean
+  autoResizeNodeEnabledByDefault: boolean
   autoResizeNodeMaxHeight: number
   autoResizeNodeSnapToGrid: boolean
 
@@ -263,6 +264,11 @@ export const SETTINGS = {
     label: 'Auto resize node',
     description: 'Automatically resize the height of a node to fit the content.',
     children: {
+      autoResizeNodeEnabledByDefault: {
+        label: 'Enable auto resize by default',
+        description: 'When enabled, the auto resize feature will be enabled by default for all nodes.',
+        type: 'boolean'
+      },
       autoResizeNodeMaxHeight: {
         label: 'Max height',
         description: 'The maximum height of the node when auto resizing (-1 for unlimited).',
@@ -410,6 +416,7 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   disablePan: false,
 
   autoResizeNodeFeatureEnabled: false,
+  autoResizeNodeEnabledByDefault: false,
   autoResizeNodeMaxHeight: -1,
   autoResizeNodeSnapToGrid: true,
 

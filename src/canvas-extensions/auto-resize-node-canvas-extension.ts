@@ -1,4 +1,4 @@
-import { Canvas, CanvasNode } from "src/@types/Canvas"
+import { Canvas, CanvasNode, CanvasNodeData } from "src/@types/Canvas"
 import { CanvasEvent } from "src/core/events"
 import CanvasExtension from "../core/canvas-extension"
 import CanvasHelper from "src/utils/canvas-helper"
@@ -8,6 +8,11 @@ export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
   isEnabled() { return 'autoResizeNodeFeatureEnabled' as const }
 
   init() {
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.NodeCreated,
+      (canvas: Canvas, node: CanvasNode) => this.onNodeCreated(canvas, node)
+    ))
+
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.PopupMenuCreated,
       (canvas: Canvas) => this.onPopupMenuCreated(canvas)
@@ -24,13 +29,30 @@ export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
     ))
   }
 
+  private isValidNodeType(nodeData: CanvasNodeData) {
+    return nodeData.type === 'text' || (nodeData.type === 'file' && nodeData.file?.endsWith('.md'))
+  }
+
+  private onNodeCreated(_canvas: Canvas, node: CanvasNode) {
+    const autoResizeNodeEnabledByDefault = this.plugin.settings.getSetting('autoResizeNodeEnabledByDefault')
+    if (!autoResizeNodeEnabledByDefault) return
+
+    const nodeData = node.getData()
+    if (nodeData.type !== 'text' && nodeData.type !== 'file') return // File extension can still be changed in the future
+
+    node.setData({
+      ...node.getData(),
+      autoResizeHeight: true
+    })
+  }
+
   private onPopupMenuCreated(canvas: Canvas) {
     if (canvas.readonly) return
 
-    const selectedNodes = [...canvas.selection].filter(element => {
-      const elementData = element.getData()
-      return elementData.type === 'text' || (elementData.type === 'file' && elementData.file.endsWith('.md'))
-    }) as CanvasNode[]
+    const selectedNodes = canvas.getSelectionData().nodes
+      .filter(nodeData => this.isValidNodeType(nodeData))
+      .map(nodeData => canvas.nodes.get(nodeData.id))
+      .filter(node => node !== undefined) as CanvasNode[]
     if (selectedNodes.length === 0) return
 
     const autoResizeHeightEnabled = selectedNodes.some(node => node.getData().autoResizeHeight)
@@ -47,11 +69,9 @@ export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
   }
 
   private toggleAutoResizeHeightEnabled(canvas: Canvas, nodes: CanvasNode[], autoResizeHeight: boolean) {
-    const newAutoResizeHeight = autoResizeHeight ? undefined : true
-
     nodes.forEach(node => node.setData({
       ...node.getData(),
-      autoResizeHeight: newAutoResizeHeight
+      autoResizeHeight: !autoResizeHeight
     }))
 
     this.onPopupMenuCreated(canvas)
@@ -63,6 +83,7 @@ export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
   }
 
   private async onNodeEditingStateChanged(_canvas: Canvas, node: CanvasNode, editing: boolean) {
+    if (!this.isValidNodeType(node.getData())) return
     if (!this.canBeResized(node)) return
 
     await sleep(10)
@@ -83,6 +104,7 @@ export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
   }
   
   private async onNodeTextContentChanged(_canvas: Canvas, node: CanvasNode, dom: HTMLElement) {
+    if (!this.isValidNodeType(node.getData())) return
     if (!this.canBeResized(node)) return
 
     const cmScroller = dom.querySelector(".cm-scroller") as HTMLElement | null
