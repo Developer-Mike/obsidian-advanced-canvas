@@ -29,6 +29,10 @@ export default class BBoxHelper {
     }
   }
 
+  static isColliding(bbox1: BBox, bbox2: BBox): boolean {
+    return bbox1.minX < bbox2.maxX && bbox1.maxX > bbox2.minX && bbox1.minY < bbox2.maxY && bbox1.maxY > bbox2.minY
+  }
+
   static insideBBox(position: Position|BBox, bbox: BBox, canTouchEdge: Boolean): boolean {
     const providedBBox = {
       minX: (position as BBox).minX ?? (position as Position).x,

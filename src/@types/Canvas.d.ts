@@ -34,6 +34,7 @@ export interface Canvas {
   getEdgesForNode(node: CanvasNode): CanvasEdge[]
 
   dirty: Set<CanvasElement>
+  markDirty(element: CanvasElement): void
 
   wrapperEl: HTMLElement
   canvasEl: HTMLElement

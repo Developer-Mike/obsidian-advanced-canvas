@@ -6,7 +6,7 @@ import BBoxHelper from "src/utils/bbox-helper"
 import CanvasHelper from "src/utils/canvas-helper"
 
 export default class EdgePathfindingSquare extends EdgePathfindingMethod {
-  async getPath(_plugin: AdvancedCanvasPlugin, _canvas: Canvas, fromPos: Position, fromBBoxSidePos: Position, fromSide: Side, toPos: Position, toBBoxSidePos: Position, toSide: Side, _isDragging: boolean): Promise<EdgePath> {
+  getPath(_plugin: AdvancedCanvasPlugin, _canvas: Canvas, fromPos: Position, fromBBoxSidePos: Position, fromSide: Side, toPos: Position, toBBoxSidePos: Position, toSide: Side, _isDragging: boolean): EdgePath {
     let pathArray: Position[] = []
     let center: Position = { x: 0, y: 0 }
 

@@ -45,12 +45,12 @@ export default class EdgeStylesExtension extends CanvasExtension {
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.NodeAdded,
-      (canvas: Canvas, node: CanvasNode) => this.updateAllEdgesInArea(canvas, node.getBBox())
+      (canvas: Canvas, node: CanvasNode) => canvas.dirty.size <= 1 ? this.updateAllEdgesInArea(canvas, node.getBBox()) : void 0
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.NodeMoved,
-      (canvas: Canvas, node: CanvasNode) => this.updateAllEdgesInArea(canvas, node.getBBox())	
+      (canvas: Canvas, node: CanvasNode) => node.initialized ? this.updateAllEdgesInArea(canvas, node.getBBox()) : void 0
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
@@ -106,12 +106,15 @@ export default class EdgeStylesExtension extends CanvasExtension {
 
   private updateAllEdgesInArea(canvas: Canvas, bbox: BBox) {
     for (const edge of canvas.edges.values()) {
-      this.onEdgeChanged(canvas, edge)
+      if (!BBoxHelper.isColliding(edge.getBBox(), bbox)) continue
+
+      canvas.markDirty(edge)
     }
   }
 
   private onEdgeChanged(canvas: Canvas, edge: CanvasEdge) {
-    if (canvas.dirty.size > 0 && !canvas.dirty.has(edge)) return
+    // Skip if edge isn't dirty or selected
+    if (!canvas.dirty.has(edge) && !canvas.selection.has(edge)) return
 
     const edgeData = edge.getData()
     
@@ -133,14 +136,12 @@ export default class EdgeStylesExtension extends CanvasExtension {
         toBBoxSidePos :
         edge.bezier.to
 
-      const pathPromise = new EDGE_PATHFINDING_METHODS[pathfindingMethod]().getPath(this.plugin, canvas, fromPos, fromBBoxSidePos, edge.from.side, toPos, toBBoxSidePos, edge.to.side, canvas.isDragging)
-      pathPromise.then(path => {
-        if (!path) return
+      const path = new EDGE_PATHFINDING_METHODS[pathfindingMethod]().getPath(this.plugin, canvas, fromPos, fromBBoxSidePos, edge.from.side, toPos, toBBoxSidePos, edge.to.side, canvas.isDragging)
+      if (!path) return
 
-        edge.center = path.center
-        edge.path.interaction.setAttr("d", path?.svgPath)
-        edge.path.display.setAttr("d", path?.svgPath)
-      })
+      edge.center = path.center
+      edge.path.interaction.setAttr("d", path?.svgPath)
+      edge.path.display.setAttr("d", path?.svgPath)
     }
 
     // Update label position

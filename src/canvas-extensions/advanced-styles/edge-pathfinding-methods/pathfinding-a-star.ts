@@ -36,7 +36,7 @@ class Node {
 }
 
 export default class EdgePathfindingAStar extends EdgePathfindingMethod {
-  async getPath(plugin: AdvancedCanvasPlugin, canvas: Canvas, fromPos: Position, _fromBBoxSidePos: Position, fromSide: Side, toPos: Position, _toBBoxSidePos: Position, toSide: Side, isDragging: boolean): Promise<EdgePath | null> {
+  getPath(plugin: AdvancedCanvasPlugin, canvas: Canvas, fromPos: Position, _fromBBoxSidePos: Position, fromSide: Side, toPos: Position, _toBBoxSidePos: Position, toSide: Side, isDragging: boolean): EdgePath | null {
     if (isDragging && !plugin.settings.getSetting('edgeStylePathfinderPathLiveUpdate')) return null
         
     const nodeBBoxes = [...canvas.nodes.values()]
@@ -53,7 +53,7 @@ export default class EdgePathfindingAStar extends EdgePathfindingMethod {
     const toPosWithMargin = BBoxHelper.moveInDirection(toPos, toSide, 10)
 
     const gridResolution = plugin.settings.getSetting('edgeStylePathfinderGridResolution')
-    const pathArray = await this.aStarAlgorithm(fromPosWithMargin, fromSide, toPosWithMargin, toSide, nodeBBoxes, gridResolution)
+    const pathArray = this.aStarAlgorithm(fromPosWithMargin, fromSide, toPosWithMargin, toSide, nodeBBoxes, gridResolution)
     if (!pathArray) return null // No path found - use default path
 
     // Make connection points to the node removing the margin
@@ -70,7 +70,7 @@ export default class EdgePathfindingAStar extends EdgePathfindingMethod {
     }
   }
 
-  private async aStarAlgorithm(fromPos: Position, fromSide: Side, toPos: Position, toSide: Side, obstacles: BBox[], gridResolution: number): Promise<Position[] | null> {
+  private aStarAlgorithm(fromPos: Position, fromSide: Side, toPos: Position, toSide: Side, obstacles: BBox[], gridResolution: number): Position[] | null {
     const start: Node = new Node(
       Math.floor(fromPos.x / gridResolution) * gridResolution,
       Math.floor(fromPos.y / gridResolution) * gridResolution
