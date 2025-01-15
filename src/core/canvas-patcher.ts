@@ -6,6 +6,7 @@ import { requireApiVersion, WorkspaceLeaf, editorInfoField } from "obsidian"
 import { EditorView, ViewUpdate } from "@codemirror/view"
 import { around } from "monkey-around"
 import JSONC from "tiny-jsonc"
+import JSONSS from "json-stable-stringify"
 
 export default class CanvasPatcher {
   plugin: AdvancedCanvasPlugin
@@ -48,9 +49,21 @@ export default class CanvasPatcher {
     
     // Patch canvas view
     PatchHelper.patchObjectPrototype(this.plugin, canvasView, {
-      getViewData: (_next: any) => function (..._args: any) {
+      getViewData: (next: any) => function (...args: any) {
         const canvasData = this.canvas.getData()
-        return JSON.stringify(canvasData, null, 2)
+
+        try {
+          return JSONSS(canvasData, { space: 2 })
+        } catch (e) {
+          console.error('Failed to stringify canvas data using json-stable-stringify:', e)
+
+          try {
+            return JSON.stringify(canvasData, null, 2)
+          } catch (e) {
+            console.error('Failed to stringify canvas data using JSON.stringify:', e)
+            return next.call(this, ...args)
+          }
+        }
       },
       setViewData: (next: any) => function (json: string, ...args: any) {
         json = json !== '' ? json : '{}'

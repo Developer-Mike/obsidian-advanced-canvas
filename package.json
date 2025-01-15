@@ -15,6 +15,7 @@
 	},
 	"dependencies": {
 		"esbuild-sass-plugin": "^2.6.0",
+		"json-stable-stringify": "^1.2.1",
 		"monkey-around": "^2.3.0",
 		"sass": "^1.70.0",
 		"tiny-jsonc": "^1.0.1"
