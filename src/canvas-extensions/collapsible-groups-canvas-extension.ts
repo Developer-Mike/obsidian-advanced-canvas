@@ -51,12 +51,13 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
 
     collapseButton.onclick = () => { 
       this.setCollapsed(canvas, groupNode, groupNode.getData().isCollapsed ? undefined : true)
+      canvas.markMoved(groupNode)
     }
 
     groupNode.labelEl?.insertAdjacentElement('afterend', collapseButton)
   }
 
-  private onCopy(canvas: Canvas, selectionData: SelectionData) {
+  private onCopy(_canvas: Canvas, selectionData: SelectionData) {
     for (const collapsedGroupData of selectionData.nodes) {
       if (collapsedGroupData.type !== 'group' || !collapsedGroupData.isCollapsed || !collapsedGroupData.collapsedData) continue
 

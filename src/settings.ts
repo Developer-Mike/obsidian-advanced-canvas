@@ -33,9 +33,9 @@ export interface AdvancedCanvasPluginSettingsValues {
   customEdgeStyleAttributes: StyleAttribute[]
   defaultEdgeLineDirection: keyof typeof SETTINGS.edgesStylingFeatureEnabled.children.defaultEdgeLineDirection.options
   defaultEdgeStyleAttributes: { [key: string]: string }
+  edgeStyleUpdateWhileDragging: boolean
   edgeStyleDirectRotateArrow: boolean
   edgeStylePathfinderGridResolution: number
-  edgeStylePathfinderPathLiveUpdate: boolean
   edgeStylePathfinderPathRounded: boolean
 
   commandsFeatureEnabled: boolean
@@ -193,6 +193,11 @@ export const SETTINGS = {
           return [ ...BUILTIN_EDGE_STYLE_ATTRIBUTES, ...settingsManager.getSetting('customEdgeStyleAttributes') ]
         }
       } as StyleAttributesSetting,
+      edgeStyleUpdateWhileDragging: {
+        label: 'Update edge style while dragging (Can be very slow)',
+        description: 'When enabled, the edge style will be updated while dragging an edge.',
+        type: 'boolean'
+      },
       edgeStyleDirectRotateArrow: {
         label: 'Rotate arrow if pathfinding method is "Direct"',
         description: 'When enabled, the arrow will be rotated to the direction of the edge if the pathfinding method is set to "Direct".',
@@ -203,11 +208,6 @@ export const SETTINGS = {
         description: 'The resolution of the grid when using the A* path style. The lower the value, the more precise the path will be. But it will also take longer to calculate.',
         type: 'number',
         parse: (value: string) => Math.max(5, parseInt(value) || 0)
-      },
-      edgeStylePathfinderPathLiveUpdate: {
-        label: 'Live update A* path',
-        description: 'When enabled, the A* path style will be updated live while dragging the edge.',
-        type: 'boolean'
       },
       edgeStylePathfinderPathRounded: {
         label: 'A* rounded path',
@@ -400,9 +400,9 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   customEdgeStyleAttributes: [],
   defaultEdgeLineDirection: 'unidirectional',
   defaultEdgeStyleAttributes: {},
+  edgeStyleUpdateWhileDragging: false,
   edgeStyleDirectRotateArrow: false,
   edgeStylePathfinderGridResolution: 10,
-  edgeStylePathfinderPathLiveUpdate: true,
   edgeStylePathfinderPathRounded: true,
 
   commandsFeatureEnabled: true,

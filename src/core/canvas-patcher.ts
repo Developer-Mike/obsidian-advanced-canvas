@@ -144,12 +144,12 @@ export default class CanvasPatcher {
       },
       removeNode: (next: any) => function (node: CanvasNode) {
         const result = next.call(this, node)
-        if (!this.isMassClearing) that.triggerWorkspaceEvent(CanvasEvent.NodeRemoved, this, node)
+        if (!this.isClearing) that.triggerWorkspaceEvent(CanvasEvent.NodeRemoved, this, node)
         return result
       },
       removeEdge: (next: any) => function (edge: CanvasEdge) {
         const result = next.call(this, edge)
-        if (!this.isMassClearing) that.triggerWorkspaceEvent(CanvasEvent.EdgeRemoved, this, edge)
+        if (!this.isClearing) that.triggerWorkspaceEvent(CanvasEvent.EdgeRemoved, this, edge)
         return result
       },
       handleCopy: (next: any) => function (...args: any) {
@@ -188,9 +188,9 @@ export default class CanvasPatcher {
         return result
       },
       clear: (next: any) => function (...args: any) {
-        this.isMassClearing = true
+        this.isClearing = true
         const result = next.call(this, ...args)
-        this.isMassClearing = false
+        this.isClearing = false
         return result
       },
       /*setData: (next: any) => function (...args: any) {

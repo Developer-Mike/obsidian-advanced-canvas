@@ -35,6 +35,7 @@ export interface Canvas {
 
   dirty: Set<CanvasElement>
   markDirty(element: CanvasElement): void
+  markMoved(element: CanvasNode): void
 
   wrapperEl: HTMLElement
   canvasEl: HTMLElement
@@ -96,7 +97,7 @@ export interface Canvas {
   requestSave(): void
 
   // Custom
-  isMassClearing?: boolean
+  isClearing?: boolean
   isCopying?: boolean
   lockedX: number
   lockedY: number

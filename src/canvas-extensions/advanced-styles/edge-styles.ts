@@ -51,7 +51,8 @@ export default class EdgeStylesExtension extends CanvasExtension {
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.NodeMoved,
-      (canvas: Canvas, node: CanvasNode) => node.initialized ? this.updateAllEdgesInArea(canvas, node.getBBox()) : void 0
+      // Only update edges this way if a node got moved with the arrow keys
+      (canvas: Canvas, node: CanvasNode) => node.initialized && !canvas.isDragging ? this.updateAllEdgesInArea(canvas, node.getBBox()) : void 0
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
@@ -73,6 +74,11 @@ export default class EdgeStylesExtension extends CanvasExtension {
         this.updateAllEdgesInArea(canvas, selectedNodeBBox)
       }
     ))
+  }
+
+  // Skip if isDragging and setting isn't enabled
+  private shouldUpdateEdge(canvas: Canvas): boolean {
+    return !canvas.isDragging || this.plugin.settings.getSetting('edgeStyleUpdateWhileDragging')
   }
 
   private onPopupMenuCreated(canvas: Canvas): void {
@@ -106,6 +112,8 @@ export default class EdgeStylesExtension extends CanvasExtension {
   }
 
   private updateAllEdgesInArea(canvas: Canvas, bbox: BBox) {
+    if (!this.shouldUpdateEdge(canvas)) return
+
     for (const edge of canvas.edges.values()) {
       if (!BBoxHelper.isColliding(edge.getBBox(), bbox)) continue
 
@@ -116,6 +124,8 @@ export default class EdgeStylesExtension extends CanvasExtension {
   private onEdgeChanged(canvas: Canvas, edge: CanvasEdge) {
     // Skip if edge isn't dirty or selected
     if (!canvas.dirty.has(edge) && !canvas.selection.has(edge)) return
+
+    if (!this.shouldUpdateEdge(canvas)) return
 
     const edgeData = edge.getData()
     
@@ -137,7 +147,7 @@ export default class EdgeStylesExtension extends CanvasExtension {
         toBBoxSidePos :
         edge.bezier.to
 
-      const path = new EDGE_PATHFINDING_METHODS[pathfindingMethod]().getPath(this.plugin, canvas, fromPos, fromBBoxSidePos, edge.from.side, toPos, toBBoxSidePos, edge.to.side, canvas.isDragging)
+      const path = new EDGE_PATHFINDING_METHODS[pathfindingMethod]().getPath(this.plugin, canvas, fromPos, fromBBoxSidePos, edge.from.side, toPos, toBBoxSidePos, edge.to.side)
       if (!path) return
 
       edge.center = path.center
