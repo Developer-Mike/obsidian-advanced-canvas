@@ -342,7 +342,7 @@ export default class CanvasPatcher {
     
     this.runAfterInitialized(edge, () => {
       this.triggerWorkspaceEvent(CanvasEvent.EdgeAdded, edge.canvas, edge)
-      this.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, edge.canvas, edge)
+      // this.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, edge.canvas, edge) - already fired in render function
     })
   }
   
