@@ -78,7 +78,7 @@ export default class EdgeStylesExtension extends CanvasExtension {
 
   // Skip if isDragging and setting isn't enabled
   private shouldUpdateEdge(canvas: Canvas): boolean {
-    return !canvas.isDragging || this.plugin.settings.getSetting('edgeStyleUpdateWhileDragging')
+    return !canvas.isDragging || this.plugin.settings.getSetting('edgeStyleUpdateWhileDragging') || canvas.canvasEl.hasClass('is-connecting')
   }
 
   private onPopupMenuCreated(canvas: Canvas): void {
