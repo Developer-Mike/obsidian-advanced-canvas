@@ -26,8 +26,8 @@ Open the Community Plugins tab in the settings and search for "Advanced Canvas" 
         <li>Install it using <a href="https://github.com/TfTHacker/obsidian42-brat">BRAT</a></li>
         <li>Manual folder creation
             <ol>
-                <li>Create a folder named <code>obsidian-advanced-canvas</code> in your vault's plugins folder (<code>&lt;vault&gt;/.obsidian/plugins/</code>).</li>
-                <li>Download <code>main.js</code>, <code>styles.css</code> and <code>manifest.json</code> from the latest release and put them in the <code>obsidian-advanced-canvas</code> folder.</li>
+                <li>Create a folder named <code>advanced-canvas</code> in your vault's plugins folder (<code>&lt;vault&gt;/.obsidian/plugins/</code>).</li>
+                <li>Download <code>main.js</code>, <code>styles.css</code> and <code>manifest.json</code> from the latest release and put them in the <code>advanced-canvas</code> folder.</li>
                 <li>Enable the plugin in Settings -> Community plugins -> Installed plugins</li>
             </ol>
         </li>
