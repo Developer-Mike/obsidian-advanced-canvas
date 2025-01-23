@@ -53,6 +53,7 @@ export interface Canvas {
   x: number
   y: number
   zoom: number
+  zoomBreakpoint: number
 
   tx: number
   ty: number
@@ -192,6 +193,7 @@ export interface CanvasElement {
   initialize(): void
   setColor(color: string): void
   
+  updateBreakpoint(breakpoint: boolean): void
   setIsEditing(editing: boolean): void
   getBBox(): BBox
   

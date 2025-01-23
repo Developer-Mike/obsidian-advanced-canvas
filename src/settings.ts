@@ -2,6 +2,7 @@ import { Notice, PluginSettingTab, request, Setting as SettingEl } from "obsidia
 import AdvancedCanvasPlugin from "./main"
 import { BUILTIN_EDGE_STYLE_ATTRIBUTES, BUILTIN_NODE_STYLE_ATTRIBUTES, StyleAttribute } from "./canvas-extensions/advanced-styles/style-config"
 import { ButtonSetting, DropdownSetting, StyleAttributesSetting, SettingsHeading, Setting, TextSetting, BooleanSetting, NumberSetting } from "./@types/Settings"
+import { VARIABLE_BREAKPOINT_CSS_VAR } from "./canvas-extensions/variable-breakpoint-canvas-extension"
 
 const ASK_FOR_DONATION_DELAY = 1000 * 60 * 60 * 24 * 7 // 1 week
 const SPENT_HOURS = 140
@@ -37,6 +38,8 @@ export interface AdvancedCanvasPluginSettingsValues {
   edgeStyleDirectRotateArrow: boolean
   edgeStylePathfinderGridResolution: number
   edgeStylePathfinderPathRounded: boolean
+
+  variableBreakpointFeatureEnabled: boolean
 
   commandsFeatureEnabled: boolean
   zoomToClonedNode: boolean
@@ -215,6 +218,11 @@ export const SETTINGS = {
         type: 'boolean'
       }
     }
+  },
+  variableBreakpointFeatureEnabled: {
+    label: 'Variable breakpoint',
+    description: `Change the zoom breakpoint (the zoom level at which the nodes won't render their content anymore) on a per-node basis using the ${VARIABLE_BREAKPOINT_CSS_VAR} CSS variable.`,
+    children: { }
   },
   commandsFeatureEnabled: {
     label: 'Extended commands',
@@ -404,6 +412,8 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   edgeStyleDirectRotateArrow: false,
   edgeStylePathfinderGridResolution: 10,
   edgeStylePathfinderPathRounded: true,
+
+  variableBreakpointFeatureEnabled: true,
 
   commandsFeatureEnabled: true,
   zoomToClonedNode: true,

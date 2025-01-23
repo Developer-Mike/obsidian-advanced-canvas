@@ -306,6 +306,11 @@ export default class CanvasPatcher {
         that.triggerWorkspaceEvent(CanvasEvent.NodeEditingStateChanged, this.canvas, node, editing)
         return result
       },
+      updateBreakpoint: (next: any) => function (breakpoint: boolean) {
+        const breakpointRef = { value: breakpoint }
+        that.triggerWorkspaceEvent(CanvasEvent.NodeBreakpointChanged, this.canvas, node, breakpointRef)
+        return next.call(this, breakpointRef.value)
+      },
       getBBox: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
         that.triggerWorkspaceEvent(CanvasEvent.NodeBBoxRequested, this.canvas, node, result)

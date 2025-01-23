@@ -1,10 +1,12 @@
 import { ItemView, Plugin } from 'obsidian'
 import CanvasPatcher from './core/canvas-patcher'
 import { Canvas, CanvasView } from './@types/Canvas'
+import Quicksettings from './quicksettings'
 
 // Utils
 import IconsHelper from './utils/icons-helper'
 import DebugHelper from './utils/debug-helper'
+import MigrationHelper from './utils/migration-helper'
 
 // Managers
 import SettingsManager from './settings'
@@ -12,6 +14,7 @@ import WindowsManager from './windows-manager'
 
 // Canvas Extensions
 import CanvasExtension from './core/canvas-extension'
+import VariableBreakpointCanvasExtension from './canvas-extensions/variable-breakpoint-canvas-extension'
 import GroupCanvasExtension from './canvas-extensions/group-canvas-extension'
 import PresentationCanvasExtension from './canvas-extensions/presentation-canvas-extension'
 import BetterReadonlyCanvasExtension from './canvas-extensions/better-readonly-canvas-extension'
@@ -33,8 +36,6 @@ import NodeInteractionExposerExtension from './canvas-extensions/dataset-exposer
 import NodeExposerExtension from './canvas-extensions/dataset-exposers/node-exposer'
 import EdgeExposerExtension from './canvas-extensions/dataset-exposers/edge-exposer'
 import CanvasWrapperExposerExtension from './canvas-extensions/dataset-exposers/canvas-wrapper-exposer'
-import MigrationHelper from './utils/migration-helper'
-import Quicksettings from './quicksettings'
 
 const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   // Dataset Exposers
@@ -48,6 +49,7 @@ const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   EdgeStylesExtension,
 
   // Basic Extensions
+  VariableBreakpointCanvasExtension,
   BetterDefaultSettingsCanvasExtension,
   CommandsCanvasExtension,
   BetterReadonlyCanvasExtension,

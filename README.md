@@ -406,6 +406,9 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
   - `advanced-canvas:copy`
     - Fired when the selection gets copied
     - Payload: `Canvas`, `SelectionData (Reference!)`
+  - `advanced-canvas:node-breakpoint-changed`
+    - Fired when the breakpoint of a node changes
+    - Payload: `Canvas`, `Node`, `breakpoint: { value: boolean }`
   - `advanced-canvas:node-editing-state-changed`
     - Fired when the editing state of a node changes
     - Payload: `Canvas`, `Node`, `boolean (isEditing)`
