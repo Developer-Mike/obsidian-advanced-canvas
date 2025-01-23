@@ -76,7 +76,7 @@ export default class EdgeStylesExtension extends CanvasExtension {
     ))
   }
 
-  // Skip if isDragging and setting isn't enabled
+  // Skip if isDragging and setting isn't enabled and not connecting an edge
   private shouldUpdateEdge(canvas: Canvas): boolean {
     return !canvas.isDragging || this.plugin.settings.getSetting('edgeStyleUpdateWhileDragging') || canvas.canvasEl.hasClass('is-connecting')
   }
@@ -197,11 +197,12 @@ export default class EdgeStylesExtension extends CanvasExtension {
     }
     
     const setArrowRotation = (element: HTMLElement, side: Side, rotation: number) => {
-      element.style.transform = element.style.transform
-        .replace(/rotate\([-\d]+(deg|rad)\)/g, `rotate(${rotation}rad)`)
+      //element.style.transform = element.style.transform.replace(/rotate\([-\d]+(\.[\d]*)?(deg|rad)\)/g, "") // Reset rotation
 
-      const offset = BBoxHelper.getSideVector(side)
-      element.style.translate = `${offset.x * 7}px ${offset.y * -7}px`
+      const clientBBox = element.getBoundingClientRect()
+      // element.style.transformOrigin = `${0}px ${-clientBBox.height}px`
+
+      // element.style.transform += `rotate(${rotation}rad)`
     }
 
     const edgeRotation = Math.atan2(edge.bezier.to.y - edge.bezier.from.y, edge.bezier.to.x - edge.bezier.from.x) - (Math.PI / 2)
