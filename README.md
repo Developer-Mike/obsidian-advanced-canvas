@@ -245,6 +245,10 @@ Custom style attributes for nodes and edges can easily be added.
         // You can add more categories here
     ]
    ```
+
+> [!IMPORTANT]
+> There needs to be **one** option with the value null
+
 2. Create a new CSS snippet in your vault (And enable it in the settings)
     ```css	
     .canvas-node[data-<DATASET-KEY>="rainy"] { /* The dataset key is now written in kebab-case */
