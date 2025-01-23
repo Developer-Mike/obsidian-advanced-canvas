@@ -264,8 +264,10 @@ Add breakpoints to nodes to change at which zoom factor the node's content gets 
 
 Create a new CSS snippet in your vault (And enable it in the settings)
 ```css	
-.canvas-node[data-shape="pill"] { /* Any CSS selector can be used (As long as the .canvas-node element has the CSS variable defined) */
-    --variable-breakpoint: 0.5; /* The zoom factor at which the node's content gets unrendered (Zoom level can reach from 1 to -4) */
+/* Any CSS selector can be used (As long as the .canvas-node element has the CSS variable defined) */
+.canvas-node[data-shape="pill"] {
+    /* The zoom factor at which the node's content gets unrendered (Zoom level can reach from 1 to -4) */
+    --variable-breakpoint: 0.5;
 }
 ```
 
