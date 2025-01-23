@@ -77,6 +77,7 @@ All features can be enabled/disabled in the settings.
     - Square
     - A*
 - Add [custom styles](#custom-styles) to nodes and edges for unlimited possibilities
+- Add [per-node breakpoints](#variable-breakpoints) to change at which zoom factor the node's content gets unrendered
 - [Custom colors](#custom-colors) in the color picker
 - [Presentation mode](#presentation-mode)
   - Create presentations by connecting nodes with arrows
@@ -257,6 +258,16 @@ Custom style attributes for nodes and edges can easily be added.
     ```
 3. Reload Obsidian and enjoy your new custom style!
     <br><img src="./assets/custom-style-attribute-example.png" alt="Custom Style Attribute Example"/>
+
+## Variable Breakpoints
+Add breakpoints to nodes to change at which zoom factor the node's content gets unrendered.
+
+Create a new CSS snippet in your vault (And enable it in the settings)
+```css	
+.canvas-node[data-shape="pill"] { /* Any CSS selector can be used (As long as the .canvas-node element has the CSS variable defined) */
+    --variable-breakpoint: 0.5; /* The zoom factor at which the node's content gets unrendered (Zoom level can reach from 1 to -4) */
+}
+```
 
 ## Custom Colors
 Add custom colors to the color picker. You can add them using the following css snippet:
