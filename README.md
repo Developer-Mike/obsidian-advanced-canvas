@@ -10,7 +10,7 @@
     <a href="https://github.com/Developer-Mike/obsidian-advanced-canvas/stargazers"><img src="https://img.shields.io/github/stars/Developer-Mike/obsidian-advanced-canvas?colorA=363a4f&colorB=e0ac00&style=for-the-badge" alt="GitHub star count"></a>
     <a href="https://github.com/Developer-Mike/obsidian-advanced-canvas/issues"><img src="https://img.shields.io/github/issues/Developer-Mike/obsidian-advanced-canvas?colorA=363a4f&colorB=e93147&style=for-the-badge" alt="Open issues on GitHub"></a>
     <br/>
-	<a href="https://obsidian.md/plugins?id=advanced-canvas"><img src="https://img.shields.io/endpoint?url=https://scambier.xyz/obsidian-endpoints/advanced-canvas.json&style=for-the-badge&colorA=363a4f&colorB=d53984"/></a>
+	<a href="https://obsidian.md/plugins?id=advanced-canvas"><img src="https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/obsidianmd/obsidian-releases/master/community-plugin-stats.json&query=$.advanced-canvas.downloads&label=Downloads&style=for-the-badge&colorA=363a4f&colorB=d53984"/></a>
     <a href="./LICENSE"><img src="https://img.shields.io/static/v1.svg?style=for-the-badge&label=License&message=GPL-3.0&colorA=363a4f&colorB=b7bdf8" alt="GPL-3.0 license"/></a>
     <br/><br/>
     <b>⚡ Supercharge</b> your canvas experience! Create presentations, flowcharts and more!
@@ -26,8 +26,8 @@ Open the Community Plugins tab in the settings and search for "Advanced Canvas" 
         <li>Install it using <a href="https://github.com/TfTHacker/obsidian42-brat">BRAT</a></li>
         <li>Manual folder creation
             <ol>
-                <li>Create a folder named <code>obsidian-advanced-canvas</code> in your vault's plugins folder (<code>&lt;vault&gt;/.obsidian/plugins/</code>).</li>
-                <li>Download <code>main.js</code>, <code>styles.css</code> and <code>manifest.json</code> from the latest release and put them in the <code>obsidian-advanced-canvas</code> folder.</li>
+                <li>Create a folder named <code>advanced-canvas</code> in your vault's plugins folder (<code>&lt;vault&gt;/.obsidian/plugins/</code>).</li>
+                <li>Download <code>main.js</code>, <code>styles.css</code> and <code>manifest.json</code> from the latest release and put them in the <code>advanced-canvas</code> folder.</li>
                 <li>Enable the plugin in Settings -> Community plugins -> Installed plugins</li>
             </ol>
         </li>
@@ -221,7 +221,7 @@ Set the pathfinding method of the edges (arrows) to default, straight, squared o
 Custom style attributes for nodes and edges can easily be added.
 
 1. Add a popup menu option
-   - Open the `<VAULT-PATH>/.obsidian/plugins/obsidian-advanced-canvas/data.json` file
+   - Open the `<VAULT-PATH>/.obsidian/plugins/advanced-canvas/data.json` file
    - If you want to add an option to node popup menu, search for `customNodeStyleAttributes` property, otherwise search for `customEdgeStyleAttributes` property. (Create it if it doesn't exist yet)
    - Add the custom popup menu option (Remove the comments!)
    ```json
@@ -245,6 +245,10 @@ Custom style attributes for nodes and edges can easily be added.
         // You can add more categories here
     ]
    ```
+
+> [!IMPORTANT]
+> There needs to be **one** option with the value null
+
 2. Create a new CSS snippet in your vault (And enable it in the settings)
     ```css	
     .canvas-node[data-<DATASET-KEY>="rainy"] { /* The dataset key is now written in kebab-case */
