@@ -275,4 +275,11 @@
     }
   }
   //#endregion
+
+  //#region Combinations
+  &[data-border='dashed'][data-shape='document'] .canvas-node-container {
+    border-top: none;
+    border-bottom: none;
+  }
+  //#endregion
 }
