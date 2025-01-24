@@ -470,8 +470,8 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
 Every feature can be enabled/disabled in the settings. All features were made to be as customizable as possible.
 
 ## Contributing
-All contributions are welcome!
-You may want to check out issues with the `only PRs` label to find issues that won't be worked on by me.
+All code contributions are welcome! (PRs that only update the documentation won't get merged. Please open an issue instead.)
+You may want to check out issues with the `PRs appreciated` label to find issues you can start with.
 But feel free to work on any issue or non-issue you want to work on!
 
 ## Star History
