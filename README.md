@@ -131,6 +131,8 @@ Please consider supporting the plugin. There are many hours of work and effort b
   - The cloned node will have the same dimensions and color as the original node
 - `Advanced Canvas: Expand node up/down/left/right`
   - Expand the selected node in the direction of the arrow keys
+- `Advanced Canvas: Flip selection horizontally/vertically`
+  - Flip the selected nodes and the respective edges horizontally or vertically
 
 ## Node Styles
 You can customize the default node styles using the settings.
