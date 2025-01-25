@@ -336,7 +336,7 @@ Collapse and expand groups to organize your canvas.
 </details>
 
 ## Auto Node Resizing
-Resize nodes automatically when the text content changes.
+Resize nodes automatically when the text content changes. Toggle this feature on a per-node basis using the updated popup menu.
 
 <details>
     <summary>Auto Node Resizing Example</summary>
