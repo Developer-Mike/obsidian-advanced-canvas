@@ -95,6 +95,19 @@ export default class BBoxHelper {
     }
   }
 
+  static getOppositeSide(side: Side): Side {
+    switch (side) {
+      case 'top':
+        return 'bottom'
+      case 'right':
+        return 'left'
+      case 'bottom':
+        return 'top'
+      case 'left':
+        return 'right'
+    }
+  }
+
   static isHorizontal(side: Side): boolean {
     return side === 'left' || side === 'right'
   }
