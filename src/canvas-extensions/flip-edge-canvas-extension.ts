@@ -59,5 +59,7 @@ export default class FlipEdgeCanvasExtension extends CanvasExtension {
         toSide: edgeData.fromSide
       })
     }
+
+    canvas.pushHistory(canvas.getData())
   }
 }
