@@ -46,6 +46,8 @@ export interface AdvancedCanvasPluginSettingsValues {
   cloneNodeMargin: number
   expandNodeStepSize: number
 
+  flipEdgeFeatureEnabled: boolean
+
   betterReadonlyEnabled: boolean
   disableNodePopup: boolean
   disableZoom: boolean
@@ -247,6 +249,11 @@ export const SETTINGS = {
       }
     }
   },
+  flipEdgeFeatureEnabled: {
+    label: 'Flip edges',
+    description: 'Flip the direction of edges using the popup menu.',
+    children: { }
+  },
   betterReadonlyEnabled: {
     label: 'Better readonly',
     description: 'Improve the readonly mode.',
@@ -419,6 +426,8 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   zoomToClonedNode: true,
   cloneNodeMargin: 20,
   expandNodeStepSize: 20,
+
+  flipEdgeFeatureEnabled: true,
 
   betterReadonlyEnabled: true,
   disableNodePopup: false,
