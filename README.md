@@ -94,6 +94,8 @@ All features can be enabled/disabled in the settings.
   - Disable node popup menus
   - Lock the canvas' position
   - Lock the canvas' zoom
+- [Flip edge](#flip-edge)
+  - Flip the direction of an edge with one click
 - [Encapsulate selection](#encapsulate-selection)
   - Create a new canvas from the selected nodes
   - Create a link to the new canvas in the current canvas
@@ -365,6 +367,14 @@ Move the current selection to a new canvas and create a link in the current canv
 - Select the nodes you want to encapsulate
 - Use the context menu (right click) to encapsulate the selection
 - OR use the command palette (`Advanced Canvas: Encapsulate selection`)
+
+## Flip Edge
+Flip the direction of an edge with one click.
+
+<details>
+    <summary>Flip Edge Example</summary>
+    <img src="./assets/flip-edge.gif" alt="Flip Edge Example"/>
+</details>
 
 ## Canvas Events
 All custom events are prefixed with `advanced-canvas:` and can be listened to using `app.workspace.on` (Just like the default events).
