@@ -24,9 +24,6 @@ export interface AdvancedCanvasPluginSettingsValues {
   minNodeSize: number
   disableFontSizeRelativeToZoom: boolean
 
-  zOrderingFeatureEnabled: boolean
-  zOrderingShowOneLayerShiftOptions: boolean
-
   combineCustomStylesInDropdown: boolean
 
   nodeStylingFeatureEnabled: boolean
@@ -43,6 +40,9 @@ export interface AdvancedCanvasPluginSettingsValues {
   edgeStylePathfinderPathRounded: boolean
 
   variableBreakpointFeatureEnabled: boolean
+
+  zOrderingFeatureEnabled: boolean
+  zOrderingShowOneLayerShiftOptions: boolean
 
   commandsFeatureEnabled: boolean
   zoomToClonedNode: boolean
@@ -229,6 +229,17 @@ export const SETTINGS = {
     description: `Change the zoom breakpoint (the zoom level at which the nodes won't render their content anymore) on a per-node basis using the ${VARIABLE_BREAKPOINT_CSS_VAR} CSS variable.`,
     children: { }
   },
+  zOrderingFeatureEnabled: {
+    label: 'Z ordering controls',
+    description: 'Change the z-index of nodes using the context menu.',
+    children: {
+      zOrderingShowOneLayerShiftOptions: {
+        label: 'Show one layer shift options',
+        description: 'When enabled, you can move nodes one layer forward or backward.',
+        type: 'boolean'
+      }
+    }
+  },
   commandsFeatureEnabled: {
     label: 'Extended commands',
     description: 'Add more commands to the canvas.',
@@ -408,9 +419,6 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   minNodeSize: 60,
   disableFontSizeRelativeToZoom: false,
 
-  zOrderingFeatureEnabled: true,
-  zOrderingShowOneLayerShiftOptions: false,
-
   combineCustomStylesInDropdown: false,
 
   nodeStylingFeatureEnabled: true,
@@ -427,6 +435,9 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   edgeStylePathfinderPathRounded: true,
 
   variableBreakpointFeatureEnabled: true,
+
+  zOrderingFeatureEnabled: true,
+  zOrderingShowOneLayerShiftOptions: false,
 
   commandsFeatureEnabled: true,
   zoomToClonedNode: true,

@@ -2,9 +2,10 @@ import { Canvas, CanvasNode } from "src/@types/Canvas"
 import { CanvasEvent } from "src/core/events"
 import CanvasExtension from "../core/canvas-extension"
 import { Menu } from "obsidian"
+import BBoxHelper from "src/utils/bbox-helper"
 
 export default class ZOrderingCanvasExtension  extends CanvasExtension {
-  isEnabled() { return this.plugin.settings.getSetting('zOrderingFeatureEnabled') }
+  isEnabled() { return 'zOrderingFeatureEnabled' as const }
 
   init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
@@ -33,64 +34,73 @@ export default class ZOrderingCanvasExtension  extends CanvasExtension {
   private addZOrderingContextMenuItems(canvas: Canvas, nodes: CanvasNode[], menu: Menu) {
     menu.addSeparator()
 
-    if (this.plugin.settings.getSetting('zOrderingShowOneLayerShiftOptions')) {
+    if (this.plugin.settings.getSetting('zOrderingShowOneLayerShiftOptions') && nodes.length === 1) {
       menu.addItem(item => {
         item.setTitle('Move one layer forward')
         item.setIcon('arrow-up')
-        item.onClick(() => this.moveOneLayer(canvas, nodes, true))
+        item.onClick(() => this.moveOneLayer(canvas, nodes.first()!, true))
       })
 
       menu.addItem(item => {
         item.setTitle('Move one layer backward')
         item.setIcon('arrow-down')
-        item.onClick(() => this.moveOneLayer(canvas, nodes, false))
+        item.onClick(() => this.moveOneLayer(canvas, nodes.first()!, false))
       })
     }
 
     menu.addItem(item => {
       item.setTitle('Bring to Front')
       item.setIcon('bring-to-front')
-      item.onClick(() => this.bringToFront(canvas, nodes))
+      item.onClick(() => this.moveMaxLayers(canvas, nodes, true))
     })
 
     menu.addItem(item => {
       item.setTitle('Send to Back')
       item.setIcon('send-to-back')
-      item.onClick(() => this.sendToBack(canvas, nodes))
+      item.onClick(() => this.moveMaxLayers(canvas, nodes, false))
     })
 
     menu.addSeparator()
   }
 
-  private moveOneLayer(canvas: Canvas, nodes: CanvasNode[], up: boolean) {
-    const otherZIndexes = [...this.getAllZIndexes(canvas)]
+  private moveOneLayer(canvas: Canvas, selectedNode: CanvasNode, forward: boolean) {
+    const selectedNodeBBox = selectedNode.getBBox()
+    const collidingNodes = [...canvas.nodes.values()]
+      .filter(node => BBoxHelper.isColliding(selectedNodeBBox, node.getBBox())) // Only nodes that collide with the selected node
+      .filter(node => node !== selectedNode) // Exclude the selected node
 
-    for (const node of nodes) {
-      const nextZIndex = up ? 
-        (Math.min(...otherZIndexes.filter(z => z > node.zIndex)) + 1) :
-        (Math.max(...otherZIndexes.filter(z => z < node.zIndex)) - 1)
-      
-      if (nextZIndex === Infinity || nextZIndex === -Infinity) continue // Already in front or back
-      this.setNodesZIndex([node], nextZIndex)
-    }
+    const nearestZIndexNode = collidingNodes
+      .sort((a, b) => forward ? a.zIndex - b.zIndex : b.zIndex - a.zIndex) // Sort by zIndex
+      .filter(node => forward ? node.zIndex > selectedNode.zIndex : node.zIndex < selectedNode.zIndex) // Only nodes that are one layer above or below the selected node
+      .first()
+    if (nearestZIndexNode === undefined) return // Already at the top or bottom
+
+    const targetZIndex = nearestZIndexNode.zIndex
+
+    // Shift the nearest zIndex node to the selected node's zIndex
+    this.setNodesZIndex([nearestZIndexNode], selectedNode.zIndex)
+
+    // Shift the selected node to the nearest zIndex node
+    this.setNodesZIndex([selectedNode], targetZIndex)
   }
 
-  private bringToFront(canvas: Canvas, nodes: CanvasNode[] = []) {
-    const maxZIndex = Math.max(...this.getAllZIndexes(canvas)) + 1
-    this.setNodesZIndex(nodes, maxZIndex)
-  }
+  private moveMaxLayers(canvas: Canvas, selectedNodes: CanvasNode[], forward: boolean) {
+    let targetZIndex = forward ? 
+      Math.max(...this.getAllZIndexes(canvas)) + 1 : 
+      Math.min(...this.getAllZIndexes(canvas)) - selectedNodes.length
 
-  private sendToBack(canvas: Canvas, nodes: CanvasNode[] = []) {
-    const minZIndex = Math.min(...this.getAllZIndexes(canvas)) - 1
-    this.setNodesZIndex(nodes, minZIndex)
+    this.setNodesZIndex(selectedNodes, targetZIndex)
   }
 
   private setNodesZIndex(nodes: CanvasNode[], zIndex: number) {
-    console.log('Setting z-index', zIndex, 'for nodes', nodes)
+    const sortedNodes = nodes.sort((a, b) => a.zIndex - b.zIndex)
 
-    for (const node of nodes) {
-      node.zIndex = zIndex
-      node.nodeEl.style.zIndex = zIndex.toString()
+    for (let i = 0; i < sortedNodes.length; i++) {
+      const node = sortedNodes[i]
+      const finalZIndex = zIndex + i
+
+      node.zIndex = finalZIndex
+      node.nodeEl.style.zIndex = finalZIndex.toString()
     }
   }
 
