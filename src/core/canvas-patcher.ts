@@ -1,10 +1,12 @@
 import AdvancedCanvasPlugin from "src/main"
-import { BBox, Canvas, CanvasData, CanvasEdge, CanvasEdgeData, CanvasElement, CanvasNode, CanvasNodeData, CanvasView } from "src/@types/Canvas"
+import { BBox, CanvasData, CanvasEdge, CanvasEdgeData, CanvasElement, CanvasNode, CanvasNodeData, CanvasView } from "src/@types/Canvas"
 import PatchHelper from "src/utils/patch-helper"
 import { CanvasEvent } from "./canvas-events"
-import { requireApiVersion, WorkspaceLeaf } from "obsidian"
+import { requireApiVersion, WorkspaceLeaf, editorInfoField } from "obsidian"
+import { EditorView, ViewUpdate } from "@codemirror/view"
 import { around } from "monkey-around"
 import JSONC from "tiny-jsonc"
+import JSONSS from "json-stable-stringify"
 
 export default class CanvasPatcher {
   plugin: AdvancedCanvasPlugin
@@ -47,34 +49,40 @@ export default class CanvasPatcher {
     
     // Patch canvas view
     PatchHelper.patchObjectPrototype(this.plugin, canvasView, {
-      getViewData: (_next: any) => function (..._args: any) {
+      getViewData: (next: any) => function (...args: any) {
         const canvasData = this.canvas.getData()
-        canvasData.metadata = this.canvas.metadata ?? {}
 
-        return JSON.stringify(canvasData, null, 2)
+        try {
+          return JSONSS(canvasData, { space: 2 })
+        } catch (e) {
+          console.error('Failed to stringify canvas data using json-stable-stringify:', e)
+
+          try {
+            return JSON.stringify(canvasData, null, 2)
+          } catch (e) {
+            console.error('Failed to stringify canvas data using JSON.stringify:', e)
+            return next.call(this, ...args)
+          }
+        }
       },
       setViewData: (next: any) => function (json: string, ...args: any) {
-        let validJson = json !== '' ? json : '{}'
-        let parsedJson
+        json = json !== '' ? json : '{}'
 
-        // Check for SyntaxError
-        try { parsedJson = JSON.parse(validJson) }
-        catch (e) {
+        let result
+        try {
+          result = next.call(this, json, ...args)
+        } catch (e) {
+          console.error('Invalid JSON, repairing through Advanced Canvas:', e)
+
           // Invalid JSON
           that.plugin.createFileSnapshot(this.file.path, json)
-          
+
           // Try to parse it with trailing commas
-          parsedJson = JSONC.parse(validJson)
-          validJson = JSON.stringify(parsedJson, null, 2)
+          json = JSON.stringify(JSONC.parse(json), null, 2)
+          result = next.call(this, json, ...args)
         }
 
-        const result = next.call(this, validJson, ...args)
-
-        try { this.canvas.metadata = parsedJson.metadata }
-        catch (_e) { this.canvas.metadata = {} }
-
         that.triggerWorkspaceEvent(CanvasEvent.CanvasChanged, this.canvas)
-
         return result
       }
     })
@@ -149,12 +157,24 @@ export default class CanvasPatcher {
       },
       removeNode: (next: any) => function (node: CanvasNode) {
         const result = next.call(this, node)
-        that.triggerWorkspaceEvent(CanvasEvent.NodeRemoved, this, node)
+        if (!this.isClearing) that.triggerWorkspaceEvent(CanvasEvent.NodeRemoved, this, node)
         return result
       },
       removeEdge: (next: any) => function (edge: CanvasEdge) {
         const result = next.call(this, edge)
-        that.triggerWorkspaceEvent(CanvasEvent.EdgeRemoved, this, edge)
+        if (!this.isClearing) that.triggerWorkspaceEvent(CanvasEvent.EdgeRemoved, this, edge)
+        return result
+      },
+      handleCopy: (next: any) => function (...args: any) {
+        this.isCopying = true
+        const result = next.call(this, ...args)
+        this.isCopying = false
+
+        return result
+      },
+      getSelectionData: (next: any) => function (...args: any) {
+        const result = next.call(this, ...args)
+        if (this.isCopying) that.triggerWorkspaceEvent(CanvasEvent.OnCopy, this, result)
         return result
       },
       zoomToBbox: (next: any) => function (bbox: BBox) {
@@ -180,6 +200,12 @@ export default class CanvasPatcher {
         that.triggerWorkspaceEvent(CanvasEvent.Redo, this)
         return result
       },
+      clear: (next: any) => function (...args: any) {
+        this.isClearing = true
+        const result = next.call(this, ...args)
+        this.isClearing = false
+        return result
+      },
       /*setData: (next: any) => function (...args: any) {
         //
         const result = next.call(this, ...args)
@@ -198,12 +224,11 @@ export default class CanvasPatcher {
           if (!this.view.file || this.view.file.path !== targetFilePath) return
 
           this.importData(data, true, true)
-          that.emitEventsForUnknownDataChanges(this)
         }
 
         if (!silent) that.triggerWorkspaceEvent(CanvasEvent.LoadData, this, data, setData)
         const result = next.call(this, data, clearCanvas)
-        that.emitEventsForUnknownDataChanges(this)
+
         return result
       },
       requestSave: (next: any) => function (...args: any) {
@@ -233,6 +258,17 @@ export default class CanvasPatcher {
       }
     })
 
+    // Add editor extension for node text content change listener
+    this.plugin.registerEditorExtension([EditorView.updateListener.of((update: ViewUpdate) => {
+      if (!update.docChanged) return
+
+      const editor = update.state.field(editorInfoField) as any
+      const node = editor.node as CanvasNode | undefined
+      if (!node) return
+
+      that.triggerWorkspaceEvent(CanvasEvent.NodeTextContentChanged, node.canvas, node, update)
+    })])
+
     // Canvas is now patched - update all open canvas views
     this.plugin.app.workspace.iterateAllLeaves((leaf: WorkspaceLeaf) => {
       if (leaf.view.getViewType() !== 'canvas') return
@@ -261,9 +297,19 @@ export default class CanvasPatcher {
         this.canvas.view.requestSave()
 
         // Add to the undo stack
-        if (addHistory) this.canvas.pushHistory(this.canvas.getData())
+        if (addHistory) this.canvas.pushHistory(this.canvas.data)
 
         return result
+      },
+      setIsEditing: (next: any) => function (editing: boolean, ...args: any) {
+        const result = next.call(this, editing, ...args)
+        that.triggerWorkspaceEvent(CanvasEvent.NodeEditingStateChanged, this.canvas, node, editing)
+        return result
+      },
+      updateBreakpoint: (next: any) => function (breakpoint: boolean) {
+        const breakpointRef = { value: breakpoint }
+        that.triggerWorkspaceEvent(CanvasEvent.NodeBreakpointChanged, this.canvas, node, breakpointRef)
+        return next.call(this, breakpointRef.value)
       },
       getBBox: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
@@ -314,6 +360,7 @@ export default class CanvasPatcher {
     
     this.runAfterInitialized(edge, () => {
       this.triggerWorkspaceEvent(CanvasEvent.EdgeAdded, edge.canvas, edge)
+      // this.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, edge.canvas, edge) - already fired in render function
     })
   }
   
@@ -338,18 +385,6 @@ export default class CanvasPatcher {
     })
 
     that.plugin.register(uninstall)
-  }
-
-  private emitEventsForUnknownDataChanges(canvas: Canvas) {
-    // If node data changed
-    canvas.nodes.forEach((node: CanvasNode) => this.runAfterInitialized(node, () => {
-      this.triggerWorkspaceEvent(CanvasEvent.NodeChanged, node.canvas, node)
-    }))
-
-    // If edge data changed
-    canvas.edges.forEach((edge: CanvasEdge) => this.runAfterInitialized(edge, () => {
-      this.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, edge.canvas, edge)
-    }))
   }
 
   private triggerWorkspaceEvent(event: string, ...args: any) {

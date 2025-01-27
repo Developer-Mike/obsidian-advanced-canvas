@@ -1,5 +1,5 @@
 import { setIcon } from "obsidian"
-import { BBox, Canvas, CanvasData, CanvasNode } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasData, CanvasNode, SelectionData } from "src/@types/Canvas"
 import { CanvasEvent } from "src/core/canvas-events"
 import BBoxHelper from "src/utils/bbox-helper"
 import CanvasExtension from "../core/canvas-extension"
@@ -19,6 +19,11 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.NodeBBoxRequested,
       (canvas: Canvas, node: CanvasNode, bbox: BBox) => this.onNodeBBoxRequested(canvas, node, bbox)
+    ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.OnCopy,
+      (canvas: Canvas, selectionData: SelectionData) => this.onCopy(canvas, selectionData)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
@@ -44,14 +49,34 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
     collapseButton.id = COLLAPSE_BUTTON_ID
     setIcon(collapseButton, groupNodeData.isCollapsed ? 'plus-circle' : 'minus-circle')
 
-    collapseButton.onclick = () => { this.setCollapsed(canvas, groupNode, groupNode.getData().isCollapsed ? undefined : true) }
+    collapseButton.onclick = () => { 
+      this.setCollapsed(canvas, groupNode, groupNode.getData().isCollapsed ? undefined : true)
+      canvas.markMoved(groupNode)
+    }
 
     groupNode.labelEl?.insertAdjacentElement('afterend', collapseButton)
+  }
+
+  private onCopy(_canvas: Canvas, selectionData: SelectionData) {
+    for (const collapsedGroupData of selectionData.nodes) {
+      if (collapsedGroupData.type !== 'group' || !collapsedGroupData.isCollapsed || !collapsedGroupData.collapsedData) continue
+
+      selectionData.nodes.push(...collapsedGroupData.collapsedData.nodes.map(nodeData => ({ 
+        ...nodeData,
+        // Restore the relative position of the node to the group
+        x: nodeData.x + collapsedGroupData.x,
+        y: nodeData.y + collapsedGroupData.y
+      })))
+      selectionData.edges.push(...collapsedGroupData.collapsedData.edges)
+    }
   }
 
   private setCollapsed(canvas: Canvas, groupNode: CanvasNode, collapsed: boolean | undefined) {
     groupNode.setData({ ...groupNode.getData(), isCollapsed: collapsed })
     canvas.setData(canvas.getData())
+
+    canvas.history.current--
+    canvas.pushHistory(canvas.getData())
   }
 
   onNodeBBoxRequested(_canvas: Canvas, node: CanvasNode, bbox: BBox) {

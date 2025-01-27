@@ -115,7 +115,11 @@ export default class CanvasHelper {
     const popupMenuEl = canvas?.menu?.menuEl
     if (!popupMenuEl) return
 
-    if (element.id) popupMenuEl.querySelector(`#${element.id}`)?.remove()
+    if (element.id) {
+      const optionToReplace = popupMenuEl.querySelector(`#${element.id}`)
+      if (optionToReplace && index === -1) index = Array.from(popupMenuEl.children).indexOf(optionToReplace) - 1
+      optionToReplace?.remove()
+    }
 
     const sisterElement = index >= 0 ? popupMenuEl.children[index] : popupMenuEl.children[popupMenuEl.children.length + index]
     popupMenuEl.insertAfter(element, sisterElement)
@@ -137,7 +141,7 @@ export default class CanvasHelper {
     let maxY = -Infinity
 
     for (const node of canvasNodes) {
-      const nodeData = node.getData ? node.getData() : node
+      const nodeData = (node as any).getData ? (node as CanvasNode).getData() : node
 
       minX = Math.min(minX, nodeData.x)
       minY = Math.min(minY, nodeData.y)
@@ -149,6 +153,10 @@ export default class CanvasHelper {
   }
 
   static zoomToBBox(canvas: Canvas, bbox: BBox) {
+    /* const zoomX = canvas.canvasRect.width / (1.1 * (bbox.maxX - bbox.minX))
+    const zoomY = canvas.canvasRect.height / (1.1 * (bbox.maxY - bbox.minY))
+    const zoom = Math.clamp(Math.min(zoomX, zoomY), -4, 1) */
+
     const PADDING_CORRECTION_FACTOR = 1 / 1.1
     const zoomedBBox = BBoxHelper.scaleBBox(bbox, PADDING_CORRECTION_FACTOR)
 
@@ -190,7 +198,7 @@ export default class CanvasHelper {
           currentStyleAttributes[stylableAttribute.datasetKey] = styleOption.value
 
           // Update icon
-         setIcon(menuOption, styleOption.icon)
+          setIcon(menuOption, styleOption.icon)
 
           // Close menu
           menuOption.dispatchEvent(new Event('click'))
@@ -322,21 +330,24 @@ export default class CanvasHelper {
 
           // Add style options
           for (const styleOption of stylableAttribute.options) {
-            const styleMenuDropdownSubmenuOptionElement = document.createElement('div')
-            styleMenuDropdownSubmenuOptionElement.classList.add('menu-item')
-            styleMenuDropdownSubmenuOptionElement.classList.add('tappable')
-
-            // Add icon
-            const submenuIconElement = document.createElement('div')
-            submenuIconElement.classList.add('menu-item-icon')
-            setIcon(submenuIconElement, styleOption.icon)
-            styleMenuDropdownSubmenuOptionElement.appendChild(submenuIconElement)
-
-            // Add label
-            const submenuLabelElement = document.createElement('div')
-            submenuLabelElement.classList.add('menu-item-title')
-            submenuLabelElement.textContent = styleOption.label
-            styleMenuDropdownSubmenuOptionElement.appendChild(submenuLabelElement)
+            const styleMenuDropdownSubmenuOptionElement = this.createDropdownOptionElement({
+              label: styleOption.label,
+              icon: styleOption.icon,
+              callback: () => {
+                // Set style attribute
+                setStyleAttribute(stylableAttribute, styleOption.value)
+  
+                // Keep correct reference
+                currentStyleAttributes[stylableAttribute.datasetKey] = styleOption.value
+                selectedStyle = styleOption
+  
+                // Update icon
+                setIcon(iconElement, styleOption.icon)
+  
+                // Close menu
+                styleMenuDropdownSubmenuElement.remove()
+              }
+            })
 
             // Add selected icon
             if (selectedStyle === styleOption) {
@@ -352,31 +363,6 @@ export default class CanvasHelper {
 
             // Add to dropdown submenu
             styleMenuDropdownSubmenuElement.appendChild(styleMenuDropdownSubmenuOptionElement)
-
-            // Add hover effect
-            styleMenuDropdownSubmenuOptionElement.addEventListener('pointerenter', () => {
-              styleMenuDropdownSubmenuOptionElement.classList.add('selected')
-            })
-
-            styleMenuDropdownSubmenuOptionElement.addEventListener('pointerleave', () => {
-              styleMenuDropdownSubmenuOptionElement.classList.remove('selected')
-            })
-
-            // Add click event
-            styleMenuDropdownSubmenuOptionElement.addEventListener('click', () => {
-              // Set style attribute
-              setStyleAttribute(stylableAttribute, styleOption.value)
-
-              // Keep correct reference
-              currentStyleAttributes[stylableAttribute.datasetKey] = styleOption.value
-              selectedStyle = styleOption
-
-              // Update icon
-              setIcon(iconElement, styleOption.icon)
-
-              // Close menu
-              styleMenuDropdownSubmenuElement.remove()
-            })
           }
 
           // Append to body
@@ -387,5 +373,46 @@ export default class CanvasHelper {
       // Append to body
       popupMenuElement.appendChild(styleMenuDropdownElement)
     })
+  }
+
+  static createDropdownOptionElement(menuOption: MenuOption): HTMLElement {
+    const menuDropdownOptionElement = document.createElement('div')
+    menuDropdownOptionElement.classList.add('menu-item')
+    menuDropdownOptionElement.classList.add('tappable')
+
+    // Add icon
+    const iconElement = document.createElement('div')
+    iconElement.classList.add('menu-item-icon')
+    setIcon(iconElement, menuOption.icon)
+    menuDropdownOptionElement.appendChild(iconElement)
+
+    // Add label
+    const labelElement = document.createElement('div')
+    labelElement.classList.add('menu-item-title')
+    labelElement.textContent = menuOption.label
+    menuDropdownOptionElement.appendChild(labelElement)
+
+    // Add hover effect
+    menuDropdownOptionElement.addEventListener('pointerenter', () => {
+      menuDropdownOptionElement.classList.add('selected')
+    })
+
+    menuDropdownOptionElement.addEventListener('pointerleave', () => {
+      menuDropdownOptionElement.classList.remove('selected')
+    })
+
+    // Add click event
+    menuDropdownOptionElement.addEventListener('click', () => {
+      menuOption.callback?.()
+    })
+
+    return menuDropdownOptionElement
+  }
+
+  static createDropdownSeparatorElement(): HTMLElement {
+    const separatorElement = document.createElement('div')
+    separatorElement.classList.add('menu-separator')
+
+    return separatorElement
   }
 }

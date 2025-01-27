@@ -28,7 +28,10 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.NodeCreated,
-      (canvas: Canvas, node: CanvasNode) => this.applyDefaultNodeStyles(canvas, node)
+      (canvas: Canvas, node: CanvasNode) => {
+        this.enforceNodeGridAlignment(canvas, node)
+        this.applyDefaultNodeStyles(canvas, node)
+      }
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
@@ -49,6 +52,8 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
       width: this.plugin.settings.getSetting('defaultFileNodeWidth'),
       height: this.plugin.settings.getSetting('defaultFileNodeHeight')
     }
+
+    canvas.config.minContainerDimension = this.plugin.settings.getSetting('minNodeSize')
   }
 
   private async onDoubleClick(canvas: Canvas, event: MouseEvent, preventDefault: { value: boolean }) {
@@ -60,12 +65,6 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
     switch (this.plugin.settings.getSetting('nodeTypeOnDoubleClick')) {
       case 'file':
         const file = await new FileSelectModal(this.plugin.app, undefined, true).awaitInput()
-
-        if (this.plugin.settings.getSetting('alignDoubleClickedNodeToGrid')) pos = {
-          x: Math.round((pos.x - (canvas.config.defaultFileNodeDimensions.width / 2)) / CanvasHelper.GRID_SIZE) * CanvasHelper.GRID_SIZE + (canvas.config.defaultFileNodeDimensions.width / 2),
-          y: Math.round((pos.y - (canvas.config.defaultFileNodeDimensions.height / 2)) / CanvasHelper.GRID_SIZE) * CanvasHelper.GRID_SIZE + (canvas.config.defaultFileNodeDimensions.height / 2)
-        }
-
         canvas.createFileNode({
           pos: pos,
           position: 'center',
@@ -74,11 +73,6 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
 
         break
       default:
-        if (this.plugin.settings.getSetting('alignDoubleClickedNodeToGrid')) pos = {
-          x: Math.round((pos.x - (canvas.config.defaultTextNodeDimensions.width / 2)) / CanvasHelper.GRID_SIZE) * CanvasHelper.GRID_SIZE + (canvas.config.defaultTextNodeDimensions.width / 2),
-          y: Math.round((pos.y - (canvas.config.defaultTextNodeDimensions.height / 2)) / CanvasHelper.GRID_SIZE) * CanvasHelper.GRID_SIZE + (canvas.config.defaultTextNodeDimensions.height / 2)
-        }
-
         canvas.createTextNode({
           pos: pos,
           position: 'center'
@@ -86,6 +80,17 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
 
         break
     }
+  }
+
+  private enforceNodeGridAlignment(canvas: Canvas, node: CanvasNode) {
+    if (!this.plugin.settings.getSetting('alignNewNodesToGrid')) return
+
+    const nodeData = node.getData()
+    node.setData({
+      ...nodeData,
+      x: Math.round(nodeData.x / CanvasHelper.GRID_SIZE) * CanvasHelper.GRID_SIZE,
+      y: Math.round(nodeData.y / CanvasHelper.GRID_SIZE) * CanvasHelper.GRID_SIZE
+    })
   }
 
   private applyDefaultNodeStyles(_canvas: Canvas, node: CanvasNode) {

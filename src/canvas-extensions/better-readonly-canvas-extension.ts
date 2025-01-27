@@ -1,7 +1,7 @@
 import { Canvas } from "src/@types/Canvas"
 import CanvasHelper, { MenuOption } from "src/utils/canvas-helper"
 import { CanvasEvent } from "src/core/canvas-events"
-import { AdvancedCanvasPluginSettings } from "src/settings"
+import { AdvancedCanvasPluginSettingsValues } from "src/settings"
 import CanvasExtension from "../core/canvas-extension"
 
 export default class BetterReadonlyCanvasExtension extends CanvasExtension {
@@ -104,7 +104,7 @@ export default class BetterReadonlyCanvasExtension extends CanvasExtension {
     )
   }
 
-  private createToggle(menuOption: MenuOption, settingKey: keyof AdvancedCanvasPluginSettings): HTMLElement {
+  private createToggle(menuOption: MenuOption, settingKey: keyof AdvancedCanvasPluginSettingsValues): HTMLElement {
     const toggle = CanvasHelper.createControlMenuButton({
       ...menuOption,
       callback: () => (async () => {

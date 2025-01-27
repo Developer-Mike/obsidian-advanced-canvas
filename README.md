@@ -1,10 +1,7 @@
->[!IMPORTANT]
-> Due to a high-priority project and other reasons, **development of Advanced Canvas is paused** until 20th Nov.
-
 <h3 align="center">
     <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="./assets/logo-dark.svg">
-        <img alt="Logo" src="./assets/logo-light.svg" width="100">
+        <source media="(prefers-color-scheme: dark)" srcset="./assets/logo-dark.png">
+        <img alt="Logo" src="./assets/logo-light.png" width="100">
     </picture><br/><br/>
 	Advanced Canvas for <a href="https://obsidian.md">Obsidian.md</a>
 </h3>
@@ -12,9 +9,8 @@
 <p align="center">
     <a href="https://github.com/Developer-Mike/obsidian-advanced-canvas/stargazers"><img src="https://img.shields.io/github/stars/Developer-Mike/obsidian-advanced-canvas?colorA=363a4f&colorB=e0ac00&style=for-the-badge" alt="GitHub star count"></a>
     <a href="https://github.com/Developer-Mike/obsidian-advanced-canvas/issues"><img src="https://img.shields.io/github/issues/Developer-Mike/obsidian-advanced-canvas?colorA=363a4f&colorB=e93147&style=for-the-badge" alt="Open issues on GitHub"></a>
-    <a href="https://github.com/Developer-Mike/obsidian-advanced-canvas/contributors"><img src="https://img.shields.io/github/contributors/Developer-Mike/obsidian-advanced-canvas?colorA=363a4f&colorB=08b94e&style=for-the-badge" alt="List of contributors"></a>
     <br/>
-	<a href="https://obsidian.md/plugins?id=advanced-canvas"><img src="https://img.shields.io/endpoint?url=https://scambier.xyz/obsidian-endpoints/advanced-canvas.json&style=for-the-badge&colorA=363a4f&colorB=d53984"/></a>
+	<a href="https://obsidian.md/plugins?id=advanced-canvas"><img src="https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/obsidianmd/obsidian-releases/master/community-plugin-stats.json&query=$.advanced-canvas.downloads&label=Downloads&style=for-the-badge&colorA=363a4f&colorB=d53984"/></a>
     <a href="./LICENSE"><img src="https://img.shields.io/static/v1.svg?style=for-the-badge&label=License&message=GPL-3.0&colorA=363a4f&colorB=b7bdf8" alt="GPL-3.0 license"/></a>
     <br/><br/>
     <b>⚡ Supercharge</b> your canvas experience! Create presentations, flowcharts and more!
@@ -30,8 +26,8 @@ Open the Community Plugins tab in the settings and search for "Advanced Canvas" 
         <li>Install it using <a href="https://github.com/TfTHacker/obsidian42-brat">BRAT</a></li>
         <li>Manual folder creation
             <ol>
-                <li>Create a folder named <code>obsidian-advanced-canvas</code> in your vault's plugins folder (<code>&lt;vault&gt;/.obsidian/plugins/</code>).</li>
-                <li>Download <code>main.js</code>, <code>styles.css</code> and <code>manifest.json</code> from the latest release and put them in the <code>obsidian-advanced-canvas</code> folder.</li>
+                <li>Create a folder named <code>advanced-canvas</code> in your vault's plugins folder (<code>&lt;vault&gt;/.obsidian/plugins/</code>).</li>
+                <li>Download <code>main.js</code>, <code>styles.css</code> and <code>manifest.json</code> from the latest release and put them in the <code>advanced-canvas</code> folder.</li>
                 <li>Enable the plugin in Settings -> Community plugins -> Installed plugins</li>
             </ol>
         </li>
@@ -42,6 +38,7 @@ Open the Community Plugins tab in the settings and search for "Advanced Canvas" 
 All features can be enabled/disabled in the settings.
 
 - Create groups independently of the nodes
+- [Better default settings](#better-default-settings)
 - More [canvas commands](#canvas-commands)
 - [Node Styles](#node-styles)
   - (Flowchart) [Node Shapes](#node-shapes)
@@ -79,9 +76,10 @@ All features can be enabled/disabled in the settings.
     - Straight
     - Square
     - A*
+- Add [custom styles](#custom-styles) to nodes and edges for unlimited possibilities
+- Add [per-node breakpoints](#variable-breakpoints) to change at which zoom factor the node's content gets unrendered
+- [Z-Ordering control](#z-ordering-control) for nodes to control their stacking order
 - [Custom colors](#custom-colors) in the color picker
-- [Properties Support](#properties-support)
-  - Set properties for the canvas file
 - [Presentation mode](#presentation-mode)
   - Create presentations by connecting nodes with arrows
 - [Portals](#portals)
@@ -89,10 +87,16 @@ All features can be enabled/disabled in the settings.
   - Create edges (arrows) to the embedded canvas
 - [Collapsible groups](#collapsible-groups)
   - Collapse and expand groups to organize your canvas
+- [Auto node resizing](#auto-node-resizing)
+  - Resize nodes automatically when the text content changes
+- [Focus mode](#focus-mode)
+  - Focus on a single node and blur all other nodes
 - [Better readonly](#better-readonly)
   - Disable node popup menus
   - Lock the canvas' position
   - Lock the canvas' zoom
+- [Flip edge](#flip-edge)
+  - Flip the direction of an edge with one click
 - [Encapsulate selection](#encapsulate-selection)
   - Create a new canvas from the selected nodes
   - Create a link to the new canvas in the current canvas
@@ -105,7 +109,16 @@ Please consider supporting the plugin. There are many hours of work and effort b
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/X8X27IA08)
 <img src="https://img.shields.io/endpoint?url=https://wakapi.dev/api/compat/shields/v1/Developer-Mike/interval:all_time/project:obsidian-advanced-canvas&label=Time%20Spent&style=for-the-badge&colorA=ffffff&colorB=ff5e5b" alt="Time Spent">
 
+## Better Default Settings
+- Enforce all new nodes to be aligned to the grid
+- Customize default text node size
+- Customize default file node size
+- Modify the minimum node size
+- Disable the font scaling relative to the zoom level
+
 ## Canvas Commands
+- `Advanced Canvas: Open Quicksettings`
+  - Open the quicksettings menu
 - `Advanced Canvas: Create text node`
   - Create a new text node
 - `Advanced Canvas: Create file node`
@@ -119,8 +132,12 @@ Please consider supporting the plugin. There are many hours of work and effort b
   - The cloned node will have the same dimensions and color as the original node
 - `Advanced Canvas: Expand node up/down/left/right`
   - Expand the selected node in the direction of the arrow keys
+- `Advanced Canvas: Flip selection horizontally/vertically`
+  - Flip the selected nodes and the respective edges horizontally or vertically
 
 ## Node Styles
+You can customize the default node styles using the settings.
+
 ### Node Shapes
 <details>
     <summary>Flowchart Example</summary>
@@ -180,6 +197,8 @@ Set the style of the border to dotted, dashed or invisible.
 </details>
 
 ## Edge Styles
+You can customize the default edge styles using the settings.
+
 ### Path Styles
 Set the style of the edge paths to dotted, short-dashed or long-dashed.
 
@@ -208,7 +227,7 @@ Set the pathfinding method of the edges (arrows) to default, straight, squared o
 Custom style attributes for nodes and edges can easily be added.
 
 1. Add a popup menu option
-   - Open the `<VAULT-PATH>/.obsidian/plugins/obsidian-advanced-canvas/data.json` file
+   - Open the `<VAULT-PATH>/.obsidian/plugins/advanced-canvas/data.json` file
    - If you want to add an option to node popup menu, search for `customNodeStyleAttributes` property, otherwise search for `customEdgeStyleAttributes` property. (Create it if it doesn't exist yet)
    - Add the custom popup menu option (Remove the comments!)
    ```json
@@ -232,6 +251,10 @@ Custom style attributes for nodes and edges can easily be added.
         // You can add more categories here
     ]
    ```
+
+> [!IMPORTANT]
+> There needs to be **one** option with the value null
+
 2. Create a new CSS snippet in your vault (And enable it in the settings)
     ```css	
     .canvas-node[data-<DATASET-KEY>="rainy"] { /* The dataset key is now written in kebab-case */
@@ -240,6 +263,26 @@ Custom style attributes for nodes and edges can easily be added.
     ```
 3. Reload Obsidian and enjoy your new custom style!
     <br><img src="./assets/custom-style-attribute-example.png" alt="Custom Style Attribute Example"/>
+
+## Variable Breakpoints
+Add breakpoints to nodes to change at which zoom factor the node's content gets unrendered.
+
+Create a new CSS snippet in your vault (And enable it in the settings)
+```css	
+/* Any CSS selector can be used (As long as the .canvas-node element has the CSS variable defined) */
+.canvas-node[data-shape="pill"] {
+    /* The zoom factor at which the node's content gets unrendered (Zoom level can reach from 1 to -4) */
+    --variable-breakpoint: 0.5;
+}
+```
+
+## Z-Ordering Control
+Change z-ordering of nodes using the context menu.
+
+<details>
+    <summary>Z-Ordering Control Example</summary>
+    <img src="./assets/z-ordering-control.png" alt="Z-Ordering Control Example"/>
+</details>
 
 ## Custom Colors
 Add custom colors to the color picker. You can add them using the following css snippet:
@@ -255,24 +298,6 @@ Add custom colors to the color picker. You can add them using the following css 
     <summary>Custom Colors In Palette</summary>
     <img src="./assets/custom-colors.png" alt="Custom Colors In Palette"/>
 </details>
-
-## Properties Support
-Support for properties in canvas files just like in md files. You can edit the properties using the updated control menu.
-
-Supported properties:
-- `cssclasses` (Separate multiple classes with a space)
-
-### Custom Background Example (cssclasses)
-```css
-.canvas-wrapper.<CLASS-NAME> > .canvas-background {
-    background-image: url('<IMAGE-URL>');
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    
-    filter: blur(5px) brightness(0.8);
-}
-```
 
 ## Presentation Mode
 In presentation mode, you can navigate through the nodes using the arrow keys or the PageUp/PageDown keys (Compatible with most presentation remotes). The different slides/nodes are connected using arrows. If you want to have multiple arrows pointing from the same node, you can number them in the order you want to navigate through them. While in presentation mode, the canvas is in readonly mode (So [better readonly](#better-readonly) effects the presentation mode as well!). You can exit the presentation mode using the `ESC` key or the corresponding command. If you want to continue the presentation from the last slide you were on, you can use the `Advanced Canvas: Continue presentation` command.
@@ -321,6 +346,22 @@ Collapse and expand groups to organize your canvas.
     <img src="./assets/collapsible-groups.png" alt="Collapsible Groups Example"/>
 </details>
 
+## Auto Node Resizing
+Resize nodes automatically when the text content changes. Toggle this feature on a per-node basis using the updated popup menu.
+
+<details>
+    <summary>Auto Node Resizing Example</summary>
+    <img src="./assets/auto-node-resizing.gif" alt="Auto Node Resizing Example"/>
+</details>
+
+## Focus Mode
+Focus on a single node and blur all other nodes.
+
+<details>
+    <summary>Focus Mode Example</summary>
+    <img src="./assets/focus-mode.png" alt="Focus Mode"/>
+</details>
+
 ## Better Readonly
 - Disable node popup menus
 - Lock the canvas' position
@@ -338,12 +379,20 @@ Move the current selection to a new canvas and create a link in the current canv
 - Use the context menu (right click) to encapsulate the selection
 - OR use the command palette (`Advanced Canvas: Encapsulate selection`)
 
+## Flip Edge
+Flip the direction of an edge with one click.
+
+<details>
+    <summary>Flip Edge Example</summary>
+    <img src="./assets/flip-edge.gif" alt="Flip Edge Example"/>
+</details>
+
 ## Canvas Events
 All custom events are prefixed with `advanced-canvas:` and can be listened to using `app.workspace.on` (Just like the default events).
 
 <details>
     <summary>
-        All Events (27)
+        All Events
     </summary>
 
   - `advanced-canvas:canvas-changed`
@@ -373,11 +422,6 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
   - `advanced-canvas:edge-added`
     - Fired when a new edge gets added
     - Payload: `Canvas`, `Edge`
-  - `advanced-canvas:node-removed`
-    - Fired when a node gets removed
-    - Payload: `Canvas`, `Node`
-  - `advanced-canvas:edge-removed`
-    - Fired when an edge gets removed
     - Payload: `Canvas`, `Edge`
   - `advanced-canvas:node-changed`
     - Fired when any node gets changed
@@ -385,6 +429,23 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
   - `advanced-canvas:edge-changed`
     - Fired when any edge gets changed
     - Payload: `Canvas`, `Edge`
+  - `advanced-canvas:node-text-content-changed`
+    - Fired when the text content of a node gets changed (While typing)
+    - Payload: `Canvas`, `Node`, `ViewUpdate (From CodeMirror)`
+  - `advanced-canvas:node-removed`
+    - Fired when a node gets removed
+    - Payload: `Canvas`, `Node`
+  - `advanced-canvas:edge-removed`
+    - Fired when an edge gets removed
+  - `advanced-canvas:copy`
+    - Fired when the selection gets copied
+    - Payload: `Canvas`, `SelectionData (Reference!)`
+  - `advanced-canvas:node-breakpoint-changed`
+    - Fired when the breakpoint of a node changes
+    - Payload: `Canvas`, `Node`, `breakpoint: { value: boolean }`
+  - `advanced-canvas:node-editing-state-changed`
+    - Fired when the editing state of a node changes
+    - Payload: `Canvas`, `Node`, `boolean (isEditing)`
   - `advanced-canvas:node-bbox-requested`
     - Fired when the bounding box of a node gets requested (e.g. for the edge path or when dragging a group)
     - Payload: `Canvas`, `Node`, `BBox (Reference!)`
@@ -430,13 +491,9 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
 Every feature can be enabled/disabled in the settings. All features were made to be as customizable as possible.
 
 ## Contributing
-All contributions are welcome! Here's how you can help:
-- Create a fork of the repository
-- Create a branch with a descriptive name
-- Make your changes
-- Debug the plugin using `npm run dev`
-- Create a pull request
-- Wait for the review
+All code contributions are welcome! (PRs that only update the documentation won't get merged. Please open an issue instead.)
+You may want to check out issues with the `PRs appreciated` label to find issues you can start with.
+But feel free to work on any issue or non-issue you want to work on!
 
 ## Star History
 [![Star History Chart](https://api.star-history.com/svg?repos=Developer-Mike/obsidian-advanced-canvas&type=Date)](https://star-history.com/#Developer-Mike/obsidian-advanced-canvas&Date)

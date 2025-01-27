@@ -1,5 +1,5 @@
 import { TFile } from "obsidian"
-import { BBox, Canvas, CanvasData, CanvasEdge, CanvasElement, CanvasNode, CanvasNodeData } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasData, CanvasElement, CanvasNode, CanvasNodeData, CanvasView } from "src/@types/Canvas"
 import { CanvasEvent } from "src/core/canvas-events"
 import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "../core/canvas-extension"
@@ -11,6 +11,28 @@ export default class PortalsCanvasExtension extends CanvasExtension {
   isEnabled() { return 'portalsFeatureEnabled' as const }
 
   init() {
+    this.plugin.registerEvent(this.plugin.app.vault.on('modify', (file: TFile) => {
+      const canvases = this.plugin.app.workspace.getLeavesOfType('canvas').map(leaf => (leaf.view as CanvasView).canvas)
+
+      for (const canvas of canvases) {
+        if (canvas === undefined) continue
+        
+        const hasPortalsToFile = canvas.getData().nodes.filter(nodeData => 
+          nodeData.type === 'file' && 
+          nodeData.portalToFile === file.path
+        ).length > 0
+
+        // Update whole canvas data
+        if (hasPortalsToFile) {
+          canvas.setData(canvas.getData())
+
+          // Maintain history
+          canvas.history.current--
+          canvas.history.data.pop()
+        }
+      }
+    }))
+
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.PopupMenuCreated,
       (canvas: Canvas) => this.updatePopupMenu(canvas)
@@ -283,6 +305,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     const data = JSON.parse(JSON.stringify(dataRef)) as CanvasData
 
     // Open portals
+    this.nestedPortals = {}
     const addedData = await Promise.all(data.nodes.map(nodeData => this.tryOpenPortal(canvas, nodeData)))
     for (const newData of addedData) {
       data.nodes.push(...newData.nodes)
@@ -344,17 +367,29 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     return data
   }
 
-  private async tryOpenPortal(canvas: Canvas, portalNodeData: CanvasNodeData): Promise<CanvasData> {
+  private nestedPortals: { [portalId: string]: string[] } = {}
+  private async tryOpenPortal(canvas: Canvas, portalNodeData: CanvasNodeData, parentPortalId?: string): Promise<CanvasData> {
     const addedData: CanvasData = { nodes: [], edges: [] }
     if (portalNodeData.type !== 'file' || !portalNodeData.portalToFile) return addedData
 
     // Update portal file
     portalNodeData.portalToFile = portalNodeData.file
 
-    // Fix recursive portals
+    // Fix direct recursion
     if (portalNodeData.portalToFile === canvas.view.file.path) {
       portalNodeData.portalToFile = undefined
       return addedData
+    }
+
+    // Fix indirect recursion
+    if (parentPortalId) {
+      if (this.nestedPortals[parentPortalId]?.includes(portalNodeData.portalToFile!)) {
+        portalNodeData.portalToFile = undefined
+        return addedData
+      }
+      
+      this.nestedPortals[parentPortalId] = this.nestedPortals[parentPortalId] ?? []
+      this.nestedPortals[parentPortalId].push(portalNodeData.portalToFile!)
     }
 
     const portalFile = this.plugin.app.vault.getAbstractFileByPath(portalNodeData.file!)
@@ -400,7 +435,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
 
       addedData.nodes.push(addedNode)
 
-      const nestedNodes = await this.tryOpenPortal(canvas, addedNode)
+      const nestedNodes = await this.tryOpenPortal(canvas, addedNode, parentPortalId ?? portalNodeData.id)
       addedData.nodes.push(...nestedNodes.nodes)
       addedData.edges.push(...nestedNodes.edges)
     }

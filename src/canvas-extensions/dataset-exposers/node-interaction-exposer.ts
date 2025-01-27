@@ -24,6 +24,7 @@ export default class NodeInteractionExposerExtension extends CanvasExtension {
             : [[exposedDataKey, nodeData[exposedDataKey]]]
 
           for (const [key, value] of datasetPairs) {
+            if (key === undefined) continue
             const modifiedKey = TARGET_NODE_DATASET_PREFIX + key.toString().charAt(0).toUpperCase() + key.toString().slice(1)
             
             if (!value) delete interactionEl.dataset[modifiedKey]

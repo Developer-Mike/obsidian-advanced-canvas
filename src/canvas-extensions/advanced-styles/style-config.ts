@@ -21,7 +21,7 @@ export const BUILTIN_NODE_STYLE_ATTRIBUTES = [
     options: [
       {
         icon: 'align-left',
-        label: 'Left (default)',
+        label: 'Left',
         value: null
       },
       {
@@ -43,7 +43,7 @@ export const BUILTIN_NODE_STYLE_ATTRIBUTES = [
     options: [
       {
         icon: 'rectangle-horizontal',
-        label: 'Round Rectangle (default)',
+        label: 'Round Rectangle',
         value: null
       },
       {
@@ -89,7 +89,7 @@ export const BUILTIN_NODE_STYLE_ATTRIBUTES = [
     options: [
       {
         icon: 'border-solid',
-        label: 'Solid (default)',
+        label: 'Solid',
         value: null
       },
       {
@@ -118,7 +118,7 @@ export const BUILTIN_EDGE_STYLE_ATTRIBUTES = [
     options: [
       {
         icon: 'path-solid',
-        label: 'Solid (default)',
+        label: 'Solid',
         value: null
       },
       {
@@ -144,7 +144,7 @@ export const BUILTIN_EDGE_STYLE_ATTRIBUTES = [
     options: [
       {
         icon: 'arrow-triangle',
-        label: 'Triangle (default)',
+        label: 'Triangle',
         value: null
       },
       {
@@ -190,7 +190,7 @@ export const BUILTIN_EDGE_STYLE_ATTRIBUTES = [
     options: [
       {
         icon: 'pathfinding-method-bezier',
-        label: 'Bezier (default)',
+        label: 'Bezier',
         value: null
       },
       {
