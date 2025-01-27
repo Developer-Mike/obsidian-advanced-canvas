@@ -1,80 +1,139 @@
-import { Canvas, CanvasNode } from "src/@types/Canvas"
+import { Canvas, CanvasNode, CanvasNodeData } from "src/@types/Canvas"
 import { CanvasEvent } from "src/core/events"
 import CanvasExtension from "../core/canvas-extension"
 import CanvasHelper from "src/utils/canvas-helper"
 import { ViewUpdate } from "@codemirror/view"
 
 export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
-  isEnabled() { return this.plugin.settings.getSetting('autoResizeNodeFeatureEnabled') }
+  isEnabled() { return 'autoResizeNodeFeatureEnabled' as const }
 
   init() {
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.NodeCreated,
+      (canvas: Canvas, node: CanvasNode) => this.onNodeCreated(canvas, node)
+    ))
+
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.PopupMenuCreated,
       (canvas: Canvas) => this.onPopupMenuCreated(canvas)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.NodeTextContentChanged,
-      (canvas: Canvas, node: CanvasNode, viewUpdate: ViewUpdate) => this.onNodeTextContentChanged(canvas, node, viewUpdate)
+      CanvasEvent.NodeEditingStateChanged,
+      (canvas: Canvas, node: CanvasNode, editing: boolean) => this.onNodeEditingStateChanged(canvas, node, editing)
     ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.NodeTextContentChanged,
+      (canvas: Canvas, node: CanvasNode, viewUpdate: ViewUpdate) => this.onNodeTextContentChanged(canvas, node, viewUpdate.view.dom)
+    ))
+  }
+
+  private isValidNodeType(nodeData: CanvasNodeData) {
+    return nodeData.type === 'text' || (nodeData.type === 'file' && nodeData.file?.endsWith('.md'))
+  }
+
+  private onNodeCreated(_canvas: Canvas, node: CanvasNode) {
+    const autoResizeNodeEnabledByDefault = this.plugin.settings.getSetting('autoResizeNodeEnabledByDefault')
+    if (!autoResizeNodeEnabledByDefault) return
+
+    const nodeData = node.getData()
+    if (nodeData.type !== 'text' && nodeData.type !== 'file') return // File extension can still be changed in the future
+
+    node.setData({
+      ...node.getData(),
+      autoResizeHeight: true
+    })
   }
 
   private onPopupMenuCreated(canvas: Canvas) {
     if (canvas.readonly) return
 
-    const selectedNodes = [...canvas.selection].filter(element => {
-      const elementData = element.getData()
-      return elementData.type === 'text'
-    }) as CanvasNode[]
+    const selectedNodes = canvas.getSelectionData().nodes
+      .filter(nodeData => this.isValidNodeType(nodeData))
+      .map(nodeData => canvas.nodes.get(nodeData.id))
+      .filter(node => node !== undefined) as CanvasNode[]
     if (selectedNodes.length === 0) return
 
-    const hasLockedHeight = selectedNodes.some(node => node.getData().lockedHeight)
+    const autoResizeHeightEnabled = selectedNodes.some(node => node.getData().autoResizeHeight)
     
     CanvasHelper.addPopupMenuOption(
       canvas,
       CanvasHelper.createPopupMenuOption({
-        id: 'lock-height',
-        label: 'Toggle locked height',
-        icon: hasLockedHeight ? 'ruler' : 'pencil-ruler',
-        callback: () => this.setLockedHeight(canvas, selectedNodes, hasLockedHeight)
+        id: 'auto-resize-height',
+        label: autoResizeHeightEnabled ? 'Disable auto-resize' : 'Enable auto-resize',
+        icon: autoResizeHeightEnabled ? 'scan-text' : 'lock',
+        callback: () => this.toggleAutoResizeHeightEnabled(canvas, selectedNodes, autoResizeHeightEnabled)
       })
     )
   }
 
-  private setLockedHeight(canvas: Canvas, nodes: CanvasNode[], lockedHeight: boolean) {
-    const newLockedHeight = lockedHeight ? undefined : true
-
+  private toggleAutoResizeHeightEnabled(canvas: Canvas, nodes: CanvasNode[], autoResizeHeight: boolean) {
     nodes.forEach(node => node.setData({
       ...node.getData(),
-      lockedHeight: newLockedHeight
+      autoResizeHeight: !autoResizeHeight
     }))
 
     this.onPopupMenuCreated(canvas)
   }
-  
-  private async onNodeTextContentChanged(canvas: Canvas, node: CanvasNode, viewUpdate: ViewUpdate) {
+
+  private canBeResized(node: CanvasNode) {
     const nodeData = node.getData()
-    if (nodeData.lockedHeight) return
+    return nodeData.autoResizeHeight
+  }
 
-    let textPadding = 0
-    const cmScroller = viewUpdate.view.dom.querySelector(".cm-scroller")
-    if (cmScroller) {
-      for (const pseudo of ["before", "after"]) {
-        const style = window.getComputedStyle(cmScroller, pseudo)
-        const height = parseFloat(style.getPropertyValue("height"))
+  private async onNodeEditingStateChanged(_canvas: Canvas, node: CanvasNode, editing: boolean) {
+    if (!this.isValidNodeType(node.getData())) return
+    if (!this.canBeResized(node)) return
 
-        textPadding += height
-      }
+    await sleep(10)
+
+    if (editing) {
+      this.onNodeTextContentChanged(_canvas, node, node.child.editMode.cm.dom)
+      return
     }
 
-    let newHeight = viewUpdate.view.contentHeight + textPadding + 10
+    const renderedMarkdownContainer = node.nodeEl.querySelector(".markdown-preview-view.markdown-rendered") as HTMLElement | null
+    if (!renderedMarkdownContainer) return
+
+    renderedMarkdownContainer.style.height = "min-content"
+    let newHeight = renderedMarkdownContainer.clientHeight
+    renderedMarkdownContainer.style.removeProperty("height")
+
+    this.setNodeHeight(node, newHeight)
+  }
+  
+  private async onNodeTextContentChanged(_canvas: Canvas, node: CanvasNode, dom: HTMLElement) {
+    if (!this.isValidNodeType(node.getData())) return
+    if (!this.canBeResized(node)) return
+
+    const cmScroller = dom.querySelector(".cm-scroller") as HTMLElement | null
+    if (!cmScroller) return
+
+    cmScroller.style.height = "min-content"
+    const newHeight = cmScroller.scrollHeight
+    cmScroller.style.removeProperty("height")
+
+    this.setNodeHeight(node, newHeight)
+  }
+
+  private setNodeHeight(node: CanvasNode, height: number) {
+    if (height === 0) return
+    
+    // Limit the height to the maximum allowed
+    const maxHeight = this.plugin.settings.getSetting('autoResizeNodeMaxHeight')
+    if (maxHeight != -1 && height > maxHeight) height = maxHeight
+
+    const nodeData = node.getData()
+
+    height = Math.max(height, node.canvas.config.minContainerDimension)
 
     if (this.plugin.settings.getSetting('autoResizeNodeSnapToGrid'))
-      newHeight = Math.round(newHeight / CanvasHelper.GRID_SIZE) * CanvasHelper.GRID_SIZE
+      height = Math.ceil(height / CanvasHelper.GRID_SIZE) * CanvasHelper.GRID_SIZE
 
     node.setData({
       ...nodeData,
-      height: newHeight
+      height: height
     })
   }
 }

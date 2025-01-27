@@ -29,6 +29,10 @@ export default class BBoxHelper {
     }
   }
 
+  static isColliding(bbox1: BBox, bbox2: BBox): boolean {
+    return bbox1.minX <= bbox2.maxX && bbox1.maxX >= bbox2.minX && bbox1.minY <= bbox2.maxY && bbox1.maxY >= bbox2.minY
+  }
+
   static insideBBox(position: Position|BBox, bbox: BBox, canTouchEdge: Boolean): boolean {
     const providedBBox = {
       minX: (position as BBox).minX ?? (position as Position).x,
@@ -88,6 +92,19 @@ export default class BBoxHelper {
         return { x: -1, y: 0 }
       default:
         return { x: 0, y: 0 }
+    }
+  }
+
+  static getOppositeSide(side: Side): Side {
+    switch (side) {
+      case 'top':
+        return 'bottom'
+      case 'right':
+        return 'left'
+      case 'bottom':
+        return 'top'
+      case 'left':
+        return 'right'
     }
   }
 

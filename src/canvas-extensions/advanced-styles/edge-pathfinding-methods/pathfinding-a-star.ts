@@ -4,6 +4,7 @@ import SvgPathHelper from "src/utils/svg-path-helper"
 import AdvancedCanvasPlugin from "src/main"
 import BBoxHelper from "src/utils/bbox-helper"
 
+const MAX_MS_CALCULATION = 100
 const DIRECTIONS = [
   { dx: 1, dy: 0 }, { dx: -1, dy: 0 }, { dx: 0, dy: 1 }, { dx: 0, dy: -1 },
   { dx: 1, dy: 1 }, { dx: -1, dy: 1 }, { dx: 1, dy: -1 }, { dx: -1, dy: -1 },
@@ -35,9 +36,7 @@ class Node {
 }
 
 export default class EdgePathfindingAStar extends EdgePathfindingMethod {
-  getPath(plugin: AdvancedCanvasPlugin, canvas: Canvas, fromPos: Position, _fromBBoxSidePos: Position, fromSide: Side, toPos: Position, _toBBoxSidePos: Position, toSide: Side, isDragging: boolean): EdgePath | null {
-    if (isDragging && !plugin.settings.getSetting('edgeStylePathfinderPathLiveUpdate')) return null
-        
+  getPath(plugin: AdvancedCanvasPlugin, canvas: Canvas, fromPos: Position, _fromBBoxSidePos: Position, fromSide: Side, toPos: Position, _toBBoxSidePos: Position, toSide: Side): EdgePath | null {        
     const nodeBBoxes = [...canvas.nodes.values()]
       .filter(node => {
         const nodeData = node.getData()
@@ -91,6 +90,8 @@ export default class EdgePathfindingAStar extends EdgePathfindingMethod {
   
     const openSet: Node[] = [start]
     const closedSet: Node[] = []
+
+    const startTimestamp = performance.now()
   
     while (openSet.length > 0) {
       // Find the node with the lowest fCost in the open set
@@ -103,25 +104,32 @@ export default class EdgePathfindingAStar extends EdgePathfindingMethod {
           lowestFCost = node.fCost
         }
       }
+
+      // Check if the calculation is taking too long
+      if (performance.now() - startTimestamp > MAX_MS_CALCULATION)
+        return null
   
       // No path found
-      if (!current) return null
+      if (!current)
+        return null
   
       // Remove the current node from the open set and add it to the closed set
       openSet.splice(openSet.indexOf(current), 1)
       closedSet.push(current)
   
       // Check if we have reached the end
-      if (current.x === end.x && current.y === end.y) {
+      if (current.x === end.x && current.y === end.y)
         return [fromPos, ...this.reconstructPath(current), toPos].map(node => ({ x: node.x, y: node.y }))
-      }
   
       // Location is not start or end, all touching positions are invalid
-      if (!(current.x === start.x && current.y === start.y) && this.isTouchingObstacle(current, obstacles)) continue
+      if (!(current.x === start.x && current.y === start.y) && this.isTouchingObstacle(current, obstacles))
+        continue
   
       // Expand neighbors
       for (const neighbor of this.getPossibleNeighbors(current, obstacles, gridResolution)) {
-        if (neighbor.inList(closedSet)) continue
+        // Skip if already processed
+        if (neighbor.inList(closedSet))
+          continue
   
         // Calculate tentative gCost
         const tentativeGCost = current.gCost + this.getMovementCost({

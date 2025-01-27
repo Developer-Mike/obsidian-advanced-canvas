@@ -1,10 +1,12 @@
 import { ItemView, Plugin } from 'obsidian'
 import CanvasPatcher from './core/canvas-patcher'
 import { Canvas, CanvasView } from './@types/Canvas'
+import Quicksettings from './quicksettings'
 
 // Utils
 import IconsHelper from './utils/icons-helper'
 import DebugHelper from './utils/debug-helper'
+import MigrationHelper from './utils/migration-helper'
 
 // Managers
 import SettingsManager from './settings'
@@ -12,6 +14,7 @@ import WindowsManager from './windows-manager'
 
 // Canvas Extensions
 import CanvasExtension from './core/canvas-extension'
+import VariableBreakpointCanvasExtension from './canvas-extensions/variable-breakpoint-canvas-extension'
 import GroupCanvasExtension from './canvas-extensions/group-canvas-extension'
 import PresentationCanvasExtension from './canvas-extensions/presentation-canvas-extension'
 import ZOrderingCanvasExtension from './canvas-extensions/z-ordering-canvas-extension'
@@ -23,8 +26,8 @@ import PortalsCanvasExtension from './canvas-extensions/portals-canvas-extension
 import BetterDefaultSettingsCanvasExtension from './canvas-extensions/better-default-settings-canvas-extension'
 import ColorPaletteCanvasExtension from './canvas-extensions/color-palette-canvas-extension'
 import CollapsibleGroupsCanvasExtension from './canvas-extensions/collapsible-groups-canvas-extension'
-import PropertiesCanvasExtension from './canvas-extensions/properties-canvas-extension'
 import FocusModeCanvasExtension from './canvas-extensions/focus-mode-canvas-extension'
+import FlipEdgeCanvasExtension from './canvas-extensions/flip-edge-canvas-extension'
 
 // Advanced Styles
 import NodeStylesExtension from './canvas-extensions/advanced-styles/node-styles'
@@ -35,7 +38,6 @@ import NodeInteractionExposerExtension from './canvas-extensions/dataset-exposer
 import NodeExposerExtension from './canvas-extensions/dataset-exposers/node-exposer'
 import EdgeExposerExtension from './canvas-extensions/dataset-exposers/edge-exposer'
 import CanvasWrapperExposerExtension from './canvas-extensions/dataset-exposers/canvas-wrapper-exposer'
-import MigrationHelper from './utils/migration-helper'
 
 const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   // Dataset Exposers
@@ -49,12 +51,13 @@ const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   EdgeStylesExtension,
 
   // Basic Extensions
+  VariableBreakpointCanvasExtension,
   BetterDefaultSettingsCanvasExtension,
   CommandsCanvasExtension,
+  FlipEdgeCanvasExtension,
   ZOrderingCanvasExtension,
   BetterReadonlyCanvasExtension,
   AutoResizeNodeCanvasExtension,
-  PropertiesCanvasExtension,
   GroupCanvasExtension,
 
   // More Advanced Extensions
@@ -71,6 +74,7 @@ export default class AdvancedCanvasPlugin extends Plugin {
   debugHelper: DebugHelper
 
   settings: SettingsManager
+  quicksettings: Quicksettings
   windowsManager: WindowsManager
 
   canvasPatcher: CanvasPatcher
@@ -85,6 +89,8 @@ export default class AdvancedCanvasPlugin extends Plugin {
     this.settings = new SettingsManager(this)
     await this.settings.loadSettings()
     this.settings.addSettingsTab()
+    
+    this.quicksettings = new Quicksettings(this)
 
     this.windowsManager = new WindowsManager(this)
 

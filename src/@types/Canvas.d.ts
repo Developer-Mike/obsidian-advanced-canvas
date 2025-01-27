@@ -33,6 +33,10 @@ export interface Canvas {
   edges: Map<string, CanvasEdge>
   getEdgesForNode(node: CanvasNode): CanvasEdge[]
 
+  dirty: Set<CanvasElement>
+  markDirty(element: CanvasElement): void
+  markMoved(element: CanvasNode): void
+
   wrapperEl: HTMLElement
   canvasEl: HTMLElement
   menu: PopupMenu
@@ -49,6 +53,7 @@ export interface Canvas {
   x: number
   y: number
   zoom: number
+  zoomBreakpoint: number
 
   tx: number
   ty: number
@@ -93,7 +98,8 @@ export interface Canvas {
   requestSave(): void
 
   // Custom
-  isCopying: boolean
+  isClearing?: boolean
+  isCopying?: boolean
   lockedX: number
   lockedY: number
   lockedZoom: number
@@ -176,9 +182,19 @@ export interface CanvasElement {
   initialized: boolean
   isDirty?: boolean // Custom for Change event
 
+  child: {
+    editMode: {
+      cm: {
+        dom: HTMLElement
+      }
+    }
+  }
+
   initialize(): void
   setColor(color: string): void
   
+  updateBreakpoint(breakpoint: boolean): void
+  setIsEditing(editing: boolean): void
   getBBox(): BBox
   
   getData(): CanvasNodeData | CanvasEdgeData
@@ -192,6 +208,7 @@ export interface CanvasNodeData {
   y: number
   width: number
   height: number
+  color: string
 
   type: CanvasNodeType
   text?: string
@@ -201,7 +218,7 @@ export interface CanvasNodeData {
   // TODO: needsToBeInitialized?: boolean
   styleAttributes?: { [key: string]: string | null }
 
-  lockedHeight?: boolean
+  autoResizeHeight?: boolean
 
   isCollapsed?: boolean
   collapsedData?: CanvasData

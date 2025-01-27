@@ -1,4 +1,4 @@
-import { Canvas, CanvasEdge, CanvasNode, Position, Side } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasEdge, CanvasElement, CanvasNode, Position, Side } from "src/@types/Canvas"
 import CanvasHelper from "src/utils/canvas-helper"
 import { CanvasEvent } from "src/core/events"
 import BBoxHelper from "src/utils/bbox-helper"
@@ -43,28 +43,42 @@ export default class EdgeStylesExtension extends CanvasExtension {
       (canvas: Canvas, edge: CanvasEdge, center: Position) => this.onEdgeCenterRequested(canvas, edge, center)
     ))
 
+    // TODO: Could be optimized and ignore initial node creation
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.NodeAdded,
-      (canvas: Canvas, _node: CanvasNode) => this.updateAllEdges(canvas)
+      (canvas: Canvas, node: CanvasNode) => this.updateAllEdgesInArea(canvas, node.getBBox())
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.NodeMoved,
-      (canvas: Canvas, _node: CanvasNode) => this.updateAllEdges(canvas)
+      // Only update edges this way if a node got moved with the arrow keys
+      (canvas: Canvas, node: CanvasNode) => node.initialized && !canvas.isDragging ? this.updateAllEdgesInArea(canvas, node.getBBox()) : void 0
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.NodeRemoved,
-      (canvas: Canvas, _node: CanvasNode) => this.updateAllEdges(canvas)
+      (canvas: Canvas, node: CanvasNode) => this.updateAllEdgesInArea(canvas, node.getBBox())
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.DraggingStateChanged,
       (canvas: Canvas, isDragging: boolean) => {
         if (isDragging) return
-        this.updateAllEdges(canvas)
+
+        const selectedNodes = canvas.getSelectionData().nodes
+          .map(nodeData => canvas.nodes.get(nodeData.id))
+          .filter(node => node !== undefined) as CanvasNode[]
+        const selectedNodeBBoxes = selectedNodes.map(node => node.getBBox())
+        const selectedNodeBBox = BBoxHelper.combineBBoxes(selectedNodeBBoxes)
+
+        this.updateAllEdgesInArea(canvas, selectedNodeBBox)
       }
     ))
+  }
+
+  // Skip if isDragging and setting isn't enabled
+  private shouldUpdateEdge(canvas: Canvas): boolean {
+    return !canvas.isDragging || this.plugin.settings.getSetting('edgeStyleUpdateWhileDragging') || canvas.canvasEl.hasClass('is-connecting')
   }
 
   private onPopupMenuCreated(canvas: Canvas): void {
@@ -97,13 +111,22 @@ export default class EdgeStylesExtension extends CanvasExtension {
     canvas.pushHistory(canvas.getData())
   }
 
-  private updateAllEdges(canvas: Canvas) {
+  private updateAllEdgesInArea(canvas: Canvas, bbox: BBox) {
+    if (!this.shouldUpdateEdge(canvas)) return
+
     for (const edge of canvas.edges.values()) {
-      this.onEdgeChanged(canvas, edge)
+      if (!BBoxHelper.isColliding(edge.getBBox(), bbox)) continue
+
+      canvas.markDirty(edge)
     }
   }
 
   private onEdgeChanged(canvas: Canvas, edge: CanvasEdge) {
+    // Skip if edge isn't dirty or selected
+    if (!canvas.dirty.has(edge) && !canvas.selection.has(edge)) return
+
+    if (!this.shouldUpdateEdge(canvas)) return
+
     const edgeData = edge.getData()
     
     // Reset path to default
@@ -124,7 +147,7 @@ export default class EdgeStylesExtension extends CanvasExtension {
         toBBoxSidePos :
         edge.bezier.to
 
-      const path = new EDGE_PATHFINDING_METHODS[pathfindingMethod]().getPath(this.plugin, canvas, fromPos, fromBBoxSidePos, edge.from.side, toPos, toBBoxSidePos, edge.to.side, canvas.isDragging)
+      const path = new EDGE_PATHFINDING_METHODS[pathfindingMethod]().getPath(this.plugin, canvas, fromPos, fromBBoxSidePos, edge.from.side, toPos, toBBoxSidePos, edge.to.side)
       if (!path) return
 
       edge.center = path.center
