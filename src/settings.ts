@@ -159,6 +159,27 @@ export const SETTINGS = {
     description: 'Combine all style attributes of Advanced Canvas in a single dropdown.',
     children: { }
   },
+  canvasLinksFeatureEnabled: {
+    label: 'Canvas links',
+    description: 'TODO',
+    children: {
+      showLinksToEmbeddedFiles: {
+        label: 'Show links to embedded files',
+        description: 'TODO',
+        type: 'boolean'
+      },
+      showLinksBetweenFileNodesInGraph: {
+        label: 'Show links between file nodes in graph',
+        description: 'TODO',
+        type: 'boolean'
+      },
+      showLinksBetweenFileNodesInProperties: {
+        label: 'Show links between file nodes in properties',
+        description: 'TODO',
+        type: 'boolean'
+      }
+    }
+  },
   nodeStylingFeatureEnabled: {
     label: 'Node styling',
     description: 'Style your nodes with different shapes and borders.',

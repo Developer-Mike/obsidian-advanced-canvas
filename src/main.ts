@@ -38,6 +38,7 @@ import NodeInteractionExposerExtension from './canvas-extensions/dataset-exposer
 import NodeExposerExtension from './canvas-extensions/dataset-exposers/node-exposer'
 import EdgeExposerExtension from './canvas-extensions/dataset-exposers/edge-exposer'
 import CanvasWrapperExposerExtension from './canvas-extensions/dataset-exposers/canvas-wrapper-exposer'
+import CanvasLinkObsidianExtension from './obsidian-extensions/canvas-link-obsidian-extension'
 
 const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   // Dataset Exposers
@@ -78,6 +79,7 @@ export default class AdvancedCanvasPlugin extends Plugin {
   windowsManager: WindowsManager
 
   canvasPatcher: CanvasPatcher
+  canvasLinkObsidianExtension: CanvasLinkObsidianExtension
   canvasExtensions: CanvasExtension[]
 
 	async onload() {
@@ -95,6 +97,7 @@ export default class AdvancedCanvasPlugin extends Plugin {
     this.windowsManager = new WindowsManager(this)
 
     this.canvasPatcher = new CanvasPatcher(this)
+    this.canvasLinkObsidianExtension = new CanvasLinkObsidianExtension(this)
     this.canvasExtensions = CANVAS_EXTENSIONS.map((Extension: any) => new Extension(this))
 	}
 

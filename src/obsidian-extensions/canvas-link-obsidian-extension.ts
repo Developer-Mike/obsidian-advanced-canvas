@@ -1,8 +1,8 @@
 import { TAbstractFile, TFile } from "obsidian"
-import { CanvasData, CanvasEdgeData, CanvasNodeData } from "src/@types/Canvas"
+import { CanvasData, CanvasNodeData } from "src/@types/Canvas"
 import AdvancedCanvasPlugin from "src/main"
-import { patchObjectPrototype } from "src/utils/patch-helper"
-import * as PathHelper from "src/utils/path-helper"
+import PatchHelper from "src/utils/patch-helper"
+import PathHelper from "src/utils/path-helper"
 
 export default class CanvasLinkObsidianExtension {
   plugin: AdvancedCanvasPlugin
@@ -13,14 +13,31 @@ export default class CanvasLinkObsidianExtension {
     if (!this.plugin.settings.getSetting('canvasLinksFeatureEnabled')) return
 
     const that = this
-    patchObjectPrototype(this.plugin, this.plugin.app.metadataCache, {
+    PatchHelper.patchObjectPrototype(this.plugin, this.plugin.app.metadataCache, {
+      getCache: (next: any) => function (filepath: string, ...args: any[]) {
+        // Bypass the "md" extension check by handling the "canvas" extension here
+        if (PathHelper.extension(filepath) === 'canvas') {
+          if (!this.fileCache.hasOwnProperty(filepath)) return null
+
+          /*
+          const hash = this.fileCache[filepath].hash
+          return this.metadataCache[hash] || null
+          */
+          return this.metadataCache[filepath] || null
+        }
+
+        return next.call(this, filepath, ...args)
+      },
       resolveLinks: (next: any) => async function (filepath: string, ...args: any[]) {
+        // Call the original function if the file is not a canvas file
         if (PathHelper.extension(filepath) !== 'canvas')
           return next.call(this, filepath, ...args)
 
+        // Get canvas file
         const file = this.vault.getAbstractFileByPath(filepath)
         if (!(file instanceof TFile)) return
 
+        // Read canvas data
         const content = JSON.parse(await this.vault.cachedRead(file) ?? '{}') as CanvasData
         if (!content?.nodes) return
 
@@ -35,6 +52,19 @@ export default class CanvasLinkObsidianExtension {
             }
           }
         }
+
+        ////////////////////////// TODO
+        if (this.resolvedLinks[file.path]) {
+          this.metadataCache[file.path] = {
+            embeds: Object.entries(this.resolvedLinks[file.path]).map(([path, count]) => ({
+              link: `[[${path}]]`,
+              original: path,
+              displayText: `${path} (${count})`,
+              position: { start: { line: 0, col: 0, offset: 0 }, end: { line: 0, col: 0, offset: 0 } }
+            }))
+          }
+        }
+        //////////////////////////
 
         // Show links between files with edges
         if (!that.plugin.settings.getSetting('showLinksBetweenFileNodesInGraph')) return
@@ -63,14 +93,15 @@ export default class CanvasLinkObsidianExtension {
       }
     })
 
+    // Add event listeners to update the links when a file is created or modified - metadataCache.linkResolver only resolves md files
     this.plugin.registerEvent(this.plugin.app.vault.on(
       'create',
-      (file: TAbstractFile) => this.plugin.app.metadataCache.resolveLinks(file.path)
+      (file: TAbstractFile) => file.path.endsWith(".canvas") ? this.plugin.app.metadataCache.resolveLinks(file.path) : null
     ))
 
     this.plugin.registerEvent(this.plugin.app.vault.on(
       'modify',
-      (file: TAbstractFile) => this.plugin.app.metadataCache.resolveLinks(file.path)
+      (file: TAbstractFile) => file.path.endsWith(".canvas") ? this.plugin.app.metadataCache.resolveLinks(file.path) : null
     ))
   }
 }

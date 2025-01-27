@@ -275,9 +275,6 @@ export interface CanvasEdgeData {
 
   fromSide: Side
   toSide: Side
-
-  fromEnd: undefined | 'arrow'
-  toEnd: 'none' | undefined
   
   fromEnd?: EndType
   toEnd?: EndType
