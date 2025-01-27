@@ -1,88 +1,120 @@
 import { ItemView, Plugin } from 'obsidian'
-import SettingsManager from './settings'
-import ShapesCanvasExtension from './canvas-extensions/shapes-canvas-extension'
-import { Canvas, CanvasView } from './@types/Canvas'
 import CanvasPatcher from './core/canvas-patcher'
+import { Canvas, CanvasView } from './@types/Canvas'
+import Quicksettings from './quicksettings'
+
+// Utils
+import IconsHelper from './utils/icons-helper'
+import DebugHelper from './utils/debug-helper'
+import MigrationHelper from './utils/migration-helper'
+
+// Managers
+import SettingsManager from './settings'
+import WindowsManager from './windows-manager'
+
+// Canvas Extensions
+import CanvasExtension from './core/canvas-extension'
+import VariableBreakpointCanvasExtension from './canvas-extensions/variable-breakpoint-canvas-extension'
 import GroupCanvasExtension from './canvas-extensions/group-canvas-extension'
 import PresentationCanvasExtension from './canvas-extensions/presentation-canvas-extension'
-import InteractionTaggerCanvasExtension from './canvas-extensions/interaction-tagger-canvas-extension'
-import NodeDataTaggerCanvasExtension from './canvas-extensions/node-data-tagger-canvas-extension'
-import ReadonlyCanvasExtension from './canvas-extensions/readonly-canvas-extension'
+import ZOrderingCanvasExtension from './canvas-extensions/z-ordering-canvas-extension'
+import BetterReadonlyCanvasExtension from './canvas-extensions/better-readonly-canvas-extension'
 import EncapsulateCanvasExtension from './canvas-extensions/encapsulate-canvas-extension'
 import CommandsCanvasExtension from './canvas-extensions/commands-canvas-extension'
+import AutoResizeNodeCanvasExtension from './canvas-extensions/auto-resize-node-canvas-extension'
 import PortalsCanvasExtension from './canvas-extensions/portals-canvas-extension'
-import IconsHelper from './utils/icons-helper'
-import StickersCanvasExtension from './canvas-extensions/stickers-canvas-extension'
-import EdgesStyleCanvasExtension from './canvas-extensions/edges-style-canvas-extension'
-import EdgeDataTaggerCanvasExtension from './canvas-extensions/edge-data-tagger-canvas-extension'
-import DebugHelper from './utils/debug-helper'
 import BetterDefaultSettingsCanvasExtension from './canvas-extensions/better-default-settings-canvas-extension'
 import ColorPaletteCanvasExtension from './canvas-extensions/color-palette-canvas-extension'
 import CollapsibleGroupsCanvasExtension from './canvas-extensions/collapsible-groups-canvas-extension'
-import WindowsManager from './windows-manager'
-import CanvasWrapperDataTaggerCanvasExtension from './canvas-extensions/canvas-wrapper-data-tagger-canvas-extension'
-import PropertiesCanvasExtension from './canvas-extensions/properties-canvas-extension'
-import CanvasLinkObsidianExtension from './obsidian-extensions/canvas-link-obsidian-extension'
+import FocusModeCanvasExtension from './canvas-extensions/focus-mode-canvas-extension'
+import FlipEdgeCanvasExtension from './canvas-extensions/flip-edge-canvas-extension'
 
-const OBSIDIAN_EXTENSIONS: any[] = [
-  CanvasLinkObsidianExtension
-]
+// Advanced Styles
+import NodeStylesExtension from './canvas-extensions/advanced-styles/node-styles'
+import EdgeStylesExtension from './canvas-extensions/advanced-styles/edge-styles'
 
-const CANVAS_EXTENSIONS: any[] = [
-  CanvasWrapperDataTaggerCanvasExtension,
-  NodeDataTaggerCanvasExtension,
-  EdgeDataTaggerCanvasExtension,
-  InteractionTaggerCanvasExtension,
+// Dataset Exposers
+import NodeInteractionExposerExtension from './canvas-extensions/dataset-exposers/node-interaction-exposer'
+import NodeExposerExtension from './canvas-extensions/dataset-exposers/node-exposer'
+import EdgeExposerExtension from './canvas-extensions/dataset-exposers/edge-exposer'
+import CanvasWrapperExposerExtension from './canvas-extensions/dataset-exposers/canvas-wrapper-exposer'
+
+const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
+  // Dataset Exposers
+  CanvasWrapperExposerExtension,
+  NodeExposerExtension,
+  EdgeExposerExtension,
+  NodeInteractionExposerExtension,
+
+  // Advanced Styles
+  NodeStylesExtension,
+  EdgeStylesExtension,
+
+  // Basic Extensions
+  VariableBreakpointCanvasExtension,
   BetterDefaultSettingsCanvasExtension,
   CommandsCanvasExtension,
-  PropertiesCanvasExtension,
-  ReadonlyCanvasExtension,
+  FlipEdgeCanvasExtension,
+  ZOrderingCanvasExtension,
+  BetterReadonlyCanvasExtension,
+  AutoResizeNodeCanvasExtension,
   GroupCanvasExtension,
+
+  // More Advanced Extensions
   CollapsibleGroupsCanvasExtension,
+  FocusModeCanvasExtension,
   EncapsulateCanvasExtension,
   ColorPaletteCanvasExtension,
-  StickersCanvasExtension,
-  ShapesCanvasExtension,
-  EdgesStyleCanvasExtension,
   PresentationCanvasExtension,
   PortalsCanvasExtension
 ]
 
 export default class AdvancedCanvasPlugin extends Plugin {
-  settings: SettingsManager
-  windowsManager: WindowsManager
+  migrationHelper: MigrationHelper
   debugHelper: DebugHelper
 
-  obsidianExtensions: any[] = []
+  settings: SettingsManager
+  quicksettings: Quicksettings
+  windowsManager: WindowsManager
 
   canvasPatcher: CanvasPatcher
-  canvasExtensions: any[]
+  canvasExtensions: CanvasExtension[]
 
 	async onload() {
+    this.migrationHelper = new MigrationHelper(this)
+    await this.migrationHelper.migrate()
+
     IconsHelper.addIcons()
     
     this.settings = new SettingsManager(this)
     await this.settings.loadSettings()
     this.settings.addSettingsTab()
+    
+    this.quicksettings = new Quicksettings(this)
 
     this.windowsManager = new WindowsManager(this)
 
-    this.obsidianExtensions = OBSIDIAN_EXTENSIONS.map((Extension) => new Extension(this))
-
     this.canvasPatcher = new CanvasPatcher(this)
-    this.canvasExtensions = CANVAS_EXTENSIONS.map((Extension) => new Extension(this))
+    this.canvasExtensions = CANVAS_EXTENSIONS.map((Extension: any) => new Extension(this))
 	}
 
   onunload() {}
 
-  getCurrentCanvasView(): CanvasView|null {
+  getCurrentCanvasView(): CanvasView | null {
     const canvasView = this.app.workspace.getActiveViewOfType(ItemView)
     if (canvasView?.getViewType() !== 'canvas') return null
     return canvasView as CanvasView
   }
 
-  getCurrentCanvas(): Canvas|null {
+  getCurrentCanvas(): Canvas | null {
     return this.getCurrentCanvasView()?.canvas || null
+  }
+
+  createFileSnapshot(path: string, content: string) {
+    const fileRecoveryPlugin = this.app.internalPlugins.plugins['file-recovery']?.instance
+    if (!fileRecoveryPlugin) return
+
+    fileRecoveryPlugin.forceAdd(path, content)
   }
 
   // this.app.plugins.plugins["advanced-canvas"].enableDebugMode()

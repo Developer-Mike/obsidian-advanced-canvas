@@ -1,5 +1,5 @@
 import App, { SuggestModal, TFile } from 'obsidian'
-import * as PathHelper from 'src/utils/path-helper'
+import PathHelper from 'src/utils/path-helper'
 
 export class FileNameModal extends SuggestModal<string> {
   parentPath: string
@@ -90,10 +90,8 @@ export class FileSelectModal extends SuggestModal<string> {
       this.onChooseSuggestion = (path: string, _evt: MouseEvent | KeyboardEvent) => {
         const file = this.app.vault.getAbstractFileByPath(path)
 
-        if (file instanceof TFile) {
-          resolve(file)
-          return
-        }
+        if (file instanceof TFile)
+          return resolve(file)
 
         if (!this.suggestNewFile) return
 

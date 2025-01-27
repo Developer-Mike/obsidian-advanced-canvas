@@ -1,16 +1,14 @@
 import { Canvas, Position } from "src/@types/Canvas"
-import * as CanvasHelper from "src/utils/canvas-helper"
-import AdvancedCanvasPlugin from "src/main"
+import CanvasHelper from "src/utils/canvas-helper"
 import { CanvasEvent } from "src/core/events"
+import CanvasExtension from "../core/canvas-extension"
 
 const GROUP_NODE_SIZE = { width: 300, height: 300 }
 
-export default class GroupCanvasExtension {
-  plugin: AdvancedCanvasPlugin
+export default class GroupCanvasExtension extends CanvasExtension {
+  isEnabled() { return true }
 
-  constructor(plugin: any) {
-    this.plugin = plugin
-
+  init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.CanvasChanged,
       (canvas: Canvas) => {

@@ -33,7 +33,12 @@ export interface Canvas {
   edges: Map<string, CanvasEdge>
   getEdgesForNode(node: CanvasNode): CanvasEdge[]
 
+  dirty: Set<CanvasElement>
+  markDirty(element: CanvasElement): void
+  markMoved(element: CanvasNode): void
+
   wrapperEl: HTMLElement
+  canvasEl: HTMLElement
   menu: PopupMenu
   cardMenuEl: HTMLElement
   canvasControlsEl: HTMLElement
@@ -48,6 +53,7 @@ export interface Canvas {
   x: number
   y: number
   zoom: number
+  zoomBreakpoint: number
 
   tx: number
   ty: number
@@ -82,6 +88,7 @@ export interface Canvas {
   getContainingNodes(bbox: BBox): CanvasNode[]
 
   history: CanvasHistory
+  pushHistory(data: CanvasData): void
   undo(): void
   redo(): void
 
@@ -91,6 +98,8 @@ export interface Canvas {
   requestSave(): void
 
   // Custom
+  isClearing?: boolean
+  isCopying?: boolean
   lockedX: number
   lockedY: number
   lockedZoom: number
@@ -126,6 +135,7 @@ export interface SelectionData {
 export interface CanvasConfig {
   defaultTextNodeDimensions: Size
   defaultFileNodeDimensions: Size
+  minContainerDimension: number
 }
 
 export interface CanvasView extends ItemView {
@@ -172,9 +182,19 @@ export interface CanvasElement {
   initialized: boolean
   isDirty?: boolean // Custom for Change event
 
+  child: {
+    editMode: {
+      cm: {
+        dom: HTMLElement
+      }
+    }
+  }
+
   initialize(): void
   setColor(color: string): void
   
+  updateBreakpoint(breakpoint: boolean): void
+  setIsEditing(editing: boolean): void
   getBBox(): BBox
   
   getData(): CanvasNodeData | CanvasEdgeData
@@ -183,13 +203,22 @@ export interface CanvasElement {
 
 export type CanvasNodeType = 'text' | 'group' | 'file' | 'link'
 export interface CanvasNodeData {
+  id: string
+  x: number
+  y: number
+  width: number
+  height: number
+  color: string
+
   type: CanvasNodeType
   text?: string
   label?: string
   file?: string
 
-  isSticker?: boolean
-  shape?: string | null
+  // TODO: needsToBeInitialized?: boolean
+  styleAttributes?: { [key: string]: string | null }
+
+  autoResizeHeight?: boolean
 
   isCollapsed?: boolean
   collapsedData?: CanvasData
@@ -210,12 +239,13 @@ export interface CanvasNodeData {
 
   // Node from portal
   portalId?: string
-
-  [key: string]: any
 }
 
 export interface CanvasNode extends CanvasElement {
+  isEditing: boolean
+
   nodeEl: HTMLElement
+  contentEl: HTMLElement
 
   labelEl?: HTMLElement
   file?: TFile
@@ -231,11 +261,12 @@ export interface CanvasNode extends CanvasElement {
 
   color: string
 
-  setData(data: CanvasNodeData): void
+  setData(data: CanvasNodeData, addHistory?: boolean): void
   getData(): CanvasNodeData
 }
 
 type Side = 'top' | 'right' | 'bottom' | 'left'
+type EndType = 'none' | 'arrow'
 export interface CanvasEdgeData {
   id: string
 
@@ -248,14 +279,17 @@ export interface CanvasEdgeData {
   fromEnd: undefined | 'arrow'
   toEnd: 'none' | undefined
   
-  edgeStyle?: 'long-dashed' | 'short-dashed' | 'dotted'
-  edgePathRoute?: 'direct' | 'square' | 'a-star'
+  fromEnd?: EndType
+  toEnd?: EndType
+
+  styleAttributes?: { [key: string]: string | null }
 
   portalId?: string
   isUnsaved?: boolean
+
+  [key: string]: any
 }
 
-type EndType = 'none' | 'arrow'
 export interface CanvasEdge extends CanvasElement {
   label: string
 
@@ -264,10 +298,19 @@ export interface CanvasEdge extends CanvasElement {
     side: Side
     end: EndType
   }
+  fromLineEnd: {
+    el: HTMLElement
+    type: 'arrow'
+  }
+
   to: {
     node: CanvasNode
     side: Side
     end: EndType
+  }
+  toLineEnd: {
+    el: HTMLElement
+    type: 'arrow'
   }
 
   bezier: {
@@ -299,7 +342,7 @@ export interface CanvasEdge extends CanvasElement {
   render(): void
   updatePath(): void
   
-  setData(data: CanvasEdgeData): void
+  setData(data: CanvasEdgeData, addHistory?: boolean): void
   getData(): CanvasEdgeData
 }
 

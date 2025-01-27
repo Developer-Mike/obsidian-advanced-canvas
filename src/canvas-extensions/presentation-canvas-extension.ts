@@ -1,27 +1,25 @@
 import { Menu, Notice } from 'obsidian'
 import { BBox, Canvas, CanvasEdge, CanvasElement, CanvasNode, Position, Size } from 'src/@types/Canvas'
-import AdvancedCanvasPlugin from 'src/main'
 import { CanvasEvent } from 'src/core/events'
-import * as CanvasHelper from "src/utils/canvas-helper"
-import * as BBoxHelper from "src/utils/bbox-helper"
+import CanvasHelper from "src/utils/canvas-helper"
+import BBoxHelper from "src/utils/bbox-helper"
+import CanvasExtension from '../core/canvas-extension'
 
 const START_SLIDE_NAME = 'Start Slide'
 const DEFAULT_SLIDE_NAME = 'New Slide'
 
-export default class PresentationCanvasExtension {
-  plugin: AdvancedCanvasPlugin
+export default class PresentationCanvasExtension extends CanvasExtension {
   savedViewport: any = null
   isPresentationMode: boolean = false
-  visitedNodes: any[] = []
+  visitedNodeIds: string[] = []
+  fullscreenModalObserver: MutationObserver | null = null
 
-  constructor(plugin: any) {
-    this.plugin = plugin
-
-    if (!this.plugin.settings.getSetting('presentationFeatureEnabled')) return
-
+  isEnabled() { return 'presentationFeatureEnabled' as const }
+  
+  init() {
     /* Add wrap in slide option to context menu */
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      'canvas:selection-menu',
+      CanvasEvent.SelectionContextMenu,
       (menu: Menu, canvas: Canvas) => {
         menu.addItem((item) =>
           item
@@ -47,12 +45,42 @@ export default class PresentationCanvasExtension {
     })
 
     this.plugin.addCommand({
+			id: 'set-start-node',
+			name: 'Set start node',
+			checkCallback: CanvasHelper.canvasCommand(
+        this.plugin,
+        (canvas: Canvas) => !canvas.readonly && !this.isPresentationMode && canvas.getSelectionData().nodes.length === 1,
+        (canvas: Canvas) => this.setStartNode(canvas, canvas.nodes.get(canvas.getSelectionData().nodes[0].id))
+      )
+    })
+
+    this.plugin.addCommand({
 			id: 'start-presentation',
       name: 'Start presentation',
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (_canvas: Canvas) => !this.isPresentationMode,
         (canvas: Canvas) => this.startPresentation(canvas)
+      )
+    })
+
+    this.plugin.addCommand({
+			id: 'continue-presentation',
+      name: 'Continue presentation',
+      checkCallback: CanvasHelper.canvasCommand(
+        this.plugin,
+        (_canvas: Canvas) => !this.isPresentationMode,
+        (canvas: Canvas) => this.startPresentation(canvas, true)
+      )
+    })
+
+    this.plugin.addCommand({
+      id: 'end-presentation',
+      name: 'End presentation',
+      checkCallback: CanvasHelper.canvasCommand(
+        this.plugin,
+        (_canvas: Canvas) => this.isPresentationMode,
+        (canvas: Canvas) => this.endPresentation(canvas)
       )
     })
 
@@ -110,6 +138,8 @@ export default class PresentationCanvasExtension {
   }
 
   onPopupMenuCreated(canvas: Canvas): void {
+    if (!this.plugin.settings.getSetting('showSetStartNodeInPopup')) return
+
     // If the canvas is readonly or there are multiple/no nodes selected, return
     const selectedNodesData = canvas.getSelectionData().nodes
     if (canvas.readonly || selectedNodesData.length !== 1 || canvas.selection.size > 1) return
@@ -164,7 +194,7 @@ export default class PresentationCanvasExtension {
     const startNode = this.getStartNode(canvas)
     if (startNode) startNode.setData({ ...startNode.getData(), isStartNode: false })
 
-    if (node !== startNode) node.setData({ ...node.getData(), isStartNode: true })
+    if (node !== startNode) node.setData({ ...node.getData(), isStartNode: true }, true)
   }
 
   private getDefaultSlideSize(): Size {
@@ -232,11 +262,14 @@ export default class PresentationCanvasExtension {
 
       await sleep(animationDurationMs / 2)
 
-      const nextNodeBBoxEnlarged = BBoxHelper.scaleBBox(toNode.getBBox(), animationIntensity)
-      if (useCustomZoomFunction) CanvasHelper.zoomToBBox(canvas, nextNodeBBoxEnlarged)
-      else canvas.zoomToBbox(nextNodeBBoxEnlarged)
+      if (fromNode.getData().id !== toNode.getData().id) {
+        // Add 0.1 to fix obsidian bug that causes the animation to skip if the bbox is the same
+        const nextNodeBBoxEnlarged = BBoxHelper.scaleBBox(toNode.getBBox(), animationIntensity + 0.1)
+        if (useCustomZoomFunction) CanvasHelper.zoomToBBox(canvas, nextNodeBBoxEnlarged)
+        else canvas.zoomToBbox(nextNodeBBoxEnlarged)
 
-      await sleep(animationDurationMs / 2)
+        await sleep(animationDurationMs / 2)
+      }
     }
 
     let nodeBBox = toNode.getBBox()
@@ -244,14 +277,19 @@ export default class PresentationCanvasExtension {
     else canvas.zoomToBbox(nodeBBox)
   }
 
-  private async startPresentation(canvas: Canvas) {
-    const startNode = this.getStartNode(canvas)
-    if (!startNode) {
-      new Notice('No start node found. Please mark a node as a start node trough the popup menu.')
-      return
+  private async startPresentation(canvas: Canvas, tryContinue: boolean = false) {
+    // Only reset visited nodes if we are not trying to continue
+    if (!tryContinue || this.visitedNodeIds.length === 0) {
+      const startNode = this.getStartNode(canvas)
+      if (!startNode) {
+        new Notice('No start node found. Please mark a node as a start node trough the popup menu.')
+        return
+      }
+      
+      this.visitedNodeIds = [startNode.getData().id]
     }
 
-    this.visitedNodes = []
+    // Save current viewport
     this.savedViewport = {
       x: canvas.tx,
       y: canvas.ty,
@@ -267,15 +305,20 @@ export default class PresentationCanvasExtension {
     canvas.setReadonly(true)
 
     // Register event handler for keyboard navigation
-    if (this.plugin.settings.getSetting('useArrowKeysToChangeSlides')) {
-      canvas.wrapperEl.onkeydown = (e: any) => {
+    canvas.wrapperEl.onkeydown = (e: any) => {
+      if (this.plugin.settings.getSetting('useArrowKeysToChangeSlides')) {
         if (e.key === 'ArrowRight') this.nextNode(canvas)
         else if (e.key === 'ArrowLeft') this.previousNode(canvas)
+      }
+
+      if (this.plugin.settings.getSetting('usePgUpPgDownKeysToChangeSlides')) {
+        if (e.key === 'PageDown') this.nextNode(canvas)
+        else if (e.key === 'PageUp') this.previousNode(canvas)
       }
     }
 
     // Keep modals while in fullscreen mode
-    const fullscreenModalObserver = new MutationObserver((mutationRecords) => {
+    this.fullscreenModalObserver = new MutationObserver((mutationRecords) => {
       mutationRecords.forEach((mutationRecord) => {
         mutationRecord.addedNodes.forEach((node) => {
           document.body.removeChild(node)
@@ -286,13 +329,11 @@ export default class PresentationCanvasExtension {
       const inputField = document.querySelector(".prompt-input") as HTMLInputElement|null
       if (inputField) inputField.focus()
     })
-    fullscreenModalObserver.observe(document.body, { childList: true })
+    this.fullscreenModalObserver.observe(document.body, { childList: true })
 
     // Register event handler for exiting presentation mode
     canvas.wrapperEl.onfullscreenchange = (_e: any) => {
       if (document.fullscreenElement) return
-
-      fullscreenModalObserver.disconnect()
       this.endPresentation(canvas)
     }
 
@@ -302,12 +343,19 @@ export default class PresentationCanvasExtension {
     await sleep(500)
 
     // Zoom to first node
-    this.visitedNodes.push(startNode)
+    const startNodeId = this.visitedNodeIds.first()
+    if (!startNodeId) return
+
+    const startNode = canvas.nodes.get(startNodeId)
+    if (!startNode) return
+
     this.animateNodeTransition(canvas, undefined, startNode)
   }
 
   private endPresentation(canvas: Canvas) {
     // Unregister event handlers
+    this.fullscreenModalObserver?.disconnect()
+    this.fullscreenModalObserver = null
     canvas.wrapperEl.onkeydown = null
     canvas.wrapperEl.onfullscreenchange = null
 
@@ -319,15 +367,20 @@ export default class PresentationCanvasExtension {
     if (document.fullscreenElement) document.exitFullscreen()
 
     // Reset viewport
-    canvas.setViewport(this.savedViewport.x, this.savedViewport.y, this.savedViewport.zoom)
+    if (this.plugin.settings.getSetting('resetViewportOnPresentationEnd'))
+      canvas.setViewport(this.savedViewport.x, this.savedViewport.y, this.savedViewport.zoom)
+    
     this.isPresentationMode = false
   }
 
   private nextNode(canvas: Canvas) {
-    const fromNode = this.visitedNodes.last()
+    const fromNodeId = this.visitedNodeIds.last()
+    if (!fromNodeId) return
+
+    const fromNode = canvas.nodes.get(fromNodeId)
     if (!fromNode) return
 
-    const outgoingEdges = canvas.getEdgesForNode(fromNode).filter((edge: CanvasEdge) => edge.from.node === fromNode)
+    const outgoingEdges = canvas.getEdgesForNode(fromNode).filter((edge: CanvasEdge) => edge.from.node.getData().id === fromNodeId)
     let toNode = outgoingEdges.first()?.to.node
 
     // If there are multiple outgoing edges, we need to look at the edge label
@@ -342,8 +395,8 @@ export default class PresentationCanvasExtension {
         })
 
       // Find which edges already have been traversed
-      const traversedEdgesCount = this.visitedNodes
-        .filter((visitedNode: CanvasNode) => visitedNode == fromNode).length - 1
+      const traversedEdgesCount = this.visitedNodeIds
+        .filter((visitedNodeId: string) => visitedNodeId === fromNodeId).length - 1
 
       // Select next edge
       const nextEdge = sortedEdges[traversedEdgesCount]
@@ -351,7 +404,7 @@ export default class PresentationCanvasExtension {
     }
 
     if (toNode) {
-      this.visitedNodes.push(toNode)
+      this.visitedNodeIds.push(toNode.getData().id)
       this.animateNodeTransition(canvas, fromNode, toNode)
     } else {
       // No more nodes left, animate to same node
@@ -360,15 +413,22 @@ export default class PresentationCanvasExtension {
   }
 
   private previousNode(canvas: Canvas) {
-    const fromNode = this.visitedNodes.pop()
+    const fromNodeId = this.visitedNodeIds.pop()
+    if (!fromNodeId) return
+
+    const fromNode = canvas.nodes.get(fromNodeId)
     if (!fromNode) return
 
-    let toNode = this.visitedNodes.last()
+    const toNodeId = this.visitedNodeIds.last()
+    if (!toNodeId) return
+
+    let toNode = canvas.nodes.get(toNodeId)
+    if (!toNode) return
 
     // Fall back to same node if there are no more nodes before
     if (!toNode) {
       toNode = fromNode
-      this.visitedNodes.push(fromNode)
+      this.visitedNodeIds.push(fromNodeId)
     }
 
     this.animateNodeTransition(canvas, fromNode, toNode)

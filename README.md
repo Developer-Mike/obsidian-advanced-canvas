@@ -1,7 +1,7 @@
 <h3 align="center">
     <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="./assets/logo-dark.svg">
-        <img alt="Logo" src="./assets/logo-light.svg" width="100">
+        <source media="(prefers-color-scheme: dark)" srcset="./assets/logo-dark.png">
+        <img alt="Logo" src="./assets/logo-light.png" width="100">
     </picture><br/><br/>
 	Advanced Canvas for <a href="https://obsidian.md">Obsidian.md</a>
 </h3>
@@ -9,65 +9,94 @@
 <p align="center">
     <a href="https://github.com/Developer-Mike/obsidian-advanced-canvas/stargazers"><img src="https://img.shields.io/github/stars/Developer-Mike/obsidian-advanced-canvas?colorA=363a4f&colorB=e0ac00&style=for-the-badge" alt="GitHub star count"></a>
     <a href="https://github.com/Developer-Mike/obsidian-advanced-canvas/issues"><img src="https://img.shields.io/github/issues/Developer-Mike/obsidian-advanced-canvas?colorA=363a4f&colorB=e93147&style=for-the-badge" alt="Open issues on GitHub"></a>
-    <a href="https://github.com/Developer-Mike/obsidian-advanced-canvas/contributors"><img src="https://img.shields.io/github/contributors/Developer-Mike/obsidian-advanced-canvas?colorA=363a4f&colorB=08b94e&style=for-the-badge" alt="List of contributors"></a>
     <br/>
-	<a href="https://obsidian.md/plugins?id=advanced-canvas"><img src="https://img.shields.io/github/downloads/Developer-Mike/obsidian-advanced-canvas/total?style=for-the-badge&colorA=363a4f&colorB=d53984"/></a>
+	<a href="https://obsidian.md/plugins?id=advanced-canvas"><img src="https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/obsidianmd/obsidian-releases/master/community-plugin-stats.json&query=$.advanced-canvas.downloads&label=Downloads&style=for-the-badge&colorA=363a4f&colorB=d53984"/></a>
     <a href="./LICENSE"><img src="https://img.shields.io/static/v1.svg?style=for-the-badge&label=License&message=GPL-3.0&colorA=363a4f&colorB=b7bdf8" alt="GPL-3.0 license"/></a>
     <br/><br/>
     <b>⚡ Supercharge</b> your canvas experience! Create presentations, flowcharts and more!
 </p>
 
 ## Installation
-Recommended:
-- Open the Community Plugins tab in the settings and search for "Advanced Canvas"
+Open the Community Plugins tab in the settings and search for "Advanced Canvas" (or click [here](https://obsidian.md/plugins?id=advanced-canvas)).
 
-OR
-- Install it using [BRAT](https://github.com/TfTHacker/obsidian42-brat)
-
-OR
-- Create a folder named `advanced-canvas` in your vault's plugins folder (`<vault>/.obsidian/plugins/`).
-- Download `main.js`, `styles.css` and `manifest.json` from the latest release and put them in the `advanced-canvas` folder.
-- Enable the plugin in Settings -> Community plugins -> Installed plugins
+<details>
+    <summary>Other installation methods</summary>
+    <br/>
+    <ul>
+        <li>Install it using <a href="https://github.com/TfTHacker/obsidian42-brat">BRAT</a></li>
+        <li>Manual folder creation
+            <ol>
+                <li>Create a folder named <code>advanced-canvas</code> in your vault's plugins folder (<code>&lt;vault&gt;/.obsidian/plugins/</code>).</li>
+                <li>Download <code>main.js</code>, <code>styles.css</code> and <code>manifest.json</code> from the latest release and put them in the <code>advanced-canvas</code> folder.</li>
+                <li>Enable the plugin in Settings -> Community plugins -> Installed plugins</li>
+            </ol>
+        </li>
+    </ul>
+</details>
 
 ## Features
 All features can be enabled/disabled in the settings.
 
-- Create groups independently of the nodes ([Updated card menu](#updated-canvas-card-menu))
+- Create groups independently of the nodes
+- [Better default settings](#better-default-settings)
 - More [canvas commands](#canvas-commands)
-- (Flowchart) [Node shapes](#node-shapes)
-  - Terminal shape
-  - Process shape
-  - Decision shape
-  - Input/Output shape
-  - On-page Reference shape
-  - Predefined Process shape
-  - Document shape
-  - Database shape
+- [Node Styles](#node-styles)
+  - (Flowchart) [Node Shapes](#node-shapes)
+    - Terminal shape
+    - Process shape
+    - Decision shape
+    - Input/Output shape
+    - On-page Reference shape
+    - Predefined Process shape
+    - Document shape
+    - Database shape
+  - [Border Styles](#border-styles)
+    - Dotted
+    - Dashed
+    - Invisible
+  - Text Alignment
+    - Left
+    - Center
+    - Right
 - [Edge Styles](#edge-styles)
-  - Edge styles
+  - [Path Styles](#path-styles)
     - Dotted
     - Short-dashed
     - Long-dashed
-  - Path styles
+  - [Arrow Styles](#arrow-styles)
+    - Triangle Outline
+    - Halved Triangle
+    - Thin Triangle
+    - Diamond
+    - Diamond Outline
+    - Circle
+    - Circle Outline
+  - [Pathfinding Methods](#pathfinding-methods)
     - Default
     - Straight
+    - Square
     - A*
+- Add [custom styles](#custom-styles) to nodes and edges for unlimited possibilities
+- Add [per-node breakpoints](#variable-breakpoints) to change at which zoom factor the node's content gets unrendered
+- [Z-Ordering control](#z-ordering-control) for nodes to control their stacking order
 - [Custom colors](#custom-colors) in the color picker
-- [Properties Support](#properties-support)
-  - Set properties for the canvas file
-- [Stickers](#stickers)
-  - Convert image nodes to stickers (transparent background and no border)
-- [Presentation mode](#presentation)
+- [Presentation mode](#presentation-mode)
   - Create presentations by connecting nodes with arrows
 - [Portals](#portals)
   - Embed other canvases inside your canvas
   - Create edges (arrows) to the embedded canvas
 - [Collapsible groups](#collapsible-groups)
   - Collapse and expand groups to organize your canvas
+- [Auto node resizing](#auto-node-resizing)
+  - Resize nodes automatically when the text content changes
+- [Focus mode](#focus-mode)
+  - Focus on a single node and blur all other nodes
 - [Better readonly](#better-readonly)
   - Disable node popup menus
   - Lock the canvas' position
   - Lock the canvas' zoom
+- [Flip edge](#flip-edge)
+  - Flip the direction of an edge with one click
 - [Encapsulate selection](#encapsulate-selection)
   - Create a new canvas from the selected nodes
   - Create a link to the new canvas in the current canvas
@@ -75,30 +104,21 @@ All features can be enabled/disabled in the settings.
 - Expose node data to style them using CSS
 
 ## Support
-If you want to support me and my work, consider starring ⭐ the repository, or, if you want to support me financially, you can donate any amount on [Ko-fi](https://ko-fi.com/X8X27IA08) ❤️
+Please consider supporting the plugin. There are many hours of work and effort behind it. The two easiest ways to support the plugin are either by starring ⭐ the repository or by donating any amount on [Ko-fi](https://ko-fi.com/X8X27IA08) ❤️. Thank you!
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/X8X27IA08)
+<img src="https://img.shields.io/endpoint?url=https://wakapi.dev/api/compat/shields/v1/Developer-Mike/interval:all_time/project:obsidian-advanced-canvas&label=Time%20Spent&style=for-the-badge&colorA=ffffff&colorB=ff5e5b" alt="Time Spent">
 
-## Updated UI
-### Canvas Card Menu
-<details>
-    <summary>Canvas Card Menu</summary>
-    <img src="./assets/card-menu.png" alt="New canvas card menu"/>
-</details>
-
-### Node Popup Menu
-<details>
-    <summary>Node Popup Menu</summary>
-    <img src="./assets/popup-menu.png" alt="New node popup menu"/>
-</details>
-
-### Canvas Control Menu
-<details>
-    <summary>Canvas Control Menu</summary>
-    <img src="./assets/control-menu.png" alt="New canvas control menu"/>
-</details>
+## Better Default Settings
+- Enforce all new nodes to be aligned to the grid
+- Customize default text node size
+- Customize default file node size
+- Modify the minimum node size
+- Disable the font scaling relative to the zoom level
 
 ## Canvas Commands
+- `Advanced Canvas: Open Quicksettings`
+  - Open the quicksettings menu
 - `Advanced Canvas: Create text node`
   - Create a new text node
 - `Advanced Canvas: Create file node`
@@ -112,17 +132,22 @@ If you want to support me and my work, consider starring ⭐ the repository, or,
   - The cloned node will have the same dimensions and color as the original node
 - `Advanced Canvas: Expand node up/down/left/right`
   - Expand the selected node in the direction of the arrow keys
+- `Advanced Canvas: Flip selection horizontally/vertically`
+  - Flip the selected nodes and the respective edges horizontally or vertically
 
-## Node Shapes
+## Node Styles
+You can customize the default node styles using the settings.
+
+### Node Shapes
 <details>
     <summary>Flowchart Example</summary>
     <img src="./assets/sample-flowchart.png" alt="Flowchart Example"/>
 </details>
 
-### Usage
-- Use the [updated popup menu](#node-popup-menu) set a node's shape
+#### Usage
+- Use the updated popup menu set a node's shape
 
-### Shapes
+#### Shapes
 <details>
     <summary>Terminal Shape</summary>
     <img src="./assets/flowchart-nodes/terminal.png" alt="Terminal Shape"/>
@@ -163,21 +188,100 @@ If you want to support me and my work, consider starring ⭐ the repository, or,
     <img src="./assets/flowchart-nodes/database.png" alt="Database Shape"/>
 </details>
 
+### Border Styles
+Set the style of the border to dotted, dashed or invisible.
+
+<details>
+    <summary>Border Styles Example</summary>
+    <img src="./assets/border-styles.png" alt="Border Styles Example"/>
+</details>
+
 ## Edge Styles
-### Edge Styles
-Set the style of the edges (arrows) to dotted, short-dashed or long-dashed.
+You can customize the default edge styles using the settings.
+
+### Path Styles
+Set the style of the edge paths to dotted, short-dashed or long-dashed.
 
 <details>
     <summary>Edge Styles Example</summary>
-    <img src="./assets/edge-styles.png" alt="Edge Styles Example"/>
+    <img src="./assets/edge-path-styles.png" alt="Edge Path Styles Example"/>
 </details>
 
-### Path Styles
-Set the path style of the edges (arrows) to default, straight or A*.
+### Arrow Styles
+Set the style of the arrows to triangle outline, halved triangle, thin triangle, diamond, diamond outline, circle or circle outline.
+
+<details>
+    <summary>Arrow Styles Example</summary>
+    <img src="./assets/edge-arrow-styles.png" alt="Edge Arrow Styles Example"/>
+</details>
+
+### Pathfinding Methods
+Set the pathfinding method of the edges (arrows) to default, straight, squared or A*.
 
 <details>
     <summary>Path Styles Example</summary>
-    <img src="./assets/edge-path-styles.png" alt="Edge Path Styles Example"/>
+    <img src="./assets/edge-pathfinding-methods.png" alt="Edge Pathfinding Methods Example"/>
+</details>
+
+## Custom Styles
+Custom style attributes for nodes and edges can easily be added.
+
+1. Add a popup menu option
+   - Open the `<VAULT-PATH>/.obsidian/plugins/advanced-canvas/data.json` file
+   - If you want to add an option to node popup menu, search for `customNodeStyleAttributes` property, otherwise search for `customEdgeStyleAttributes` property. (Create it if it doesn't exist yet)
+   - Add the custom popup menu option (Remove the comments!)
+   ```json
+    "customNodeStyleAttributes": [
+        {
+            "datasetKey": "exampleStyleAttribute", // Must be unique and written in camelCase
+            "label": "Example Style Attribute",
+            "options": [
+                {
+                    "icon": "cloud-sun", // Choose an icon from lucide.dev
+                    "label": "Sunny Appearance",
+                    "value": null // Null means default
+                },
+                {
+                    "icon": "cloud-rain-wind", // Choose an icon from lucide.dev
+                    "label": "Rainy Appearance",
+                    "value": "rainy" // The value that gets set
+                }
+            ]   
+        }
+        // You can add more categories here
+    ]
+   ```
+
+> [!IMPORTANT]
+> There needs to be **one** option with the value null
+
+2. Create a new CSS snippet in your vault (And enable it in the settings)
+    ```css	
+    .canvas-node[data-<DATASET-KEY>="rainy"] { /* The dataset key is now written in kebab-case */
+        background-color: #7f7f7f;
+    }
+    ```
+3. Reload Obsidian and enjoy your new custom style!
+    <br><img src="./assets/custom-style-attribute-example.png" alt="Custom Style Attribute Example"/>
+
+## Variable Breakpoints
+Add breakpoints to nodes to change at which zoom factor the node's content gets unrendered.
+
+Create a new CSS snippet in your vault (And enable it in the settings)
+```css	
+/* Any CSS selector can be used (As long as the .canvas-node element has the CSS variable defined) */
+.canvas-node[data-shape="pill"] {
+    /* The zoom factor at which the node's content gets unrendered (Zoom level can reach from 1 to -4) */
+    --variable-breakpoint: 0.5;
+}
+```
+
+## Z-Ordering Control
+Change z-ordering of nodes using the context menu.
+
+<details>
+    <summary>Z-Ordering Control Example</summary>
+    <img src="./assets/z-ordering-control.png" alt="Z-Ordering Control Example"/>
 </details>
 
 ## Custom Colors
@@ -195,34 +299,8 @@ Add custom colors to the color picker. You can add them using the following css 
     <img src="./assets/custom-colors.png" alt="Custom Colors In Palette"/>
 </details>
 
-## Properties Support
-Support for properties in canvas files just like in md files. You can edit the properties using the [updated control menu](#canvas-control-menu).
-
-Supported properties:
-- `cssclasses`
-
-### Custom Background Example (cssclasses)
-```css
-.canvas-wrapper.<CLASS-NAME> > .canvas-background {
-    background-image: url('<IMAGE-URL>');
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    
-    filter: blur(5px) brightness(0.8);
-}
-```
-
-## Stickers
-Convert image nodes to stickers. Stickers have a transparent background and no border.
-
-<details>
-    <summary>Sticker Example</summary>
-    <img src="./assets/stickers.png" alt="Sticker Example"/>
-</details>
-
 ## Presentation Mode
-In presentation mode, you can navigate through the nodes using the arrow keys. The different slides/nodes are connected using arrows. If you want to have multiple arrows pointing from the same node, you can number them in the order you want to navigate through them. While in presentation mode, the canvas is in readonly mode (So [better readonly](#better-readonly) effects the presentation mode as well!). You can exit the presentation mode using the `ESC` key.
+In presentation mode, you can navigate through the nodes using the arrow keys or the PageUp/PageDown keys (Compatible with most presentation remotes). The different slides/nodes are connected using arrows. If you want to have multiple arrows pointing from the same node, you can number them in the order you want to navigate through them. While in presentation mode, the canvas is in readonly mode (So [better readonly](#better-readonly) effects the presentation mode as well!). You can exit the presentation mode using the `ESC` key or the corresponding command. If you want to continue the presentation from the last slide you were on, you can use the `Advanced Canvas: Continue presentation` command.
 
 <img src="./assets/sample-presentation-simple.gif" alt="Presentation mode example"/>
 
@@ -241,12 +319,12 @@ In presentation mode, you can navigate through the nodes using the arrow keys. T
 
 ### Usage
 - Create the first slide
-  - Create the first slide of the presentation using the [updated popup menu](#node-popup-menu)
-  - OR create a node and mark it as the first slide using the [updated card menu](#canvas-card-menu)
+  - Create the first slide of the presentation using the updated popup menu
+  - OR create a node and mark it as the first slide using the updated card menu
 - Add more slides
   - Link the slides using arrows
     - If you want to loop back to a previous slide, you can number the arrows in the order you want to navigate through them
-  - <b>TIP:</b> Create slides with consistent dimensions by using the [updated card menu](#canvas-card-menu)
+  - <b>TIP:</b> Create slides with consistent dimensions by using the updated card menu
 - Control the presentation
   - Start the presentation using the command palette (`Advanced Canvas: Start presentation`)
   - Change slides using the arrow keys
@@ -268,6 +346,22 @@ Collapse and expand groups to organize your canvas.
     <img src="./assets/collapsible-groups.png" alt="Collapsible Groups Example"/>
 </details>
 
+## Auto Node Resizing
+Resize nodes automatically when the text content changes. Toggle this feature on a per-node basis using the updated popup menu.
+
+<details>
+    <summary>Auto Node Resizing Example</summary>
+    <img src="./assets/auto-node-resizing.gif" alt="Auto Node Resizing Example"/>
+</details>
+
+## Focus Mode
+Focus on a single node and blur all other nodes.
+
+<details>
+    <summary>Focus Mode Example</summary>
+    <img src="./assets/focus-mode.png" alt="Focus Mode"/>
+</details>
+
 ## Better Readonly
 - Disable node popup menus
 - Lock the canvas' position
@@ -275,7 +369,7 @@ Collapse and expand groups to organize your canvas.
 - BUT to retain some interactivity, it allows zooming to a bounding box (e.g. zoom to selection, zoom to fit all)
 
 ### Usage
-- Use the [updated control menu](#canvas-control-menu) to toggle the new features (Only shown if the canvas is in readonly mode)
+- Use the updated control menu to toggle the new features (Only shown if the canvas is in readonly mode)
 
 ## Encapsulate Selection
 Move the current selection to a new canvas and create a link in the current canvas.
@@ -285,12 +379,20 @@ Move the current selection to a new canvas and create a link in the current canv
 - Use the context menu (right click) to encapsulate the selection
 - OR use the command palette (`Advanced Canvas: Encapsulate selection`)
 
+## Flip Edge
+Flip the direction of an edge with one click.
+
+<details>
+    <summary>Flip Edge Example</summary>
+    <img src="./assets/flip-edge.gif" alt="Flip Edge Example"/>
+</details>
+
 ## Canvas Events
 All custom events are prefixed with `advanced-canvas:` and can be listened to using `app.workspace.on` (Just like the default events).
 
 <details>
     <summary>
-        All Events (27)
+        All Events
     </summary>
 
   - `advanced-canvas:canvas-changed`
@@ -308,17 +410,18 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
   - `advanced-canvas:dragging-state-changed`
     - Fired when the dragging state of the canvas changes
     - Payload: `Canvas`, `boolean`
+  - `advanced-canvas:node-created`
+    - Fired when a new node gets created
+    - Payload: `Canvas`, `Node`
+  - `advanced-canvas:edge-created`
+    - Fired when a new edge gets created
+    - Payload: `Canvas`, `Edge`
   - `advanced-canvas:node-added`
     - Fired when a new node gets added
     - Payload: `Canvas`, `Node`
   - `advanced-canvas:edge-added`
     - Fired when a new edge gets added
     - Payload: `Canvas`, `Edge`
-  - `advanced-canvas:node-removed`
-    - Fired when a node gets removed
-    - Payload: `Canvas`, `Node`
-  - `advanced-canvas:edge-removed`
-    - Fired when an edge gets removed
     - Payload: `Canvas`, `Edge`
   - `advanced-canvas:node-changed`
     - Fired when any node gets changed
@@ -326,6 +429,23 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
   - `advanced-canvas:edge-changed`
     - Fired when any edge gets changed
     - Payload: `Canvas`, `Edge`
+  - `advanced-canvas:node-text-content-changed`
+    - Fired when the text content of a node gets changed (While typing)
+    - Payload: `Canvas`, `Node`, `ViewUpdate (From CodeMirror)`
+  - `advanced-canvas:node-removed`
+    - Fired when a node gets removed
+    - Payload: `Canvas`, `Node`
+  - `advanced-canvas:edge-removed`
+    - Fired when an edge gets removed
+  - `advanced-canvas:copy`
+    - Fired when the selection gets copied
+    - Payload: `Canvas`, `SelectionData (Reference!)`
+  - `advanced-canvas:node-breakpoint-changed`
+    - Fired when the breakpoint of a node changes
+    - Payload: `Canvas`, `Node`, `breakpoint: { value: boolean }`
+  - `advanced-canvas:node-editing-state-changed`
+    - Fired when the editing state of a node changes
+    - Payload: `Canvas`, `Node`, `boolean (isEditing)`
   - `advanced-canvas:node-bbox-requested`
     - Fired when the bounding box of a node gets requested (e.g. for the edge path or when dragging a group)
     - Payload: `Canvas`, `Node`, `BBox (Reference!)`
@@ -371,14 +491,9 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
 Every feature can be enabled/disabled in the settings. All features were made to be as customizable as possible.
 
 ## Contributing
-All contributions are welcome! Here's how you can help:
-- Create a fork of the repository
-- Create a branch with a descriptive name
-- Make your changes
-- Debug the plugin using `npm run dev`
-- Create a pull request
-- Wait for the review
+All code contributions are welcome! (PRs that only update the documentation won't get merged. Please open an issue instead.)
+You may want to check out issues with the `PRs appreciated` label to find issues you can start with.
+But feel free to work on any issue or non-issue you want to work on!
 
-## Known Issues - Create an issue if you find any!
-- [ ] Shapes are not shown in the preview
-- [ ] Edges from portals can still be dragged
+## Star History
+[![Star History Chart](https://api.star-history.com/svg?repos=Developer-Mike/obsidian-advanced-canvas&type=Date)](https://star-history.com/#Developer-Mike/obsidian-advanced-canvas&Date)

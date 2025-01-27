@@ -14,3 +14,112 @@
     border-radius: 0 var(--input-radius) var(--input-radius) 0;
   }
 }
+
+.ac-settings-heading {  
+  border-bottom: 1px solid var(--color-accent);
+
+  &:not(:first-child) {
+    margin-top: var(--size-4-10) !important;
+  }
+
+  .setting-item-description {
+    margin-inline-end: 20px;
+  }
+}
+
+details.setting-item {
+  &[open] > summary {
+    margin-bottom: 0.75em;
+  }
+
+  & > *:not(summary) {
+    padding-left: 1em;
+    border-left: 1px solid var(--color-accent);
+  }
+}
+
+.kofi-button {
+  height: 30px;
+
+  &.sticky {
+    z-index: 10;
+
+    position: absolute;
+    bottom: var(--size-4-5);
+    right: var(--size-4-5);
+  }
+
+  img {
+    height: 100%;
+  }
+}
+
+.kofi-overlay {
+  z-index: 100;
+
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+
+  background-color: rgba(255, 255, 255, 0.9);
+
+  h1 {
+    margin-bottom: 0;
+  }
+
+  p {
+    max-width: 50%;
+
+    color: var(--text-muted);
+    text-align: center;
+
+    b {
+      color: var(--text-primary);
+    }
+  }
+
+  progress {
+    margin-top: var(--size-4-8);
+    background: transparent;
+
+    &::-webkit-progress-bar {
+      background-color: var(--background-modifier-border);
+      border-radius: var(--input-radius);
+    }
+
+    &::-webkit-progress-value {
+      background-color: var(--color-accent);
+      border-radius: var(--input-radius);
+    }
+  }
+
+  .kofi-button {
+    margin-top: var(--size-4-10);
+    margin-bottom: var(--size-4-5);
+  }
+
+  .no-button {
+    cursor: pointer;
+  }
+}
+
+// Quicksettings
+.quicksettings-suggestion {
+  display: flex;
+  flex-direction: column;
+
+  .quicksettings-suggestion-label {
+    font-weight: 500;
+  }
+  
+  .quicksettings-suggestion-description {
+    color: var(--text-muted);
+  }
+}

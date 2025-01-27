@@ -12,11 +12,7 @@
   }
 }
 
-.canvas-wrapper.presentation-mode .start-node::before {
-  visibility: hidden;
-}
-
-.canvas-node[data-is-start-node=true]::before {
+.canvas-wrapper:not(.presentation-mode) .canvas-node[data-is-start-node=true]::before {
   content: 'Start';
 
   position: absolute;

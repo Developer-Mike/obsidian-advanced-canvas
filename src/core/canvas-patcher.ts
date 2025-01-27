@@ -1,9 +1,12 @@
 import AdvancedCanvasPlugin from "src/main"
-import { BBox, Canvas, CanvasData, CanvasEdge, CanvasElement, CanvasNode, CanvasView } from "src/@types/Canvas"
-import { patchObjectInstance, patchObjectPrototype } from "src/utils/patch-helper"
+import { BBox, Canvas, CanvasData, CanvasEdge, CanvasEdgeData, CanvasElement, CanvasNode, CanvasNodeData, CanvasView } from "src/@types/Canvas"
+import PatchHelper from "src/utils/patch-helper"
 import { CanvasEvent } from "./events"
-import { ItemView, WorkspaceLeaf } from "obsidian"
+import { ItemView, requireApiVersion, WorkspaceLeaf, editorInfoField } from "obsidian"
+import { EditorView, ViewUpdate } from "@codemirror/view"
 import { around } from "monkey-around"
+import JSONC from "tiny-jsonc"
+import JSONSS from "json-stable-stringify"
 
 export default class CanvasPatcher {
   plugin: AdvancedCanvasPlugin
@@ -16,45 +19,76 @@ export default class CanvasPatcher {
   private async applyPatches() {
     const that = this
 
+    // Wait for layout ready -> Support deferred view initialization
+    await new Promise<void>(resolve => this.plugin.app.workspace.onLayoutReady(() => resolve()))
+
+    // Get the current canvas view fully loaded
+    const getCanvasView = async (): Promise<CanvasView | null> => {
+      const canvasLeaf = this.plugin.app.workspace.getLeavesOfType('canvas')?.first()
+      if (!canvasLeaf) return null
+
+      if (requireApiVersion('1.7.2')) await canvasLeaf.loadIfDeferred() // Load the canvas if the view is deferred
+      return canvasLeaf.view as CanvasView
+    }
+
     // Get the current canvas view or wait for it to be created
-    const canvasView = (
-      this.plugin.app.workspace.getLeavesOfType('canvas')?.first()?.view ??
-      await new Promise<CanvasView>((resolve) => {
-        // @ts-ignore
-        const uninstall = around(this.plugin.app.internalPlugins.plugins.canvas.views, {
-          canvas: (next: any) => function (...args: any) {
-            const result = next.call(this, ...args)
+    let canvasView = await getCanvasView()
+    canvasView ??= await new Promise<CanvasView>(resolve => {
+      const event = this.plugin.app.workspace.on('layout-change', async () => {
+        const newCanvasView = await getCanvasView()
+        if (!newCanvasView) return
 
-            resolve(result)
-            uninstall() // Uninstall the patch
-
-            return result
-          }
-        })
-        this.plugin.register(uninstall)
+        resolve(newCanvasView)
+        this.plugin.app.workspace.offref(event)
       })
-    ) as CanvasView
+
+      this.plugin.registerEvent(event)
+    })
+
+    console.log('Patching canvas view:', canvasView)
     
     // Patch canvas view
-    patchObjectPrototype(this.plugin, canvasView, {
-      getViewData: (_next: any) => function (..._args: any) {
+    PatchHelper.patchObjectPrototype(this.plugin, canvasView, {
+      getViewData: (next: any) => function (...args: any) {
         const canvasData = this.canvas.getData()
-        canvasData.metadata = this.canvas.metadata ?? {}
 
-        return JSON.stringify(canvasData, null, 2)
+        try {
+          return JSONSS(canvasData, { space: 2 })
+        } catch (e) {
+          console.error('Failed to stringify canvas data using json-stable-stringify:', e)
+
+          try {
+            return JSON.stringify(canvasData, null, 2)
+          } catch (e) {
+            console.error('Failed to stringify canvas data using JSON.stringify:', e)
+            return next.call(this, ...args)
+          }
+        }
       },
       setViewData: (next: any) => function (json: string, ...args: any) {
-        const result = next.call(this, json, ...args)
-        this.canvas.metadata = JSON.parse(json).metadata
+        json = json !== '' ? json : '{}'
+
+        let result
+        try {
+          result = next.call(this, json, ...args)
+        } catch (e) {
+          console.error('Invalid JSON, repairing through Advanced Canvas:', e)
+
+          // Invalid JSON
+          that.plugin.createFileSnapshot(this.file.path, json)
+
+          // Try to parse it with trailing commas
+          json = JSON.stringify(JSONC.parse(json), null, 2)
+          result = next.call(this, json, ...args)
+        }
 
         that.triggerWorkspaceEvent(CanvasEvent.CanvasChanged, this.canvas)
-
         return result
       }
     })
 
     // Patch canvas
-    patchObjectPrototype(this.plugin, canvasView.canvas, {
+    PatchHelper.patchObjectPrototype(this.plugin, canvasView.canvas, {
       markViewportChanged: (next: any) => function (...args: any) {
         that.triggerWorkspaceEvent(CanvasEvent.ViewportChanged.Before, this)
         const result = next.call(this, ...args)
@@ -87,22 +121,60 @@ export default class CanvasPatcher {
         that.triggerWorkspaceEvent(CanvasEvent.SelectionChanged, this, oldSelection, ((update: () => void) => next.call(this, update)))
         return result
       },
+      createTextNode: (next: any) => function (...args: any) {
+        const node = next.call(this, ...args)
+        that.triggerWorkspaceEvent(CanvasEvent.NodeCreated, this, node)
+        return node
+      },
+      createFileNode: (next: any) => function (...args: any) {
+        const node = next.call(this, ...args)
+        that.triggerWorkspaceEvent(CanvasEvent.NodeCreated, this, node)
+        return node
+      },
+      createFileNodes: (next: any) => function (...args: any) {
+        const nodes = next.call(this, ...args)
+        nodes.forEach((node: CanvasNode) => that.triggerWorkspaceEvent(CanvasEvent.NodeCreated, this, node))
+        return nodes
+      },
+      createGroupNode: (next: any) => function (...args: any) {
+        const node = next.call(this, ...args)
+        that.triggerWorkspaceEvent(CanvasEvent.NodeCreated, this, node)
+        return node
+      },
+      createLinkNode: (next: any) => function (...args: any) {
+        const node = next.call(this, ...args)
+        that.triggerWorkspaceEvent(CanvasEvent.NodeCreated, this, node)
+        return node
+      },
       addNode: (next: any) => function (node: CanvasNode) {
         that.patchNode(node)
         return next.call(this, node)
       },
       addEdge: (next: any) => function (edge: CanvasEdge) {
         that.patchEdge(edge)
+        if (!this.viewportChanged) that.triggerWorkspaceEvent(CanvasEvent.EdgeCreated, this, edge)
         return next.call(this, edge)
       },
       removeNode: (next: any) => function (node: CanvasNode) {
         const result = next.call(this, node)
-        that.triggerWorkspaceEvent(CanvasEvent.NodeRemoved, this, node)
+        if (!this.isClearing) that.triggerWorkspaceEvent(CanvasEvent.NodeRemoved, this, node)
         return result
       },
       removeEdge: (next: any) => function (edge: CanvasEdge) {
         const result = next.call(this, edge)
-        that.triggerWorkspaceEvent(CanvasEvent.EdgeRemoved, this, edge)
+        if (!this.isClearing) that.triggerWorkspaceEvent(CanvasEvent.EdgeRemoved, this, edge)
+        return result
+      },
+      handleCopy: (next: any) => function (...args: any) {
+        this.isCopying = true
+        const result = next.call(this, ...args)
+        this.isCopying = false
+
+        return result
+      },
+      getSelectionData: (next: any) => function (...args: any) {
+        const result = next.call(this, ...args)
+        if (this.isCopying) that.triggerWorkspaceEvent(CanvasEvent.OnCopy, this, result)
         return result
       },
       zoomToBbox: (next: any) => function (bbox: BBox) {
@@ -128,6 +200,18 @@ export default class CanvasPatcher {
         that.triggerWorkspaceEvent(CanvasEvent.Redo, this)
         return result
       },
+      clear: (next: any) => function (...args: any) {
+        this.isClearing = true
+        const result = next.call(this, ...args)
+        this.isClearing = false
+        return result
+      },
+      /*setData: (next: any) => function (...args: any) {
+        //
+        const result = next.call(this, ...args)
+        //
+        return result
+      },*/
       getData: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
         that.triggerWorkspaceEvent(CanvasEvent.DataRequested, this, result)
@@ -140,12 +224,11 @@ export default class CanvasPatcher {
           if (!this.view.file || this.view.file.path !== targetFilePath) return
 
           this.importData(data, true, true)
-          that.emitEventsForUnknownDataChanges(this)
         }
 
         if (!silent) that.triggerWorkspaceEvent(CanvasEvent.LoadData, this, data, setData)
         const result = next.call(this, data, clearCanvas)
-        that.emitEventsForUnknownDataChanges(this)
+
         return result
       },
       requestSave: (next: any) => function (...args: any) {
@@ -157,7 +240,7 @@ export default class CanvasPatcher {
     })
 
     // Patch canvas popup menu
-    patchObjectPrototype(this.plugin, canvasView.canvas.menu, {
+    PatchHelper.patchObjectPrototype(this.plugin, canvasView.canvas.menu, {
       render: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
         that.triggerWorkspaceEvent(CanvasEvent.PopupMenuCreated, this.canvas)
@@ -167,13 +250,24 @@ export default class CanvasPatcher {
     })
 
     // Patch interaction layer
-    patchObjectPrototype(this.plugin, canvasView.canvas.nodeInteractionLayer, {
+    PatchHelper.patchObjectPrototype(this.plugin, canvasView.canvas.nodeInteractionLayer, {
       setTarget: (next: any) => function (node: CanvasNode) {
         const result = next.call(this, node)
         that.triggerWorkspaceEvent(CanvasEvent.NodeInteraction, this.canvas, node)
         return result
       }
     })
+
+    // Add editor extension for node text content change listener
+    this.plugin.registerEditorExtension([EditorView.updateListener.of((update: ViewUpdate) => {
+      if (!update.docChanged) return
+
+      const editor = update.state.field(editorInfoField) as any
+      const node = editor.node as CanvasNode | undefined
+      if (!node) return
+
+      that.triggerWorkspaceEvent(CanvasEvent.NodeTextContentChanged, node.canvas, node, update)
+    })])
 
     // Canvas is now patched - update all open canvas views
     this.plugin.app.workspace.iterateAllLeaves((leaf: WorkspaceLeaf) => {
@@ -188,9 +282,9 @@ export default class CanvasPatcher {
   private patchNode(node: CanvasNode) {
     const that = this
 
-    patchObjectInstance(this.plugin, node, {
-      setData: (next: any) => function (...args: any) {
-        const result = next.call(this, ...args)
+    PatchHelper.patchObjectInstance(this.plugin, node, {
+      setData: (next: any) => function (data: CanvasNodeData, addHistory?: boolean) {
+        const result = next.call(this, data)
 
         if (node.initialized && !node.isDirty) {
           node.isDirty = true
@@ -202,7 +296,20 @@ export default class CanvasPatcher {
         this.canvas.data = this.canvas.getData()
         this.canvas.view.requestSave()
 
+        // Add to the undo stack
+        if (addHistory) this.canvas.pushHistory(this.canvas.data)
+
         return result
+      },
+      setIsEditing: (next: any) => function (editing: boolean, ...args: any) {
+        const result = next.call(this, editing, ...args)
+        that.triggerWorkspaceEvent(CanvasEvent.NodeEditingStateChanged, this.canvas, node, editing)
+        return result
+      },
+      updateBreakpoint: (next: any) => function (breakpoint: boolean) {
+        const breakpointRef = { value: breakpoint }
+        that.triggerWorkspaceEvent(CanvasEvent.NodeBreakpointChanged, this.canvas, node, breakpointRef)
+        return next.call(this, breakpointRef.value)
       },
       getBBox: (next: any) => function (...args: any) {
         const result = next.call(this, ...args)
@@ -220,9 +327,9 @@ export default class CanvasPatcher {
   private patchEdge(edge: CanvasEdge) {
     const that = this
 
-    patchObjectInstance(this.plugin, edge, {
-      setData: (next: any) => function (...args: any) {
-        const result = next.call(this, ...args)
+    PatchHelper.patchObjectInstance(this.plugin, edge, {
+      setData: (next: any) => function (data: CanvasEdgeData, addHistory?: boolean) {
+        const result = next.call(this, data)
 
         if (edge.initialized && !edge.isDirty) {
           edge.isDirty = true
@@ -233,6 +340,9 @@ export default class CanvasPatcher {
         // Save the data to the file
         this.canvas.data = this.canvas.getData()
         this.canvas.view.requestSave()
+
+        // Add to the undo stack
+        if (addHistory) this.canvas.pushHistory(this.canvas.getData())
 
         return result
       },
@@ -250,6 +360,7 @@ export default class CanvasPatcher {
     
     this.runAfterInitialized(edge, () => {
       this.triggerWorkspaceEvent(CanvasEvent.EdgeAdded, edge.canvas, edge)
+      // this.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, edge.canvas, edge) - already fired in render function
     })
   }
   
@@ -274,18 +385,6 @@ export default class CanvasPatcher {
     })
 
     that.plugin.register(uninstall)
-  }
-
-  private emitEventsForUnknownDataChanges(canvas: Canvas) {
-    // If node data changed
-    canvas.nodes.forEach((node: CanvasNode) => this.runAfterInitialized(node, () => {
-      this.triggerWorkspaceEvent(CanvasEvent.NodeChanged, node.canvas, node)
-    }))
-
-    // If edge data changed
-    canvas.edges.forEach((edge: CanvasEdge) => this.runAfterInitialized(edge, () => {
-      this.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, edge.canvas, edge)
-    }))
   }
 
   private triggerWorkspaceEvent(event: string, ...args: any) {

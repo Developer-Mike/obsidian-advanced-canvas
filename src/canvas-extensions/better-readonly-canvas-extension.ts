@@ -1,18 +1,13 @@
 import { Canvas } from "src/@types/Canvas"
-import * as CanvasHelper from "src/utils/canvas-helper"
-import AdvancedCanvasPlugin from "src/main"
+import CanvasHelper, { MenuOption } from "src/utils/canvas-helper"
 import { CanvasEvent } from "src/core/events"
-import { AdvancedCanvasPluginSettings } from "src/settings"
+import { AdvancedCanvasPluginSettingsValues } from "src/settings"
+import CanvasExtension from "../core/canvas-extension"
 
-export default class ReadonlyCanvasExtension {
-  plugin: AdvancedCanvasPlugin
+export default class BetterReadonlyCanvasExtension extends CanvasExtension {
+  isEnabled() { return 'betterReadonlyEnabled' as const }
 
-  constructor(plugin: any) {
-    this.plugin = plugin
-    const that = this
-
-    if (!this.plugin.settings.getSetting('betterReadonlyEnabled')) return
-
+  init() {
     /* Popup listener */
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.PopupMenuCreated,
@@ -29,20 +24,20 @@ export default class ReadonlyCanvasExtension {
         if (movingToBBox) {
           movingToBBox = false
 
-          that.updateLockedZoom(canvas)
-          that.updateLockedPan(canvas)
+          this.updateLockedZoom(canvas)
+          this.updateLockedPan(canvas)
 
           return
         }
 
         if (!canvas.readonly) return
 
-        if (that.plugin.settings.getSetting('disableZoom')) {
+        if (this.plugin.settings.getSetting('disableZoom')) {
           canvas.zoom = canvas.lockedZoom ?? canvas.zoom
           canvas.tZoom = canvas.lockedZoom ?? canvas.tZoom
         }
 
-        if (that.plugin.settings.getSetting('disablePan')) {
+        if (this.plugin.settings.getSetting('disablePan')) {
           canvas.x = canvas.lockedX ?? canvas.x
           canvas.tx = canvas.lockedX ?? canvas.tx
           canvas.y = canvas.lockedY ?? canvas.y
@@ -78,7 +73,7 @@ export default class ReadonlyCanvasExtension {
     const settingsContainer = canvas.quickSettingsButton?.parentElement
     if (!settingsContainer) return
 
-    CanvasHelper.addQuickSettingsButton(
+    CanvasHelper.addControlMenuButton(
       settingsContainer,
       this.createToggle({
         id: 'disable-node-popup',
@@ -88,7 +83,7 @@ export default class ReadonlyCanvasExtension {
       }, 'disableNodePopup')
     )
 
-    CanvasHelper.addQuickSettingsButton(
+    CanvasHelper.addControlMenuButton(
       settingsContainer,
       this.createToggle({
         id: 'disable-zoom',
@@ -98,7 +93,7 @@ export default class ReadonlyCanvasExtension {
       }, 'disableZoom')
     )
 
-    CanvasHelper.addQuickSettingsButton(
+    CanvasHelper.addControlMenuButton(
       settingsContainer,
       this.createToggle({
         id: 'disable-pan',
@@ -109,8 +104,8 @@ export default class ReadonlyCanvasExtension {
     )
   }
 
-  private createToggle(menuOption: CanvasHelper.MenuOption, settingKey: keyof AdvancedCanvasPluginSettings): HTMLElement {
-    const toggle = CanvasHelper.createQuickSettingsButton({
+  private createToggle(menuOption: MenuOption, settingKey: keyof AdvancedCanvasPluginSettingsValues): HTMLElement {
+    const toggle = CanvasHelper.createControlMenuButton({
       ...menuOption,
       callback: () => (async () => {
         const newValue = !this.plugin.settings.getSetting(settingKey)
