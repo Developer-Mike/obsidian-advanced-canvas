@@ -78,6 +78,7 @@ All features can be enabled/disabled in the settings.
     - A*
 - Add [custom styles](#custom-styles) to nodes and edges for unlimited possibilities
 - Add [per-node breakpoints](#variable-breakpoints) to change at which zoom factor the node's content gets unrendered
+- [Z-Ordering control](#z-ordering-control) for nodes to control their stacking order
 - [Custom colors](#custom-colors) in the color picker
 - [Presentation mode](#presentation-mode)
   - Create presentations by connecting nodes with arrows
@@ -274,6 +275,14 @@ Create a new CSS snippet in your vault (And enable it in the settings)
     --variable-breakpoint: 0.5;
 }
 ```
+
+## Z-Ordering Control
+Change z-ordering of nodes using the context menu.
+
+<details>
+    <summary>Z-Ordering Control Example</summary>
+    <img src="./assets/z-ordering-control.png" alt="Z-Ordering Control Example"/>
+</details>
 
 ## Custom Colors
 Add custom colors to the color picker. You can add them using the following css snippet:
