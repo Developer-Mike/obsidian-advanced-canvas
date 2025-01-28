@@ -75,31 +75,51 @@ export default class MetadataCachePatcher extends Patcher {
         ;(this.resolvedLinks as ResolvedLinks)[file.path] = links.reduce((acc, link) => {
           acc[link] = (acc[link] || 0) + 1
           return acc
-        }, this.resolvedLinks[file.path] || {})
+        }, {} as Record<string, number>)
 
         // Show links between files with edges
         if (!that.plugin.settings.getSetting('treatFileNodeEdgesAsLinks')) return
         
-        for (const edge of content?.edges) {
+        // Extract canvas file edges
+        for (const edge of content?.edges || []) {
           const from = content.nodes.find((node: CanvasNodeData) => node.id === edge.fromNode)
           const to = content.nodes.find((node: CanvasNodeData) => node.id === edge.toNode)
-
           if (!from || !to) continue
+
+          // Check if both nodes are file nodes
           if (from.type !== 'file' || to.type !== 'file' || !from.file || !to.file) continue
 
-          this.resolvedLinks[from.file] = {
-            ...this.resolvedLinks[from.file],
-            [to.file]: (this.resolvedLinks[from.file]?.[to.file] || 0) + 1
-          }
+          // Register the link for the "from" node to the "to" node
+          this.registerInternalLinkAC(file.name, from.file, to.file)
 
-          if (edge.toEnd === 'none' || edge.fromEnd === 'arrow') {
-            this.resolvedLinks[to.file] = {
-              ...this.resolvedLinks[to.file],
-              [from.file]: (this.resolvedLinks[to.file]?.[from.file] || 0) + 1
-            }
-          }
+          // Check if the edge is bidirectional or unidirectional - if yes, register the link for the "to" node to the "from" node as well
+          if (!(edge.toEnd !== 'none' || edge.fromEnd === 'arrow'))
+            this.registerInternalLinkAC(file.name, to.file, from.file)
         }
-      }
+      },
+      registerInternalLinkAC: (_next: any) => function (canvasName: string, from: string, to: string) {
+        // Update metadata cache for "from" node
+        const fromFileHash = this.fileCache[from]?.hash ?? HashHelper.hash(from)
+        const fromFileMetadataCache = (this.metadataCache[fromFileHash] ?? { v: 1 }) as MetadataCacheEntry
+        this.metadataCache[fromFileHash] = {
+          ...fromFileMetadataCache,
+          embeds: [
+            ...(fromFileMetadataCache.embeds || []),
+            {
+              link: to,
+              original: to,
+              displayText: `${canvasName} → ${to}`,
+              position: { start: { line: 0, col: 0, offset: 0 }, end: { line: 0, col: 0, offset: 0 } }
+            }
+          ]
+        }
+    
+        // Update resolved links for "from" node
+        this.resolvedLinks[from] = {
+          ...this.resolvedLinks[from],
+          [to]: (this.resolvedLinks[from]?.[to] || 0) + 1
+        }
+    }
     })
   }
 }
