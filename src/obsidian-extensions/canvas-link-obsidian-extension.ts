@@ -1,6 +1,7 @@
 import { TAbstractFile, TFile } from "obsidian"
 import { CanvasData, CanvasNodeData } from "src/@types/Canvas"
 import AdvancedCanvasPlugin from "src/main"
+import HashHelper from "src/utils/hash-helper"
 import PatchHelper from "src/utils/patch-helper"
 import PathHelper from "src/utils/path-helper"
 
@@ -18,12 +19,9 @@ export default class CanvasLinkObsidianExtension {
         // Bypass the "md" extension check by handling the "canvas" extension here
         if (PathHelper.extension(filepath) === 'canvas') {
           if (!this.fileCache.hasOwnProperty(filepath)) return null
-
-          /*
+          
           const hash = this.fileCache[filepath].hash
           return this.metadataCache[hash] || null
-          */
-          return this.metadataCache[filepath] || null
         }
 
         return next.call(this, filepath, ...args)
@@ -53,16 +51,18 @@ export default class CanvasLinkObsidianExtension {
           }
         }
 
-        ////////////////////////// TODO
-        if (this.resolvedLinks[file.path]) {
-          this.metadataCache[file.path] = {
-            embeds: Object.entries(this.resolvedLinks[file.path]).map(([path, count]) => ({
-              link: `[[${path}]]`,
-              original: path,
-              displayText: `${path} (${count})`,
-              position: { start: { line: 0, col: 0, offset: 0 }, end: { line: 0, col: 0, offset: 0 } }
-            }))
-          }
+        ////////////////////////// 
+        const fileHash = HashHelper.hash(file.path)
+        this.fileCache[file.path].hash = fileHash
+
+        this.metadataCache[fileHash] = {
+          embeds: Object.entries(this.resolvedLinks[file.path] ?? {}).map(([path, count]) => ({
+            link: path,
+            original: path,
+            displayText: `${path} (${count})`,
+            position: { start: { line: 0, col: 0, offset: 0 }, end: { line: 0, col: 0, offset: 0 } },
+          })),
+          v: 1
         }
         //////////////////////////
 

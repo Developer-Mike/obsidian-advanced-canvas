@@ -80,4 +80,5 @@ export interface MetadataCacheEntry {
     type: "paragraph" | "list" | "heading"
     position: PositionRange
   }[]
+  v: number
 }
