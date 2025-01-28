@@ -1,5 +1,6 @@
 import { TAbstractFile, TFile } from "obsidian"
 import { CanvasData, CanvasNodeData } from "src/@types/Canvas"
+import { FileCacheEntry, MetadataCacheEntry, MetadataCacheMap, ResolvedLinks } from "src/@types/Obsidian"
 import AdvancedCanvasPlugin from "src/main"
 import HashHelper from "src/utils/hash-helper"
 import PatchHelper from "src/utils/patch-helper"
@@ -26,6 +27,22 @@ export default class CanvasLinkObsidianExtension {
 
         return next.call(this, filepath, ...args)
       },
+      onCreateOrModify: (next: any) => async function (file: TFile, ...args: any[]) {
+        // Call the original function if the file is not a canvas file
+        if (PathHelper.extension(file.path) !== 'canvas')
+          return next.call(this, file, ...args)
+
+        // Update the cache
+        this.saveFileCache(file.path, {
+          hash: HashHelper.hash(file.path), // Hash wouldn't get set in the original function
+          mtime: file.stat.mtime,
+          size: file.stat.size
+        })
+
+        // Resolve links (This wouldn't get called in the original function too)
+        // TODO: Use workQueue like in the original function
+        this.resolveLinks(file.path)
+      },
       resolveLinks: (next: any) => async function (filepath: string, ...args: any[]) {
         // Call the original function if the file is not a canvas file
         if (PathHelper.extension(filepath) !== 'canvas')
@@ -35,36 +52,36 @@ export default class CanvasLinkObsidianExtension {
         const file = this.vault.getAbstractFileByPath(filepath)
         if (!(file instanceof TFile)) return
 
+        // Get file cache
+        const fileCache = this.fileCache[file.path] as FileCacheEntry
+        if (!fileCache) return
+
         // Read canvas data
         const content = JSON.parse(await this.vault.cachedRead(file) ?? '{}') as CanvasData
         if (!content?.nodes) return
 
-        // Show links to embedded files
-        if (that.plugin.settings.getSetting('showLinksToEmbeddedFiles')) {
-          for (const node of content.nodes) {
-            if (node.type !== 'file' || !node.file) continue
+        // Extract canvas file nodes
+        const nodes = content.nodes.filter((node: CanvasNodeData) => node.type === 'file' && node.file)
+        const links = nodes.map((node: CanvasNodeData) => node.file) as string[]
 
-            this.resolvedLinks[file.path] = {
-              ...this.resolvedLinks[file.path],
-              [node.file]: (this.resolvedLinks[file.path]?.[node.file] || 0) + 1
-            }
-          }
-        }
-
-        ////////////////////////// 
-        const fileHash = HashHelper.hash(file.path)
-        this.fileCache[file.path].hash = fileHash
-
-        this.metadataCache[fileHash] = {
-          embeds: Object.entries(this.resolvedLinks[file.path] ?? {}).map(([path, count]) => ({
+        // Update metadata cache
+        ;(this.metadataCache as MetadataCacheMap)[fileCache.hash] = {
+          v: 1,
+          embeds: links.map((path: string) => ({
             link: path,
             original: path,
-            displayText: `${path} (${count})`,
+            displayText: path,
             position: { start: { line: 0, col: 0, offset: 0 }, end: { line: 0, col: 0, offset: 0 } },
-          })),
-          v: 1
+          }))
+        } as MetadataCacheEntry
+
+        // Update resolved links
+        if (that.plugin.settings.getSetting('showLinksToEmbeddedFiles')) {
+          ;(this.resolvedLinks as ResolvedLinks)[file.path] = links.reduce((acc, link) => {
+            acc[link] = (acc[link] || 0) + 1
+            return acc
+          }, this.resolvedLinks[file.path] || {})
         }
-        //////////////////////////
 
         // Show links between files with edges
         if (!that.plugin.settings.getSetting('showLinksBetweenFileNodesInGraph')) return
@@ -92,16 +109,5 @@ export default class CanvasLinkObsidianExtension {
         }
       }
     })
-
-    // Add event listeners to update the links when a file is created or modified - metadataCache.linkResolver only resolves md files
-    this.plugin.registerEvent(this.plugin.app.vault.on(
-      'create',
-      (file: TAbstractFile) => file.path.endsWith(".canvas") ? this.plugin.app.metadataCache.resolveLinks(file.path) : null
-    ))
-
-    this.plugin.registerEvent(this.plugin.app.vault.on(
-      'modify',
-      (file: TAbstractFile) => file.path.endsWith(".canvas") ? this.plugin.app.metadataCache.resolveLinks(file.path) : null
-    ))
   }
 }

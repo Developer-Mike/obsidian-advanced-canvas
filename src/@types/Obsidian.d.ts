@@ -26,8 +26,10 @@ declare module "obsidian" {
   }
 
   export interface ExtendedMetadataCache extends MetadataCache {
-    fileCache: { [path: string]: FileCacheEntry }
-    metadataCache: { [hash: string]: MetadataCacheEntry }
+    fileCache: FileCache
+    metadataCache: MetadataCacheMap
+    resolvedLinks: ResolvedLinks
+
     onCreateOrModify: (file: TFile) => void
     saveFileCache: (filepath: string, cache: FileCacheEntry) => void // Called in onCreateOrModify
     linkResolver: () => void
@@ -41,6 +43,10 @@ declare module "obsidian" {
   export interface EventRef {
     fn: (...args: any) => any
   }
+}
+
+export interface FileCache {
+  [path: string]: FileCacheEntry
 }
 
 export interface FileCacheEntry {
@@ -58,6 +64,10 @@ interface Position {
 interface PositionRange {
   start: Position
   end: Position
+}
+
+export interface MetadataCacheMap {
+  [hash: string]: MetadataCacheEntry
 }
 
 export interface MetadataCacheEntry {
@@ -81,4 +91,10 @@ export interface MetadataCacheEntry {
     position: PositionRange
   }[]
   v: number
+}
+
+export interface ResolvedLinks {
+  [path: string]: {
+    [link: string]: number
+  }
 }
