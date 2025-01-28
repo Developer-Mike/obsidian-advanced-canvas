@@ -99,7 +99,7 @@ export default class MetadataCachePatcher extends Patcher {
       },
       registerInternalLinkAC: (_next: any) => function (canvasName: string, from: string, to: string) {
         // Update metadata cache for "from" node
-        const fromFileHash = this.fileCache[from]?.hash ?? HashHelper.hash(from)
+        const fromFileHash = this.fileCache[from]?.hash ?? HashHelper.hash(from) // Some files might not be resolved yet
         const fromFileMetadataCache = (this.metadataCache[fromFileHash] ?? { v: 1 }) as MetadataCacheEntry
         this.metadataCache[fromFileHash] = {
           ...fromFileMetadataCache,
