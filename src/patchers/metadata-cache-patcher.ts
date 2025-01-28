@@ -8,7 +8,7 @@ import Patcher from "./patcher"
 
 export default class MetadataCachePatcher extends Patcher {
   protected async patch() {
-    if (!this.plugin.settings.getSetting('canvasLinksFeatureEnabled')) return
+    if (!this.plugin.settings.getSetting('canvasMetadataCompatibilityEnabled')) return
 
     const that = this
     PatchHelper.patchObjectPrototype(this.plugin, this.plugin.app.metadataCache, {
@@ -72,17 +72,13 @@ export default class MetadataCachePatcher extends Patcher {
         } as MetadataCacheEntry
 
         // Update resolved links
-        if (that.plugin.settings.getSetting('showLinksToEmbeddedFiles')) {
-          ;(this.resolvedLinks as ResolvedLinks)[file.path] = links.reduce((acc, link) => {
-            acc[link] = (acc[link] || 0) + 1
-            return acc
-          }, this.resolvedLinks[file.path] || {})
-        }
+        ;(this.resolvedLinks as ResolvedLinks)[file.path] = links.reduce((acc, link) => {
+          acc[link] = (acc[link] || 0) + 1
+          return acc
+        }, this.resolvedLinks[file.path] || {})
 
         // Show links between files with edges
-        if (!that.plugin.settings.getSetting('showLinksBetweenFileNodesInGraph')) return
-        // Linking between markdown files already handled by the markdown files
-        if (that.plugin.settings.getSetting('showLinksBetweenFileNodesInProperties')) return
+        if (!that.plugin.settings.getSetting('treatFileNodeEdgesAsLinks')) return
         
         for (const edge of content?.edges) {
           const from = content.nodes.find((node: CanvasNodeData) => node.id === edge.fromNode)

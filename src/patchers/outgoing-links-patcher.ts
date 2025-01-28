@@ -3,7 +3,7 @@ import Patcher from "./patcher"
 
 export default class OutgoingLinksPatcher extends Patcher {
   protected async patch() {
-    if (!this.plugin.settings.getSetting('canvasLinksFeatureEnabled')) return
+    if (!this.plugin.settings.getSetting('canvasMetadataCompatibilityEnabled')) return
 
     const that = this
     const outgoingLinkPatch = PatchHelper.tryPatchWorkspacePrototype(this.plugin, () => (

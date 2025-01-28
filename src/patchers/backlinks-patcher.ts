@@ -6,7 +6,7 @@ export default class BacklinksPatcher extends Patcher {
   private isRecomputingBacklinks: boolean = false
 
   protected async patch() {
-    if (!this.plugin.settings.getSetting('canvasLinksFeatureEnabled')) return
+    if (!this.plugin.settings.getSetting('canvasMetadataCompatibilityEnabled')) return
 
     const that = this
     const backlinkPatch = PatchHelper.tryPatchWorkspacePrototype(this.plugin, () => (

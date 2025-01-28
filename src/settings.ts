@@ -26,10 +26,8 @@ export interface AdvancedCanvasPluginSettingsValues {
 
   combineCustomStylesInDropdown: boolean
 
-  canvasLinksFeatureEnabled: boolean
-  showLinksToEmbeddedFiles: boolean
-  showLinksBetweenFileNodesInGraph: boolean
-  showLinksBetweenFileNodesInProperties: boolean
+  canvasMetadataCompatibilityEnabled: boolean
+  treatFileNodeEdgesAsLinks: boolean
 
   nodeStylingFeatureEnabled: boolean
   customNodeStyleAttributes: StyleAttribute[]
@@ -159,23 +157,13 @@ export const SETTINGS = {
     description: 'Combine all style attributes of Advanced Canvas in a single dropdown.',
     children: { }
   },
-  canvasLinksFeatureEnabled: {
-    label: 'Canvas links',
-    description: 'TODO',
+  canvasMetadataCompatibilityEnabled: {
+    label: 'Enable .canvas metadata compatibility',
+    description: 'Make .canvas files compatible with the backlinks and outgoing links feature and show the connections in the graph view.',
     children: {
-      showLinksToEmbeddedFiles: {
-        label: 'Show links to embedded files',
-        description: 'TODO',
-        type: 'boolean'
-      },
-      showLinksBetweenFileNodesInGraph: {
-        label: 'Show links between file nodes in graph',
-        description: 'TODO',
-        type: 'boolean'
-      },
-      showLinksBetweenFileNodesInProperties: {
-        label: 'Show links between file nodes in properties',
-        description: 'TODO',
+      treatFileNodeEdgesAsLinks: {
+        label: 'Treat edges between file nodes as links',
+        description: 'When enabled, edges between file nodes will be treated as links. This means that if file node A.md has an edge to file node B.md in the canvas, file A.md will have a link to file B.md in the outgoing links section and show a connection in the graph view.',
         type: 'boolean'
       }
     }
@@ -447,10 +435,8 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
 
   combineCustomStylesInDropdown: false,
 
-  canvasLinksFeatureEnabled: true,
-  showLinksToEmbeddedFiles: true,
-  showLinksBetweenFileNodesInGraph: true,
-  showLinksBetweenFileNodesInProperties: false,
+  canvasMetadataCompatibilityEnabled: true,
+  treatFileNodeEdgesAsLinks: true,
 
   nodeStylingFeatureEnabled: true,
   customNodeStyleAttributes: [],
