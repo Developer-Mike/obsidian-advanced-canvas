@@ -1,7 +1,7 @@
 <h3 align="center">
     <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="./assets/logo-dark.png">
-        <img alt="Logo" src="./assets/logo-light.png" width="100">
+        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/logo-dark.png">
+        <img alt="Logo" src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/logo-light.png" width="100">
     </picture><br/><br/>
 	Advanced Canvas for <a href="https://obsidian.md">Obsidian.md</a>
 </h3>
@@ -11,7 +11,7 @@
     <a href="https://github.com/Developer-Mike/obsidian-advanced-canvas/issues"><img src="https://img.shields.io/github/issues/Developer-Mike/obsidian-advanced-canvas?colorA=363a4f&colorB=e93147&style=for-the-badge" alt="Open issues on GitHub"></a>
     <br/>
 	<a href="https://obsidian.md/plugins?id=advanced-canvas"><img src="https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/obsidianmd/obsidian-releases/master/community-plugin-stats.json&query=$.advanced-canvas.downloads&label=Downloads&style=for-the-badge&colorA=363a4f&colorB=d53984"/></a>
-    <a href="./LICENSE"><img src="https://img.shields.io/static/v1.svg?style=for-the-badge&label=License&message=GPL-3.0&colorA=363a4f&colorB=b7bdf8" alt="GPL-3.0 license"/></a>
+    <a href="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/LICENSE"><img src="https://img.shields.io/static/v1.svg?style=for-the-badge&label=License&message=GPL-3.0&colorA=363a4f&colorB=b7bdf8" alt="GPL-3.0 license"/></a>
     <br/><br/>
     <b>⚡ Supercharge</b> your canvas experience! Create presentations, flowcharts and more!
 </p>
@@ -140,7 +140,7 @@ You can customize the default node styles using the settings.
 ### Node Shapes
 <details>
     <summary>Flowchart Example</summary>
-    <img src="./assets/sample-flowchart.png" alt="Flowchart Example"/>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/sample-flowchart.png" alt="Flowchart Example"/>
 </details>
 
 #### Usage
@@ -149,42 +149,42 @@ You can customize the default node styles using the settings.
 #### Shapes
 <details>
     <summary>Terminal Shape</summary>
-    <img src="./assets/flowchart-nodes/terminal.png" alt="Terminal Shape"/>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flowchart-nodes/terminal.png" alt="Terminal Shape"/>
 </details>
 
 <details>
     <summary>Process/Center Shape</summary>
-    <img src="./assets/flowchart-nodes/process.png" alt="Process/Center Shape"/>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flowchart-nodes/process.png" alt="Process/Center Shape"/>
 </details>
 
 <details>
     <summary>Decision Shape</summary>
-    <img src="./assets/flowchart-nodes/decision.png" alt="Decision Shape"/>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flowchart-nodes/decision.png" alt="Decision Shape"/>
 </details>
 
 <details>
     <summary>Input/Output Shape</summary>
-    <img src="./assets/flowchart-nodes/input-output.png" alt="Input/Output Shape"/>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flowchart-nodes/input-output.png" alt="Input/Output Shape"/>
 </details>
 
 <details>
     <summary>On-page Reference Shape</summary>
-    <img src="./assets/flowchart-nodes/reference.png" alt="On-page Reference Shape"/>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flowchart-nodes/reference.png" alt="On-page Reference Shape"/>
 </details>
 
 <details>
     <summary>Predefined Process Shape</summary>
-    <img src="./assets/flowchart-nodes/predefined-process.png" alt="Predefined Process Shape"/>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flowchart-nodes/predefined-process.png" alt="Predefined Process Shape"/>
 </details>
 
 <details>
     <summary>Document Shape</summary>
-    <img src="./assets/flowchart-nodes/document.png" alt="Document Shape"/>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flowchart-nodes/document.png" alt="Document Shape"/>
 </details>
 
 <details>
     <summary>Database Shape</summary>
-    <img src="./assets/flowchart-nodes/database.png" alt="Database Shape"/>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flowchart-nodes/database.png" alt="Database Shape"/>
 </details>
 
 ### Border Styles
@@ -192,7 +192,7 @@ Set the style of the border to dotted, dashed or invisible.
 
 <details>
     <summary>Border Styles Example</summary>
-    <img src="./assets/border-styles.png" alt="Border Styles Example"/>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/border-styles.png" alt="Border Styles Example"/>
 </details>
 
 ## Edge Styles
@@ -203,7 +203,7 @@ Set the style of the edge paths to dotted, short-dashed or long-dashed.
 
 <details>
     <summary>Edge Styles Example</summary>
-    <img src="./assets/edge-path-styles.png" alt="Edge Path Styles Example"/>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/edge-path-styles.png" alt="Edge Path Styles Example"/>
 </details>
 
 ### Arrow Styles
@@ -211,7 +211,7 @@ Set the style of the arrows to triangle outline, halved triangle, thin triangle,
 
 <details>
     <summary>Arrow Styles Example</summary>
-    <img src="./assets/edge-arrow-styles.png" alt="Edge Arrow Styles Example"/>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/edge-arrow-styles.png" alt="Edge Arrow Styles Example"/>
 </details>
 
 ### Pathfinding Methods
@@ -219,7 +219,7 @@ Set the pathfinding method of the edges (arrows) to default, straight, squared o
 
 <details>
     <summary>Path Styles Example</summary>
-    <img src="./assets/edge-pathfinding-methods.png" alt="Edge Pathfinding Methods Example"/>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/edge-pathfinding-methods.png" alt="Edge Pathfinding Methods Example"/>
 </details>
 
 ## Custom Styles
@@ -261,7 +261,7 @@ Custom style attributes for nodes and edges can easily be added.
     }
     ```
 3. Reload Obsidian and enjoy your new custom style!
-    <br><img src="./assets/custom-style-attribute-example.png" alt="Custom Style Attribute Example"/>
+    <br><img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/custom-style-attribute-example.png" alt="Custom Style Attribute Example"/>
 
 ## Variable Breakpoints
 Add breakpoints to nodes to change at which zoom factor the node's content gets unrendered.
@@ -287,25 +287,25 @@ Add custom colors to the color picker. You can add them using the following css 
 
 <details>
     <summary>Custom Colors In Palette</summary>
-    <img src="./assets/custom-colors.png" alt="Custom Colors In Palette"/>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/custom-colors.png" alt="Custom Colors In Palette"/>
 </details>
 
 ## Presentation Mode
 In presentation mode, you can navigate through the nodes using the arrow keys or the PageUp/PageDown keys (Compatible with most presentation remotes). The different slides/nodes are connected using arrows. If you want to have multiple arrows pointing from the same node, you can number them in the order you want to navigate through them. While in presentation mode, the canvas is in readonly mode (So [better readonly](#better-readonly) effects the presentation mode as well!). You can exit the presentation mode using the `ESC` key or the corresponding command. If you want to continue the presentation from the last slide you were on, you can use the `Advanced Canvas: Continue presentation` command.
 
-<img src="./assets/sample-presentation-simple.gif" alt="Presentation mode example"/>
+<img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/sample-presentation-simple.gif" alt="Presentation mode example"/>
 
 <details>
     <summary>Canvas File</summary>
-    <img src="./assets/sample-presentation-simple.png" alt="Presentation canvas file"/>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/sample-presentation-simple.png" alt="Presentation canvas file"/>
 </details>
 
 ### More Complex Example
-<img src="./assets/sample-presentation-complex.gif" alt="Complex presentation mode example"/>
+<img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/sample-presentation-complex.gif" alt="Complex presentation mode example"/>
 
 <details>
     <summary>Canvas File</summary>
-    <img src="./assets/sample-presentation-complex.png" alt="Complex presentation canvas file"/>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/sample-presentation-complex.png" alt="Complex presentation canvas file"/>
 </details>
 
 ### Usage
@@ -324,7 +324,7 @@ In presentation mode, you can navigate through the nodes using the arrow keys or
 ## Portals
 Embed other canvases inside your canvas and create edges (arrows) to the embedded canvas.
 
-<img src="./assets/sample-portal-usage.png" alt="Portal example"/>
+<img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/sample-portal-usage.png" alt="Portal example"/>
 
 ### Usage
 - Embed a canvas file and click on the door icon of the popup menu to open a portal
@@ -334,7 +334,7 @@ Collapse and expand groups to organize your canvas.
 
 <details>
     <summary>Collapsible Groups Example</summary>
-    <img src="./assets/collapsible-groups.png" alt="Collapsible Groups Example"/>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/collapsible-groups.png" alt="Collapsible Groups Example"/>
 </details>
 
 ## Auto Node Resizing
@@ -342,7 +342,7 @@ Resize nodes automatically when the text content changes. Toggle this feature on
 
 <details>
     <summary>Auto Node Resizing Example</summary>
-    <img src="./assets/auto-node-resizing.gif" alt="Auto Node Resizing Example"/>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/auto-node-resizing.gif" alt="Auto Node Resizing Example"/>
 </details>
 
 ## Focus Mode
@@ -350,7 +350,7 @@ Focus on a single node and blur all other nodes.
 
 <details>
     <summary>Focus Mode Example</summary>
-    <img src="./assets/focus-mode.png" alt="Focus Mode"/>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/focus-mode.png" alt="Focus Mode"/>
 </details>
 
 ## Better Readonly
@@ -375,7 +375,7 @@ Flip the direction of an edge with one click.
 
 <details>
     <summary>Flip Edge Example</summary>
-    <img src="./assets/flip-edge.gif" alt="Flip Edge Example"/>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flip-edge.gif" alt="Flip Edge Example"/>
 </details>
 
 ## Canvas Events
