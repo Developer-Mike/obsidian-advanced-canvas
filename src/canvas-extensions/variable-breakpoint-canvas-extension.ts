@@ -1,5 +1,5 @@
 import { Canvas, CanvasNode } from "src/@types/Canvas"
-import { CanvasEvent } from "src/patchers/events"
+import { CanvasEvent } from "src/events"
 import CanvasExtension from "./canvas-extension"
 
 export const VARIABLE_BREAKPOINT_CSS_VAR = '--variable-breakpoint'

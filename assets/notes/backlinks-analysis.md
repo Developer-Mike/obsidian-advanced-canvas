@@ -1,7 +1,8 @@
-# Problem
+# Backlinks Analysis
+## Problem
 recomputeBacklink(TFile) -> app.vault.getMarkdownFiles
 
-# Solution
+### Solution
 const recurseChildren = function(e, t) {
     for (var n = [e]; n.length > 0; ) {
         var i = n.pop();

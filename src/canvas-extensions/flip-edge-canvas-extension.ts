@@ -1,5 +1,5 @@
 import { Canvas, CanvasEdge } from "src/@types/Canvas"
-import { CanvasEvent } from "src/patchers/events"
+import { CanvasEvent } from "src/events"
 import CanvasExtension from "./canvas-extension"
 import CanvasHelper from "src/utils/canvas-helper"
 

@@ -1,5 +1,5 @@
 import { Canvas } from "src/@types/Canvas"
-import { CanvasEvent } from "src/patchers/events"
+import { CanvasEvent } from "src/events"
 import AdvancedCanvasPlugin from "src/main"
 
 export default class MigrationHelper {

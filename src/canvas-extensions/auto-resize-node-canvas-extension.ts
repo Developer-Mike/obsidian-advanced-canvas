@@ -1,5 +1,5 @@
 import { Canvas, CanvasNode, CanvasNodeData } from "src/@types/Canvas"
-import { CanvasEvent } from "src/patchers/events"
+import { CanvasEvent } from "src/events"
 import CanvasExtension from "./canvas-extension"
 import CanvasHelper from "src/utils/canvas-helper"
 import { ViewUpdate } from "@codemirror/view"

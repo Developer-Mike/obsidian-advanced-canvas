@@ -1,6 +1,6 @@
 import { Canvas } from "src/@types/Canvas"
 import CanvasHelper, { MenuOption } from "src/utils/canvas-helper"
-import { CanvasEvent } from "src/patchers/events"
+import { CanvasEvent } from "src/events"
 import { AdvancedCanvasPluginSettingsValues } from "src/settings"
 import CanvasExtension from "./canvas-extension"
 

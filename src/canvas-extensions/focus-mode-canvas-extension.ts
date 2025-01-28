@@ -1,6 +1,6 @@
 import { Canvas } from "src/@types/Canvas"
 import CanvasHelper from "src/utils/canvas-helper"
-import { CanvasEvent } from "src/patchers/events"
+import { CanvasEvent } from "src/events"
 import CanvasExtension from "./canvas-extension"
 
 const CONTROL_MENU_FOCUS_TOGGLE_ID = 'focus-mode-toggle'

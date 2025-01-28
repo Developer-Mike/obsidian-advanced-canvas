@@ -9,12 +9,14 @@ import MigrationHelper from './utils/migration-helper'
 
 // Managers
 import SettingsManager from './settings'
-import WindowsManager from './windows-manager'
+import WindowsManager from './managers/windows-manager'
 
 // Patchers
 import Patcher from './patchers/patcher'
 import CanvasPatcher from './patchers/canvas-patcher'
 import MetadataCachePatcher from './patchers/metadata-cache-patcher'
+import BacklinksPatcher from './patchers/backlinks-patcher'
+import OutgoingLinksPatcher from './patchers/outgoing-links-patcher'
 
 // Canvas Extensions
 import CanvasExtension from './canvas-extensions/canvas-extension'
@@ -45,7 +47,9 @@ import CanvasWrapperExposerExtension from './canvas-extensions/dataset-exposers/
 
 const PATCHERS = [
   CanvasPatcher,
-  MetadataCachePatcher
+  MetadataCachePatcher,
+  BacklinksPatcher,
+  OutgoingLinksPatcher
 ]
 
 const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [

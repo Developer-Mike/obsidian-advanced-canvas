@@ -31,9 +31,9 @@ declare module "obsidian" {
     resolvedLinks: ResolvedLinks
 
     onCreateOrModify: (file: TFile) => void
-    saveFileCache: (filepath: string, cache: FileCacheEntry) => void // Called in onCreateOrModify
+    saveFileCache: (filepath: string, cache: FileCacheEntry) => void
     linkResolver: () => void
-    resolveLinks: (filepath: string) => void // Called in linkResolver
+    resolveLinks: (filepath: string) => void
   }
 
   export interface ExtendedWorkspace {

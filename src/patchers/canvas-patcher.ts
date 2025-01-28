@@ -1,6 +1,6 @@
 import { BBox, CanvasData, CanvasEdge, CanvasEdgeData, CanvasElement, CanvasNode, CanvasNodeData, CanvasView } from "src/@types/Canvas"
 import PatchHelper from "src/utils/patch-helper"
-import { CanvasEvent } from "./events"
+import { CanvasEvent } from "../events"
 import { requireApiVersion, WorkspaceLeaf, editorInfoField } from "obsidian"
 import { EditorView, ViewUpdate } from "@codemirror/view"
 import { around } from "monkey-around"

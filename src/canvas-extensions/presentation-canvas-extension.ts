@@ -1,6 +1,6 @@
 import { Menu, Notice } from 'obsidian'
 import { BBox, Canvas, CanvasEdge, CanvasElement, CanvasNode, Position, Size } from 'src/@types/Canvas'
-import { CanvasEvent } from 'src/patchers/events'
+import { CanvasEvent } from 'src/events'
 import CanvasHelper from "src/utils/canvas-helper"
 import BBoxHelper from "src/utils/bbox-helper"
 import CanvasExtension from './canvas-extension'
