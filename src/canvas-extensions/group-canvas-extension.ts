@@ -1,7 +1,7 @@
 import { Canvas, Position } from "src/@types/Canvas"
 import CanvasHelper from "src/utils/canvas-helper"
-import { CanvasEvent } from "src/core/events"
-import CanvasExtension from "../core/canvas-extension"
+import { CanvasEvent } from "src/patchers/events"
+import CanvasExtension from "./canvas-extension"
 
 const GROUP_NODE_SIZE = { width: 300, height: 300 }
 

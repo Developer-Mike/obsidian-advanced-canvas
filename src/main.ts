@@ -1,5 +1,4 @@
 import { ItemView, Plugin } from 'obsidian'
-import CanvasPatcher from './core/canvas-patcher'
 import { Canvas, CanvasView } from './@types/Canvas'
 import Quicksettings from './quicksettings'
 
@@ -12,8 +11,13 @@ import MigrationHelper from './utils/migration-helper'
 import SettingsManager from './settings'
 import WindowsManager from './windows-manager'
 
+// Patchers
+import Patcher from './patchers/patcher'
+import CanvasPatcher from './patchers/canvas-patcher'
+import MetadataCachePatcher from './patchers/metadata-cache-patcher'
+
 // Canvas Extensions
-import CanvasExtension from './core/canvas-extension'
+import CanvasExtension from './canvas-extensions/canvas-extension'
 import VariableBreakpointCanvasExtension from './canvas-extensions/variable-breakpoint-canvas-extension'
 import GroupCanvasExtension from './canvas-extensions/group-canvas-extension'
 import PresentationCanvasExtension from './canvas-extensions/presentation-canvas-extension'
@@ -38,7 +42,11 @@ import NodeInteractionExposerExtension from './canvas-extensions/dataset-exposer
 import NodeExposerExtension from './canvas-extensions/dataset-exposers/node-exposer'
 import EdgeExposerExtension from './canvas-extensions/dataset-exposers/edge-exposer'
 import CanvasWrapperExposerExtension from './canvas-extensions/dataset-exposers/canvas-wrapper-exposer'
-import CanvasLinkObsidianExtension from './obsidian-extensions/canvas-link-obsidian-extension'
+
+const PATCHERS = [
+  CanvasPatcher,
+  MetadataCachePatcher
+]
 
 const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   // Dataset Exposers
@@ -78,8 +86,7 @@ export default class AdvancedCanvasPlugin extends Plugin {
   quicksettings: Quicksettings
   windowsManager: WindowsManager
 
-  canvasPatcher: CanvasPatcher
-  canvasLinkObsidianExtension: CanvasLinkObsidianExtension
+  patchers: Patcher[]
   canvasExtensions: CanvasExtension[]
 
 	async onload() {
@@ -96,8 +103,7 @@ export default class AdvancedCanvasPlugin extends Plugin {
 
     this.windowsManager = new WindowsManager(this)
 
-    this.canvasPatcher = new CanvasPatcher(this)
-    this.canvasLinkObsidianExtension = new CanvasLinkObsidianExtension(this)
+    this.patchers = PATCHERS.map((Patcher: any) => new Patcher(this))
     this.canvasExtensions = CANVAS_EXTENSIONS.map((Extension: any) => new Extension(this))
 	}
 

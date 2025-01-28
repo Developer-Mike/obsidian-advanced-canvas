@@ -1,22 +1,15 @@
-import AdvancedCanvasPlugin from "src/main"
-import { BBox, Canvas, CanvasData, CanvasEdge, CanvasEdgeData, CanvasElement, CanvasNode, CanvasNodeData, CanvasView } from "src/@types/Canvas"
+import { BBox, CanvasData, CanvasEdge, CanvasEdgeData, CanvasElement, CanvasNode, CanvasNodeData, CanvasView } from "src/@types/Canvas"
 import PatchHelper from "src/utils/patch-helper"
 import { CanvasEvent } from "./events"
-import { ItemView, requireApiVersion, WorkspaceLeaf, editorInfoField } from "obsidian"
+import { requireApiVersion, WorkspaceLeaf, editorInfoField } from "obsidian"
 import { EditorView, ViewUpdate } from "@codemirror/view"
 import { around } from "monkey-around"
 import JSONC from "tiny-jsonc"
 import JSONSS from "json-stable-stringify"
+import Patcher from "./patcher"
 
-export default class CanvasPatcher {
-  plugin: AdvancedCanvasPlugin
-
-  constructor(plugin: AdvancedCanvasPlugin) {
-    this.plugin = plugin
-    this.applyPatches()
-  }
-
-  private async applyPatches() {
+export default class CanvasPatcher extends Patcher {
+  protected async patch() {
     const that = this
 
     // Wait for layout ready -> Support deferred view initialization
@@ -44,8 +37,6 @@ export default class CanvasPatcher {
 
       this.plugin.registerEvent(event)
     })
-
-    console.log('Patching canvas view:', canvasView)
     
     // Patch canvas view
     PatchHelper.patchObjectPrototype(this.plugin, canvasView, {

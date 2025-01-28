@@ -1,17 +1,13 @@
-import { TAbstractFile, TFile } from "obsidian"
+import { TFile } from "obsidian"
 import { CanvasData, CanvasNodeData } from "src/@types/Canvas"
 import { FileCacheEntry, MetadataCacheEntry, MetadataCacheMap, ResolvedLinks } from "src/@types/Obsidian"
-import AdvancedCanvasPlugin from "src/main"
 import HashHelper from "src/utils/hash-helper"
 import PatchHelper from "src/utils/patch-helper"
 import PathHelper from "src/utils/path-helper"
+import Patcher from "./patcher"
 
-export default class CanvasLinkObsidianExtension {
-  plugin: AdvancedCanvasPlugin
-
-  constructor(plugin: AdvancedCanvasPlugin) {
-    this.plugin = plugin
-
+export default class MetadataCachePatcher extends Patcher {
+  protected async patch() {
     if (!this.plugin.settings.getSetting('canvasLinksFeatureEnabled')) return
 
     const that = this

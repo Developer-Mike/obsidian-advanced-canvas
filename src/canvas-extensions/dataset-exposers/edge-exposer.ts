@@ -1,7 +1,7 @@
 import { Canvas, CanvasEdge, CanvasEdgeData } from "src/@types/Canvas"
-import { CanvasEvent } from "src/core/events"
+import { CanvasEvent } from "src/patchers/events"
 import SettingsManager from "src/settings"
-import CanvasExtension from "../../core/canvas-extension"
+import CanvasExtension from "../canvas-extension"
 
 export function getExposedEdgeData(settings: SettingsManager): (keyof CanvasEdgeData)[] {
   const exposedData: (keyof CanvasEdgeData)[] = []

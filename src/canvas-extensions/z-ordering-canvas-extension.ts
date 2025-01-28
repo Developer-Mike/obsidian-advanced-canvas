@@ -1,6 +1,6 @@
 import { Canvas, CanvasNode } from "src/@types/Canvas"
-import { CanvasEvent } from "src/core/events"
-import CanvasExtension from "../core/canvas-extension"
+import { CanvasEvent } from "src/patchers/events"
+import CanvasExtension from "./canvas-extension"
 import { Menu } from "obsidian"
 import BBoxHelper from "src/utils/bbox-helper"
 

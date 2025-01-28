@@ -1,7 +1,7 @@
 import { WorkspaceWindow } from "obsidian"
 import { Canvas } from "src/@types/Canvas"
-import { CanvasEvent } from "src/core/events"
-import CanvasExtension from "../core/canvas-extension"
+import { CanvasEvent } from "src/patchers/events"
+import CanvasExtension from "./canvas-extension"
 
 const DEFAULT_COLORS_COUNT = 6
 const CUSTOM_COLORS_MOD_STYLES_ID = 'mod-custom-colors'

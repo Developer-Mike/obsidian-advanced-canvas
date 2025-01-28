@@ -1,5 +1,5 @@
 import AdvancedCanvasPlugin from "src/main"
-import { CanvasEvent } from "../core/events"
+import { CanvasEvent } from "../patchers/events"
 import { Canvas, CanvasNode } from "src/@types/Canvas"
 
 export default class DebugHelper {

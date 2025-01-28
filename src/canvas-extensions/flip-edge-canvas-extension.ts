@@ -1,6 +1,6 @@
 import { Canvas, CanvasEdge } from "src/@types/Canvas"
-import { CanvasEvent } from "src/core/events"
-import CanvasExtension from "../core/canvas-extension"
+import { CanvasEvent } from "src/patchers/events"
+import CanvasExtension from "./canvas-extension"
 import CanvasHelper from "src/utils/canvas-helper"
 
 export default class FlipEdgeCanvasExtension extends CanvasExtension {

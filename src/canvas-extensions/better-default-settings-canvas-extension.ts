@@ -1,8 +1,8 @@
 import { Canvas, CanvasEdge, CanvasNode } from "src/@types/Canvas"
-import { CanvasEvent } from "src/core/events"
+import { CanvasEvent } from "src/patchers/events"
 import SettingsManager from "src/settings"
 import { FileSelectModal } from "src/utils/modal-helper"
-import CanvasExtension from "../core/canvas-extension"
+import CanvasExtension from "./canvas-extension"
 import CanvasHelper from "src/utils/canvas-helper"
 
 export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtension {

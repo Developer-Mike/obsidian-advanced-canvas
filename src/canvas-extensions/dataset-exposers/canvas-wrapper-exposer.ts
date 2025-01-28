@@ -1,7 +1,7 @@
 import { Canvas } from "src/@types/Canvas"
-import { CanvasEvent } from "src/core/events"
+import { CanvasEvent } from "src/patchers/events"
 import SettingsManager, { AdvancedCanvasPluginSettingsValues } from "src/settings"
-import CanvasExtension from "../../core/canvas-extension"
+import CanvasExtension from "../canvas-extension"
 
 const EXPOSED_SETTINGS: (keyof AdvancedCanvasPluginSettingsValues)[] = [
   'disableFontSizeRelativeToZoom',
