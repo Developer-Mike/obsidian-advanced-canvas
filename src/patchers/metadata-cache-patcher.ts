@@ -98,8 +98,7 @@ export default class MetadataCachePatcher extends Patcher {
         } as MetadataCacheEntry
 
         // Update resolved links
-        const allCacheEntries = [...fileNodesEmbeds, ...textNodesEmbeds, ...textNodesLinks]
-        ;(this.resolvedLinks as ResolvedLinks)[file.path] = allCacheEntries.reduce((acc, cacheEntry) => {
+        this.resolvedLinks[file.path] = [...fileNodesEmbeds, ...textNodesEmbeds, ...textNodesLinks].reduce((acc, cacheEntry) => {
           acc[cacheEntry.link] = (acc[cacheEntry.link] || 0) + 1
           return acc
         }, {} as Record<string, number>)
