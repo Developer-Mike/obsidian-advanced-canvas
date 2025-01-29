@@ -56,24 +56,51 @@ export default class MetadataCachePatcher extends Patcher {
         const content = JSON.parse(await this.vault.cachedRead(file) ?? '{}') as CanvasData
         if (!content?.nodes) return
 
-        // Extract canvas file nodes
-        const nodes = content.nodes.filter((node: CanvasNodeData) => node.type === 'file' && node.file)
-        const links = nodes.map((node: CanvasNodeData) => node.file) as string[]
+        // Extract canvas file node embeds
+        const fileNodesEmbeds = content.nodes
+          .filter((node: CanvasNodeData) => node.type === 'file' && node.file)
+          .map((node: CanvasNodeData) => node.file)
+          .map((path: string) => ({
+            link: path,
+            original: path,
+            displayText: path,
+            position: { start: { line: 0, col: 0, offset: 0 }, end: { line: 0, col: 0, offset: 0 } }
+          }))
+
+        // Extract canvas text node links/embeds
+        const textEncoder = new TextEncoder()
+        const textNodesMetadataPromises = content.nodes
+          .filter((node: CanvasNodeData) => node.type === 'text' && node.text)
+          .map((node: CanvasNodeData) => node.text)
+          .map((text: string) => textEncoder.encode(text).buffer)
+          .map((buffer: ArrayBuffer) => this.computeMetadataAsync(buffer) as Promise<MetadataCacheEntry>)
+        
+        const textNodesMetadata = await Promise.all(textNodesMetadataPromises) // Wait for all text nodes to be resolved
+
+        const textNodesEmbeds = textNodesMetadata
+          .map((metadata: MetadataCacheEntry) => metadata.embeds || [])
+          .flat()
+
+        const textNodesLinks = textNodesMetadata
+          .map((metadata: MetadataCacheEntry) => metadata.links || [])
+          .flat()
 
         // Update metadata cache
         ;(this.metadataCache as MetadataCacheMap)[fileCache.hash] = {
           v: 1,
-          embeds: links.map((path: string) => ({
-            link: path,
-            original: path,
-            displayText: path,
-            position: { start: { line: 0, col: 0, offset: 0 }, end: { line: 0, col: 0, offset: 0 } },
-          }))
+          embeds: [
+            ...fileNodesEmbeds,
+            ...textNodesEmbeds
+          ],
+          links: [
+            ...textNodesLinks
+          ]
         } as MetadataCacheEntry
 
         // Update resolved links
-        ;(this.resolvedLinks as ResolvedLinks)[file.path] = links.reduce((acc, link) => {
-          acc[link] = (acc[link] || 0) + 1
+        const allCacheEntries = [...fileNodesEmbeds, ...textNodesEmbeds, ...textNodesLinks]
+        ;(this.resolvedLinks as ResolvedLinks)[file.path] = allCacheEntries.reduce((acc, cacheEntry) => {
+          acc[cacheEntry.link] = (acc[cacheEntry.link] || 0) + 1
           return acc
         }, {} as Record<string, number>)
 
@@ -103,8 +130,8 @@ export default class MetadataCachePatcher extends Patcher {
         const fromFileMetadataCache = (this.metadataCache[fromFileHash] ?? { v: 1 }) as MetadataCacheEntry
         this.metadataCache[fromFileHash] = {
           ...fromFileMetadataCache,
-          embeds: [
-            ...(fromFileMetadataCache.embeds || []),
+          links: [
+            ...(fromFileMetadataCache.links || []),
             {
               link: to,
               original: to,

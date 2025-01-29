@@ -71,6 +71,12 @@ export interface MetadataCacheMap {
 }
 
 export interface MetadataCacheEntry {
+  links?: {
+    link: string
+    original: string
+    displayText: string
+    position: PositionRange
+  }[]
   embeds?: {
     link: string
     original: string
