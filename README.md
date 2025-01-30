@@ -496,4 +496,4 @@ You may want to check out issues with the `PRs appreciated` label to find issues
 But feel free to work on any issue or non-issue you want to work on!
 
 ## Star History
-[![Star History Chart](https://api.star-history.com/svg?repos=Developer-Mike/obsidian-advanced-canvas&type=Date)](https://star-history.com/#Developer-Mike/obsidian-advanced-canvas&Date)
+![Star History Chart](https://api.star-history.com/svg?repos=Developer-Mike/obsidian-advanced-canvas&type=Date)
