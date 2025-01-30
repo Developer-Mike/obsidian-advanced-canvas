@@ -24,10 +24,10 @@ export interface AdvancedCanvasPluginSettingsValues {
   minNodeSize: number
   disableFontSizeRelativeToZoom: boolean
 
-  combineCustomStylesInDropdown: boolean
-
   canvasMetadataCompatibilityEnabled: boolean
   treatFileNodeEdgesAsLinks: boolean
+
+  combineCustomStylesInDropdown: boolean
 
   nodeStylingFeatureEnabled: boolean
   customNodeStyleAttributes: StyleAttribute[]
@@ -152,11 +152,6 @@ export const SETTINGS = {
       }
     }
   },
-  combineCustomStylesInDropdown: {
-    label: 'Combine custom styles',
-    description: 'Combine all style attributes of Advanced Canvas in a single dropdown.',
-    children: { }
-  },
   canvasMetadataCompatibilityEnabled: {
     label: 'Enable .canvas metadata compatibility',
     description: 'Make .canvas files compatible with the backlinks and outgoing links feature and show the connections in the graph view.',
@@ -167,6 +162,11 @@ export const SETTINGS = {
         type: 'boolean'
       }
     }
+  },
+  combineCustomStylesInDropdown: {
+    label: 'Combine custom styles',
+    description: 'Combine all style attributes of Advanced Canvas in a single dropdown.',
+    children: { }
   },
   nodeStylingFeatureEnabled: {
     label: 'Node styling',
@@ -433,10 +433,10 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   minNodeSize: 60,
   disableFontSizeRelativeToZoom: false,
 
-  combineCustomStylesInDropdown: false,
-
   canvasMetadataCompatibilityEnabled: true,
   treatFileNodeEdgesAsLinks: true,
+
+  combineCustomStylesInDropdown: false,
 
   nodeStylingFeatureEnabled: true,
   customNodeStyleAttributes: [],
