@@ -37,7 +37,9 @@ Open the Community Plugins tab in the settings and search for "Advanced Canvas" 
 ## Features
 All features can be enabled/disabled in the settings.
 
-- Create groups independently of the nodes
+- Expose node data to style them using CSS
+- [Full Metadata Cache support](#full-metadata-cache-support)
+  - See embedded files and links of the canvas in the **graph view**, **outgoing-links** and **backlinks**
 - [Better default settings](#better-default-settings)
 - More [canvas commands](#canvas-commands)
 - [Node Styles](#node-styles)
@@ -100,14 +102,27 @@ All features can be enabled/disabled in the settings.
 - [Encapsulate selection](#encapsulate-selection)
   - Create a new canvas from the selected nodes
   - Create a link to the new canvas in the current canvas
+- Create groups independently of the nodes
 - Expose [canvas events](#canvas-events) to use them in other plugins
-- Expose node data to style them using CSS
 
 ## Support
 Please consider supporting the plugin. There are many hours of work and effort behind it. The two easiest ways to support the plugin are either by starring ⭐ the repository or by donating any amount on [Ko-fi](https://ko-fi.com/X8X27IA08) ❤️. Thank you!
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/X8X27IA08)
 <img src="https://img.shields.io/endpoint?url=https://wakapi.dev/api/compat/shields/v1/Developer-Mike/interval:all_time/project:obsidian-advanced-canvas&label=Time%20Spent&style=for-the-badge&colorA=ffffff&colorB=ff5e5b" alt="Time Spent">
+
+## Full Metadata Cache Support
+Advanced Canvas enables .canvas files to be indexed by the metadata cache. This means that there is now full compatibility with the graph view, outgoing links and backlinks. You can even enable (optional) the creation of an outgoing link if two embeds in a canvas are connected by an edge. This feature brings the full power of Obsidian's linking system to the canvas file format.
+
+<details>
+    <summary>Metadata Cache Support Example</summary>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/metadata-cache-support.png" alt="Metadata Cache Support Example"/>
+</details>
+
+<details>
+    <summary>Outgoing Link Using An Edge Example</summary>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/edge-metadata-cache.png" alt="Outgoing Link Using An Edge Example"/>
+</details>
 
 ## Better Default Settings
 - Enforce all new nodes to be aligned to the grid
