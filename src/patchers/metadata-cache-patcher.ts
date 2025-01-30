@@ -11,7 +11,7 @@ export default class MetadataCachePatcher extends Patcher {
     if (!this.plugin.settings.getSetting('canvasMetadataCompatibilityEnabled')) return
 
     const that = this
-    PatchHelper.patchObjectPrototype(this.plugin, this.plugin.app.metadataCache, {
+    await PatchHelper.patchObjectPrototype(this.plugin, this.plugin.app.metadataCache, {
       getCache: (next: any) => function (filepath: string, ...args: any[]) {
         // Bypass the "md" extension check by handling the "canvas" extension here
         if (PathHelper.extension(filepath) === 'canvas') {
@@ -145,7 +145,15 @@ export default class MetadataCachePatcher extends Patcher {
           ...this.resolvedLinks[from],
           [to]: (this.resolvedLinks[from]?.[to] || 0) + 1
         }
-    }
+      }
+    })
+
+    // Patch complete - reload graph views and local graph views as soon as the layout is ready
+    this.plugin.app.workspace.onLayoutReady(() => {
+      const graphViews = [...this.plugin.app.workspace.getLeavesOfType('graph'), ...this.plugin.app.workspace.getLeavesOfType('localgraph')]
+      for (const view of graphViews) (view as any).rebuildView()
+
+      console.log(graphViews)
     })
   }
 }
