@@ -1,6 +1,5 @@
 import { Canvas, CanvasEdge, CanvasNode } from "src/@types/Canvas"
-import { CanvasEvent } from "src/events"
-import SettingsManager from "src/settings"
+import { CanvasEvent, PluginEvent } from "src/events"
 import { FileSelectModal } from "src/utils/modal-helper"
 import CanvasExtension from "./canvas-extension"
 import CanvasHelper from "src/utils/canvas-helper"
@@ -12,7 +11,7 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
     this.modifyCanvasSettings(this.plugin.getCurrentCanvas())
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      SettingsManager.SETTINGS_CHANGED_EVENT,
+      PluginEvent.SettingsChanged,
       () => this.modifyCanvasSettings(this.plugin.getCurrentCanvas())
     ))
 

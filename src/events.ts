@@ -1,6 +1,10 @@
 const CANVAS_EVENT_PREFIX = 'canvas'
 const PLUGIN_EVENT_PREFIX = 'advanced-canvas'
 
+export const PluginEvent = {
+  SettingsChanged: `${PLUGIN_EVENT_PREFIX}:settings-changed`
+}
+
 export const CanvasEvent = {
   // Built-in events
   SelectionContextMenu: `${CANVAS_EVENT_PREFIX}:selection-menu`,

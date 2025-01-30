@@ -1,6 +1,6 @@
 import { Canvas } from "src/@types/Canvas"
-import { CanvasEvent } from "src/events"
-import SettingsManager, { AdvancedCanvasPluginSettingsValues } from "src/settings"
+import { CanvasEvent, PluginEvent } from "src/events"
+import { AdvancedCanvasPluginSettingsValues } from "src/settings"
 import CanvasExtension from "../canvas-extension"
 
 const EXPOSED_SETTINGS: (keyof AdvancedCanvasPluginSettingsValues)[] = [
@@ -14,7 +14,7 @@ export default class CanvasWrapperExposerExtension extends CanvasExtension {
 
   init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      SettingsManager.SETTINGS_CHANGED_EVENT,
+      PluginEvent.SettingsChanged,
       () => this.updateExposedSettings(this.plugin.getCurrentCanvas())
     ))
 

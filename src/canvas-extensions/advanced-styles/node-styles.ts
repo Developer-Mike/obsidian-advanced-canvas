@@ -1,9 +1,8 @@
 import { Canvas } from "src/@types/Canvas"
 import CanvasHelper from "src/utils/canvas-helper"
-import { CanvasEvent } from "src/events"
+import { CanvasEvent, PluginEvent } from "src/events"
 import CanvasExtension from "../canvas-extension"
 import { BUILTIN_NODE_STYLE_ATTRIBUTES, StyleAttribute } from "./style-config"
-import SettingsManager from "src/settings"
 
 export default class NodeStylesExtension extends CanvasExtension {
   allNodeStyles: StyleAttribute[]
@@ -13,7 +12,7 @@ export default class NodeStylesExtension extends CanvasExtension {
   init() {
     this.allNodeStyles = [...BUILTIN_NODE_STYLE_ATTRIBUTES, ...this.plugin.settings.getSetting('customNodeStyleAttributes')]
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      SettingsManager.SETTINGS_CHANGED_EVENT,
+      PluginEvent.SettingsChanged,
       () => this.allNodeStyles = [...BUILTIN_NODE_STYLE_ATTRIBUTES, ...this.plugin.settings.getSetting('customNodeStyleAttributes')]
     ))
 

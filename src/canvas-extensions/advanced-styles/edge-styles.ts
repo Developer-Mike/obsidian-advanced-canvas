@@ -1,10 +1,9 @@
 import { BBox, Canvas, CanvasEdge, CanvasElement, CanvasNode, Position, Side } from "src/@types/Canvas"
 import CanvasHelper from "src/utils/canvas-helper"
-import { CanvasEvent } from "src/events"
+import { CanvasEvent, PluginEvent } from "src/events"
 import BBoxHelper from "src/utils/bbox-helper"
 import CanvasExtension from "../canvas-extension"
 import { BUILTIN_EDGE_STYLE_ATTRIBUTES, StyleAttribute } from "./style-config"
-import SettingsManager from "src/settings"
 import EdgePathfindingMethod from "./edge-pathfinding-methods/edge-pathfinding-method"
 import EdgePathfindingDirect from "./edge-pathfinding-methods/pathfinding-direct"
 import EdgePathfindingSquare from "./edge-pathfinding-methods/pathfinding-square"
@@ -24,7 +23,7 @@ export default class EdgeStylesExtension extends CanvasExtension {
   init() {
     this.allEdgeStyleAttributes = [...BUILTIN_EDGE_STYLE_ATTRIBUTES, ...this.plugin.settings.getSetting('customEdgeStyleAttributes')]
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      SettingsManager.SETTINGS_CHANGED_EVENT,
+      PluginEvent.SettingsChanged,
       () => this.allEdgeStyleAttributes = [...BUILTIN_EDGE_STYLE_ATTRIBUTES, ...this.plugin.settings.getSetting('customEdgeStyleAttributes')]
     ))
 
