@@ -152,8 +152,6 @@ export default class MetadataCachePatcher extends Patcher {
     this.plugin.app.workspace.onLayoutReady(() => {
       const graphViews = [...this.plugin.app.workspace.getLeavesOfType('graph'), ...this.plugin.app.workspace.getLeavesOfType('localgraph')]
       for (const view of graphViews) (view as any).rebuildView()
-
-      console.log(graphViews)
     })
   }
 }
