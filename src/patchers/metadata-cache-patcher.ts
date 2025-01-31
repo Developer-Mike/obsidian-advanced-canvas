@@ -29,29 +29,14 @@ export default class MetadataCachePatcher extends Patcher {
           return next.call(this, file, ...args)
 
         // Update the cache
+        const fileHash = HashHelper.hash(file.path)
         this.saveFileCache(file.path, {
-          hash: HashHelper.hash(file.path), // Hash wouldn't get set in the original function
+          hash: fileHash, // Hash wouldn't get set in the original function
           mtime: file.stat.mtime,
           size: file.stat.size
         })
 
-        // Resolve links (This wouldn't get called in the original function too)
         // TODO: Use workQueue like in the original function
-        this.resolveLinks(file.path)
-      },
-      resolveLinks: (next: any) => async function (filepath: string, ...args: any[]) {
-        // Call the original function if the file is not a canvas file
-        if (PathHelper.extension(filepath) !== 'canvas')
-          return next.call(this, filepath, ...args)
-
-        // Get canvas file
-        const file = this.vault.getAbstractFileByPath(filepath)
-        if (!(file instanceof TFile)) return
-
-        // Get file cache
-        const fileCache = this.fileCache[file.path] as FileCacheEntry
-        if (!fileCache) return
-
         // Read canvas data
         const content = JSON.parse(await this.vault.cachedRead(file) ?? '{}') as CanvasData
         if (!content?.nodes) return
@@ -86,7 +71,7 @@ export default class MetadataCachePatcher extends Patcher {
           .flat()
 
         // Update metadata cache
-        ;(this.metadataCache as MetadataCacheMap)[fileCache.hash] = {
+        ;(this.metadataCache as MetadataCacheMap)[fileHash] = {
           v: 1,
           embeds: [
             ...fileNodesEmbeds,
@@ -97,34 +82,61 @@ export default class MetadataCachePatcher extends Patcher {
           ]
         } as MetadataCacheEntry
 
+        // Trigger metadata cache change event
+        this.trigger('changed', file, "", this.metadataCache[fileHash])
+
+        // Resolve links (This wouldn't get called in the original function too)
+        this.resolveLinks(file.path, content)
+      },
+      resolveLinks: (next: any) => async function (filepath: string, cachedContent: Partial<CanvasData>) { // Custom argument cachedContent
+        // Call the original function if the file is not a canvas file
+        if (PathHelper.extension(filepath) !== 'canvas')
+          return next.call(this, filepath)
+
+        // Get file object
+        const file = this.vault.getAbstractFileByPath(filepath) as TFile
+        if (!file) return
+
+        // Get metadata cache entry
+        const metadataCache = this.metadataCache[this.fileCache[filepath]?.hash] as MetadataCacheEntry
+        if (!metadataCache) return
+
+        // List of all links in the file
+        const metadataReferences = [...(metadataCache.links || []), ...(metadataCache.embeds || [])]
+
         // Update resolved links
-        this.resolvedLinks[file.path] = [...fileNodesEmbeds, ...textNodesEmbeds, ...textNodesLinks].reduce((acc, cacheEntry) => {
-          const resolvedLinkpath = this.getFirstLinkpathDest(cacheEntry.link, file.path)
+        this.resolvedLinks[filepath] = metadataReferences.reduce((acc, metadataReference) => {
+          const resolvedLinkpath = this.getFirstLinkpathDest(metadataReference.link, filepath)
           if (!resolvedLinkpath) return acc
 
           acc[resolvedLinkpath.path] = (acc[resolvedLinkpath.path] || 0) + 1
+
           return acc
         }, {} as Record<string, number>)
 
         // Show links between files with edges
-        if (!that.plugin.settings.getSetting('treatFileNodeEdgesAsLinks')) return
-        
-        // Extract canvas file edges
-        for (const edge of content?.edges || []) {
-          const from = content.nodes.find((node: CanvasNodeData) => node.id === edge.fromNode)
-          const to = content.nodes.find((node: CanvasNodeData) => node.id === edge.toNode)
-          if (!from || !to) continue
+        if (that.plugin.settings.getSetting('treatFileNodeEdgesAsLinks')) {
+          // Extract canvas file edges
+          for (const edge of cachedContent.edges || []) {
+            const from = cachedContent.nodes?.find((node: CanvasNodeData) => node.id === edge.fromNode)
+            const to = cachedContent.nodes?.find((node: CanvasNodeData) => node.id === edge.toNode)
+            if (!from || !to) continue
 
-          // Check if both nodes are file nodes
-          if (from.type !== 'file' || to.type !== 'file' || !from.file || !to.file) continue
+            // Check if both nodes are file nodes
+            if (from.type !== 'file' || to.type !== 'file' || !from.file || !to.file) continue
 
-          // Register the link for the "from" node to the "to" node
-          this.registerInternalLinkAC(file.name, from.file, to.file)
+            // Register the link for the "from" node to the "to" node
+            this.registerInternalLinkAC(file.name, from.file, to.file)
 
-          // Check if the edge is bidirectional or unidirectional - if yes, register the link for the "to" node to the "from" node as well
-          if (!(edge.toEnd !== 'none' || edge.fromEnd === 'arrow'))
-            this.registerInternalLinkAC(file.name, to.file, from.file)
+            // Check if the edge is bidirectional or unidirectional - if yes, register the link for the "to" node to the "from" node as well
+            if (!(edge.toEnd !== 'none' || edge.fromEnd === 'arrow'))
+              this.registerInternalLinkAC(file.name, to.file, from.file)
+          }
         }
+
+        // Trigger metadata cache change event
+        this.trigger('resolve', file)
+        this.trigger('resolved') // TODO: Use workQueue like in the original function
       },
       registerInternalLinkAC: (_next: any) => function (canvasName: string, from: string, to: string) {
         // Update metadata cache for "from" node
@@ -150,6 +162,13 @@ export default class MetadataCachePatcher extends Patcher {
         }
       }
     })
+
+    // metadataCache.watchVaultChanges makes a copy of computeFileMetadataAsync that gets called on the "modify" event
+    // To fix this, AC creates a new event listener for "modify" that only handles canvas files
+    this.plugin.registerEvent(this.plugin.app.vault.on('modify', (file: TFile) => {
+      if (PathHelper.extension(file.path) !== 'canvas') return
+      this.plugin.app.metadataCache.computeFileMetadataAsync(file)
+    }))
 
     // Patch complete - reload graph views and local graph views as soon as the layout is ready
     this.plugin.app.workspace.onLayoutReady(() => {
