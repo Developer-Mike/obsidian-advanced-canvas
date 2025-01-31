@@ -94,6 +94,12 @@ export interface MetadataCacheEntry {
   v: number
 }
 
+export interface MetadataCacheCanvasEntry extends MetadataCacheEntry {
+  nodes: {
+    [nodeId: string]: MetadataCacheEntry
+  }
+}
+
 export interface ResolvedLinks {
   [path: string]: {
     [link: string]: number

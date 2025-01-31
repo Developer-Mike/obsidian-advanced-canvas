@@ -1,6 +1,6 @@
 import { TFile } from "obsidian"
 import { CanvasData, CanvasNodeData } from "src/@types/Canvas"
-import { CanvasPos, FileCacheEntry, MetadataCacheEntry, MetadataCacheMap, ResolvedLinks } from "src/@types/Obsidian"
+import { MetadataCacheCanvasEntry, MetadataCacheEntry, MetadataCacheMap } from "src/@types/Obsidian"
 import HashHelper from "src/utils/hash-helper"
 import PatchHelper from "src/utils/patch-helper"
 import PathHelper from "src/utils/path-helper"
@@ -44,12 +44,13 @@ export default class MetadataCachePatcher extends Patcher {
         // Extract canvas file node embeds
         const fileNodesEmbeds = content.nodes
           .filter((node: CanvasNodeData) => node.type === 'file' && node.file)
-          .map((node: CanvasNodeData) => ({
-            link: node.file,
-            original: node.file,
-            displayText: node.file,
+          .map((node: CanvasNodeData) => [node.id, node.file] as [string, string])
+          .map(([nodeId, file]) => ({
+            link: file,
+            original: file,
+            displayText: file,
             position: {
-              nodeId: node.id,
+              nodeId: nodeId,
               start: { line: 0, col: 0, offset: 0 },
               end: { line: 0, col: 0, offset: 0 }
             }
@@ -99,8 +100,14 @@ export default class MetadataCachePatcher extends Patcher {
           ],
           links: [
             ...textNodesLinks
-          ]
-        } as MetadataCacheEntry
+          ],
+          nodes: {
+            ...textNodesMetadata.reduce((acc, metadata, index) => {
+              acc[textNodesIds[index]] = metadata
+              return acc
+            }, {} as Record<string, MetadataCacheEntry>)
+          }
+        } satisfies MetadataCacheCanvasEntry as MetadataCacheEntry
 
         // Trigger metadata cache change event
         this.trigger('changed', file, "", this.metadataCache[fileHash])
