@@ -30,7 +30,7 @@ declare module "obsidian" {
     metadataCache: MetadataCacheMap
     resolvedLinks: ResolvedLinks
 
-    onCreateOrModify: (file: TFile) => void
+    computeFileMetadataAsync: (file: TFile) => void
     saveFileCache: (filepath: string, cache: FileCacheEntry) => void
     linkResolver: () => void
     resolveLinks: (filepath: string) => void

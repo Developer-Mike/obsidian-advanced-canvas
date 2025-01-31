@@ -23,7 +23,7 @@ export default class MetadataCachePatcher extends Patcher {
 
         return next.call(this, filepath, ...args)
       },
-      onCreateOrModify: (next: any) => async function (file: TFile, ...args: any[]) {
+      computeFileMetadataAsync: (next: any) => async function (file: TFile, ...args: any[]) {
         // Call the original function if the file is not a canvas file
         if (PathHelper.extension(file.path) !== 'canvas')
           return next.call(this, file, ...args)
@@ -99,7 +99,10 @@ export default class MetadataCachePatcher extends Patcher {
 
         // Update resolved links
         this.resolvedLinks[file.path] = [...fileNodesEmbeds, ...textNodesEmbeds, ...textNodesLinks].reduce((acc, cacheEntry) => {
-          acc[cacheEntry.link] = (acc[cacheEntry.link] || 0) + 1
+          const resolvedLinkpath = this.getFirstLinkpathDest(cacheEntry.link, file.path)
+          if (!resolvedLinkpath) return acc
+
+          acc[resolvedLinkpath.path] = (acc[resolvedLinkpath.path] || 0) + 1
           return acc
         }, {} as Record<string, number>)
 
