@@ -12,16 +12,16 @@ export default class BacklinksPatcher extends Patcher {
     const backlinkPatch = PatchHelper.tryPatchWorkspacePrototype(this.plugin, () => (
       (this.plugin.app.workspace.getLeavesOfType('backlink').first()?.view as any)?.backlink
     ), {
-      recomputeBacklink: (next: any) => function (file: TFile, ...args: any[]) {
+      recomputeBacklink: PatchHelper.OverrideExisting(next => function (file: TFile, ...args: any[]) {
         that.isRecomputingBacklinks = true
         const result = next.call(this, file, ...args)
         that.isRecomputingBacklinks = false
         return result
-      }
+      })
     })
 
-    const vaultPatch = PatchHelper.patchObjectPrototype(this.plugin, this.plugin.app.vault, {
-      recurseChildrenAC: (_next: any) => function (origin: TAbstractFile, traverse: (file: TAbstractFile) => void) {
+    const vaultPatch = PatchHelper.patchPrototype<any>(this.plugin, this.plugin.app.vault, {
+      recurseChildrenAC: _next => function (origin: TAbstractFile, traverse: (file: TAbstractFile) => void) {
         for (var stack = [origin]; stack.length > 0;) {
           var current = stack.pop()
           if (current) {
@@ -32,7 +32,7 @@ export default class BacklinksPatcher extends Patcher {
           }
         }
       },
-      getMarkdownFiles: (next: any) => function (file: TFile, ...args: any[]) {
+      getMarkdownFiles: PatchHelper.OverrideExisting(next => function (file: TFile, ...args: any[]) {
         if (!that.isRecomputingBacklinks) return next.call(this, file, ...args)
 
         // If we are recomputing backlinks, we need to include markdown as well as canvas files
@@ -46,7 +46,7 @@ export default class BacklinksPatcher extends Patcher {
         })
 
         return files
-      }
+      })
     })
 
     const [backlink] = await Promise.all([backlinkPatch, vaultPatch])

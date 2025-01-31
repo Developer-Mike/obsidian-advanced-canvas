@@ -11,8 +11,8 @@ export default class MetadataCachePatcher extends Patcher {
     if (!this.plugin.settings.getSetting('canvasMetadataCompatibilityEnabled')) return
 
     const that = this
-    await PatchHelper.patchObjectPrototype(this.plugin, this.plugin.app.metadataCache, {
-      getCache: (next: any) => function (filepath: string, ...args: any[]) {
+    await PatchHelper.patchPrototype<any>(this.plugin, this.plugin.app.metadataCache, {
+      getCache: PatchHelper.OverrideExisting(next => function (filepath: string, ...args: any[]) {
         // Bypass the "md" extension check by handling the "canvas" extension here
         if (PathHelper.extension(filepath) === 'canvas') {
           if (!this.fileCache.hasOwnProperty(filepath)) return null
@@ -22,8 +22,8 @@ export default class MetadataCachePatcher extends Patcher {
         }
 
         return next.call(this, filepath, ...args)
-      },
-      computeFileMetadataAsync: (next: any) => async function (file: TFile, ...args: any[]) {
+      }),
+      computeFileMetadataAsync: PatchHelper.OverrideExisting(next => async function (file: TFile, ...args: any[]) {
         // Call the original function if the file is not a canvas file
         if (PathHelper.extension(file.path) !== 'canvas')
           return next.call(this, file, ...args)
@@ -114,8 +114,8 @@ export default class MetadataCachePatcher extends Patcher {
 
         // Resolve links (This wouldn't get called in the original function too)
         this.resolveLinks(file.path, content)
-      },
-      resolveLinks: (next: any) => async function (filepath: string, cachedContent: Partial<CanvasData>) { // Custom argument cachedContent
+      }),
+      resolveLinks: PatchHelper.OverrideExisting(next => async function (filepath: string, cachedContent: Partial<CanvasData>) { // Custom argument cachedContent
         // Call the original function if the file is not a canvas file
         if (PathHelper.extension(filepath) !== 'canvas')
           return next.call(this, filepath)
@@ -164,8 +164,8 @@ export default class MetadataCachePatcher extends Patcher {
         // Trigger metadata cache change event
         this.trigger('resolve', file)
         this.trigger('resolved') // TODO: Use workQueue like in the original function
-      },
-      registerInternalLinkAC: (_next: any) => function (canvasName: string, from: string, to: string) {
+      }),
+      registerInternalLinkAC: _next => function (canvasName: string, from: string, to: string) {
         // Update metadata cache for "from" node
         const fromFileHash = this.fileCache[from]?.hash ?? HashHelper.hash(from) // Some files might not be resolved yet
         const fromFileMetadataCache = (this.metadataCache[fromFileHash] ?? { v: 1 }) as MetadataCacheEntry

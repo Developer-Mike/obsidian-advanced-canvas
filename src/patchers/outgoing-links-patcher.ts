@@ -9,7 +9,7 @@ export default class OutgoingLinksPatcher extends Patcher {
     const outgoingLinkPatch = PatchHelper.tryPatchWorkspacePrototype(this.plugin, () => (
       (this.plugin.app.workspace.getLeavesOfType('outgoing-link').first()?.view as any)?.outgoingLink
     ), {
-      recomputeLinks: (next: any) => function (...args: any[]) {
+      recomputeLinks: PatchHelper.OverrideExisting(next => function (...args: any[]) {
         const isCanvas = this.file?.extension === 'canvas'
 
         // Trick the app into thinking that the file is a markdown file
@@ -21,8 +21,8 @@ export default class OutgoingLinksPatcher extends Patcher {
         if (isCanvas) this.file.extension = 'canvas'
 
         return result
-      },
-      recomputeUnlinked: (next: any) => function (...args: any[]) {
+      }),
+      recomputeUnlinked: PatchHelper.OverrideExisting(next => function (...args: any[]) {
         const isCanvas = this.file?.extension === 'canvas'
 
         // Trick the app into thinking that the file is a markdown file
@@ -34,7 +34,7 @@ export default class OutgoingLinksPatcher extends Patcher {
         if (isCanvas) this.file.extension = 'canvas'
 
         return result
-      }
+      })
     })
 
     const [outgoingLink] = await Promise.all([outgoingLinkPatch])
