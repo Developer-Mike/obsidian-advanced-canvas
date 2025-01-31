@@ -124,6 +124,15 @@ Advanced Canvas enables .canvas files to be indexed by the metadata cache. This 
     <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/edge-metadata-cache.png" alt="Outgoing Link Using An Edge Example"/>
 </details>
 
+### Technical Details
+- The file cache of a .canvas file now contains a value for the hash key (Generated from the filepath) instead of an empty string
+  - Check the `app.metadataCache.fileCache[<filepath>]` object to see the changes
+- The metadata cache is located in the `app.metadataCache` object - the same object that is used by Obsidian for markdown files
+  - e.g. `app.metadataCache.getCache`/`app.metadataCache.getFileCache` now works with .canvas files
+  - The `position` object which is found inside metadata cache entries now contains a new key `nodeId` for .canvas files
+- The resolved links object now has entries for .canvas files
+  - The `app.metadataCache.resolvedLinks` object values for .canvas files are implemented in the exact same way as for markdown files
+
 ## Better Default Settings
 - Enforce all new nodes to be aligned to the grid
 - Customize default text node size
