@@ -1,6 +1,6 @@
 import { TFile } from "obsidian"
 import { CanvasData, CanvasNodeData } from "src/@types/Canvas"
-import { FileCacheEntry, MetadataCacheEntry, MetadataCacheMap, ResolvedLinks } from "src/@types/Obsidian"
+import { CanvasPos, FileCacheEntry, MetadataCacheEntry, MetadataCacheMap, ResolvedLinks } from "src/@types/Obsidian"
 import HashHelper from "src/utils/hash-helper"
 import PatchHelper from "src/utils/patch-helper"
 import PathHelper from "src/utils/path-helper"
@@ -44,31 +44,51 @@ export default class MetadataCachePatcher extends Patcher {
         // Extract canvas file node embeds
         const fileNodesEmbeds = content.nodes
           .filter((node: CanvasNodeData) => node.type === 'file' && node.file)
-          .map((node: CanvasNodeData) => node.file)
-          .map((path: string) => ({
-            link: path,
-            original: path,
-            displayText: path,
-            position: { start: { line: 0, col: 0, offset: 0 }, end: { line: 0, col: 0, offset: 0 } }
+          .map((node: CanvasNodeData) => ({
+            link: node.file,
+            original: node.file,
+            displayText: node.file,
+            position: {
+              nodeId: node.id,
+              start: { line: 0, col: 0, offset: 0 },
+              end: { line: 0, col: 0, offset: 0 }
+            }
           }))
 
         // Extract canvas text node links/embeds
         const textEncoder = new TextEncoder()
-        const textNodesMetadataPromises = content.nodes
+        const textNodes = content.nodes
           .filter((node: CanvasNodeData) => node.type === 'text' && node.text)
-          .map((node: CanvasNodeData) => node.text)
-          .map((text: string) => textEncoder.encode(text).buffer)
+
+        const textNodesIds = textNodes
+          .map((node: CanvasNodeData) => node.id)
+
+        const textNodesMetadataPromises = textNodes
+          .map((node: CanvasNodeData) => textEncoder.encode(node.text).buffer)
           .map((buffer: ArrayBuffer) => this.computeMetadataAsync(buffer) as Promise<MetadataCacheEntry>)
-        
         const textNodesMetadata = await Promise.all(textNodesMetadataPromises) // Wait for all text nodes to be resolved
 
         const textNodesEmbeds = textNodesMetadata
-          .map((metadata: MetadataCacheEntry) => metadata.embeds || [])
-          .flat()
+          .map((metadata: MetadataCacheEntry, index: number) => (
+            (metadata.embeds || []).map(embed => ({
+              ...embed,
+              position: {
+                nodeId: textNodesIds[index],
+                ...embed.position
+              }
+            }))
+          )).flat()
 
         const textNodesLinks = textNodesMetadata
-          .map((metadata: MetadataCacheEntry) => metadata.links || [])
-          .flat()
+          .map((metadata: MetadataCacheEntry, index: number) => (
+            (metadata.links || []).map(link => ({
+              ...link,
+              position: {
+                nodeId: textNodesIds[index],
+                ...link.position
+              }
+            }))
+          )).flat()
 
         // Update metadata cache
         ;(this.metadataCache as MetadataCacheMap)[fileHash] = {
@@ -169,11 +189,5 @@ export default class MetadataCachePatcher extends Patcher {
       if (PathHelper.extension(file.path) !== 'canvas') return
       this.plugin.app.metadataCache.computeFileMetadataAsync(file)
     }))
-
-    // Patch complete - reload graph views and local graph views as soon as the layout is ready
-    this.plugin.app.workspace.onLayoutReady(() => {
-      const graphViews = [...this.plugin.app.workspace.getLeavesOfType('graph'), ...this.plugin.app.workspace.getLeavesOfType('localgraph')]
-      for (const view of graphViews) (view as any).rebuildView()
-    })
   }
 }

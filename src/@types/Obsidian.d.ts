@@ -1,3 +1,5 @@
+import { Pos } from "obsidian"
+
 export * from "obsidian"
 
 declare module "obsidian" {
@@ -55,15 +57,8 @@ export interface FileCacheEntry {
   size: number
 }
 
-interface Position {
-  line: number
-  col: number
-  offset: number
-}
-
-interface PositionRange {
-  start: Position
-  end: Position
+export interface CanvasPos extends Pos {
+  nodeId: string
 }
 
 export interface MetadataCacheMap {
@@ -75,26 +70,26 @@ export interface MetadataCacheEntry {
     link: string
     original: string
     displayText: string
-    position: PositionRange
+    position: Pos | CanvasPos
   }[]
   embeds?: {
     link: string
     original: string
     displayText: string
-    position: PositionRange
+    position: Pos | CanvasPos
   }[]
   headings?: { 
     heading: string
     level: number
-    position: PositionRange
+    position: Pos | CanvasPos
   }[]
   listItems?: {
     parent: number
-    position: PositionRange
+    position: Pos | CanvasPos
   }[]
   sections?: {
     type: "paragraph" | "list" | "heading"
-    position: PositionRange
+    position: Pos | CanvasPos
   }[]
   v: number
 }
