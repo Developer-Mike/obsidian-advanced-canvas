@@ -1,0 +1,7 @@
+.canvas.is-exporting {
+  --zoom-multiplier: 1;
+
+  & > .canvas-node {
+    --variable-breakpoint: -4;
+  }
+}

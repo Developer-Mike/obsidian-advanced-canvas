@@ -134,6 +134,8 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
 
   flipEdgeFeatureEnabled: true,
 
+  betterExportFeatureEnabled: true,
+
   betterReadonlyEnabled: true,
   disableNodePopup: false,
   disableZoom: false,

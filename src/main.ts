@@ -34,6 +34,7 @@ import ColorPaletteCanvasExtension from './canvas-extensions/color-palette-canva
 import CollapsibleGroupsCanvasExtension from './canvas-extensions/collapsible-groups-canvas-extension'
 import FocusModeCanvasExtension from './canvas-extensions/focus-mode-canvas-extension'
 import FlipEdgeCanvasExtension from './canvas-extensions/flip-edge-canvas-extension'
+import ExportCanvasExtension from './canvas-extensions/export-canvas-extension'
 
 // Advanced Styles
 import NodeStylesExtension from './canvas-extensions/advanced-styles/node-styles'
@@ -51,9 +52,6 @@ const PATCHERS = [
   BacklinksPatcher,
   OutgoingLinksPatcher
 ]
-import ExportCanvasExtension from './canvas-extensions/export-canvas-extension'
-import IconsHelper from './utils/icons-helper'
-import StickersCanvasExtension from './canvas-extensions/stickers-canvas-extension'
 
 const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   // Dataset Exposers
@@ -75,7 +73,6 @@ const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   BetterReadonlyCanvasExtension,
   AutoResizeNodeCanvasExtension,
   ExportCanvasExtension,
-  ReadonlyCanvasExtension,
   GroupCanvasExtension,
 
   // More Advanced Extensions

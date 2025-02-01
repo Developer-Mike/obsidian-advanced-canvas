@@ -62,8 +62,9 @@ export interface Canvas {
   isDragging: boolean
   setDragging(dragging: boolean): void
   
-  zoomToBbox(bbox: BBox): void
+  zoomToFit(): void
   zoomToSelection(): void
+  zoomToBbox(bbox: BBox): void
 
   readonly: boolean
   setReadonly(readonly: boolean): void
@@ -336,6 +337,9 @@ export interface CanvasEdge extends CanvasElement {
 
     render(): void
   }
+
+  lineGroupEl: HTMLElement
+  lineEndGroupEl: HTMLElement
 
   /** Custom field */
   center?: Position
