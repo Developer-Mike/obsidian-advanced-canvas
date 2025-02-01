@@ -1,16 +1,14 @@
 import { Canvas, Position } from "src/@types/Canvas"
-import * as CanvasHelper from "src/utils/canvas-helper"
-import AdvancedCanvasPlugin from "src/main"
-import { CanvasEvent } from "src/events/events"
+import CanvasHelper from "src/utils/canvas-helper"
+import { CanvasEvent } from "src/events"
+import CanvasExtension from "./canvas-extension"
 
 const GROUP_NODE_SIZE = { width: 300, height: 300 }
 
-export default class GroupCanvasExtension {
-  plugin: AdvancedCanvasPlugin
+export default class GroupCanvasExtension extends CanvasExtension {
+  isEnabled() { return true }
 
-  constructor(plugin: any) {
-    this.plugin = plugin
-
+  init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.CanvasChanged,
       (canvas: Canvas) => {
@@ -18,9 +16,11 @@ export default class GroupCanvasExtension {
           canvas,
           CanvasHelper.createCardMenuOption(
             canvas,
-            'create-group',
-            'Drag to add group',
-            'group',
+            {
+              id: 'create-group',
+              label: 'Drag to add group',
+              icon: 'group'
+            },
             () => GROUP_NODE_SIZE,
             (canvas: Canvas, pos: Position) => {
               canvas.createGroupNode({

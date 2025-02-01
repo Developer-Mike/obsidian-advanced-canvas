@@ -1,19 +1,37 @@
 import { TFile } from "obsidian"
-import { BBox, Canvas, CanvasData, CanvasNode, CanvasNodeData } from "src/@types/Canvas"
-import { CanvasEvent } from "src/events/events"
-import AdvancedCanvasPlugin from "src/main"
-import * as CanvasHelper from "src/utils/canvas-helper"
+import { BBox, Canvas, CanvasData, CanvasEdge, CanvasElement, CanvasNode, CanvasNodeData, CanvasView } from "src/@types/Canvas"
+import { CanvasEvent } from "src/events"
+import CanvasHelper from "src/utils/canvas-helper"
+import CanvasExtension from "./canvas-extension"
 
 const PORTAL_PADDING = 50
 const MIN_OPEN_PORTAL_SIZE = { width: 200, height: 200 }
 
-export default class PortalsCanvasExtension {
-  plugin: AdvancedCanvasPlugin
+export default class PortalsCanvasExtension extends CanvasExtension {
+  isEnabled() { return 'portalsFeatureEnabled' as const }
 
-  constructor(plugin: AdvancedCanvasPlugin) {
-    this.plugin = plugin
+  init() {
+    this.plugin.registerEvent(this.plugin.app.vault.on('modify', (file: TFile) => {
+      const canvases = this.plugin.app.workspace.getLeavesOfType('canvas').map(leaf => (leaf.view as CanvasView).canvas)
 
-    if (!this.plugin.settingsManager.getSetting('portalsFeatureEnabled')) return
+      for (const canvas of canvases) {
+        if (canvas === undefined) continue
+        
+        const hasPortalsToFile = canvas.getData().nodes.filter(nodeData => 
+          nodeData.type === 'file' && 
+          nodeData.portalToFile === file.path
+        ).length > 0
+
+        // Update whole canvas data
+        if (hasPortalsToFile) {
+          canvas.setData(canvas.getData())
+
+          // Maintain history
+          canvas.history.current--
+          canvas.history.data.pop()
+        }
+      }
+    }))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.PopupMenuCreated,
@@ -27,7 +45,12 @@ export default class PortalsCanvasExtension {
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.NodeMoved,
-      (canvas: Canvas, node: CanvasNode) => this.onNodeMoved(canvas, node)
+      (canvas: Canvas, node: CanvasNode, _keyboard: boolean) => this.onNodeMoved(canvas, node)
+    ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.NodeResized,
+      (canvas: Canvas, node: CanvasNode) => this.onNodeResized(canvas, node)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
@@ -36,26 +59,15 @@ export default class PortalsCanvasExtension {
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.ContainingNodesRequested,
+      (canvas: Canvas, bbox: BBox, nodes: CanvasNode[]) => this.onContainingNodesRequested(canvas, bbox, nodes)
+    ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.SelectionChanged,
-      (canvas: Canvas, updateSelection: (update: () => void) => void) => this.onSelectionChanged(canvas, updateSelection)
+      (canvas: Canvas, oldSelection: Set<CanvasElement>, updateSelection: (update: () => void) => void) => this.onSelectionChanged(canvas, oldSelection, updateSelection)
     ))
-
-    this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.Undo,
-      (canvas: Canvas) => {
-        this.getCanvasDataWithPortals(canvas, canvas.getData())
-          .then((data: CanvasData) => canvas.importData(data))
-      }
-    ))
-
-    this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.Redo,
-      (canvas: Canvas) => {
-        this.getCanvasDataWithPortals(canvas, canvas.getData())
-          .then((data: CanvasData) => canvas.importData(data))
-      }
-    ))
-
+    
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.DataRequested,
       (canvas: Canvas, data: CanvasData) => this.removePortalCanvasData(canvas, data)
@@ -65,7 +77,17 @@ export default class PortalsCanvasExtension {
       CanvasEvent.LoadData,
       (canvas: Canvas, data: CanvasData, setData: (data: CanvasData) => void) => {
         this.getCanvasDataWithPortals(canvas, data)
-          .then((data: CanvasData) => setData(data))
+          .then((newData: CanvasData) => {
+            // Skip if the data didn't change
+            if (newData.nodes.length === data.nodes.length && newData.edges.length === data.edges.length) return
+            setData(newData)
+
+            // Resize open portals
+            for (const nodeData of [...newData.nodes, ...newData.nodes.slice().reverse()]) {
+              if (nodeData.type !== 'file' || !nodeData.portalToFile) continue
+              this.onOpenPortalResized(canvas, canvas.nodes.get(nodeData.id)!)
+            }
+          })
       }
     ))
   }
@@ -74,16 +96,19 @@ export default class PortalsCanvasExtension {
     if (canvas.readonly) return
 
     // Only search for valid nodes
-    const selectedFileNodes = Array.from(canvas.selection).filter(node => {
-      const nodeData = node.getData()
-      if (nodeData.type !== 'file') return false
-      if (node.file?.extension === 'canvas') return true
+    const selectedFileNodes = canvas.getSelectionData().nodes.map(nodeData => {
+      const node = canvas.nodes.get(nodeData.id)
+      if (!node) return null
+
+      if (nodeData.type !== 'file') return null
+      if (node.file?.extension === 'canvas') return node
       
       // Close portal of non-canvas file
       if (nodeData.portalToFile) this.setPortalOpen(canvas, node, false)
 
-      return false
-    })
+      return null
+    }).filter(node => node !== null) as CanvasNode[]
+    
     if (selectedFileNodes.length !== 1) return
 
     const portalNode = selectedFileNodes[0]
@@ -96,21 +121,20 @@ export default class PortalsCanvasExtension {
 
     CanvasHelper.addPopupMenuOption(
       canvas,
-      CanvasHelper.createPopupMenuOption(
-        'toggle-portal',
-        portalNodeData.portalToFile ? 'Close portal' : 'Open portal',
-        portalNodeData.portalToFile ? 'door-open' : 'door-closed',
-        () => {
+      CanvasHelper.createPopupMenuOption({
+        id: 'toggle-portal',
+        label: portalNodeData.portalToFile ? 'Close portal' : 'Open portal',
+        icon: portalNodeData.portalToFile ? 'door-open' : 'door-closed',
+        callback: () => {
           this.setPortalOpen(canvas, portalNode, portalNodeData.portalToFile === undefined)
           this.updatePopupMenu(canvas)
         }
-      )
+      })
     )
   }
 
   private setPortalOpen(canvas: Canvas, portalNode: CanvasNode, open: boolean) {
     const portalNodeData = portalNode.getData()
-
     portalNode.setData({
       ...portalNodeData,
       portalToFile: open ? portalNodeData.file : undefined
@@ -134,12 +158,53 @@ export default class PortalsCanvasExtension {
       .forEach(edge => canvas.removeEdge(edge!))
   }
 
-  private onSelectionChanged(canvas: Canvas, updateSelection: (update: () => void) => void) {
+  private onContainingNodesRequested(_canvas: Canvas, _bbox: BBox, nodes: CanvasNode[]) {
+    // Remove nodes from portals from the list
+    nodes.splice(0, nodes.length, ...nodes.filter(node => node.getData().portalId === undefined))
+  }
+
+  private onSelectionChanged(canvas: Canvas, oldSelection: Set<CanvasElement>, updateSelection: (update: () => void) => void) {
+    // Unselect nodes from portals
     updateSelection(() => {
       const updatedSelection = Array.from(canvas.selection)
         .filter(node => node.getData().portalId === undefined)
       canvas.selection = new Set(updatedSelection)
     })
+
+    // Move previously selected portals to the back
+    const previouslySelectedPortalNodesIds = Array.from(oldSelection)
+      .filter(node => (node.getData() as any).portalToFile !== undefined)
+      .flatMap(node => {
+        const portalNodeData = node.getData()
+        const nestedPortalsIds = this.getNestedPortalsIds(canvas, portalNodeData.id)
+
+        return [portalNodeData.id, ...nestedPortalsIds]
+      })
+
+    for (const node of canvas.nodes.values()) {
+      const nodeData = node.getData()
+
+      // Not from unselected portal
+      if (nodeData.portalId === undefined || !previouslySelectedPortalNodesIds.includes(nodeData.portalId)) continue
+
+      // Move to front
+      node.updateZIndex()
+    }
+  }
+
+  private getNestedPortalsIds(canvas: Canvas, portalId: string): string[] {
+    const nestedPortalsIds: string[] = []
+
+    for (const node of canvas.nodes.values()) {
+      const nodeData = node.getData()
+
+      if (nodeData.portalId === portalId) {
+        nestedPortalsIds.push(nodeData.id)
+        nestedPortalsIds.push(...this.getNestedPortalsIds(canvas, nodeData.id))
+      }
+    }
+
+    return nestedPortalsIds
   }
 
   restoreObjectSnappingState: () => void
@@ -156,6 +221,14 @@ export default class PortalsCanvasExtension {
     } else this.restoreObjectSnappingState?.()
   }
 
+  private getContainingNodes(canvas: Canvas, portalNodeData: CanvasNodeData): CanvasNode[] {
+    const nestedNodesIdMap = portalNodeData.portalIdMaps?.nodeIdMap
+    if (!nestedNodesIdMap) return []
+
+    return Object.keys(nestedNodesIdMap).map(refNodeId => canvas.nodes.get(refNodeId))
+      .filter(node => node !== undefined)
+  }
+
   private onNodeMoved(canvas: Canvas, node: CanvasNode) {
     const nodeData = node.getData()
     if (nodeData.type !== 'file' || !nodeData.portalToFile) return
@@ -164,30 +237,15 @@ export default class PortalsCanvasExtension {
   }
 
   private onOpenPortalMoved(canvas: Canvas, portalNode: CanvasNode) {
-    const portalNodeData = portalNode.getData()
+    let portalNodeData = portalNode.getData()
 
-    // Update nested nodes positions
-    const nestedNodesIdMap = portalNode.getData().portalIdMaps?.nodeIdMap
-    if (!nestedNodesIdMap) return
-
-    const nestedNodes = Object.keys(nestedNodesIdMap).map(refNodeId => canvas.nodes.get(refNodeId))
-      .filter(node => node !== undefined) as CanvasNode[]
-    const sourceBBox = CanvasHelper.getBBox(nestedNodes)
-
-    // Resize portal
-    const targetSize = this.getPortalSize(sourceBBox)
-    if (portalNodeData.width !== targetSize.width || portalNodeData.height !== targetSize.height) {
-      portalNode.setData({
-        ...portalNodeData,
-        width: targetSize.width,
-        height: targetSize.height
-      })
-    }
+    const nestedNodes = this.getContainingNodes(canvas, portalNodeData)
+    const containingNodesBBox = CanvasHelper.getBBox(nestedNodes)
 
     // Move nested nodes
     const portalOffset = {
-      x: portalNodeData.x - sourceBBox.minX + PORTAL_PADDING,
-      y: portalNodeData.y - sourceBBox.minY + PORTAL_PADDING
+      x: portalNodeData.x - containingNodesBBox.minX + PORTAL_PADDING,
+      y: portalNodeData.y - containingNodesBBox.minY + PORTAL_PADDING
     }
 
     for (const nestedNode of nestedNodes) {
@@ -198,6 +256,32 @@ export default class PortalsCanvasExtension {
         x: nestedNodeData.x + portalOffset.x,
         y: nestedNodeData.y + portalOffset.y
       })
+    }
+  }
+
+  private onNodeResized(canvas: Canvas, node: CanvasNode) {
+    const nodeData = node.getData()
+    if (nodeData.type !== 'file' || !nodeData.portalToFile) return
+
+    this.onOpenPortalResized(canvas, node)
+  }
+
+  private onOpenPortalResized(canvas: Canvas, portalNode: CanvasNode) {
+    let portalNodeData = portalNode.getData()
+
+    const nestedNodes = this.getContainingNodes(canvas, portalNodeData)
+    const containingNodesBBox = CanvasHelper.getBBox(nestedNodes)
+    const targetSize = this.getPortalSize(containingNodesBBox)
+
+    // Resize portal
+    if (portalNodeData.width !== targetSize.width || portalNodeData.height !== targetSize.height) {
+      portalNode.setData({
+        ...portalNodeData,
+        width: targetSize.width,
+        height: targetSize.height
+      })
+
+      return
     }
   }
 
@@ -232,7 +316,7 @@ export default class PortalsCanvasExtension {
       if (portalNodeData.type !== 'file') continue
 
       // Reset portal size
-      if (this.plugin.settingsManager.getSetting('maintainClosedPortalSize')) {
+      if (this.plugin.settings.getSetting('maintainClosedPortalSize')) {
         portalNodeData.width = portalNodeData.closedPortalWidth ?? portalNodeData.width
         portalNodeData.height = portalNodeData.closedPortalHeight ?? portalNodeData.height
       }
@@ -249,6 +333,7 @@ export default class PortalsCanvasExtension {
     const data = JSON.parse(JSON.stringify(dataRef)) as CanvasData
 
     // Open portals
+    this.nestedPortals = {}
     const addedData = await Promise.all(data.nodes.map(nodeData => this.tryOpenPortal(canvas, nodeData)))
     for (const newData of addedData) {
       data.nodes.push(...newData.nodes)
@@ -276,12 +361,13 @@ export default class PortalsCanvasExtension {
           // Push edges with updated from and to ids
           data.edges.push(...edges.map(edge => ({
             ...edge,
+            portalId: originNodeData.portalId,
             fromNode: `${idPrefix}${edge.fromNode}`,
             toNode: `${idPrefix}${edge.toNode}`
           })))
 
           delete originNodeData.edgesToNodeFromPortal![portalId]
-        } else if (this.plugin.settingsManager.getSetting('showEdgesIntoDisabledPortals')) {
+        } else if (this.plugin.settings.getSetting('showEdgesIntoDisabledPortals')) {
           // If portal is closed, add alternative edges directly to portal
           // But don't delete the edges
 
@@ -309,17 +395,29 @@ export default class PortalsCanvasExtension {
     return data
   }
 
-  private async tryOpenPortal(canvas: Canvas, portalNodeData: CanvasNodeData): Promise<CanvasData> {
+  private nestedPortals: { [portalId: string]: string[] } = {}
+  private async tryOpenPortal(canvas: Canvas, portalNodeData: CanvasNodeData, parentPortalId?: string): Promise<CanvasData> {
     const addedData: CanvasData = { nodes: [], edges: [] }
     if (portalNodeData.type !== 'file' || !portalNodeData.portalToFile) return addedData
 
     // Update portal file
     portalNodeData.portalToFile = portalNodeData.file
 
-    // Fix recursive portals
+    // Fix direct recursion
     if (portalNodeData.portalToFile === canvas.view.file.path) {
       portalNodeData.portalToFile = undefined
       return addedData
+    }
+
+    // Fix indirect recursion
+    if (parentPortalId) {
+      if (this.nestedPortals[parentPortalId]?.includes(portalNodeData.portalToFile!)) {
+        portalNodeData.portalToFile = undefined
+        return addedData
+      }
+      
+      this.nestedPortals[parentPortalId] = this.nestedPortals[parentPortalId] ?? []
+      this.nestedPortals[parentPortalId].push(portalNodeData.portalToFile!)
     }
 
     const portalFile = this.plugin.app.vault.getAbstractFileByPath(portalNodeData.file!)
@@ -328,7 +426,10 @@ export default class PortalsCanvasExtension {
       return addedData
     }
 
-    const portalFileData = JSON.parse(await this.plugin.app.vault.cachedRead(portalFile))
+    const portalFileDataString = await this.plugin.app.vault.cachedRead(portalFile)
+    if (portalFileDataString === '') return addedData
+
+    const portalFileData = JSON.parse(portalFileDataString) as CanvasData
     if (!portalFileData) {
       portalNodeData.portalToFile = undefined
       return addedData
@@ -362,7 +463,7 @@ export default class PortalsCanvasExtension {
 
       addedData.nodes.push(addedNode)
 
-      const nestedNodes = await this.tryOpenPortal(canvas, addedNode)
+      const nestedNodes = await this.tryOpenPortal(canvas, addedNode, parentPortalId ?? portalNodeData.id)
       addedData.nodes.push(...nestedNodes.nodes)
       addedData.edges.push(...nestedNodes.edges)
     }
@@ -377,6 +478,8 @@ export default class PortalsCanvasExtension {
       const toRefNode = Object.entries(portalNodeData.portalIdMaps.nodeIdMap)
         .find(([_refNodeId, nodeId]) => nodeId === edgeDataFromPortal.toNode)?.[0]
 
+      if (!fromRefNode || !toRefNode) continue
+
       addedData.edges.push({
         ...edgeDataFromPortal,
         id: refEdgeId,
@@ -385,18 +488,6 @@ export default class PortalsCanvasExtension {
         portalId: portalNodeData.id
       })
     }
-
-    // Resize portal
-    const nestedNodesBBox = CanvasHelper.getBBox(addedData.nodes)
-    const targetSize = this.getPortalSize(nestedNodesBBox)
-
-    // Save closed portal size
-    portalNodeData.closedPortalWidth = portalNodeData.width
-    portalNodeData.closedPortalHeight = portalNodeData.height
-
-    // Set open portal size
-    portalNodeData.width = targetSize.width
-    portalNodeData.height = targetSize.height
 
     return addedData
   }

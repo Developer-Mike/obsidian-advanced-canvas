@@ -1,0 +1,40 @@
+name: Add release assets
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-upload:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build in Production Mode
+        run: npm run build
+
+      - name: Verify Files Exist
+        run: ls -la main.js styles.css manifest.json
+
+      - name: Upload Release Assets (Original Names)
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            main.js
+            styles.css
+            manifest.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

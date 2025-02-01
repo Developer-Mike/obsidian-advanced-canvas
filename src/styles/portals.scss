@@ -1,16 +1,31 @@
-.canvas-node[data-portal-to-file] .canvas-node-container {
-  background-color: transparent;
-  border-style: dashed;
+.canvas-node[data-portal-to-file] {
+  pointer-events: all;
 
-  .canvas-node-content {
-    display: none;
+  &:not(.is-focused) {
+    pointer-events: none;
+
+    .canvas-node-label {
+      pointer-events: all;
+    }
+  }
+
+  .canvas-node-container {
+    background-color: transparent;
+    border-style: dashed;
+
+    .canvas-node-content {
+      display: none;
+    }
   }
 }
 
-.canvas-node[data-portal-id] {
-  pointer-events: none;
+.canvas-node-interaction-layer[data-target-portal-id] {
+  .canvas-node-resizer {
+    pointer-events: none;
+    cursor: inherit;
 
-  @at-root .canvas-node-interaction-layer[data-target-portal-id] {
-    display: none;
+    .canvas-node-connection-point {
+      pointer-events: all;
+    }
   }
 }

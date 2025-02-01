@@ -1,0 +1,13 @@
+.canvas-wrapper[data-focus-mode-enabled="true"] .canvas:has(.canvas-node.is-focused) {
+ .canvas-node:not(.is-focused) {
+    filter: blur(5px);
+  }
+
+  .canvas-edges {
+    filter: blur(5px);
+  }
+
+  .canvas-path-label-wrapper {
+    filter: blur(5px);
+  }
+}

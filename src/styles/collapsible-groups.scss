@@ -1,0 +1,59 @@
+#group-collapse-button {
+  position: absolute;
+  left: 0;
+  top: calc(-1 * var(--size-4-1) * var(--zoom-multiplier));
+
+  padding: var(--size-4-1) var(--size-4-2);
+  
+  transform-origin: bottom left;
+  transform: translate(0, -100%) scale(var(--zoom-multiplier));
+  
+  border-radius: var(--radius-s);
+  color: var(--text-muted);
+  background-color: rgba(var(--canvas-color), 0.1);
+
+  font-size: 1.5em;
+  line-height: 1;
+
+  pointer-events: initial;
+  cursor: pointer;
+
+  transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.canvas-wrapper[data-collapsible-groups-feature-enabled="true"] .canvas-node .canvas-group-label {
+  left: calc(40px * var(--zoom-multiplier));
+}
+
+.canvas-node[data-is-collapsed] {
+  .canvas-node-container {
+    display: none;
+  }
+
+  .canvas-group-label {
+    max-width: initial;
+  }
+}
+
+.canvas-wrapper[data-collapsed-group-preview-on-drag="true"][data-is-dragging] .canvas-node[data-is-collapsed] .canvas-node-container {
+  display: block;
+  opacity: 0.5;
+
+  border-style: dashed;
+
+  .canvas-node-content {
+    background-color: transparent;
+  }
+}
+
+.canvas-node-interaction-layer[data-target-is-collapsed] {
+  .canvas-node-resizer {
+    pointer-events: none;
+    cursor: inherit;
+
+    .canvas-node-connection-point {
+      display: none;
+      pointer-events: none;
+    }
+  }
+}

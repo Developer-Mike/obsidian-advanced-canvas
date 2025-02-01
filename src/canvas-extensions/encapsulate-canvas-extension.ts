@@ -1,19 +1,16 @@
-import { Menu, SuggestModal } from "obsidian"
+import { Menu } from "obsidian"
 import { Canvas } from "src/@types/Canvas"
-import AdvancedCanvasPlugin from "src/main"
-import FileNameModal from "src/utils/modal-helper"
-import * as CanvasHelper from "src/utils/canvas-helper"
+import { FileNameModal } from "src/utils/modal-helper"
+import CanvasHelper from "src/utils/canvas-helper"
+import CanvasExtension from "./canvas-extension"
+import { CanvasEvent } from "src/events"
 
 const ENCAPSULATED_FILE_NODE_SIZE = { width: 300, height: 300 }
 
-export default class EncapsulateCanvasExtension {
-  plugin: AdvancedCanvasPlugin
+export default class EncapsulateCanvasExtension extends CanvasExtension {
+  isEnabled() { return 'canvasEncapsulationEnabled' as const }
 
-  constructor(plugin: AdvancedCanvasPlugin) {
-    this.plugin = plugin
-
-    if (!this.plugin.settingsManager.getSetting('canvasEncapsulationEnabled')) return
-
+  init() {
     /* Add command to encapsulate selection */
     this.plugin.addCommand({
       id: 'encapsulate-selection',
@@ -27,7 +24,7 @@ export default class EncapsulateCanvasExtension {
 
     /* Add encapsulate option to context menu */
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      'canvas:selection-menu',
+      CanvasEvent.SelectionContextMenu,
       (menu: Menu, canvas: Canvas) => {
         menu.addItem((item) =>
           item
@@ -43,14 +40,18 @@ export default class EncapsulateCanvasExtension {
     const selection = canvas.getSelectionData()
 
     // Create new file
-    const sourceFileFolder = canvas.view.file.parent?.path
-    if (!sourceFileFolder) return // Should never happen
+    const canvasSettings = this.plugin.app.internalPlugins.plugins.canvas.instance.options
 
-    const targetFilePath = await FileNameModal.awaitInput(new FileNameModal(
+    const defaultNewCanvasLocation = canvasSettings.newFileLocation
+    let targetFolderPath = this.plugin.app.vault.getRoot().path // If setting is "root"
+    if (defaultNewCanvasLocation === 'current') targetFolderPath = canvas.view.file?.parent?.path ?? targetFolderPath
+    else if (defaultNewCanvasLocation === 'folder') targetFolderPath = canvasSettings.newFileFolderPath ?? targetFolderPath
+
+    const targetFilePath = await new FileNameModal(
       this.plugin.app,
-      sourceFileFolder,
+      targetFolderPath,
       'canvas'
-    ))
+    ).awaitInput()
 
     const newFileData = { nodes: selection.nodes, edges: selection.edges }
     const file = await this.plugin.app.vault.create(targetFilePath, JSON.stringify(newFileData, null, 2))

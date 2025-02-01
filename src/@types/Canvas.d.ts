@@ -1,4 +1,4 @@
-import { TFile, View, WorkspaceLeaf } from "obsidian"
+import { ItemView, TFile, WorkspaceLeaf } from "obsidian"
 
 export interface Size {
   width: number
@@ -21,19 +21,24 @@ export interface Canvas {
   view: CanvasView
   config: CanvasConfig
   options: CanvasOptions
+  metadata: CanvasMetadata
 
   getData(): CanvasData
   setData(data: CanvasData): void
 
-  /** Basically setData, but without modifying the history */
-  importData(data: CanvasData): void
+  /** Basically setData (if clearCanvas == true), but without modifying the history */
+  importData(data: CanvasData, clearCanvas?: boolean): void
 
   nodes: Map<string, CanvasNode>
   edges: Map<string, CanvasEdge>
   getEdgesForNode(node: CanvasNode): CanvasEdge[]
 
-  canvasEl: HTMLElement
+  dirty: Set<CanvasElement>
+  markDirty(element: CanvasElement): void
+  markMoved(element: CanvasNode): void
+
   wrapperEl: HTMLElement
+  canvasEl: HTMLElement
   menu: PopupMenu
   cardMenuEl: HTMLElement
   canvasControlsEl: HTMLElement
@@ -48,6 +53,7 @@ export interface Canvas {
   x: number
   y: number
   zoom: number
+  zoomBreakpoint: number
 
   tx: number
   ty: number
@@ -62,39 +68,50 @@ export interface Canvas {
   readonly: boolean
   setReadonly(readonly: boolean): void
 
-  selection: Set<CanvasNode>
-  updateSelection(update: () => void): void
+  selection: Set<CanvasElement>
   getSelectionData(): SelectionData
+  updateSelection(update: () => void): void
   deselectAll(): void
 
   toggleObjectSnapping(enabled: boolean): void
   dragTempNode(dragEvent: any, nodeSize: Size, onDropped: (position: Position) => void): void
 
-  createTextNode(options: TextNodeOptions): CanvasNode
-  createGroupNode(options: GroupNodeOptions): CanvasNode
-  createFileNode(options: FileNodeOptions): CanvasNode
+  createTextNode(options: { [key: string]: any }): CanvasNode
+  createGroupNode(options: { [key: string]: any }): CanvasNode
+  createFileNode(options: { [key: string]: any }): CanvasNode
 
+  addNode(node: CanvasNode): void
   removeNode(node: CanvasNode): void
+  addEdge(edge: CanvasEdge): void
   removeEdge(edge: CanvasEdge): void
 
+  getContainingNodes(bbox: BBox): CanvasNode[]
+
   history: CanvasHistory
+  pushHistory(data: CanvasData): void
   undo(): void
   redo(): void
 
+  posFromEvt(event: MouseEvent): Position
+  onDoubleClick(event: MouseEvent): void
   handlePaste(): void
   requestSave(): void
 
   // Custom
+  isClearing?: boolean
+  isCopying?: boolean
   lockedX: number
   lockedY: number
   lockedZoom: number
-  setNodeData(node: CanvasNode, key: keyof CanvasNodeData, value: any): void
-  foreignCanvasData: { [key: string]: CanvasData }
 }
 
 export interface CanvasOptions {
   snapToObjects: boolean
   snapToGrid: boolean
+}
+
+export interface CanvasMetadata {
+  properties: { [key: string]: any }
 }
 
 export interface CanvasHistory {
@@ -115,9 +132,11 @@ export interface SelectionData extends CanvasData {
 
 export interface CanvasConfig {
   defaultTextNodeDimensions: Size
+  defaultFileNodeDimensions: Size
+  minContainerDimension: number
 }
 
-export interface CanvasView extends View {
+export interface CanvasView extends ItemView {
   _loaded: boolean
   file: TFile
   canvas: Canvas
@@ -156,16 +175,55 @@ export interface CanvasData {
   edges: CanvasEdgeData[]
 }
 
+export interface CanvasElement {
+  canvas: Canvas
+  initialized: boolean
+  isDirty?: boolean // Custom for Change event
+
+  child: {
+    editMode: {
+      cm: {
+        dom: HTMLElement
+      }
+    }
+  }
+
+  initialize(): void
+  setColor(color: string): void
+  
+  updateBreakpoint(breakpoint: boolean): void
+  setIsEditing(editing: boolean): void
+  getBBox(): BBox
+  
+  getData(): CanvasNodeData | CanvasEdgeData
+  setData(data: CanvasNodeData | CanvasEdgeData): void
+}
+
 export type CanvasNodeType = 'text' | 'group' | 'file' | 'link'
 export interface CanvasNodeData {
+  id: string
+  x: number
+  y: number
+  width: number
+  height: number
+  color: string
+
   type: CanvasNodeType
   text?: string
   label?: string
   file?: string
 
-  isSticker: boolean
-  shape: string
-  isStartNode: boolean
+  // TODO: needsToBeInitialized?: boolean
+  styleAttributes?: { [key: string]: string | null }
+
+  autoResizeHeight?: boolean
+
+  isCollapsed?: boolean
+  collapsedData?: CanvasData
+
+  isStartNode?: boolean
+  sideRatio?: number
+
   edgesToNodeFromPortal?: { [key: string]: CanvasEdgeData[] }
 
   // Portal node
@@ -179,30 +237,40 @@ export interface CanvasNodeData {
 
   // Node from portal
   portalId?: string
-
-  [key: string]: any
 }
 
-export interface CanvasNode {
-  canvas: Canvas
-  nodeEl: HTMLElement
-  getBBox(): BBox
+export interface CanvasNode extends CanvasElement {
+  isEditing: boolean
 
+  nodeEl: HTMLElement
+  contentEl: HTMLElement
+
+  labelEl?: HTMLElement
   file?: TFile
 
   x: number
   y: number
   width: number
   height: number
-
-  color: string
+  
   zIndex: number
-
-  setData(data: CanvasNodeData): void
+  /** Move node to the front. */
+  updateZIndex(): void
+  
+  color: string
+  
+  setData(data: CanvasNodeData, addHistory?: boolean): void
   getData(): CanvasNodeData
+
+  // Custom
+  prevX: number
+  prevY: number
+  prevWidth: number
+  prevHeight: number
 }
 
 type Side = 'top' | 'right' | 'bottom' | 'left'
+type EndType = 'none' | 'arrow'
 export interface CanvasEdgeData {
   id: string
 
@@ -212,23 +280,71 @@ export interface CanvasEdgeData {
   fromSide: Side
   toSide: Side
   
+  fromEnd?: EndType
+  toEnd?: EndType
+
+  styleAttributes?: { [key: string]: string | null }
+
   portalId?: string
+  isUnsaved?: boolean
+
+  [key: string]: any
 }
 
-export interface CanvasEdge {
+export interface CanvasEdge extends CanvasElement {
   label: string
 
   from: {
     node: CanvasNode
+    side: Side
+    end: EndType
   }
+  fromLineEnd: {
+    el: HTMLElement
+    type: 'arrow'
+  }
+
   to: {
     node: CanvasNode
+    side: Side
+    end: EndType
+  }
+  toLineEnd: {
+    el: HTMLElement
+    type: 'arrow'
+  }
+
+  bezier: {
+    from: Position
+    to: Position
+    cp1: Position
+    cp2: Position
+    path: string
   }
 
   path: {
-    display: HTMLElement
     interaction: HTMLElement
+    display: HTMLElement
   }
+
+  labelElement: {
+    edge: CanvasEdge
+    initialTextState: string
+    isEditing: boolean
+    textareaEl: HTMLElement
+    wrapperEl: HTMLElement
+
+    render(): void
+  }
+
+  /** Custom field */
+  center?: Position
+  getCenter(): Position
+  render(): void
+  updatePath(): void
+  
+  setData(data: CanvasEdgeData, addHistory?: boolean): void
+  getData(): CanvasEdgeData
 }
 
 export interface NodeInteractionLayer {

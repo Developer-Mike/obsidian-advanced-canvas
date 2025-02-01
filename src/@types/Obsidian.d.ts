@@ -1,3 +1,5 @@
+import { CachedMetadata, EmbedCache, LinkCache, Pos } from "obsidian"
+
 export * from "obsidian"
 
 declare module "obsidian" {
@@ -9,8 +11,6 @@ declare module "obsidian" {
     /** @public */
     vault: Vault
     /** @public */
-    metadataCache: MetadataCache
-    /** @public */
     fileManager: FileManager
     /**
      * The last known user interaction event, to help commands find out what modifier keys are pressed.
@@ -18,9 +18,24 @@ declare module "obsidian" {
      */
     lastEvent: UserEvent | null
 
+    internalPlugins: any
+
     // Custom
     /** @public */
+    metadataCache: ExtendedMetadataCache
+    /** @public */
     workspace: Workspace & ExtendedWorkspace
+  }
+
+  export interface ExtendedMetadataCache extends MetadataCache {
+    fileCache: FileCache
+    metadataCache: MetadataCacheMap
+    resolvedLinks: ResolvedLinks
+
+    computeFileMetadataAsync: (file: TFile) => void
+    saveFileCache: (filepath: string, cache: FileCacheEntry) => void
+    linkResolver: () => void
+    resolveLinks: (filepath: string) => void
   }
 
   export interface ExtendedWorkspace {
@@ -29,5 +44,48 @@ declare module "obsidian" {
 
   export interface EventRef {
     fn: (...args: any) => any
+  }
+}
+
+export interface FileCache {
+  [path: string]: FileCacheEntry
+}
+
+export interface FileCacheEntry {
+  hash: string
+  mtime: number
+  size: number
+}
+
+export interface CanvasPos extends Pos {
+  nodeId: string
+}
+
+export interface MetadataCacheMap {
+  [hash: string]: ExtendedCachedMetadata
+}
+
+export interface ExtendedCachedMetadata extends CachedMetadata {
+  links?: ExtendedLinkCache[]
+  embeds?: ExtendedEmbedCache[]
+  nodes?: NodesCache
+  v: number
+}
+
+export interface ExtendedEmbedCache extends EmbedCache {
+  position: Pos | CanvasPos
+}
+
+export interface ExtendedLinkCache extends LinkCache {
+  position: Pos | CanvasPos
+}
+
+export interface NodesCache {
+  [nodeId: string]: CachedMetadata
+}
+
+export interface ResolvedLinks {
+  [path: string]: {
+    [link: string]: number
   }
 }
