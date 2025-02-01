@@ -1,4 +1,4 @@
-import { Pos } from "obsidian"
+import { CachedMetadata, EmbedCache, LinkCache, Pos } from "obsidian"
 
 export * from "obsidian"
 
@@ -62,42 +62,26 @@ export interface CanvasPos extends Pos {
 }
 
 export interface MetadataCacheMap {
-  [hash: string]: MetadataCacheEntry
+  [hash: string]: ExtendedCachedMetadata
 }
 
-export interface MetadataCacheEntry {
-  links?: {
-    link: string
-    original: string
-    displayText: string
-    position: Pos | CanvasPos
-  }[]
-  embeds?: {
-    link: string
-    original: string
-    displayText: string
-    position: Pos | CanvasPos
-  }[]
-  headings?: { 
-    heading: string
-    level: number
-    position: Pos | CanvasPos
-  }[]
-  listItems?: {
-    parent: number
-    position: Pos | CanvasPos
-  }[]
-  sections?: {
-    type: "paragraph" | "list" | "heading"
-    position: Pos | CanvasPos
-  }[]
+export interface ExtendedCachedMetadata extends CachedMetadata {
+  links?: ExtendedLinkCache[]
+  embeds?: ExtendedEmbedCache[]
+  nodes?: NodesCache
   v: number
 }
 
-export interface MetadataCacheCanvasEntry extends MetadataCacheEntry {
-  nodes: {
-    [nodeId: string]: MetadataCacheEntry
-  }
+export interface ExtendedEmbedCache extends EmbedCache {
+  position: Pos | CanvasPos
+}
+
+export interface ExtendedLinkCache extends LinkCache {
+  position: Pos | CanvasPos
+}
+
+export interface NodesCache {
+  [nodeId: string]: CachedMetadata
 }
 
 export interface ResolvedLinks {

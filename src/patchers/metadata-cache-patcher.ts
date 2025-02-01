@@ -1,6 +1,6 @@
 import { TFile } from "obsidian"
 import { CanvasData, CanvasNodeData } from "src/@types/Canvas"
-import { MetadataCacheCanvasEntry, MetadataCacheEntry, MetadataCacheMap } from "src/@types/Obsidian"
+import { NodesCache, ExtendedCachedMetadata, MetadataCacheMap } from "src/@types/Obsidian"
 import HashHelper from "src/utils/hash-helper"
 import PatchHelper from "src/utils/patch-helper"
 import PathHelper from "src/utils/path-helper"
@@ -66,11 +66,11 @@ export default class MetadataCachePatcher extends Patcher {
 
         const textNodesMetadataPromises = textNodes
           .map((node: CanvasNodeData) => textEncoder.encode(node.text).buffer)
-          .map((buffer: ArrayBuffer) => this.computeMetadataAsync(buffer) as Promise<MetadataCacheEntry>)
+          .map((buffer: ArrayBuffer) => this.computeMetadataAsync(buffer) as Promise<ExtendedCachedMetadata>)
         const textNodesMetadata = await Promise.all(textNodesMetadataPromises) // Wait for all text nodes to be resolved
 
         const textNodesEmbeds = textNodesMetadata
-          .map((metadata: MetadataCacheEntry, index: number) => (
+          .map((metadata: ExtendedCachedMetadata, index: number) => (
             (metadata.embeds || []).map(embed => ({
               ...embed,
               position: {
@@ -81,7 +81,7 @@ export default class MetadataCachePatcher extends Patcher {
           )).flat()
 
         const textNodesLinks = textNodesMetadata
-          .map((metadata: MetadataCacheEntry, index: number) => (
+          .map((metadata: ExtendedCachedMetadata, index: number) => (
             (metadata.links || []).map(link => ({
               ...link,
               position: {
@@ -105,9 +105,9 @@ export default class MetadataCachePatcher extends Patcher {
             ...textNodesMetadata.reduce((acc, metadata, index) => {
               acc[textNodesIds[index]] = metadata
               return acc
-            }, {} as Record<string, MetadataCacheEntry>)
+            }, {} as Record<string, ExtendedCachedMetadata>)
           }
-        } satisfies MetadataCacheCanvasEntry as MetadataCacheEntry
+        } satisfies ExtendedCachedMetadata
 
         // Trigger metadata cache change event
         this.trigger('changed', file, "", this.metadataCache[fileHash])
@@ -125,7 +125,7 @@ export default class MetadataCachePatcher extends Patcher {
         if (!file) return
 
         // Get metadata cache entry
-        const metadataCache = this.metadataCache[this.fileCache[filepath]?.hash] as MetadataCacheEntry
+        const metadataCache = this.metadataCache[this.fileCache[filepath]?.hash] as ExtendedCachedMetadata
         if (!metadataCache) return
 
         // List of all links in the file
@@ -168,7 +168,7 @@ export default class MetadataCachePatcher extends Patcher {
       registerInternalLinkAC: _next => function (canvasName: string, from: string, to: string) {
         // Update metadata cache for "from" node
         const fromFileHash = this.fileCache[from]?.hash ?? HashHelper.hash(from) // Some files might not be resolved yet
-        const fromFileMetadataCache = (this.metadataCache[fromFileHash] ?? { v: 1 }) as MetadataCacheEntry
+        const fromFileMetadataCache = (this.metadataCache[fromFileHash] ?? { v: 1 }) as ExtendedCachedMetadata
         this.metadataCache[fromFileHash] = {
           ...fromFileMetadataCache,
           links: [
