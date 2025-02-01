@@ -36,7 +36,12 @@ export default class ExportCanvasExtension extends CanvasExtension {
     })
   }
 
-  private async exportImage(canvas: Canvas, nodesToExport: CanvasNode[], svg: boolean = true) {
+  // TODO: Fix edges can be cut off
+  // TODO: Fix max image size
+  // TODO: Add no font option
+  // TODO: Add UI for options
+  // TODO: Crop image to bounding box
+  private async exportImage(canvas: Canvas, nodesToExport: CanvasNode[], svg: boolean = true, garbledText: boolean = false, watermark: boolean = false) {
     // Filter all edges that should be exported
     const nodesToExportIds = nodesToExport.map(node => node.getData().id)
     const edgesToExport = [...canvas.edges.values()]
@@ -47,16 +52,20 @@ export default class ExportCanvasExtension extends CanvasExtension {
 
     // Prepare the canvas
     canvas.canvasEl.classList.add('is-exporting')
+    if (garbledText) canvas.canvasEl.classList.add('is-text-garbled')
 
     const cachedSelection = new Set(canvas.selection)
     canvas.deselectAll()
 
     const cachedViewport = { x: canvas.x, y: canvas.y, zoom: canvas.zoom }
-    const boundingBox = CanvasHelper.getBBox([...nodesToExport, ...edgesToExport])
-    canvas.zoomToBbox(boundingBox)
+    const targetBoundingBox = CanvasHelper.getBBox([...nodesToExport, ...edgesToExport])
+    canvas.zoomToBbox(targetBoundingBox)
     
     // Accelerate zoomToBbox by setting the canvas to the desired position and zoom
     canvas.setViewport(canvas.tx, canvas.ty, canvas.tZoom)
+
+    // Wait for viewport to update
+    await sleep(10)
 
     // Wait for everything to render
     const startTimestamp = performance.now()
@@ -104,10 +113,15 @@ export default class ExportCanvasExtension extends CanvasExtension {
     }
 
     // Generate the image
-    const imageDataUri = await HtmlToImage.toSvg(canvas.canvasEl, { filter: filter })
+    const options = { filter: filter }
+    const imageDataUri = svg ? await HtmlToImage.toSvg(canvas.canvasEl, options) : await HtmlToImage.toPng(canvas.canvasEl, options)
+
+    // Post-process the image
+    const actualBoundingBox = canvas.getViewportBBox()
     
     // Reset the canvas
     canvas.canvasEl.classList.remove('is-exporting')
+    if (garbledText) canvas.canvasEl.classList.remove('is-text-garbled')
 
     canvas.updateSelection(() => canvas.selection = cachedSelection)
 
