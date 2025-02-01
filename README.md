@@ -428,6 +428,9 @@ All custom events are prefixed with `advanced-canvas:` and can be listened to us
     - Payload: `Canvas`
   - `advanced-canvas:node-moved`
     - Fired when a node gets moved
+    - Payload: `Canvas`, `Node`, `keyboard: boolean`
+  - `advanced-canvas:node-resized`
+    - Fired when a node gets resized
     - Payload: `Canvas`, `Node`
   - `advanced-canvas:double-click`
     - Fired when the canvas gets double-clicked

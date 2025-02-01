@@ -254,15 +254,21 @@ export interface CanvasNode extends CanvasElement {
   y: number
   width: number
   height: number
-
-  /** Move node to the front. */
+  
   zIndex: number
+  /** Move node to the front. */
   updateZIndex(): void
-
+  
   color: string
-
+  
   setData(data: CanvasNodeData, addHistory?: boolean): void
   getData(): CanvasNodeData
+
+  // Custom
+  prevX: number
+  prevY: number
+  prevWidth: number
+  prevHeight: number
 }
 
 type Side = 'top' | 'right' | 'bottom' | 'left'

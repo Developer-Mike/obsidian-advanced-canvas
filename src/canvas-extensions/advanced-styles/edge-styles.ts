@@ -51,7 +51,7 @@ export default class EdgeStylesExtension extends CanvasExtension {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.NodeMoved,
       // Only update edges this way if a node got moved with the arrow keys
-      (canvas: Canvas, node: CanvasNode) => node.initialized && !canvas.isDragging ? this.updateAllEdgesInArea(canvas, node.getBBox()) : void 0
+      (canvas: Canvas, node: CanvasNode, keyboard: boolean) => node.initialized && keyboard ? this.updateAllEdgesInArea(canvas, node.getBBox()) : void 0
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(

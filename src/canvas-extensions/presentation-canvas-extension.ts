@@ -116,8 +116,8 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.NodeMoved,
-      (canvas: Canvas, node: CanvasNode) => this.onNodeMoved(canvas, node)
+      CanvasEvent.NodeResized,
+      (canvas: Canvas, node: CanvasNode) => this.onNodeResized(canvas, node)
     ))
   }
 
@@ -158,7 +158,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     )
   }
 
-  private onNodeMoved(_canvas: Canvas, node: CanvasNode) {
+  private onNodeResized(_canvas: Canvas, node: CanvasNode) {
     const nodeData = node.getData()
     if (!nodeData.sideRatio) return
 

@@ -45,7 +45,12 @@ export default class PortalsCanvasExtension extends CanvasExtension {
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.NodeMoved,
-      (canvas: Canvas, node: CanvasNode) => this.onNodeMoved(canvas, node)
+      (canvas: Canvas, node: CanvasNode, _keyboard: boolean) => this.onNodeMoved(canvas, node)
+    ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.NodeResized,
+      (canvas: Canvas, node: CanvasNode) => this.onNodeResized(canvas, node)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
@@ -210,6 +215,14 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     } else this.restoreObjectSnappingState?.()
   }
 
+  private getContainingNodes(canvas: Canvas, portalNodeData: CanvasNodeData): CanvasNode[] {
+    const nestedNodesIdMap = portalNodeData.portalIdMaps?.nodeIdMap
+    if (!nestedNodesIdMap) return []
+
+    return Object.keys(nestedNodesIdMap).map(refNodeId => canvas.nodes.get(refNodeId))
+      .filter(node => node !== undefined)
+  }
+
   private onNodeMoved(canvas: Canvas, node: CanvasNode) {
     const nodeData = node.getData()
     if (nodeData.type !== 'file' || !nodeData.portalToFile) return
@@ -220,30 +233,13 @@ export default class PortalsCanvasExtension extends CanvasExtension {
   private onOpenPortalMoved(canvas: Canvas, portalNode: CanvasNode) {
     let portalNodeData = portalNode.getData()
 
-    // Update nested nodes positions
-    const nestedNodesIdMap = portalNode.getData().portalIdMaps?.nodeIdMap
-    if (!nestedNodesIdMap) return
-
-    const nestedNodes = Object.keys(nestedNodesIdMap).map(refNodeId => canvas.nodes.get(refNodeId))
-      .filter(node => node !== undefined) as CanvasNode[]
-    const sourceBBox = CanvasHelper.getBBox(nestedNodes)
-
-    // Resize portal
-    const targetSize = this.getPortalSize(sourceBBox)
-    if (portalNodeData.width !== targetSize.width || portalNodeData.height !== targetSize.height) {
-      portalNode.setData({
-        ...portalNodeData,
-        width: targetSize.width,
-        height: targetSize.height
-      })
-
-      return
-    }
+    const nestedNodes = this.getContainingNodes(canvas, portalNodeData)
+    const containingNodesBBox = CanvasHelper.getBBox(nestedNodes)
 
     // Move nested nodes
     const portalOffset = {
-      x: portalNodeData.x - sourceBBox.minX + PORTAL_PADDING,
-      y: portalNodeData.y - sourceBBox.minY + PORTAL_PADDING
+      x: portalNodeData.x - containingNodesBBox.minX + PORTAL_PADDING,
+      y: portalNodeData.y - containingNodesBBox.minY + PORTAL_PADDING
     }
 
     for (const nestedNode of nestedNodes) {
@@ -254,6 +250,32 @@ export default class PortalsCanvasExtension extends CanvasExtension {
         x: nestedNodeData.x + portalOffset.x,
         y: nestedNodeData.y + portalOffset.y
       })
+    }
+  }
+
+  private onNodeResized(canvas: Canvas, node: CanvasNode) {
+    const nodeData = node.getData()
+    if (nodeData.type !== 'file' || !nodeData.portalToFile) return
+
+    this.onOpenPortalResized(canvas, node)
+  }
+
+  private onOpenPortalResized(canvas: Canvas, portalNode: CanvasNode) {
+    let portalNodeData = portalNode.getData()
+
+    const nestedNodes = this.getContainingNodes(canvas, portalNodeData)
+    const containingNodesBBox = CanvasHelper.getBBox(nestedNodes)
+    const targetSize = this.getPortalSize(containingNodesBBox)
+
+    // Resize portal
+    if (portalNodeData.width !== targetSize.width || portalNodeData.height !== targetSize.height) {
+      portalNode.setData({
+        ...portalNodeData,
+        width: targetSize.width,
+        height: targetSize.height
+      })
+
+      return
     }
   }
 

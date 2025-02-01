@@ -1,4 +1,4 @@
-import { BBox, CanvasData, CanvasEdge, CanvasEdgeData, CanvasElement, CanvasNode, CanvasNodeData, CanvasView } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasData, CanvasEdge, CanvasEdgeData, CanvasElement, CanvasNode, CanvasNodeData, CanvasView } from "src/@types/Canvas"
 import PatchHelper from "src/utils/patch-helper"
 import { CanvasEvent } from "../events"
 import { requireApiVersion, WorkspaceLeaf, editorInfoField } from "obsidian"
@@ -88,7 +88,21 @@ export default class CanvasPatcher extends Patcher {
       }),
       markMoved: PatchHelper.OverrideExisting(next => function (node: CanvasNode) {
         const result = next.call(this, node)
-        that.triggerWorkspaceEvent(CanvasEvent.NodeMoved, this, node)
+
+        if (!this.viewportChanged) {
+          if (node.prevX !== node.x || node.prevY !== node.y)
+            that.triggerWorkspaceEvent(CanvasEvent.NodeMoved, this, node, !this.isDragging)
+
+          if (node.prevWidth !== node.width || node.prevHeight !== node.height)
+            that.triggerWorkspaceEvent(CanvasEvent.NodeResized, this, node)
+        }
+
+        // Save the current position and size
+        node.prevX = node.x
+        node.prevY = node.y
+        node.prevWidth = node.width
+        node.prevHeight = node.height
+
         return result
       }),
       onDoubleClick: PatchHelper.OverrideExisting(next => function (event: MouseEvent) {
