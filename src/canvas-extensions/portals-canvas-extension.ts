@@ -81,6 +81,12 @@ export default class PortalsCanvasExtension extends CanvasExtension {
             // Skip if the data didn't change
             if (newData.nodes.length === data.nodes.length && newData.edges.length === data.edges.length) return
             setData(newData)
+
+            // Resize open portals
+            for (const nodeData of [...newData.nodes, ...newData.nodes.slice().reverse()]) {
+              if (nodeData.type !== 'file' || !nodeData.portalToFile) continue
+              this.onOpenPortalResized(canvas, canvas.nodes.get(nodeData.id)!)
+            }
           })
       }
     ))
@@ -482,18 +488,6 @@ export default class PortalsCanvasExtension extends CanvasExtension {
         portalId: portalNodeData.id
       })
     }
-
-    // Resize portal
-    const nestedNodesBBox = CanvasHelper.getBBox(addedData.nodes)
-    const targetSize = this.getPortalSize(nestedNodesBBox)
-
-    // Save closed portal size
-    portalNodeData.closedPortalWidth = portalNodeData.width
-    portalNodeData.closedPortalHeight = portalNodeData.height
-
-    // Set open portal size
-    portalNodeData.width = targetSize.width
-    portalNodeData.height = targetSize.height
 
     return addedData
   }

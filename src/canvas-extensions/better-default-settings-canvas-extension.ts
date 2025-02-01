@@ -81,7 +81,7 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
     }
   }
 
-  private enforceNodeGridAlignment(canvas: Canvas, node: CanvasNode) {
+  private enforceNodeGridAlignment(_canvas: Canvas, node: CanvasNode) {
     if (!this.plugin.settings.getSetting('alignNewNodesToGrid')) return
 
     const nodeData = node.getData()
