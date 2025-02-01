@@ -1,6 +1,11 @@
 .canvas.is-exporting {
   --zoom-multiplier: 1;
 
+  * {
+    pointer-events: none !important;
+    transition: none !important;
+  }
+
   & > .canvas-node {
     --variable-breakpoint: -4;
   }

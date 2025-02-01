@@ -245,6 +245,7 @@ export interface CanvasNode extends CanvasElement {
 
   nodeEl: HTMLElement
   contentEl: HTMLElement
+  isContentMounted?: boolean
 
   labelEl?: HTMLElement
   file?: TFile

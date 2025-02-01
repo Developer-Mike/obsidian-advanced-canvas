@@ -4,6 +4,8 @@ import * as HtmlToImage from 'html-to-image'
 import CanvasExtension from "./canvas-extension"
 import { TFile } from "obsidian"
 
+const MAX_ALLOWED_LOADING_TIME = 10_000
+
 export default class ExportCanvasExtension extends CanvasExtension {
   isEnabled() { return 'betterExportFeatureEnabled' as const }
 
@@ -34,24 +36,64 @@ export default class ExportCanvasExtension extends CanvasExtension {
     })
   }
 
-  private async exportImage(canvas: Canvas, nodesToExport: CanvasElement[], svg: boolean = true) {
+  private async exportImage(canvas: Canvas, nodesToExport: CanvasNode[], svg: boolean = true) {
+    // Filter all edges that should be exported
+    const nodesToExportIds = nodesToExport.map(node => node.getData().id)
+    const edgesToExport = [...canvas.edges.values()]
+      .filter(edge => {
+        const edgeData = edge.getData()
+        return nodesToExportIds.includes(edgeData.fromNode) && nodesToExportIds.includes(edgeData.toNode)
+      })
+
     // Prepare the canvas
     canvas.canvasEl.classList.add('is-exporting')
+
+    const cachedSelection = new Set(canvas.selection)
     canvas.deselectAll()
-    canvas.zoomToFit()
-    await sleep(1000) // Wait for everything to load
+
+    const cachedViewport = { x: canvas.x, y: canvas.y, zoom: canvas.zoom }
+    const boundingBox = CanvasHelper.getBBox([...nodesToExport, ...edgesToExport])
+    canvas.zoomToBbox(boundingBox)
+    
+    // Accelerate zoomToBbox by setting the canvas to the desired position and zoom
+    canvas.setViewport(canvas.tx, canvas.ty, canvas.tZoom)
+
+    // Wait for everything to render
+    const startTimestamp = performance.now()
+    let unmountedNodes = nodesToExport.filter(node => node.isContentMounted === false)
+    const unmountedNodesStartCount = unmountedNodes.length
+    while (unmountedNodes.length > 0 && performance.now() - startTimestamp < MAX_ALLOWED_LOADING_TIME) {
+      await sleep(10)
+
+      unmountedNodes = nodesToExport.filter(node => node.isContentMounted === false)
+      console.log('Nodes not loaded:', unmountedNodes.length, '/', unmountedNodesStartCount) // TODO: User friendly loading indicator
+    }
+
+    // If the loading time exceeds the limit, cancel the export
+    if (unmountedNodes.length > 0) {
+      console.error('Export cancelled: Nodes did not finish loading in time') // TODO: User friendly error message
+      return
+    }
 
     // Create a filter to only export the desired elements
-    const nodeElements = nodesToExport.map((node: CanvasNode) => node.nodeEl)
-    const edgeArrowAndPathElements = [...canvas.edges.values()].map((edge: CanvasEdge) => [edge.lineGroupEl, edge.lineEndGroupEl]).flat() // TODO: Don't export all edges
-    const edgeLabelElements = [...canvas.edges.values()].map((edge: CanvasEdge) => edge.labelElement.wrapperEl) // TODO: Don't export all edges
+    const nodeElements = nodesToExport
+      .map(node => node.nodeEl)
+
+    const edgePathAndArrowElements = edgesToExport
+      .map(edge => [edge.lineGroupEl, edge.lineEndGroupEl])
+      .flat()
+
+    const edgeLabelElements = edgesToExport
+      .map(edge => edge.labelElement?.wrapperEl)
+      .filter(labelElement => labelElement !== undefined) as HTMLElement[]
 
     const filter = (element: HTMLElement) => {
       // Filter nodes
       if (element.classList?.contains('canvas-node') && !nodeElements.includes(element)) 
         return false
 
-      if (element.parentElement?.classList?.contains('canvas-edges') && !edgeArrowAndPathElements.includes(element))
+      // Filter edge paths and arrows
+      if (element.parentElement?.classList?.contains('canvas-edges') && !edgePathAndArrowElements.includes(element))
         return false
 
       // Filter edge labels
@@ -66,6 +108,10 @@ export default class ExportCanvasExtension extends CanvasExtension {
     
     // Reset the canvas
     canvas.canvasEl.classList.remove('is-exporting')
+
+    canvas.updateSelection(() => canvas.selection = cachedSelection)
+
+    canvas.setViewport(cachedViewport.x, cachedViewport.y, cachedViewport.zoom)
 
     /*const downloadLink = document.createElement('a')
     downloadLink.href = imageDataUrl

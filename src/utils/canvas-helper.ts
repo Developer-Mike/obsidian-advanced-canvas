@@ -1,5 +1,5 @@
 import { setIcon, setTooltip } from "obsidian"
-import { BBox, Canvas, CanvasNode, CanvasNodeData, Position, Size } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasEdge, CanvasEdgeData, CanvasNode, CanvasNodeData, Position, Size } from "src/@types/Canvas"
 import { StyleAttribute } from "src/canvas-extensions/advanced-styles/style-config"
 import AdvancedCanvasPlugin from "src/main"
 import BBoxHelper from "./bbox-helper"
@@ -134,22 +134,18 @@ export default class CanvasHelper {
     }
   }
 
-  static getBBox(canvasNodes: (CanvasNode | CanvasNodeData)[]) {
-    let minX = Infinity
-    let minY = Infinity
-    let maxX = -Infinity
-    let maxY = -Infinity
+  static getBBox(canvasElements: (CanvasNode | CanvasNodeData | CanvasEdge)[]) {
+    const bBoxes = canvasElements.map(element => {
+      if ((element as any).getBBox) return (element as CanvasNode).getBBox()
+      
+      const nodeData = (element as CanvasNodeData)
+      if (nodeData.x !== undefined && nodeData.y !== undefined && nodeData.width !== undefined && nodeData.height !== undefined)
+        return { minX: nodeData.x, minY: nodeData.y, maxX: nodeData.x + nodeData.width, maxY: nodeData.y + nodeData.height }
 
-    for (const node of canvasNodes) {
-      const nodeData = (node as any).getData ? (node as CanvasNode).getData() : node
+      return null
+    }).filter(bbox => bbox !== null) as BBox[]
 
-      minX = Math.min(minX, nodeData.x)
-      minY = Math.min(minY, nodeData.y)
-      maxX = Math.max(maxX, nodeData.x + nodeData.width)
-      maxY = Math.max(maxY, nodeData.y + nodeData.height)
-    }
-
-    return { minX, minY, maxX, maxY }
+    return BBoxHelper.combineBBoxes(bBoxes)
   }
 
   static zoomToBBox(canvas: Canvas, bbox: BBox) {
