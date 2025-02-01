@@ -55,7 +55,6 @@ export default class EncapsulateCanvasExtension extends CanvasExtension {
 
     const newFileData = { nodes: selection.nodes, edges: selection.edges }
     const file = await this.plugin.app.vault.create(targetFilePath, JSON.stringify(newFileData, null, 2))
-    this.plugin.app.vault.modify(file, JSON.stringify(newFileData, null, 2))
 
     // Remove from current canvas
     for (const nodeData of selection.nodes) {
