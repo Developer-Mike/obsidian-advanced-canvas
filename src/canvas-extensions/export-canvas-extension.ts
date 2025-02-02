@@ -170,26 +170,16 @@ export default class ExportCanvasExtension extends CanvasExtension {
     // Reset the canvas
     canvas.canvasEl.classList.remove('is-exporting')
     if (garbledText) canvas.canvasEl.classList.remove('is-text-garbled')
-
     canvas.updateSelection(() => canvas.selection = cachedSelection)
-
     canvas.setViewport(cachedViewport.x, cachedViewport.y, cachedViewport.zoom)
 
-    /*const downloadLink = document.createElement('a')
-    downloadLink.href = imageDataUrl
-    downloadLink.download = 'canvas-export.png'
-    document.body.appendChild(downloadLink)
-    downloadLink.click()
-    document.body.removeChild(downloadLink)*/
-
-    let baseFilepath = `${canvas.view.file?.path?.replace('.canvas', '') || 'Untitled'}`
-    if (!isWholeCanvas) baseFilepath += ` - Selection ${nodesToExport.length}`
-    const filepath = `${baseFilepath}.${svg ? 'svg' : 'png'}`
+    let baseFilename = `${canvas.view.file?.basename || 'Untitled'}`
+    if (!isWholeCanvas) baseFilename += ` - Selection of ${nodesToExport.length}`
+    const filename = `${baseFilename}.${svg ? 'svg' : 'png'}`
     
-    const abstractFile = this.plugin.app.vault.getAbstractFileByPath(filepath)
-    if (abstractFile instanceof TFile) await this.plugin.app.vault.delete(abstractFile)
-
-    const file = await this.plugin.app.vault.createBinary(filepath, await fetch(imageDataUri).then((res) => res.arrayBuffer()))
-    this.plugin.app.workspace.getLeaf(true).openFile(file)
+    const downloadEl = document.createElement('a')
+    downloadEl.href = imageDataUri
+    downloadEl.download = filename
+    downloadEl.click()
   }
 }
