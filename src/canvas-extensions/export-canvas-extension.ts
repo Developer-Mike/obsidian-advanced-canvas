@@ -4,6 +4,7 @@ import * as HtmlToImage from 'html-to-image'
 import CanvasExtension from "./canvas-extension"
 import { TFile } from "obsidian"
 import BBoxHelper from "src/utils/bbox-helper"
+import DebugHelper from "src/utils/debug-helper"
 
 const MAX_ALLOWED_LOADING_TIME = 10_000
 
@@ -59,15 +60,35 @@ export default class ExportCanvasExtension extends CanvasExtension {
     // Cache the current viewport
     const cachedViewport = { x: canvas.x, y: canvas.y, zoom: canvas.zoom }
 
-    // Zoom to the bounding box of the elements to export
+    // Calculate the bounding box of the elements to export
     let targetBoundingBox = CanvasHelper.getBBox([...nodesToExport, ...edgesToExport])
+
+    // Offset bounding box to respect the aspect ratio
+    const actualAspectRatio = canvas.canvasRect.width / canvas.canvasRect.height
+    const targetAspectRatio = (targetBoundingBox.maxX - targetBoundingBox.minX) / (targetBoundingBox.maxY - targetBoundingBox.minY)
+
+    if (actualAspectRatio > targetAspectRatio) {
+      // The actual bounding box is wider than the target bounding box
+      const targetHeight = targetBoundingBox.maxY - targetBoundingBox.minY
+      const actualWidth = targetHeight * actualAspectRatio
+
+      targetBoundingBox.maxX = targetBoundingBox.minX + actualWidth
+    } else {
+      // The actual bounding box is taller than the target bounding box
+      const targetWidth = targetBoundingBox.maxX - targetBoundingBox.minX
+      const actualHeight = targetWidth / actualAspectRatio
+
+      targetBoundingBox.maxY = targetBoundingBox.minY + actualHeight
+    }
+
+    // Zoom to the bounding box of the elements to export
     CanvasHelper.zoomToRealBBox(canvas, targetBoundingBox) // Zoom to the bounding box (without padding)
     canvas.setViewport(canvas.tx, canvas.ty, canvas.tZoom) // Accelerate zoomToBbox by setting the canvas to the desired position and zoom
     await sleep(10) // Wait for viewport to update
 
     // Calculate bounding boxes that also contain the complete edge paths
     // Not before, because some nodes might have been outside the viewport
-    const canvasScale = parseFloat(canvas.canvasEl.style.transform.match(/scale\((\d+(\.\d+)?)\)/)?.[1] || '1')
+    let canvasScale = parseFloat(canvas.canvasEl.style.transform.match(/scale\((\d+(\.\d+)?)\)/)?.[1] || '1')
     const edgePathsBBox = edgesToExport.map(edge => {
       const edgeCenter = edge.getCenter()
       const labelWidth = edge.labelElement ? edge.labelElement.wrapperEl.getBoundingClientRect().width / canvasScale : 0
@@ -76,36 +97,19 @@ export default class ExportCanvasExtension extends CanvasExtension {
     })
     targetBoundingBox = BBoxHelper.combineBBoxes([targetBoundingBox, ...edgePathsBBox])
 
-    // Offset bounding box to respect the aspect ratio
-    const actualBoundingBox = canvas.getViewportBBox()
-    const actualAspectRatio = (actualBoundingBox.maxX - actualBoundingBox.minX) / (actualBoundingBox.maxY - actualBoundingBox.minY)
-    const targetAspectRatio = (targetBoundingBox.maxX - targetBoundingBox.minX) / (targetBoundingBox.maxY - targetBoundingBox.minY)
-
-    let width = undefined
-    let height = undefined
-    if (actualAspectRatio > targetAspectRatio) {
-      // The actual bounding box is wider than the target bounding box
-      // Offset the target bounding box to the left edge
-      const xOffset = targetBoundingBox.minX - actualBoundingBox.minX
-      targetBoundingBox.minX += xOffset
-      targetBoundingBox.maxX += xOffset
-
-      // Limit the image width to the actual width
-      width = (targetBoundingBox.maxX - targetBoundingBox.minX) * canvasScale
-    } else {
-      // The actual bounding box is taller than the target bounding box
-      // Offset the target bounding box to the top edge
-      const yOffset = targetBoundingBox.minY - actualBoundingBox.minY
-      targetBoundingBox.minY += yOffset
-      targetBoundingBox.maxY += yOffset
-
-      // Limit the image height to the actual height
-      height = (targetBoundingBox.maxY - targetBoundingBox.minY) * canvasScale
-    }
-
-    canvas.zoomToBbox(targetBoundingBox)
+    CanvasHelper.zoomToRealBBox(canvas, BBoxHelper.scaleBBox(targetBoundingBox, 1.1)) // Zoom to the bounding box with custom padding
     canvas.setViewport(canvas.tx, canvas.ty, canvas.tZoom) // Accelerate zoomToBbox by setting the canvas to the desired position and zoom
     await sleep(10) // Wait for viewport to update
+
+    // Calculate the output image size
+    const canvasViewportBBox = canvas.getViewportBBox()
+    canvasScale = parseFloat(canvas.canvasEl.style.transform.match(/scale\((\d+(\.\d+)?)\)/)?.[1] || '1')
+    let width = (canvasViewportBBox.maxX - canvasViewportBBox.minX) * canvasScale
+    let height = (canvasViewportBBox.maxY - canvasViewportBBox.minY) * canvasScale
+
+    if (actualAspectRatio > targetAspectRatio)
+      width = height * targetAspectRatio // The actual bounding box is wider than the target bounding box
+    else height = width / targetAspectRatio // The actual bounding box is taller than the target bounding box
 
     // Wait for everything to render
     const startTimestamp = performance.now()

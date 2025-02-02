@@ -1,6 +1,6 @@
 import AdvancedCanvasPlugin from "src/main"
 import { CanvasEvent } from "../events"
-import { Canvas, CanvasNode } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasNode } from "src/@types/Canvas"
 
 export default class DebugHelper {
   plugin: AdvancedCanvasPlugin
@@ -73,5 +73,29 @@ export default class DebugHelper {
 
     console.log('EdgeAdded Efficiency:', this.edgeAddedCount / canvas.edges.size)
     console.log('EdgeChanged Efficiency:', this.edgeChangedCount / canvas.edges.size)
+  }
+
+  static markBBox(canvas: Canvas, bbox: BBox, duration: number = -1) {
+    const node = canvas.createTextNode({
+      pos: { x: bbox.minX, y: bbox.minY },
+      size: { width: bbox.maxX - bbox.minX, height: bbox.maxY - bbox.minY },
+      text: '',
+      focus: false
+    })
+
+    node.setData({
+      ...node.getData(),
+      id: 'debug-bbox',
+      color: '1',
+      styleAttributes: {
+        border: 'invisible'
+      }
+    })
+
+    if (duration >= 0) {
+      setTimeout(() => {
+        canvas.removeNode(node)
+      }, duration)
+    }
   }
 }
