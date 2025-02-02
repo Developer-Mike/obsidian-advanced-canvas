@@ -257,7 +257,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
       const animationIntensity = this.plugin.settings.getSetting('slideTransitionAnimationIntensity')
 
       const currentNodeBBoxEnlarged = BBoxHelper.scaleBBox(fromNode.getBBox(), animationIntensity)
-      if (useCustomZoomFunction) CanvasHelper.zoomToBBox(canvas, currentNodeBBoxEnlarged)
+      if (useCustomZoomFunction) CanvasHelper.zoomToRealBBox(canvas, currentNodeBBoxEnlarged)
       else canvas.zoomToBbox(currentNodeBBoxEnlarged)
 
       await sleep(animationDurationMs / 2)
@@ -265,7 +265,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
       if (fromNode.getData().id !== toNode.getData().id) {
         // Add 0.1 to fix obsidian bug that causes the animation to skip if the bbox is the same
         const nextNodeBBoxEnlarged = BBoxHelper.scaleBBox(toNode.getBBox(), animationIntensity + 0.1)
-        if (useCustomZoomFunction) CanvasHelper.zoomToBBox(canvas, nextNodeBBoxEnlarged)
+        if (useCustomZoomFunction) CanvasHelper.zoomToRealBBox(canvas, nextNodeBBoxEnlarged)
         else canvas.zoomToBbox(nextNodeBBoxEnlarged)
 
         await sleep(animationDurationMs / 2)
@@ -273,7 +273,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     }
 
     let nodeBBox = toNode.getBBox()
-    if (useCustomZoomFunction) CanvasHelper.zoomToBBox(canvas, nodeBBox)
+    if (useCustomZoomFunction) CanvasHelper.zoomToRealBBox(canvas, nodeBBox)
     else canvas.zoomToBbox(nodeBBox)
   }
 

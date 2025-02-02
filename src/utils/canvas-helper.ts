@@ -148,23 +148,19 @@ export default class CanvasHelper {
     return BBoxHelper.combineBBoxes(bBoxes)
   }
 
-  static zoomToBBox(canvas: Canvas, bbox: BBox) {
-    /* const zoomX = canvas.canvasRect.width / (1.1 * (bbox.maxX - bbox.minX))
-    const zoomY = canvas.canvasRect.height / (1.1 * (bbox.maxY - bbox.minY))
-    const zoom = Math.clamp(Math.min(zoomX, zoomY), -4, 1) */
+  static zoomToRealBBox(canvas: Canvas, bbox: BBox) {
+    if (canvas.canvasRect.width === 0 || canvas.canvasRect.height === 0) return
 
-    const PADDING_CORRECTION_FACTOR = 1 / 1.1
-    const zoomedBBox = BBoxHelper.scaleBBox(bbox, PADDING_CORRECTION_FACTOR)
+    const widthZoom = canvas.canvasRect.width / (bbox.maxX - bbox.minX)
+    const heightZoom = canvas.canvasRect.height / (bbox.maxY - bbox.minY)
+    const zoom = Math.clamp(Math.min(widthZoom, heightZoom), -4, 1)
+    canvas.tZoom = Math.log2(zoom)
+    canvas.zoomCenter = null
 
-    canvas.zoomToBbox(zoomedBBox)
+    canvas.tx = (bbox.minX + bbox.maxX) / 2
+    canvas.ty = (bbox.minY + bbox.maxY) / 2
     
-    // Calculate zoom factor without clamp
-    const scaleFactor = Math.min(
-      canvas.canvasRect.width / (bbox.maxX - bbox.minX),
-      canvas.canvasRect.height / (bbox.maxY - bbox.minY)
-    )
-
-    canvas.tZoom = Math.log2(scaleFactor)
+    canvas.markViewportChanged()
   }
 
   static addStyleAttributesToPopup(plugin: AdvancedCanvasPlugin, canvas: Canvas, styleAttributes: StyleAttribute[], currentStyleAttributes: { [key: string]: string | null }, setStyleAttribute: (attribute: StyleAttribute, value: string | null) => void) {

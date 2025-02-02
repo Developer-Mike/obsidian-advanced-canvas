@@ -1,8 +1,9 @@
-import { Canvas, CanvasData, CanvasEdge, CanvasElement, CanvasNode } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasData, CanvasEdge, CanvasElement, CanvasNode } from "src/@types/Canvas"
 import CanvasHelper from "src/utils/canvas-helper"
 import * as HtmlToImage from 'html-to-image'
 import CanvasExtension from "./canvas-extension"
 import { TFile } from "obsidian"
+import BBoxHelper from "src/utils/bbox-helper"
 
 const MAX_ALLOWED_LOADING_TIME = 10_000
 
@@ -36,12 +37,10 @@ export default class ExportCanvasExtension extends CanvasExtension {
     })
   }
 
-  // TODO: Fix edges can be cut off
   // TODO: Fix max image size
-  // TODO: Add no font option
   // TODO: Add UI for options
   // TODO: Crop image to bounding box
-  private async exportImage(canvas: Canvas, nodesToExport: CanvasNode[], svg: boolean = true, garbledText: boolean = false, watermark: boolean = false) {
+  private async exportImage(canvas: Canvas, nodesToExport: CanvasNode[], svg: boolean = true, garbledText: boolean = false, noFontExport: boolean = true, watermark: boolean = false) {
     // Filter all edges that should be exported
     const nodesToExportIds = nodesToExport.map(node => node.getData().id)
     const edgesToExport = [...canvas.edges.values()]
@@ -57,15 +56,56 @@ export default class ExportCanvasExtension extends CanvasExtension {
     const cachedSelection = new Set(canvas.selection)
     canvas.deselectAll()
 
+    // Cache the current viewport
     const cachedViewport = { x: canvas.x, y: canvas.y, zoom: canvas.zoom }
-    const targetBoundingBox = CanvasHelper.getBBox([...nodesToExport, ...edgesToExport])
-    canvas.zoomToBbox(targetBoundingBox)
-    
-    // Accelerate zoomToBbox by setting the canvas to the desired position and zoom
-    canvas.setViewport(canvas.tx, canvas.ty, canvas.tZoom)
 
-    // Wait for viewport to update
-    await sleep(10)
+    // Zoom to the bounding box of the elements to export
+    let targetBoundingBox = CanvasHelper.getBBox([...nodesToExport, ...edgesToExport])
+    CanvasHelper.zoomToRealBBox(canvas, targetBoundingBox) // Zoom to the bounding box (without padding)
+    canvas.setViewport(canvas.tx, canvas.ty, canvas.tZoom) // Accelerate zoomToBbox by setting the canvas to the desired position and zoom
+    await sleep(10) // Wait for viewport to update
+
+    // Calculate bounding boxes that also contain the complete edge paths
+    // Not before, because some nodes might have been outside the viewport
+    const canvasScale = parseFloat(canvas.canvasEl.style.transform.match(/scale\((\d+(\.\d+)?)\)/)?.[1] || '1')
+    const edgePathsBBox = edgesToExport.map(edge => {
+      const edgeCenter = edge.getCenter()
+      const labelWidth = edge.labelElement ? edge.labelElement.wrapperEl.getBoundingClientRect().width / canvasScale : 0
+
+      return { minX: edgeCenter.x - labelWidth / 2, minY: edgeCenter.y, maxX: edgeCenter.x + labelWidth / 2, maxY: edgeCenter.y }
+    })
+    targetBoundingBox = BBoxHelper.combineBBoxes([targetBoundingBox, ...edgePathsBBox])
+
+    // Offset bounding box to respect the aspect ratio
+    const actualBoundingBox = canvas.getViewportBBox()
+    const actualAspectRatio = (actualBoundingBox.maxX - actualBoundingBox.minX) / (actualBoundingBox.maxY - actualBoundingBox.minY)
+    const targetAspectRatio = (targetBoundingBox.maxX - targetBoundingBox.minX) / (targetBoundingBox.maxY - targetBoundingBox.minY)
+
+    let width = undefined
+    let height = undefined
+    if (actualAspectRatio > targetAspectRatio) {
+      // The actual bounding box is wider than the target bounding box
+      // Offset the target bounding box to the left edge
+      const xOffset = targetBoundingBox.minX - actualBoundingBox.minX
+      targetBoundingBox.minX += xOffset
+      targetBoundingBox.maxX += xOffset
+
+      // Limit the image width to the actual width
+      width = (targetBoundingBox.maxX - targetBoundingBox.minX) * canvasScale
+    } else {
+      // The actual bounding box is taller than the target bounding box
+      // Offset the target bounding box to the top edge
+      const yOffset = targetBoundingBox.minY - actualBoundingBox.minY
+      targetBoundingBox.minY += yOffset
+      targetBoundingBox.maxY += yOffset
+
+      // Limit the image height to the actual height
+      height = (targetBoundingBox.maxY - targetBoundingBox.minY) * canvasScale
+    }
+
+    canvas.zoomToBbox(targetBoundingBox)
+    canvas.setViewport(canvas.tx, canvas.ty, canvas.tZoom) // Accelerate zoomToBbox by setting the canvas to the desired position and zoom
+    await sleep(10) // Wait for viewport to update
 
     // Wait for everything to render
     const startTimestamp = performance.now()
@@ -113,11 +153,13 @@ export default class ExportCanvasExtension extends CanvasExtension {
     }
 
     // Generate the image
-    const options = { filter: filter }
+    const options: any = {
+      height: height,
+      width: width,
+      filter: filter
+    }
+    if (noFontExport) options.fontEmbedCSS = ""
     const imageDataUri = svg ? await HtmlToImage.toSvg(canvas.canvasEl, options) : await HtmlToImage.toPng(canvas.canvasEl, options)
-
-    // Post-process the image
-    const actualBoundingBox = canvas.getViewportBBox()
     
     // Reset the canvas
     canvas.canvasEl.classList.remove('is-exporting')
