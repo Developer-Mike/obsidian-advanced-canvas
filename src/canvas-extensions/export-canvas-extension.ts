@@ -7,6 +7,7 @@ import BBoxHelper from "src/utils/bbox-helper"
 import AdvancedCanvasPlugin from "src/main"
 
 const MAX_ALLOWED_LOADING_TIME = 10_000
+const MAX_PIXEL_RATIO = 20
 
 export default class ExportCanvasExtension extends CanvasExtension {
   isEnabled() { return 'betterExportFeatureEnabled' as const }
@@ -42,6 +43,19 @@ export default class ExportCanvasExtension extends CanvasExtension {
     const modal = new Modal(this.plugin.app)
     modal.setTitle('Export image settings')
 
+    // Create ref to dynamic settings
+    let pixelRatioSetting: Setting | null = null
+    let noFontExportSetting: Setting | null = null
+    const updateDynamicSettings = () => {
+      if (svg) {
+        pixelRatioSetting?.settingEl?.hide()
+        noFontExportSetting?.settingEl?.show()
+      } else {
+        pixelRatioSetting?.settingEl?.show()
+        noFontExportSetting?.settingEl?.hide()
+      }
+    }
+
     let svg = true
     new Setting(modal.contentEl)
       .setName('Export file format')
@@ -52,13 +66,31 @@ export default class ExportCanvasExtension extends CanvasExtension {
           png: 'PNG'
         })
         .setValue(svg ? 'svg' : 'png')
-        .onChange(value => svg = value === 'svg')
+        .onChange(value => {
+          svg = value === 'svg'
+          updateDynamicSettings()
+        })
+      )
+
+    const nodesBBox = CanvasHelper.getBBox(nodesToExport ?? [...canvas.nodes.values()])
+    const nodesBBoxSize = { width: nodesBBox.maxX - nodesBBox.minX, height: nodesBBox.maxY - nodesBBox.minY }
+    const canvasElSize = { width: canvas.canvasEl.clientWidth, height: canvas.canvasEl.clientHeight }
+    const suggestedPixelRatio = Math.round(Math.min(nodesBBoxSize.width / canvasElSize.width, nodesBBoxSize.height / canvasElSize.height))
+    let pixelRatio = Math.min(MAX_PIXEL_RATIO, suggestedPixelRatio)
+    pixelRatioSetting = new Setting(modal.contentEl)
+      .setName('Pixel ratio')
+      .setDesc('Higher pixel ratios result in higher resolution images but also larger file sizes.')
+      .addSlider(slider => slider
+        .setDynamicTooltip()
+        .setLimits(1, MAX_PIXEL_RATIO, 1)
+        .setValue(pixelRatio)
+        .onChange(value => pixelRatio = value)
       )
     
     let noFontExport = true
-    new Setting(modal.contentEl)
+    noFontExportSetting = new Setting(modal.contentEl)
       .setName('Skip font export')
-      .setDesc('This will not include the fonts in the exported SVG. This will make the SVG file smaller (does not affect PNG).')
+      .setDesc('This will not include the fonts in the exported SVG. This will make the SVG file smaller.')
       .addToggle(toggle => toggle
         .setValue(noFontExport)
         .onChange(value => noFontExport = value)
@@ -88,16 +120,25 @@ export default class ExportCanvasExtension extends CanvasExtension {
         .setCta()
         .onClick(async () => {
           modal.close()
-          this.exportImage(canvas, nodesToExport, svg, garbledText, noFontExport, watermark)
+
+          this.exportImage(
+            canvas, 
+            nodesToExport, 
+            svg, 
+            svg ? 1 : pixelRatio, 
+            svg ? noFontExport : false,
+            watermark,
+            garbledText
+          )
         })
       )
 
+    updateDynamicSettings()
     modal.open()
   }
 
-  // TODO: Fix max image size
   // TODO: Implement watermark
-  private async exportImage(canvas: Canvas, nodesToExport: CanvasNode[] | null, svg: boolean, garbledText: boolean, noFontExport: boolean, watermark: boolean) {
+  private async exportImage(canvas: Canvas, nodesToExport: CanvasNode[] | null, svg: boolean, pixelRatio: number, noFontExport: boolean, watermark: boolean, garbledText: boolean) {
     const isWholeCanvas = nodesToExport === null
     if (!nodesToExport) nodesToExport = [...canvas.nodes.values()]
     
@@ -222,6 +263,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
 
       // Generate the image
       const options: any = {
+        pixelRatio: pixelRatio,
         height: height,
         width: width,
         filter: filter
