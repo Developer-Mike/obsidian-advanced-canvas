@@ -33,15 +33,17 @@ export default class ExportCanvasExtension extends CanvasExtension {
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (canvas: Canvas) => canvas.nodes.size > 0,
-        (canvas: Canvas) => this.exportImage(canvas, [...canvas.nodes.values()])
+        (canvas: Canvas) => this.exportImage(canvas, null)
       )
     })
   }
 
   // TODO: Fix max image size
   // TODO: Add UI for options
-  // TODO: Crop image to bounding box
-  private async exportImage(canvas: Canvas, nodesToExport: CanvasNode[], svg: boolean = true, garbledText: boolean = false, noFontExport: boolean = true, watermark: boolean = false) {
+  private async exportImage(canvas: Canvas, nodesToExport: CanvasNode[] | null, svg: boolean = true, garbledText: boolean = false, noFontExport: boolean = true, watermark: boolean = false) {
+    const isWholeCanvas = nodesToExport === null
+    if (!nodesToExport) nodesToExport = [...canvas.nodes.values()]
+    
     // Filter all edges that should be exported
     const nodesToExportIds = nodesToExport.map(node => node.getData().id)
     const edgesToExport = [...canvas.edges.values()]
@@ -180,7 +182,10 @@ export default class ExportCanvasExtension extends CanvasExtension {
     downloadLink.click()
     document.body.removeChild(downloadLink)*/
 
-    const filepath = `${canvas.view.file?.path?.replace('.canvas', '') || 'Untitled'}.${svg ? 'svg' : 'png'}`
+    let baseFilepath = `${canvas.view.file?.path?.replace('.canvas', '') || 'Untitled'}`
+    if (!isWholeCanvas) baseFilepath += ` - Selection ${nodesToExport.length}`
+    const filepath = `${baseFilepath}.${svg ? 'svg' : 'png'}`
+    
     const abstractFile = this.plugin.app.vault.getAbstractFileByPath(filepath)
     if (abstractFile instanceof TFile) await this.plugin.app.vault.delete(abstractFile)
 
