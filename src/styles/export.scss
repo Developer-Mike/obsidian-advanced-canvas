@@ -9,6 +9,10 @@
   & > .canvas-node {
     --variable-breakpoint: -4;
   }
+
+  #watermark-ac {
+    z-index: 9999999;
+  }
 }
 
 .progress-bar-modal-ac {
