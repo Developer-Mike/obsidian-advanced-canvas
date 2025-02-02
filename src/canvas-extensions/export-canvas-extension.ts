@@ -2,9 +2,10 @@ import { BBox, Canvas, CanvasData, CanvasEdge, CanvasElement, CanvasNode } from 
 import CanvasHelper from "src/utils/canvas-helper"
 import * as HtmlToImage from 'html-to-image'
 import CanvasExtension from "./canvas-extension"
-import { TFile } from "obsidian"
+import { Modal, ProgressBarComponent, Setting, TFile } from "obsidian"
 import BBoxHelper from "src/utils/bbox-helper"
 import DebugHelper from "src/utils/debug-helper"
+import AdvancedCanvasPlugin from "src/main"
 
 const MAX_ALLOWED_LOADING_TIME = 10_000
 
@@ -114,21 +115,23 @@ export default class ExportCanvasExtension extends CanvasExtension {
     else height = width / targetAspectRatio // The actual bounding box is taller than the target bounding box
 
     // Wait for everything to render
-    const startTimestamp = performance.now()
+    const progressModal = new ExportImageProgressModal(this.plugin)
     let unmountedNodes = nodesToExport.filter(node => node.isContentMounted === false)
     const unmountedNodesStartCount = unmountedNodes.length
+    const startTimestamp = performance.now()
     while (unmountedNodes.length > 0 && performance.now() - startTimestamp < MAX_ALLOWED_LOADING_TIME) {
       await sleep(10)
 
       unmountedNodes = nodesToExport.filter(node => node.isContentMounted === false)
-      console.log('Nodes not loaded:', unmountedNodes.length, '/', unmountedNodesStartCount) // TODO: User friendly loading indicator
+      progressModal.update(unmountedNodes.length / unmountedNodesStartCount)
     }
 
     // If the loading time exceeds the limit, cancel the export
     if (unmountedNodes.length > 0) {
-      console.error('Export cancelled: Nodes did not finish loading in time') // TODO: User friendly error message
+      console.error('Export cancelled: Nodes did not finish loading in time')
+      progressModal.showError()
       return
-    }
+    } else progressModal.success()
 
     // Create a filter to only export the desired elements
     const nodeElements = nodesToExport
@@ -173,6 +176,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
     canvas.updateSelection(() => canvas.selection = cachedSelection)
     canvas.setViewport(cachedViewport.x, cachedViewport.y, cachedViewport.zoom)
 
+    // Download the image
     let baseFilename = `${canvas.view.file?.basename || 'Untitled'}`
     if (!isWholeCanvas) baseFilename += ` - Selection of ${nodesToExport.length}`
     const filename = `${baseFilename}.${svg ? 'svg' : 'png'}`
@@ -181,5 +185,62 @@ export default class ExportCanvasExtension extends CanvasExtension {
     downloadEl.href = imageDataUri
     downloadEl.download = filename
     downloadEl.click()
+  }
+}
+
+export class ExportImageSettingsModal extends Modal {
+  private promise: Promise<void>
+
+  constructor(plugin: AdvancedCanvasPlugin) {
+    super(plugin.app)
+    this.setTitle('What\'s your name?')
+
+    new Setting(this.contentEl)
+  }
+
+  await() { return this.promise }
+}
+
+export class ExportImageProgressModal extends Modal {
+  private progressElement: Setting
+  private progressComponent: ProgressBarComponent
+  private allowClose: boolean = false
+
+  constructor(plugin: AdvancedCanvasPlugin) {
+    super(plugin.app)
+
+    this.modalEl.querySelector(".modal-close-button")?.remove()
+
+    this.setTitle('Exporting image')
+
+    this.progressElement = new Setting(this.contentEl)
+      .setClass('progress-bar-modal-ac')
+      .addProgressBar(progress => this.progressComponent = progress)
+    this.progressElement.infoEl.remove()
+
+    this.open()
+  }
+
+  override onClose() {
+    if (!this.allowClose) this.open()
+  }
+
+  update(progress: number) {
+    this.progressComponent.setValue(progress)
+
+    if (progress === 1) {
+      this.allowClose = true
+      this.close()
+    }
+  }
+
+  showError() {
+    console.log(this.progressElement.settingEl)
+    this.progressElement.settingEl.classList.add('error')
+    return;
+    setTimeout(() => {
+      this.allowClose = true
+      this.close()
+    }, 5000)
   }
 }

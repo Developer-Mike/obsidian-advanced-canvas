@@ -10,3 +10,11 @@
     --variable-breakpoint: -4;
   }
 }
+
+.progress-bar-modal-ac {
+  margin-top: .75em;
+
+  &.error .setting-progress-bar {
+    color: var(--color-error);
+  }
+}
