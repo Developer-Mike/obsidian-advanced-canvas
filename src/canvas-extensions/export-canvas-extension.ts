@@ -2,9 +2,8 @@ import { BBox, Canvas, CanvasData, CanvasEdge, CanvasElement, CanvasNode } from 
 import CanvasHelper from "src/utils/canvas-helper"
 import * as HtmlToImage from 'html-to-image'
 import CanvasExtension from "./canvas-extension"
-import { Modal, ProgressBarComponent, Setting, TFile } from "obsidian"
+import { Modal, Notice, ProgressBarComponent, Setting, TFile } from "obsidian"
 import BBoxHelper from "src/utils/bbox-helper"
-import DebugHelper from "src/utils/debug-helper"
 import AdvancedCanvasPlugin from "src/main"
 
 const MAX_ALLOWED_LOADING_TIME = 10_000
@@ -14,12 +13,22 @@ export default class ExportCanvasExtension extends CanvasExtension {
 
   init() {
     this.plugin.addCommand({
-      id: 'export-selected-nodes',
-      name: 'Export selected nodes',
+      id: 'export-all-as-image',
+      name: 'Export canvas as image',
+      checkCallback: CanvasHelper.canvasCommand(
+        this.plugin,
+        (canvas: Canvas) => canvas.nodes.size > 0,
+        (canvas: Canvas) => this.showExportImageSettingsModal(canvas, null)
+      )
+    })
+
+    this.plugin.addCommand({
+      id: 'export-selected-as-image',
+      name: 'Export selected nodes as image',
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (canvas: Canvas) => canvas.selection.size > 0,
-        (canvas: Canvas) => this.exportImage(
+        (canvas: Canvas) => this.showExportImageSettingsModal(
           canvas, 
           canvas.getSelectionData().nodes
             .map(nodeData => canvas.nodes.get(nodeData.id))
@@ -27,21 +36,68 @@ export default class ExportCanvasExtension extends CanvasExtension {
         )
       )
     })
+  }
 
-    this.plugin.addCommand({
-      id: 'export-all-nodes',
-      name: 'Export whole canvas',
-      checkCallback: CanvasHelper.canvasCommand(
-        this.plugin,
-        (canvas: Canvas) => canvas.nodes.size > 0,
-        (canvas: Canvas) => this.exportImage(canvas, null)
+  private async showExportImageSettingsModal(canvas: Canvas, nodesToExport: CanvasNode[] | null) {
+    const modal = new Modal(this.plugin.app)
+    modal.setTitle('Export image settings')
+
+    let svg = true
+    new Setting(modal.contentEl)
+      .setName('Export file format')
+      .setDesc('Choose the file format to export the canvas as.')
+      .addDropdown(dropdown => dropdown
+        .addOptions({
+          svg: 'SVG',
+          png: 'PNG'
+        })
+        .setValue(svg ? 'svg' : 'png')
+        .onChange(value => svg = value === 'svg')
       )
-    })
+    
+    let noFontExport = true
+    new Setting(modal.contentEl)
+      .setName('Skip font export')
+      .setDesc('This will not include the fonts in the exported SVG. This will make the SVG file smaller (does not affect PNG).')
+      .addToggle(toggle => toggle
+        .setValue(noFontExport)
+        .onChange(value => noFontExport = value)
+      )
+
+    let watermark = false
+    new Setting(modal.contentEl)
+      .setName('Show logo')
+      .setDesc('This will add an Obsidian + Advanced Canvas logo to the bottom left.')
+      .addToggle(toggle => toggle
+        .setValue(watermark)
+        .onChange(value => watermark = value)
+      )
+
+    let garbledText = false
+    new Setting(modal.contentEl)
+      .setName('Privacy mode')
+      .setDesc('This will obscure any text on your canvas.')
+      .addToggle(toggle => toggle
+        .setValue(garbledText)
+        .onChange(value => garbledText = value)
+      )
+
+    new Setting(modal.contentEl)
+      .addButton(button => button
+        .setButtonText('Save')
+        .setCta()
+        .onClick(async () => {
+          modal.close()
+          this.exportImage(canvas, nodesToExport, svg, garbledText, noFontExport, watermark)
+        })
+      )
+
+    modal.open()
   }
 
   // TODO: Fix max image size
-  // TODO: Add UI for options
-  private async exportImage(canvas: Canvas, nodesToExport: CanvasNode[] | null, svg: boolean = true, garbledText: boolean = false, noFontExport: boolean = true, watermark: boolean = false) {
+  // TODO: Implement watermark
+  private async exportImage(canvas: Canvas, nodesToExport: CanvasNode[] | null, svg: boolean, garbledText: boolean, noFontExport: boolean, watermark: boolean) {
     const isWholeCanvas = nodesToExport === null
     if (!nodesToExport) nodesToExport = [...canvas.nodes.values()]
     
@@ -52,6 +108,17 @@ export default class ExportCanvasExtension extends CanvasExtension {
         const edgeData = edge.getData()
         return nodesToExportIds.includes(edgeData.fromNode) && nodesToExportIds.includes(edgeData.toNode)
       })
+
+    // Create loading overlay
+    new Notice('Exporting the canvas. Please wait...')
+    const interactionBlocker = document.createElement('div')
+    interactionBlocker.classList.add('modal-container', 'mod-dim')
+    document.body.appendChild(interactionBlocker)
+
+    const interactionBlockerBg = document.createElement('div')
+    interactionBlockerBg.classList.add('modal-bg')
+    interactionBlocker.style.opacity = '0.85'
+    interactionBlocker.appendChild(interactionBlockerBg)
 
     // Prepare the canvas
     canvas.canvasEl.classList.add('is-exporting')
@@ -115,60 +182,67 @@ export default class ExportCanvasExtension extends CanvasExtension {
     else height = width / targetAspectRatio // The actual bounding box is taller than the target bounding box
 
     // Wait for everything to render
-    const progressModal = new ExportImageProgressModal(this.plugin)
     let unmountedNodes = nodesToExport.filter(node => node.isContentMounted === false)
-    const unmountedNodesStartCount = unmountedNodes.length
     const startTimestamp = performance.now()
     while (unmountedNodes.length > 0 && performance.now() - startTimestamp < MAX_ALLOWED_LOADING_TIME) {
       await sleep(10)
 
       unmountedNodes = nodesToExport.filter(node => node.isContentMounted === false)
-      progressModal.update(unmountedNodes.length / unmountedNodesStartCount)
+      console.info(`Waiting for ${unmountedNodes.length} nodes to finish loading...`)
     }
 
-    // If the loading time exceeds the limit, cancel the export
-    if (unmountedNodes.length > 0) {
-      console.error('Export cancelled: Nodes did not finish loading in time')
-      progressModal.showError()
-      return
-    } else progressModal.success()
+    if (unmountedNodes.length === 0) {
+      // Create a filter to only export the desired elements
+      const nodeElements = nodesToExport
+        .map(node => node.nodeEl)
 
-    // Create a filter to only export the desired elements
-    const nodeElements = nodesToExport
-      .map(node => node.nodeEl)
+      const edgePathAndArrowElements = edgesToExport
+        .map(edge => [edge.lineGroupEl, edge.lineEndGroupEl])
+        .flat()
 
-    const edgePathAndArrowElements = edgesToExport
-      .map(edge => [edge.lineGroupEl, edge.lineEndGroupEl])
-      .flat()
+      const edgeLabelElements = edgesToExport
+        .map(edge => edge.labelElement?.wrapperEl)
+        .filter(labelElement => labelElement !== undefined) as HTMLElement[]
 
-    const edgeLabelElements = edgesToExport
-      .map(edge => edge.labelElement?.wrapperEl)
-      .filter(labelElement => labelElement !== undefined) as HTMLElement[]
+      const filter = (element: HTMLElement) => {
+        // Filter nodes
+        if (element.classList?.contains('canvas-node') && !nodeElements.includes(element)) 
+          return false
 
-    const filter = (element: HTMLElement) => {
-      // Filter nodes
-      if (element.classList?.contains('canvas-node') && !nodeElements.includes(element)) 
-        return false
+        // Filter edge paths and arrows
+        if (element.parentElement?.classList?.contains('canvas-edges') && !edgePathAndArrowElements.includes(element))
+          return false
 
-      // Filter edge paths and arrows
-      if (element.parentElement?.classList?.contains('canvas-edges') && !edgePathAndArrowElements.includes(element))
-        return false
+        // Filter edge labels
+        if (element.classList?.contains('canvas-path-label-wrapper') && !edgeLabelElements.includes(element)) 
+          return false
 
-      // Filter edge labels
-      if (element.classList?.contains('canvas-path-label-wrapper') && !edgeLabelElements.includes(element)) 
-        return false
+        return true
+      }
 
-      return true
+      // Generate the image
+      const options: any = {
+        height: height,
+        width: width,
+        filter: filter
+      }
+      if (noFontExport) options.fontEmbedCSS = ""
+      const imageDataUri = svg ? await HtmlToImage.toSvg(canvas.canvasEl, options) : await HtmlToImage.toPng(canvas.canvasEl, options)
+
+      // Download the image
+      let baseFilename = `${canvas.view.file?.basename || 'Untitled'}`
+      if (!isWholeCanvas) baseFilename += ` - Selection of ${nodesToExport.length}`
+      const filename = `${baseFilename}.${svg ? 'svg' : 'png'}`
+      
+      const downloadEl = document.createElement('a')
+      downloadEl.href = imageDataUri
+      downloadEl.download = filename
+      downloadEl.click()
+    } else {
+      const ERROR_MESSAGE = 'Export cancelled: Nodes did not finish loading in time'
+      new Notice(ERROR_MESSAGE)
+      console.error(ERROR_MESSAGE)
     }
-
-    // Generate the image
-    const options: any = {
-      height: height,
-      width: width,
-      filter: filter
-    }
-    if (noFontExport) options.fontEmbedCSS = ""
-    const imageDataUri = svg ? await HtmlToImage.toSvg(canvas.canvasEl, options) : await HtmlToImage.toPng(canvas.canvasEl, options)
     
     // Reset the canvas
     canvas.canvasEl.classList.remove('is-exporting')
@@ -176,15 +250,8 @@ export default class ExportCanvasExtension extends CanvasExtension {
     canvas.updateSelection(() => canvas.selection = cachedSelection)
     canvas.setViewport(cachedViewport.x, cachedViewport.y, cachedViewport.zoom)
 
-    // Download the image
-    let baseFilename = `${canvas.view.file?.basename || 'Untitled'}`
-    if (!isWholeCanvas) baseFilename += ` - Selection of ${nodesToExport.length}`
-    const filename = `${baseFilename}.${svg ? 'svg' : 'png'}`
-    
-    const downloadEl = document.createElement('a')
-    downloadEl.href = imageDataUri
-    downloadEl.download = filename
-    downloadEl.click()
+    // Remove the loading overlay
+    interactionBlocker.remove()
   }
 }
 
@@ -199,48 +266,4 @@ export class ExportImageSettingsModal extends Modal {
   }
 
   await() { return this.promise }
-}
-
-export class ExportImageProgressModal extends Modal {
-  private progressElement: Setting
-  private progressComponent: ProgressBarComponent
-  private allowClose: boolean = false
-
-  constructor(plugin: AdvancedCanvasPlugin) {
-    super(plugin.app)
-
-    this.modalEl.querySelector(".modal-close-button")?.remove()
-
-    this.setTitle('Exporting image')
-
-    this.progressElement = new Setting(this.contentEl)
-      .setClass('progress-bar-modal-ac')
-      .addProgressBar(progress => this.progressComponent = progress)
-    this.progressElement.infoEl.remove()
-
-    this.open()
-  }
-
-  override onClose() {
-    if (!this.allowClose) this.open()
-  }
-
-  update(progress: number) {
-    this.progressComponent.setValue(progress)
-
-    if (progress === 1) {
-      this.allowClose = true
-      this.close()
-    }
-  }
-
-  showError() {
-    console.log(this.progressElement.settingEl)
-    this.progressElement.settingEl.classList.add('error')
-    return;
-    setTimeout(() => {
-      this.allowClose = true
-      this.close()
-    }, 5000)
-  }
 }
