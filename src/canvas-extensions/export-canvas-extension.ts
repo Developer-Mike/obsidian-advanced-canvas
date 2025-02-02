@@ -271,8 +271,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
           pixelRatio: pixelRatio,
           height: height,
           width: width,
-          filter: filter,
-          backgroundColor: 'white',
+          filter: filter
         }
         if (noFontExport) options.fontEmbedCSS = ""
         const imageDataUri = svg ? await HtmlToImage.toSvg(canvas.canvasEl, options) : await HtmlToImage.toPng(canvas.canvasEl, options)
