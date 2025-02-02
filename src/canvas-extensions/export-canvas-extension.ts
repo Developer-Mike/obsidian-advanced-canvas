@@ -47,13 +47,16 @@ export default class ExportCanvasExtension extends CanvasExtension {
     // Create ref to dynamic settings
     let pixelRatioSetting: Setting | null = null
     let noFontExportSetting: Setting | null = null
+    let transparentBackgroundSetting: Setting | null = null
     const updateDynamicSettings = () => {
       if (svg) {
         pixelRatioSetting?.settingEl?.hide()
         noFontExportSetting?.settingEl?.show()
+        transparentBackgroundSetting?.settingEl?.hide()
       } else {
         pixelRatioSetting?.settingEl?.show()
         noFontExportSetting?.settingEl?.hide()
+        transparentBackgroundSetting?.settingEl?.show()
       }
     }
 
@@ -114,6 +117,15 @@ export default class ExportCanvasExtension extends CanvasExtension {
         .setValue(garbledText)
         .onChange(value => garbledText = value)
       )
+    
+    let transparentBackground = false
+    transparentBackgroundSetting = new Setting(modal.contentEl)
+      .setName('Transparent background')
+      .setDesc('This will make the background of the image transparent.')
+      .addToggle(toggle => toggle
+        .setValue(transparentBackground)
+        .onChange(value => transparentBackground = value)
+      )
 
     new Setting(modal.contentEl)
       .addButton(button => button
@@ -129,7 +141,8 @@ export default class ExportCanvasExtension extends CanvasExtension {
             svg ? 1 : pixelRatio, 
             svg ? noFontExport : false,
             watermark,
-            garbledText
+            garbledText,
+            svg ? true : transparentBackground
           )
         })
       )
@@ -138,8 +151,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
     modal.open()
   }
 
-  // TODO: Implement watermark
-  private async exportImage(canvas: Canvas, nodesToExport: CanvasNode[] | null, svg: boolean, pixelRatio: number, noFontExport: boolean, watermark: boolean, garbledText: boolean) {
+  private async exportImage(canvas: Canvas, nodesToExport: CanvasNode[] | null, svg: boolean, pixelRatio: number, noFontExport: boolean, watermark: boolean, garbledText: boolean, transparentBackground: boolean) {
     const isWholeCanvas = nodesToExport === null
     if (!nodesToExport) nodesToExport = [...canvas.nodes.values()]
     
@@ -150,6 +162,10 @@ export default class ExportCanvasExtension extends CanvasExtension {
         const edgeData = edge.getData()
         return nodesToExportIds.includes(edgeData.fromNode) && nodesToExportIds.includes(edgeData.toNode)
       })
+
+    // Set the background color
+    const backgroundColor = transparentBackground ? undefined : 
+      window.getComputedStyle(canvas.canvasEl).getPropertyValue('--canvas-background')
 
     // Create loading overlay
     new Notice('Exporting the canvas. Please wait...')
@@ -269,6 +285,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
         // Generate the image
         const options: any = {
           pixelRatio: pixelRatio,
+          backgroundColor: backgroundColor,
           height: height,
           width: width,
           filter: filter
