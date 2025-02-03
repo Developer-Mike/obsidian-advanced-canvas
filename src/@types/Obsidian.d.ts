@@ -9,7 +9,7 @@ declare module "obsidian" {
     /** @public */
     scope: Scope
     /** @public */
-    vault: Vault
+    vault: ExtendedVault
     /** @public */
     fileManager: FileManager
     /**
@@ -20,22 +20,35 @@ declare module "obsidian" {
 
     internalPlugins: any
 
-    // Custom
     /** @public */
     metadataCache: ExtendedMetadataCache
     /** @public */
     workspace: Workspace & ExtendedWorkspace
   }
 
+  export interface ExtendedVault extends Vault {
+    getMarkdownFiles: () => TFile[]
+
+    // Custom
+    recurseChildrenAC: (origin: TAbstractFile, traverse: (file: TAbstractFile) => void) => void
+  }
+
   export interface ExtendedMetadataCache extends MetadataCache {
+    vault: ExtendedVault
+
     fileCache: FileCache
     metadataCache: MetadataCacheMap
     resolvedLinks: ResolvedLinks
 
+    computeMetadataAsync: (buffer: ArrayBuffer) => Promise<ExtendedCachedMetadata>
+
     computeFileMetadataAsync: (file: TFile) => void
     saveFileCache: (filepath: string, cache: FileCacheEntry) => void
     linkResolver: () => void
-    resolveLinks: (filepath: string) => void
+    resolveLinks: (filepath: string, /* custom */ cachedContent: any) => void
+
+    // Custom
+    registerInternalLinkAC: (canvasName: string, from: string, to: string) => void
   }
 
   export interface ExtendedWorkspace {

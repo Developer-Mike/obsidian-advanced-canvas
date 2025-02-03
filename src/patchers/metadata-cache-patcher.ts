@@ -1,4 +1,4 @@
-import { TFile } from "obsidian"
+import { ExtendedMetadataCache, TFile } from "obsidian"
 import { CanvasData, CanvasNodeData } from "src/@types/Canvas"
 import { ExtendedCachedMetadata, MetadataCacheMap } from "src/@types/Obsidian"
 import HashHelper from "src/utils/hash-helper"
@@ -11,7 +11,7 @@ export default class MetadataCachePatcher extends Patcher {
     if (!this.plugin.settings.getSetting('canvasMetadataCompatibilityEnabled')) return
 
     const that = this
-    await PatchHelper.patchPrototype<any>(this.plugin, this.plugin.app.metadataCache, {
+    PatchHelper.patchPrototype<ExtendedMetadataCache>(this.plugin, this.plugin.app.metadataCache, {
       getCache: PatchHelper.OverrideExisting(next => function (filepath: string, ...args: any[]) {
         // Bypass the "md" extension check by handling the "canvas" extension here
         if (PathHelper.extension(filepath) === 'canvas') {

@@ -1,17 +1,32 @@
 import { around } from "monkey-around"
 import { Plugin } from "obsidian"
 
+// All keys in T that are functions
+type FunctionKeys<T> = {
+  [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never
+}[keyof T]
+
+// The type of the function at key K in T
+type KeyFunction<T, K extends FunctionKeys<T>> = 
+  T[K] extends (...args: any[]) => any ? T[K] : never
+
+// The type of a patch function for key K in T
+type KeyFunctionReplacement<T, K extends FunctionKeys<T>> = 
+  (this: T, ...args: Parameters<KeyFunction<T, K>>) => ReturnType<KeyFunction<T, K>>
+
+// The wrapper of a patch function for key K in T
+type PatchFunctionWrapper<T, K extends FunctionKeys<T>> = 
+  (next: KeyFunction<T, K>) => KeyFunctionReplacement<T, K>
+
+// The object of patch functions for T
 type FunctionPatchObject<T> = {
-  [Key in keyof T | any]: ((next: T[Key | any]) => (this: T, ...args: any) => any) & { __overrideExisting?: boolean }
+  [K in FunctionKeys<T>]?: PatchFunctionWrapper<T, K> & { __overrideExisting?: boolean }
 }
 
 export default class PatchHelper {
-  static OverrideExisting<
-    T,
-    K extends keyof T
-  >(fn: (next: T[K]) => (this: T, ...args: any[]) => any) {
-    return Object.assign(fn, { __overrideExisting: true })
-  }
+  static OverrideExisting<T, K extends FunctionKeys<T>>(
+    fn: PatchFunctionWrapper<T, K> & { __overrideExisting?: boolean }
+  ) { return Object.assign(fn, { __overrideExisting: true }) }
 
   static patchPrototype<T>(
     plugin: Plugin,
@@ -31,9 +46,9 @@ export default class PatchHelper {
     const target = prototype ? object.constructor.prototype : object
 
     // Validate override requirements
-    for (const key of Object.keys(patches) as Array<keyof T>) {
+    for (const key of Object.keys(patches) as Array<FunctionKeys<T>>) {
       const patch = patches[key]
-      if (patch.__overrideExisting) {
+      if (patch?.__overrideExisting) {
         if (typeof target[key] !== 'function')
           throw new Error(`Method ${String(key)} does not exist on target`)
       }

@@ -25,9 +25,9 @@ export interface Canvas {
 
   getData(): CanvasData
   setData(data: CanvasData): void
-
   /** Basically setData (if clearCanvas == true), but without modifying the history */
-  importData(data: CanvasData, clearCanvas?: boolean): void
+  importData(data: CanvasData, clearCanvas?: boolean, /* custom */ silent?: boolean): void
+  clear(): void
 
   nodes: Map<string, CanvasNode>
   edges: Map<string, CanvasEdge>
@@ -39,7 +39,7 @@ export interface Canvas {
 
   wrapperEl: HTMLElement
   canvasEl: HTMLElement
-  menu: PopupMenu
+  menu: CanvasPopupMenu
   cardMenuEl: HTMLElement
   canvasControlsEl: HTMLElement
   quickSettingsButton: HTMLElement
@@ -48,6 +48,8 @@ export interface Canvas {
   canvasRect: DOMRect
   getViewportBBox(): BBox
   setViewport(tx: number, ty: number, tZoom: number): void
+
+  viewportChanged: boolean
   markViewportChanged(): void
 
   x: number
@@ -82,6 +84,8 @@ export interface Canvas {
   createTextNode(options: { [key: string]: any }): CanvasNode
   createGroupNode(options: { [key: string]: any }): CanvasNode
   createFileNode(options: { [key: string]: any }): CanvasNode
+  createFileNodes(filepaths: string[], position: Position): CanvasNode[]
+  createLinkNode(options: { [key: string]: any }): CanvasNode
 
   addNode(node: CanvasNode): void
   removeNode(node: CanvasNode): void
@@ -97,6 +101,8 @@ export interface Canvas {
 
   posFromEvt(event: MouseEvent): Position
   onDoubleClick(event: MouseEvent): void
+  handleCopy(e: ClipboardEvent): void
+
   handlePaste(): void
   requestSave(): void
 
@@ -355,11 +361,13 @@ export interface CanvasEdge extends CanvasElement {
 }
 
 export interface NodeInteractionLayer {
+  canvas: Canvas
   interactionEl: HTMLElement
   setTarget(node: CanvasNode): void
 }
 
-export interface PopupMenu {
+export interface CanvasPopupMenu {
+  canvas: Canvas
   menuEl: HTMLElement
   render(): void
 }

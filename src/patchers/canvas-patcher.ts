@@ -2,7 +2,7 @@ import { EditorView, ViewUpdate } from "@codemirror/view"
 import JSONSS from "json-stable-stringify"
 import { around } from "monkey-around"
 import { editorInfoField, requireApiVersion, WorkspaceLeaf } from "obsidian"
-import { BBox, CanvasData, CanvasEdge, CanvasEdgeData, CanvasElement, CanvasNode, CanvasNodeData, CanvasView } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasData, CanvasEdge, CanvasEdgeData, CanvasElement, CanvasNode, CanvasNodeData, CanvasPopupMenu, CanvasView, NodeInteractionLayer } from "src/@types/Canvas"
 import PatchHelper from "src/utils/patch-helper"
 import JSONC from "tiny-jsonc"
 import { CanvasEvent } from "../events"
@@ -39,7 +39,7 @@ export default class CanvasPatcher extends Patcher {
     })
     
     // Patch canvas view
-    PatchHelper.patchPrototype<any>(this.plugin, canvasView, {
+    PatchHelper.patchPrototype<CanvasView>(this.plugin, canvasView, {
       getViewData: PatchHelper.OverrideExisting(next => function (...args: any) {
         const canvasData = this.canvas.getData()
 
@@ -79,7 +79,7 @@ export default class CanvasPatcher extends Patcher {
     })
 
     // Patch canvas
-    PatchHelper.patchPrototype<any>(this.plugin, canvasView.canvas, {
+    PatchHelper.patchPrototype<Canvas>(this.plugin, canvasView.canvas, {
       markViewportChanged: PatchHelper.OverrideExisting(next => function (...args: any) {
         that.triggerWorkspaceEvent(CanvasEvent.ViewportChanged.Before, this)
         const result = next.call(this, ...args)
@@ -245,7 +245,7 @@ export default class CanvasPatcher extends Patcher {
     })
 
     // Patch canvas popup menu
-    PatchHelper.patchPrototype<any>(this.plugin, canvasView.canvas.menu, {
+    PatchHelper.patchPrototype<CanvasPopupMenu>(this.plugin, canvasView.canvas.menu, {
       render: PatchHelper.OverrideExisting(next => function (...args: any) {
         const result = next.call(this, ...args)
         that.triggerWorkspaceEvent(CanvasEvent.PopupMenuCreated, this.canvas)
@@ -255,7 +255,7 @@ export default class CanvasPatcher extends Patcher {
     })
 
     // Patch interaction layer
-    PatchHelper.patchPrototype<any>(this.plugin, canvasView.canvas.nodeInteractionLayer, {
+    PatchHelper.patchPrototype<NodeInteractionLayer>(this.plugin, canvasView.canvas.nodeInteractionLayer, {
       setTarget: PatchHelper.OverrideExisting(next => function (node: CanvasNode) {
         const result = next.call(this, node)
         that.triggerWorkspaceEvent(CanvasEvent.NodeInteraction, this.canvas, node)
@@ -287,7 +287,7 @@ export default class CanvasPatcher extends Patcher {
   private patchNode(node: CanvasNode) {
     const that = this
 
-    PatchHelper.patch<any>(this.plugin, node, {
+    PatchHelper.patch<CanvasNode>(this.plugin, node, {
       setData: PatchHelper.OverrideExisting(next => function (data: CanvasNodeData, addHistory?: boolean) {
         const result = next.call(this, data)
 
@@ -332,7 +332,7 @@ export default class CanvasPatcher extends Patcher {
   private patchEdge(edge: CanvasEdge) {
     const that = this
 
-    PatchHelper.patch<any>(this.plugin, edge, {
+    PatchHelper.patch<CanvasEdge>(this.plugin, edge, {
       setData: PatchHelper.OverrideExisting(next => function (data: CanvasEdgeData, addHistory?: boolean) {
         const result = next.call(this, data)
 
