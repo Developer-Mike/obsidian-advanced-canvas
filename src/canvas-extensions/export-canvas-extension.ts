@@ -76,19 +76,15 @@ export default class ExportCanvasExtension extends CanvasExtension {
         })
       )
 
-    const nodesBBox = CanvasHelper.getBBox(nodesToExport ?? [...canvas.nodes.values()])
-    const nodesBBoxSize = { width: nodesBBox.maxX - nodesBBox.minX, height: nodesBBox.maxY - nodesBBox.minY }
-    const canvasElSize = { width: canvas.canvasEl.clientWidth, height: canvas.canvasEl.clientHeight }
-    const suggestedPixelRatio = Math.round(Math.max(nodesBBoxSize.width / canvasElSize.width, nodesBBoxSize.height / canvasElSize.height))
-    let pixelRatio = Math.min(MAX_PIXEL_RATIO, suggestedPixelRatio)
+    let pixelRatioFactor = 1
     pixelRatioSetting = new Setting(modal.contentEl)
       .setName('Pixel ratio')
       .setDesc('Higher pixel ratios result in higher resolution images but also larger file sizes.')
       .addSlider(slider => slider
         .setDynamicTooltip()
-        .setLimits(1, MAX_PIXEL_RATIO, 1)
-        .setValue(pixelRatio)
-        .onChange(value => pixelRatio = value)
+        .setLimits(0.2, 5, 0.1)
+        .setValue(pixelRatioFactor)
+        .onChange(value => pixelRatioFactor = value)
       )
     
     let noFontExport = true
@@ -138,7 +134,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
             canvas, 
             nodesToExport, 
             svg, 
-            svg ? 1 : pixelRatio, 
+            svg ? 1 : pixelRatioFactor, 
             svg ? noFontExport : false,
             watermark,
             garbledText,
@@ -151,7 +147,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
     modal.open()
   }
 
-  private async exportImage(canvas: Canvas, nodesToExport: CanvasNode[] | null, svg: boolean, pixelRatio: number, noFontExport: boolean, watermark: boolean, garbledText: boolean, transparentBackground: boolean) {
+  private async exportImage(canvas: Canvas, nodesToExport: CanvasNode[] | null, svg: boolean, pixelRatioFactor: number, noFontExport: boolean, watermark: boolean, garbledText: boolean, transparentBackground: boolean) {
     const isWholeCanvas = nodesToExport === null
     if (!nodesToExport) nodesToExport = [...canvas.nodes.values()]
     
@@ -189,8 +185,11 @@ export default class ExportCanvasExtension extends CanvasExtension {
       const targetBoundingBox = CanvasHelper.getBBox([...nodesToExport, ...edgesToExport])
       let enlargedTargetBoundingBox = BBoxHelper.scaleBBox(targetBoundingBox, 1.1) // Enlarge the bounding box by 10%
 
-      // Fix tZoom to large (bbox to small to zoom to)
-      //enlargedTargetBoundingBox = CanvasHelper.getSmallestAllowedZoomBBox(canvas, enlargedTargetBoundingBox)
+      // Calculate pixel ratio
+      const enlargedTargetBoundingBoxSize = { width: enlargedTargetBoundingBox.maxX - enlargedTargetBoundingBox.minX, height: enlargedTargetBoundingBox.maxY - enlargedTargetBoundingBox.minY }
+      const canvasElSize = { width: canvas.canvasEl.clientWidth, height: canvas.canvasEl.clientHeight }
+      const requiredPixelRatio = Math.max(enlargedTargetBoundingBoxSize.width / canvasElSize.width, enlargedTargetBoundingBoxSize.height / canvasElSize.height)
+      const pixelRatio = svg ? undefined : Math.round(requiredPixelRatio * pixelRatioFactor)
 
       // Add watermark
       watermarkEl = watermark ? this.getWatermark(enlargedTargetBoundingBox) : null
