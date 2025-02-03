@@ -1,9 +1,9 @@
 import { Notice, PluginSettingTab, Setting as SettingEl } from "obsidian"
-import AdvancedCanvasPlugin from "./main"
+import { BooleanSetting, ButtonSetting, DropdownSetting, NumberSetting, Setting, SettingsHeading, StyleAttributesSetting, TextSetting } from "./@types/Settings"
 import { BUILTIN_EDGE_STYLE_ATTRIBUTES, BUILTIN_NODE_STYLE_ATTRIBUTES, StyleAttribute } from "./canvas-extensions/advanced-styles/style-config"
-import { ButtonSetting, DropdownSetting, StyleAttributesSetting, SettingsHeading, Setting, TextSetting, BooleanSetting, NumberSetting } from "./@types/Settings"
 import { VARIABLE_BREAKPOINT_CSS_VAR } from "./canvas-extensions/variable-breakpoint-canvas-extension"
 import { PluginEvent } from "./events"
+import AdvancedCanvasPlugin from "./main"
 
 const README_URL = 'https://github.com/Developer-Mike/obsidian-advanced-canvas?tab=readme-ov-file'
 const ASK_FOR_DONATION_DELAY = 1000 * 60 * 60 * 24 * 7 // 1 week

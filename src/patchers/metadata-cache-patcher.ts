@@ -1,6 +1,6 @@
 import { TFile } from "obsidian"
 import { CanvasData, CanvasNodeData } from "src/@types/Canvas"
-import { NodesCache, ExtendedCachedMetadata, MetadataCacheMap } from "src/@types/Obsidian"
+import { ExtendedCachedMetadata, MetadataCacheMap } from "src/@types/Obsidian"
 import HashHelper from "src/utils/hash-helper"
 import PatchHelper from "src/utils/patch-helper"
 import PathHelper from "src/utils/path-helper"

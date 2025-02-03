@@ -29,7 +29,7 @@ export default class NodeExposerExtension extends CanvasExtension {
             ? Object.entries(nodeData[exposedDataKey])
             : [[exposedDataKey, nodeData[exposedDataKey]]]
 
-          for (const [key, value] of datasetPairs) {
+          for (const [key, value] of datasetPairs as [string, string][]) {
             if (!value) delete node.nodeEl.dataset[key]
             else node.nodeEl.dataset[key] = value
           }

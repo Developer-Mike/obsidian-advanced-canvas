@@ -1,8 +1,8 @@
+import { Menu } from "obsidian"
 import { Canvas, CanvasNode } from "src/@types/Canvas"
 import { CanvasEvent } from "src/events"
-import CanvasExtension from "./canvas-extension"
-import { Menu } from "obsidian"
 import BBoxHelper from "src/utils/bbox-helper"
+import CanvasExtension from "./canvas-extension"
 
 export default class ZOrderingCanvasExtension  extends CanvasExtension {
   isEnabled() { return 'zOrderingFeatureEnabled' as const }

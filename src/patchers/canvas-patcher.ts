@@ -1,11 +1,11 @@
-import { BBox, Canvas, CanvasData, CanvasEdge, CanvasEdgeData, CanvasElement, CanvasNode, CanvasNodeData, CanvasView } from "src/@types/Canvas"
-import PatchHelper from "src/utils/patch-helper"
-import { CanvasEvent } from "../events"
-import { requireApiVersion, WorkspaceLeaf, editorInfoField } from "obsidian"
 import { EditorView, ViewUpdate } from "@codemirror/view"
-import { around } from "monkey-around"
-import JSONC from "tiny-jsonc"
 import JSONSS from "json-stable-stringify"
+import { around } from "monkey-around"
+import { editorInfoField, requireApiVersion, WorkspaceLeaf } from "obsidian"
+import { BBox, CanvasData, CanvasEdge, CanvasEdgeData, CanvasElement, CanvasNode, CanvasNodeData, CanvasView } from "src/@types/Canvas"
+import PatchHelper from "src/utils/patch-helper"
+import JSONC from "tiny-jsonc"
+import { CanvasEvent } from "../events"
 import Patcher from "./patcher"
 
 export default class CanvasPatcher extends Patcher {

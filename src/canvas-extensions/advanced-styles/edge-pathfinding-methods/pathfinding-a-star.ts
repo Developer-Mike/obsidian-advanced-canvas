@@ -1,8 +1,8 @@
 import { BBox, Canvas, Position, Side } from "src/@types/Canvas"
-import EdgePathfindingMethod, { EdgePath } from "./edge-pathfinding-method"
-import SvgPathHelper from "src/utils/svg-path-helper"
 import AdvancedCanvasPlugin from "src/main"
 import BBoxHelper from "src/utils/bbox-helper"
+import SvgPathHelper from "src/utils/svg-path-helper"
+import EdgePathfindingMethod, { EdgePath } from "./edge-pathfinding-method"
 
 const MAX_MS_CALCULATION = 100
 const DIRECTIONS = [

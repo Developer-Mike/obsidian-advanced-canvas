@@ -1,11 +1,9 @@
-import { BBox, Canvas, CanvasNode } from "src/@types/Canvas"
-import CanvasHelper from "src/utils/canvas-helper"
 import * as HtmlToImage from 'html-to-image'
-import CanvasExtension from "./canvas-extension"
-import { Modal, Notice, ProgressBarComponent, Setting } from "obsidian"
+import { Modal, Notice, Setting } from "obsidian"
+import { BBox, Canvas, CanvasNode } from "src/@types/Canvas"
 import BBoxHelper from "src/utils/bbox-helper"
-import AdvancedCanvasPlugin from "src/main"
-import DebugHelper from "src/utils/debug-helper"
+import CanvasHelper from "src/utils/canvas-helper"
+import CanvasExtension from "./canvas-extension"
 
 const MAX_ALLOWED_LOADING_TIME = 10_000
 const MAX_PIXEL_RATIO = 20

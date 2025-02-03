@@ -1,7 +1,7 @@
 import { Canvas, CanvasEdge } from "src/@types/Canvas"
 import { CanvasEvent } from "src/events"
-import CanvasExtension from "./canvas-extension"
 import CanvasHelper from "src/utils/canvas-helper"
+import CanvasExtension from "./canvas-extension"
 
 export default class FlipEdgeCanvasExtension extends CanvasExtension {
   isEnabled() { return 'flipEdgeFeatureEnabled' as const }

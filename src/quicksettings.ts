@@ -1,8 +1,8 @@
 import App, { SuggestModal } from "obsidian"
-import AdvancedCanvasPlugin from "./main"
-import SettingsManager, { SETTINGS, AdvancedCanvasPluginSettingsValues, DEFAULT_SETTINGS_VALUES } from "./settings"
 import { DropdownSetting, Setting, StyleAttributesSetting } from "./@types/Settings"
 import { StyleAttribute } from "./canvas-extensions/advanced-styles/style-config"
+import AdvancedCanvasPlugin from "./main"
+import SettingsManager, { AdvancedCanvasPluginSettingsValues, DEFAULT_SETTINGS_VALUES, SETTINGS } from "./settings"
 
 export default class Quicksettings {
   plugin: AdvancedCanvasPlugin

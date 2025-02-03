@@ -1,8 +1,8 @@
 import { Canvas, CanvasEdge, CanvasNode } from "src/@types/Canvas"
 import { CanvasEvent, PluginEvent } from "src/events"
+import CanvasHelper from "src/utils/canvas-helper"
 import { FileSelectModal } from "src/utils/modal-helper"
 import CanvasExtension from "./canvas-extension"
-import CanvasHelper from "src/utils/canvas-helper"
 
 export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtension {
   isEnabled() { return true }

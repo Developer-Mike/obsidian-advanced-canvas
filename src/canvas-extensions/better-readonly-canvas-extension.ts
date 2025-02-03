@@ -1,7 +1,7 @@
 import { Canvas } from "src/@types/Canvas"
-import CanvasHelper, { MenuOption } from "src/utils/canvas-helper"
 import { CanvasEvent } from "src/events"
 import { AdvancedCanvasPluginSettingsValues } from "src/settings"
+import CanvasHelper, { MenuOption } from "src/utils/canvas-helper"
 import CanvasExtension from "./canvas-extension"
 
 export default class BetterReadonlyCanvasExtension extends CanvasExtension {

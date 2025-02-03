@@ -1,4 +1,4 @@
-import { BBox, CanvasNodeData, Position, Side } from "src/@types/Canvas"
+import { BBox, Position, Side } from "src/@types/Canvas"
 
 export default class BBoxHelper {
   static combineBBoxes(bboxes: BBox[]): BBox {

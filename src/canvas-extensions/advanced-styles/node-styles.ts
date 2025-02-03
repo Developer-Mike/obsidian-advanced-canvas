@@ -1,6 +1,6 @@
 import { Canvas } from "src/@types/Canvas"
-import CanvasHelper from "src/utils/canvas-helper"
 import { CanvasEvent, PluginEvent } from "src/events"
+import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "../canvas-extension"
 import { BUILTIN_NODE_STYLE_ATTRIBUTES, StyleAttribute } from "./style-config"
 

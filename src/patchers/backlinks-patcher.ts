@@ -1,6 +1,6 @@
+import { TAbstractFile, TFile, TFolder } from "obsidian"
 import PatchHelper from "src/utils/patch-helper"
 import Patcher from "./patcher"
-import { TAbstractFile, TFile, TFolder } from "obsidian"
 
 export default class BacklinksPatcher extends Patcher {
   private isRecomputingBacklinks: boolean = false

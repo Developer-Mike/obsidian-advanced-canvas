@@ -1,9 +1,9 @@
 import { Canvas, Position, Side } from "src/@types/Canvas"
-import EdgePathfindingMethod, { EdgePath } from "./edge-pathfinding-method"
-import SvgPathHelper from "src/utils/svg-path-helper"
 import AdvancedCanvasPlugin from "src/main"
 import BBoxHelper from "src/utils/bbox-helper"
 import CanvasHelper from "src/utils/canvas-helper"
+import SvgPathHelper from "src/utils/svg-path-helper"
+import EdgePathfindingMethod, { EdgePath } from "./edge-pathfinding-method"
 
 export default class EdgePathfindingSquare extends EdgePathfindingMethod {
   getPath(_plugin: AdvancedCanvasPlugin, _canvas: Canvas, fromPos: Position, fromBBoxSidePos: Position, fromSide: Side, toPos: Position, toBBoxSidePos: Position, toSide: Side): EdgePath {

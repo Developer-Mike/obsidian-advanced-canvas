@@ -1,13 +1,13 @@
-import { BBox, Canvas, CanvasEdge, CanvasElement, CanvasNode, Position, Side } from "src/@types/Canvas"
-import CanvasHelper from "src/utils/canvas-helper"
+import { BBox, Canvas, CanvasEdge, CanvasNode, Position, Side } from "src/@types/Canvas"
 import { CanvasEvent, PluginEvent } from "src/events"
 import BBoxHelper from "src/utils/bbox-helper"
+import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "../canvas-extension"
-import { BUILTIN_EDGE_STYLE_ATTRIBUTES, StyleAttribute } from "./style-config"
 import EdgePathfindingMethod from "./edge-pathfinding-methods/edge-pathfinding-method"
+import EdgePathfindingAStar from "./edge-pathfinding-methods/pathfinding-a-star"
 import EdgePathfindingDirect from "./edge-pathfinding-methods/pathfinding-direct"
 import EdgePathfindingSquare from "./edge-pathfinding-methods/pathfinding-square"
-import EdgePathfindingAStar from "./edge-pathfinding-methods/pathfinding-a-star"
+import { BUILTIN_EDGE_STYLE_ATTRIBUTES, StyleAttribute } from "./style-config"
 
 const EDGE_PATHFINDING_METHODS: { [key: string]: new() => EdgePathfindingMethod } = {
   'direct': EdgePathfindingDirect,

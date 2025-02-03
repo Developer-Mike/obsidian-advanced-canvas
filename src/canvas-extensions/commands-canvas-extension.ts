@@ -1,8 +1,8 @@
-import { Canvas, CanvasEdge, CanvasEdgeData, CanvasNodeData } from "src/@types/Canvas"
+import { Canvas, CanvasEdgeData } from "src/@types/Canvas"
+import BBoxHelper from "src/utils/bbox-helper"
 import CanvasHelper from "src/utils/canvas-helper"
 import { FileSelectModal } from "src/utils/modal-helper"
 import CanvasExtension from "./canvas-extension"
-import BBoxHelper from "src/utils/bbox-helper"
 
 type Direction = 'up' | 'down' | 'left' | 'right'
 const DIRECTIONS = ['up', 'down', 'left', 'right'] as Direction[]
