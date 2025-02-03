@@ -163,6 +163,22 @@ export default class CanvasHelper {
     canvas.markViewportChanged()
   }
 
+  static readonly MAX_ALLOWED_ZOOM = 1
+  static getSmallestAllowedZoomBBox(canvas: Canvas, bbox: BBox): BBox {
+    if (canvas.canvasRect.width === 0 || canvas.canvasRect.height === 0) return bbox
+
+    const widthZoom = canvas.canvasRect.width / (bbox.maxX - bbox.minX)
+    const heightZoom = canvas.canvasRect.height / (bbox.maxY - bbox.minY)
+    const requiredZoom = Math.min(widthZoom, heightZoom)
+
+    if (requiredZoom > CanvasHelper.MAX_ALLOWED_ZOOM) {
+      const scaleFactor = requiredZoom / CanvasHelper.MAX_ALLOWED_ZOOM
+      return BBoxHelper.scaleBBox(bbox, scaleFactor)
+    }
+
+    return bbox
+  }
+
   static addStyleAttributesToPopup(plugin: AdvancedCanvasPlugin, canvas: Canvas, styleAttributes: StyleAttribute[], currentStyleAttributes: { [key: string]: string | null }, setStyleAttribute: (attribute: StyleAttribute, value: string | null) => void) {
     if (!plugin.settings.getSetting('combineCustomStylesInDropdown')) 
       this.addStyleAttributesButtons(canvas, styleAttributes, currentStyleAttributes, setStyleAttribute)
