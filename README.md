@@ -89,6 +89,9 @@ All features can be enabled/disabled in the settings.
   - Create edges (arrows) to the embedded canvas
 - [Collapsible groups](#collapsible-groups)
   - Collapse and expand groups to organize your canvas
+- Better [Image Export](#image-export)
+  - Export the whole canvas or just a selection as an image
+  - Export the canvas as an png/**svg** image with transparency
 - [Auto node resizing](#auto-node-resizing)
   - Resize nodes automatically when the text content changes
 - [Focus mode](#focus-mode)
@@ -369,6 +372,14 @@ Collapse and expand groups to organize your canvas.
 <details>
     <summary>Collapsible Groups Example</summary>
     <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/collapsible-groups.png" alt="Collapsible Groups Example"/>
+</details>
+
+## Image Export
+Export the whole canvas/your selection as an png/svg image with transparency. Export options from the core plugin are also available - this includes "Privacy Mode" and "Show Logo" (Logo got extended to include Advanced Canvas).
+
+<details>
+    <summary>Image Export Example</summary>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/image-export-example.svg" alt="Image Export Example"/>
 </details>
 
 ## Auto Node Resizing
