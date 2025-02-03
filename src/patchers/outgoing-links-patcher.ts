@@ -10,7 +10,7 @@ export default class OutgoingLinksPatcher extends Patcher {
     const outgoingLinkPatch = PatchHelper.tryPatchWorkspacePrototype<OutgoingLink>(this.plugin, () => (
       (this.plugin.app.workspace.getLeavesOfType('outgoing-link').first()?.view as any)?.outgoingLink
     ), {
-      recomputeLinks: PatchHelper.OverrideExisting(next => function (...args: any[]) {
+      recomputeLinks: PatchHelper.OverrideExisting(next => function (...args: any[]): void {
         const isCanvas = this.file?.extension === 'canvas'
 
         // Trick the app into thinking that the file is a markdown file
@@ -23,7 +23,7 @@ export default class OutgoingLinksPatcher extends Patcher {
 
         return result
       }),
-      recomputeUnlinked: PatchHelper.OverrideExisting(next => function (...args: any[]) {
+      recomputeUnlinked: PatchHelper.OverrideExisting(next => function (...args: any[]): void {
         const isCanvas = this.file?.extension === 'canvas'
 
         // Trick the app into thinking that the file is a markdown file

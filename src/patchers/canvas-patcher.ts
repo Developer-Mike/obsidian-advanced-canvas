@@ -2,7 +2,7 @@ import { EditorView, ViewUpdate } from "@codemirror/view"
 import JSONSS from "json-stable-stringify"
 import { around } from "monkey-around"
 import { editorInfoField, requireApiVersion, WorkspaceLeaf } from "obsidian"
-import { BBox, Canvas, CanvasData, CanvasEdge, CanvasEdgeData, CanvasElement, CanvasNode, CanvasNodeData, CanvasPopupMenu, CanvasView, NodeInteractionLayer } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasData, CanvasEdge, CanvasEdgeData, CanvasElement, CanvasNode, CanvasNodeData, CanvasPopupMenu, CanvasView, NodeInteractionLayer, Position, SelectionData } from "src/@types/Canvas"
 import PatchHelper from "src/utils/patch-helper"
 import JSONC from "tiny-jsonc"
 import { CanvasEvent } from "../events"
@@ -59,7 +59,7 @@ export default class CanvasPatcher extends Patcher {
           }
         }
       }),
-      setViewData: PatchHelper.OverrideExisting(next => function (json: string, ...args: any) {
+      setViewData: PatchHelper.OverrideExisting(next => function (json: string, ...args: any): void {
         json = json !== '' ? json : '{}'
 
         let result
@@ -83,13 +83,13 @@ export default class CanvasPatcher extends Patcher {
 
     // Patch canvas
     PatchHelper.patchPrototype<Canvas>(this.plugin, canvasView.canvas, {
-      markViewportChanged: PatchHelper.OverrideExisting(next => function (...args: any) {
+      markViewportChanged: PatchHelper.OverrideExisting(next => function (...args: any): void {
         that.triggerWorkspaceEvent(CanvasEvent.ViewportChanged.Before, this)
         const result = next.call(this, ...args)
         that.triggerWorkspaceEvent(CanvasEvent.ViewportChanged.After, this)
         return result
       }),
-      markMoved: PatchHelper.OverrideExisting(next => function (node: CanvasNode) {
+      markMoved: PatchHelper.OverrideExisting(next => function (node: CanvasNode): void {
         const result = next.call(this, node)
 
         if (!this.viewportChanged) {
@@ -108,124 +108,124 @@ export default class CanvasPatcher extends Patcher {
 
         return result
       }),
-      onDoubleClick: PatchHelper.OverrideExisting(next => function (event: MouseEvent) {
+      onDoubleClick: PatchHelper.OverrideExisting(next => function (event: MouseEvent): void {
         const preventDefault = { value: false }
         that.triggerWorkspaceEvent(CanvasEvent.DoubleClick, this, event, preventDefault)
         if (!preventDefault.value) next.call(this, event)
       }),
-      setDragging: PatchHelper.OverrideExisting(next => function (dragging: boolean) {
+      setDragging: PatchHelper.OverrideExisting(next => function (dragging: boolean): void {
         const result = next.call(this, dragging)
         that.triggerWorkspaceEvent(CanvasEvent.DraggingStateChanged, this, dragging)
         return result
       }),
-      getContainingNodes: PatchHelper.OverrideExisting(next => function (bbox: BBox) {
+      getContainingNodes: PatchHelper.OverrideExisting(next => function (bbox: BBox): CanvasNode[] {
         const result = next.call(this, bbox)
         that.triggerWorkspaceEvent(CanvasEvent.ContainingNodesRequested, this, bbox, result)
         return result
       }),
-      updateSelection: PatchHelper.OverrideExisting(next => function (update: () => void) {
+      updateSelection: PatchHelper.OverrideExisting(next => function (update: () => void): void {
         const oldSelection = new Set(this.selection)
         const result = next.call(this, update)
         that.triggerWorkspaceEvent(CanvasEvent.SelectionChanged, this, oldSelection, ((update: () => void) => next.call(this, update)))
         return result
       }),
-      createTextNode: PatchHelper.OverrideExisting(next => function (...args: any) {
+      createTextNode: PatchHelper.OverrideExisting(next => function (...args: any): CanvasNode {
         const node = next.call(this, ...args)
         that.triggerWorkspaceEvent(CanvasEvent.NodeCreated, this, node)
         return node
       }),
-      createFileNode: PatchHelper.OverrideExisting(next => function (...args: any) {
+      createFileNode: PatchHelper.OverrideExisting(next => function (...args: any): CanvasNode {
         const node = next.call(this, ...args)
         that.triggerWorkspaceEvent(CanvasEvent.NodeCreated, this, node)
         return node
       }),
-      createFileNodes: PatchHelper.OverrideExisting(next => function (...args: any) {
+      createFileNodes: PatchHelper.OverrideExisting(next => function (...args: any): CanvasNode[] {
         const nodes = next.call(this, ...args)
         nodes.forEach((node: CanvasNode) => that.triggerWorkspaceEvent(CanvasEvent.NodeCreated, this, node))
         return nodes
       }),
-      createGroupNode: PatchHelper.OverrideExisting(next => function (...args: any) {
+      createGroupNode: PatchHelper.OverrideExisting(next => function (...args: any): CanvasNode {
         const node = next.call(this, ...args)
         that.triggerWorkspaceEvent(CanvasEvent.NodeCreated, this, node)
         return node
       }),
-      createLinkNode: PatchHelper.OverrideExisting(next => function (...args: any) {
+      createLinkNode: PatchHelper.OverrideExisting(next => function (...args: any): CanvasNode {
         const node = next.call(this, ...args)
         that.triggerWorkspaceEvent(CanvasEvent.NodeCreated, this, node)
         return node
       }),
-      addNode: PatchHelper.OverrideExisting(next => function (node: CanvasNode) {
+      addNode: PatchHelper.OverrideExisting(next => function (node: CanvasNode): void {
         that.patchNode(node)
         return next.call(this, node)
       }),
-      addEdge: PatchHelper.OverrideExisting(next => function (edge: CanvasEdge) {
+      addEdge: PatchHelper.OverrideExisting(next => function (edge: CanvasEdge): void {
         that.patchEdge(edge)
         if (!this.viewportChanged) that.triggerWorkspaceEvent(CanvasEvent.EdgeCreated, this, edge)
         return next.call(this, edge)
       }),
-      removeNode: PatchHelper.OverrideExisting(next => function (node: CanvasNode) {
+      removeNode: PatchHelper.OverrideExisting(next => function (node: CanvasNode): void {
         const result = next.call(this, node)
         if (!this.isClearing) that.triggerWorkspaceEvent(CanvasEvent.NodeRemoved, this, node)
         return result
       }),
-      removeEdge: PatchHelper.OverrideExisting(next => function (edge: CanvasEdge) {
+      removeEdge: PatchHelper.OverrideExisting(next => function (edge: CanvasEdge): void {
         const result = next.call(this, edge)
         if (!this.isClearing) that.triggerWorkspaceEvent(CanvasEvent.EdgeRemoved, this, edge)
         return result
       }),
-      handleCopy: PatchHelper.OverrideExisting(next => function (...args: any) {
+      handleCopy: PatchHelper.OverrideExisting(next => function (...args: any): void {
         this.isCopying = true
         const result = next.call(this, ...args)
         this.isCopying = false
 
         return result
       }),
-      getSelectionData: PatchHelper.OverrideExisting(next => function (...args: any) {
+      getSelectionData: PatchHelper.OverrideExisting(next => function (...args: any): SelectionData {
         const result = next.call(this, ...args)
         if (this.isCopying) that.triggerWorkspaceEvent(CanvasEvent.OnCopy, this, result)
         return result
       }),
-      zoomToBbox: PatchHelper.OverrideExisting(next => function (bbox: BBox) {
+      zoomToBbox: PatchHelper.OverrideExisting(next => function (bbox: BBox): void {
         that.triggerWorkspaceEvent(CanvasEvent.ZoomToBbox.Before, this, bbox)
         const result = next.call(this, bbox)
         that.triggerWorkspaceEvent(CanvasEvent.ZoomToBbox.After, this, bbox)
         return result
       }),
-      setReadonly: PatchHelper.OverrideExisting(next => function (readonly: boolean) {
+      setReadonly: PatchHelper.OverrideExisting(next => function (readonly: boolean): void {
         const result = next.call(this, readonly)
         that.triggerWorkspaceEvent(CanvasEvent.ReadonlyChanged, this, readonly)
         return result
       }),
-      undo: PatchHelper.OverrideExisting(next => function (...args: any) {
+      undo: PatchHelper.OverrideExisting(next => function (...args: any): void {
         const result = next.call(this, ...args)
         this.importData(this.getData(), true) // Force update the canvas data
         that.triggerWorkspaceEvent(CanvasEvent.Undo, this)
         return result
       }),
-      redo: PatchHelper.OverrideExisting(next => function (...args: any) {
+      redo: PatchHelper.OverrideExisting(next => function (...args: any): void {
         const result = next.call(this, ...args)
         this.importData(this.getData(), true) // Force update the canvas data
         that.triggerWorkspaceEvent(CanvasEvent.Redo, this)
         return result
       }),
-      clear: PatchHelper.OverrideExisting(next => function (...args: any) {
+      clear: PatchHelper.OverrideExisting(next => function (...args: any): void {
         this.isClearing = true
         const result = next.call(this, ...args)
         this.isClearing = false
         return result
       }),
-      /*setData: PatchHelper.OverrideExisting(next => function (...args: any) {
+      /*setData: PatchHelper.OverrideExisting(next => function (...args: any): void {
         //
         const result = next.call(this, ...args)
         //
         return result
       }),*/
-      getData: PatchHelper.OverrideExisting(next => function (...args: any) {
+      getData: PatchHelper.OverrideExisting(next => function (...args: any): CanvasData {
         const result = next.call(this, ...args)
         that.triggerWorkspaceEvent(CanvasEvent.DataRequested, this, result)
         return result
       }),
-      importData: PatchHelper.OverrideExisting(next => function (data: CanvasData, clearCanvas?: boolean, silent?: boolean) {
+      importData: PatchHelper.OverrideExisting(next => function (data: CanvasData, clearCanvas?: boolean, silent?: boolean): void {
         const targetFilePath = this.view.file.path
         const setData = (data: CanvasData) => {
           // Skip if the canvas got unloaded or the file changed
@@ -239,7 +239,7 @@ export default class CanvasPatcher extends Patcher {
 
         return result
       }),
-      requestSave: PatchHelper.OverrideExisting(next => function (...args: any) {
+      requestSave: PatchHelper.OverrideExisting(next => function (...args: any): void {
         that.triggerWorkspaceEvent(CanvasEvent.CanvasSaved.Before, this)
         const result = next.call(this, ...args)
         that.triggerWorkspaceEvent(CanvasEvent.CanvasSaved.After, this)
@@ -249,7 +249,7 @@ export default class CanvasPatcher extends Patcher {
 
     // Patch canvas popup menu
     PatchHelper.patchPrototype<CanvasPopupMenu>(this.plugin, canvasView.canvas.menu, {
-      render: PatchHelper.OverrideExisting(next => function (...args: any) {
+      render: PatchHelper.OverrideExisting(next => function (...args: any): void {
         const result = next.call(this, ...args)
         that.triggerWorkspaceEvent(CanvasEvent.PopupMenuCreated, this.canvas)
         next.call(this) // Re-Center the popup menu
@@ -259,7 +259,7 @@ export default class CanvasPatcher extends Patcher {
 
     // Patch interaction layer
     PatchHelper.patchPrototype<NodeInteractionLayer>(this.plugin, canvasView.canvas.nodeInteractionLayer, {
-      setTarget: PatchHelper.OverrideExisting(next => function (node: CanvasNode) {
+      setTarget: PatchHelper.OverrideExisting(next => function (node: CanvasNode): void {
         const result = next.call(this, node)
         that.triggerWorkspaceEvent(CanvasEvent.NodeInteraction, this.canvas, node)
         return result
@@ -291,7 +291,7 @@ export default class CanvasPatcher extends Patcher {
     const that = this
 
     PatchHelper.patch<CanvasNode>(this.plugin, node, {
-      setData: PatchHelper.OverrideExisting(next => function (data: CanvasNodeData, addHistory?: boolean) {
+      setData: PatchHelper.OverrideExisting(next => function (data: CanvasNodeData, addHistory?: boolean): void {
         const result = next.call(this, data)
 
         if (node.initialized && !node.isDirty) {
@@ -309,17 +309,17 @@ export default class CanvasPatcher extends Patcher {
 
         return result
       }),
-      setIsEditing: PatchHelper.OverrideExisting(next => function (editing: boolean, ...args: any) {
+      setIsEditing: PatchHelper.OverrideExisting(next => function (editing: boolean, ...args: any): void {
         const result = next.call(this, editing, ...args)
         that.triggerWorkspaceEvent(CanvasEvent.NodeEditingStateChanged, this.canvas, node, editing)
         return result
       }),
-      updateBreakpoint: PatchHelper.OverrideExisting(next => function (breakpoint: boolean) {
+      updateBreakpoint: PatchHelper.OverrideExisting(next => function (breakpoint: boolean): void {
         const breakpointRef = { value: breakpoint }
         that.triggerWorkspaceEvent(CanvasEvent.NodeBreakpointChanged, this.canvas, node, breakpointRef)
         return next.call(this, breakpointRef.value)
       }),
-      getBBox: PatchHelper.OverrideExisting(next => function (...args: any) {
+      getBBox: PatchHelper.OverrideExisting(next => function (...args: any): BBox {
         const result = next.call(this, ...args)
         that.triggerWorkspaceEvent(CanvasEvent.NodeBBoxRequested, this.canvas, node, result)
         return result
@@ -336,7 +336,7 @@ export default class CanvasPatcher extends Patcher {
     const that = this
 
     PatchHelper.patch<CanvasEdge>(this.plugin, edge, {
-      setData: PatchHelper.OverrideExisting(next => function (data: CanvasEdgeData, addHistory?: boolean) {
+      setData: PatchHelper.OverrideExisting(next => function (data: CanvasEdgeData, addHistory?: boolean): void {
         const result = next.call(this, data)
 
         if (edge.initialized && !edge.isDirty) {
@@ -354,12 +354,12 @@ export default class CanvasPatcher extends Patcher {
 
         return result
       }),
-      render: PatchHelper.OverrideExisting(next => function (...args: any) {
+      render: PatchHelper.OverrideExisting(next => function (...args: any): void {
         const result = next.call(this, ...args)
         that.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, this.canvas, edge)
         return result
       }),
-      getCenter: PatchHelper.OverrideExisting(next => function (...args: any) {
+      getCenter: PatchHelper.OverrideExisting(next => function (...args: any): Position {
         const result = next.call(this, ...args)
         that.triggerWorkspaceEvent(CanvasEvent.EdgeCenterRequested, this.canvas, edge, result)
         return result
@@ -382,7 +382,7 @@ export default class CanvasPatcher extends Patcher {
 
     // Patch CanvasElement object
     const uninstall = around(canvasElement, {
-      initialize: next => function (...args: any) {
+      initialize: next => function (...args: any): void {
         const result = next.call(this, ...args)
 
         onReady()
@@ -395,7 +395,7 @@ export default class CanvasPatcher extends Patcher {
     that.plugin.register(uninstall)
   }
 
-  private triggerWorkspaceEvent(event: string, ...args: any) {
+  private triggerWorkspaceEvent(event: string, ...args: any): void {
     this.plugin.app.workspace.trigger(event, ...args)
   }
 }

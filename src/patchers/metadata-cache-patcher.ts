@@ -12,7 +12,7 @@ export default class MetadataCachePatcher extends Patcher {
 
     const that = this
     PatchHelper.patchPrototype<ExtendedMetadataCache>(this.plugin, this.plugin.app.metadataCache, {
-      getCache: PatchHelper.OverrideExisting(next => function (filepath: string, ...args: any[]) {
+      getCache: PatchHelper.OverrideExisting(next => function (filepath: string, ...args: any[]): ExtendedCachedMetadata | null {
         // Bypass the "md" extension check by handling the "canvas" extension here
         if (PathHelper.extension(filepath) === 'canvas') {
           if (!this.fileCache.hasOwnProperty(filepath)) return null

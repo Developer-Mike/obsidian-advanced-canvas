@@ -23,6 +23,10 @@ export interface Canvas {
   options: CanvasOptions
   metadata: CanvasMetadata
 
+  /**
+   * @deprecated Use getData instead -> Can be outdated
+   */
+  data: CanvasData
   getData(): CanvasData
   setData(data: CanvasData): void
   /** Basically setData (if clearCanvas == true), but without modifying the history */
@@ -153,6 +157,8 @@ export interface CanvasView extends ItemView {
 
   getViewData(): string
   setViewData(data: string): void
+
+  requestSave(): void
 }
 
 export interface CanvasWorkspaceLeaf extends WorkspaceLeaf {
