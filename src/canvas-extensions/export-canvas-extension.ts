@@ -325,14 +325,52 @@ export default class ExportCanvasExtension extends CanvasExtension {
   }
 
   private getInteractionBlocker() {
-    const interactionBlocker = document.createElement('div')
+    // Loading tint overlay
+    /* const interactionBlocker = document.createElement('div')
     interactionBlocker.classList.add('modal-container', 'mod-dim')
     document.body.appendChild(interactionBlocker)
 
     const interactionBlockerBg = document.createElement('div')
     interactionBlockerBg.classList.add('modal-bg')
     interactionBlockerBg.style.opacity = '1'
-    interactionBlocker.appendChild(interactionBlockerBg)
+    interactionBlocker.appendChild(interactionBlockerBg) */
+
+    // Progress bar (like when loading the workspace)
+    const interactionBlocker = document.createElement('div')
+    interactionBlocker.classList.add('progress-bar-container')
+
+    const progressBar = document.createElement('div')
+    progressBar.classList.add('progress-bar')
+    interactionBlocker.appendChild(progressBar)
+
+    const progressBarMessage = document.createElement('div')
+    progressBarMessage.classList.add('progress-bar-message', 'u-center-text')
+    progressBarMessage.innerText = 'Generating image...'
+    progressBar.appendChild(progressBarMessage)
+
+    const progressBarIndicator = document.createElement('div')
+    progressBarIndicator.classList.add('progress-bar-indicator')
+    progressBar.appendChild(progressBarIndicator)
+
+    const progressBarLine = document.createElement('div')
+    progressBarLine.classList.add('progress-bar-line')
+    progressBarIndicator.appendChild(progressBarLine)
+
+    const progressBarSublineIncrease = document.createElement('div')
+    progressBarSublineIncrease.classList.add('progress-bar-subline', 'mod-increase')
+    progressBarIndicator.appendChild(progressBarSublineIncrease)
+
+    const progressBarSublineDecrease = document.createElement('div')
+    progressBarSublineDecrease.classList.add('progress-bar-subline', 'mod-decrease')
+    progressBarIndicator.appendChild(progressBarSublineDecrease)
+
+    /* const progressBarContext = document.createElement('div')
+    progressBarContext.classList.add('progress-bar-context')
+    progressBarContext.innerText = 'Please wait...'
+    progressBar.appendChild(progressBarContext) */
+
+    // Alternative
+    // search-result-container is-loading
 
     return interactionBlocker
   }
