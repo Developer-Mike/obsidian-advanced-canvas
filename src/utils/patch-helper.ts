@@ -1,6 +1,10 @@
 import { around } from "monkey-around"
 import { Plugin } from "obsidian"
 
+// Is any
+type IsAny<T> = 0 extends 1 & T ? true : false
+type NotAny<T> = IsAny<T> extends true ? never : T
+
 // All keys in T that are functions
 type FunctionKeys<T> = {
   [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never
@@ -11,21 +15,23 @@ type KeyFunction<T, K extends FunctionKeys<T>> =
   T[K] extends (...args: any[]) => any ? T[K] : never
 
 // The type of a patch function for key K in T
-type KeyFunctionReplacement<T, K extends FunctionKeys<T>> = 
-  (this: T, ...args: Parameters<KeyFunction<T, K>>) => ReturnType<KeyFunction<T, K>>
+type KeyFunctionReplacement<T, K extends FunctionKeys<T>, R extends ReturnType<KeyFunction<T, K>>> = 
+  (this: T, ...args: Parameters<KeyFunction<T, K>>) => IsAny<ReturnType<KeyFunction<T, K>>> extends false 
+  ? ReturnType<KeyFunction<T, K>> & NotAny<R>
+  : any
 
 // The wrapper of a patch function for key K in T
-type PatchFunctionWrapper<T, K extends FunctionKeys<T>> = 
-  (next: KeyFunction<T, K>) => KeyFunctionReplacement<T, K>
+type PatchFunctionWrapper<T, K extends FunctionKeys<T>, R extends ReturnType<KeyFunction<T, K>>> =
+  (next: KeyFunction<T, K>) => KeyFunctionReplacement<T, K, R>
 
 // The object of patch functions for T
 type FunctionPatchObject<T> = {
-  [K in FunctionKeys<T>]?: PatchFunctionWrapper<T, K> & { __overrideExisting?: boolean }
+  [K in FunctionKeys<T>]?: PatchFunctionWrapper<T, K, ReturnType<KeyFunction<T, K>>> & { __overrideExisting?: boolean }
 }
 
 export default class PatchHelper {
-  static OverrideExisting<T, K extends FunctionKeys<T>>(
-    fn: PatchFunctionWrapper<T, K> & { __overrideExisting?: boolean }
+  static OverrideExisting<T, K extends FunctionKeys<T>, R extends ReturnType<KeyFunction<T, K>>>(
+    fn: PatchFunctionWrapper<T, K, R> & { __overrideExisting?: boolean }
   ) { return Object.assign(fn, { __overrideExisting: true }) }
 
   static patchPrototype<T>(

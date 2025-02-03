@@ -40,11 +40,14 @@ export default class CanvasPatcher extends Patcher {
     
     // Patch canvas view
     PatchHelper.patchPrototype<CanvasView>(this.plugin, canvasView, {
-      getViewData: PatchHelper.OverrideExisting(next => function (...args: any) {
+      getViewData: PatchHelper.OverrideExisting(next => function (...args: any): string {
         const canvasData = this.canvas.getData()
 
         try {
-          return JSONSS(canvasData, { space: 2 })
+          const stringified = JSONSS(canvasData, { space: 2 })
+          if (stringified === undefined) throw new Error('Failed to stringify canvas data using json-stable-stringify')
+            
+          return stringified
         } catch (e) {
           console.error('Failed to stringify canvas data using json-stable-stringify:', e)
 

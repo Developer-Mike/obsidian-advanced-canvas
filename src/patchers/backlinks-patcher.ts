@@ -13,7 +13,7 @@ export default class BacklinksPatcher extends Patcher {
     const backlinkPatch = PatchHelper.tryPatchWorkspacePrototype<Backlink>(this.plugin, () => (
       (this.plugin.app.workspace.getLeavesOfType('backlink').first()?.view as any)?.backlink
     ), {
-      recomputeBacklink: PatchHelper.OverrideExisting(next => function (file: TFile, ...args: any[]) {
+      recomputeBacklink: PatchHelper.OverrideExisting(next => function (file: TFile, ...args: any[]): void {
         that.isRecomputingBacklinks = true
         const result = next.call(this, file, ...args)
         that.isRecomputingBacklinks = false
@@ -33,7 +33,7 @@ export default class BacklinksPatcher extends Patcher {
           }
         }
       },
-      getMarkdownFiles: PatchHelper.OverrideExisting(next => function (...args: any[]) {
+      getMarkdownFiles: PatchHelper.OverrideExisting(next => function (...args: any[]): TFile[] {
         if (!that.isRecomputingBacklinks) return next.call(this, ...args)
 
         // If we are recomputing backlinks, we need to include markdown as well as canvas files
@@ -46,7 +46,7 @@ export default class BacklinksPatcher extends Patcher {
           }
         })
 
-        return "files"
+        return files
       })
     })
 
