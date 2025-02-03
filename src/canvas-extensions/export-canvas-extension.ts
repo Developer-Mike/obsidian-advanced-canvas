@@ -325,16 +325,6 @@ export default class ExportCanvasExtension extends CanvasExtension {
   }
 
   private getInteractionBlocker() {
-    // Loading tint overlay
-    /* const interactionBlocker = document.createElement('div')
-    interactionBlocker.classList.add('modal-container', 'mod-dim')
-    document.body.appendChild(interactionBlocker)
-
-    const interactionBlockerBg = document.createElement('div')
-    interactionBlockerBg.classList.add('modal-bg')
-    interactionBlockerBg.style.opacity = '1'
-    interactionBlocker.appendChild(interactionBlockerBg) */
-
     // Progress bar (like when loading the workspace)
     const interactionBlocker = document.createElement('div')
     interactionBlocker.classList.add('progress-bar-container')
@@ -363,14 +353,6 @@ export default class ExportCanvasExtension extends CanvasExtension {
     const progressBarSublineDecrease = document.createElement('div')
     progressBarSublineDecrease.classList.add('progress-bar-subline', 'mod-decrease')
     progressBarIndicator.appendChild(progressBarSublineDecrease)
-
-    /* const progressBarContext = document.createElement('div')
-    progressBarContext.classList.add('progress-bar-context')
-    progressBarContext.innerText = 'Please wait...'
-    progressBar.appendChild(progressBarContext) */
-
-    // Alternative
-    // search-result-container is-loading
 
     return interactionBlocker
   }
