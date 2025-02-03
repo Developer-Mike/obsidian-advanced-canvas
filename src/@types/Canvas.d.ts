@@ -59,6 +59,7 @@ export interface Canvas {
   tx: number
   ty: number
   tZoom: number
+  screenshotting: boolean
 
   isDragging: boolean
   setDragging(dragging: boolean): void

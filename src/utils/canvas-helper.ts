@@ -153,7 +153,7 @@ export default class CanvasHelper {
 
     const widthZoom = canvas.canvasRect.width / (bbox.maxX - bbox.minX)
     const heightZoom = canvas.canvasRect.height / (bbox.maxY - bbox.minY)
-    const zoom = Math.clamp(Math.min(widthZoom, heightZoom), -4, 1)
+    const zoom = canvas.screenshotting ? Math.min(widthZoom, heightZoom) : Math.clamp(Math.min(widthZoom, heightZoom), -4, 1)
     canvas.tZoom = Math.log2(zoom)
     canvas.zoomCenter = null
 

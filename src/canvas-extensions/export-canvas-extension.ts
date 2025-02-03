@@ -173,6 +173,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
     document.body.appendChild(interactionBlocker)
 
     // Prepare the canvas
+    canvas.screenshotting = true
     canvas.canvasEl.classList.add('is-exporting')
     if (garbledText) canvas.canvasEl.classList.add('is-text-garbled')
     let watermarkEl = null
@@ -189,7 +190,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
       let enlargedTargetBoundingBox = BBoxHelper.scaleBBox(targetBoundingBox, 1.1) // Enlarge the bounding box by 10%
 
       // Fix tZoom to large (bbox to small to zoom to)
-      enlargedTargetBoundingBox = CanvasHelper.getSmallestAllowedZoomBBox(canvas, enlargedTargetBoundingBox)
+      //enlargedTargetBoundingBox = CanvasHelper.getSmallestAllowedZoomBBox(canvas, enlargedTargetBoundingBox)
 
       // Add watermark
       watermarkEl = watermark ? this.getWatermark(enlargedTargetBoundingBox) : null
@@ -223,8 +224,6 @@ export default class ExportCanvasExtension extends CanvasExtension {
       // Not before, because some nodes might have been outside the viewport
       let canvasScale = parseFloat(canvas.canvasEl.style.transform.match(/scale\((\d+(\.\d+)?)\)/)?.[1] || '1')
       const edgePathsBBox = BBoxHelper.combineBBoxes(edgesToExport.map(edge => {
-        console.log(edge.from.node?.initialized)
-
         const edgeCenter = edge.getCenter()
         const labelWidth = edge.labelElement ? edge.labelElement.wrapperEl.getBoundingClientRect().width / canvasScale : 0
 
@@ -237,8 +236,6 @@ export default class ExportCanvasExtension extends CanvasExtension {
       CanvasHelper.zoomToRealBBox(canvas, adjustedBoundingBox) // Zoom to the bounding box
       canvas.setViewport(canvas.tx, canvas.ty, canvas.tZoom) // Accelerate zoomToBbox by setting the canvas to the desired position and zoom
       await sleep(10) // Wait for viewport to update
-
-      await sleep(10000)
 
       // Calculate the output image size
       const canvasViewportBBox = canvas.getViewportBBox()
@@ -316,6 +313,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
       }
     } finally {
       // Reset the canvas
+      canvas.screenshotting = false
       canvas.canvasEl.classList.remove('is-exporting')
       if (garbledText) canvas.canvasEl.classList.remove('is-text-garbled')
       if (watermarkEl) canvas.canvasEl.removeChild(watermarkEl)
@@ -349,7 +347,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
 
     const watermarkPadding = {
       x: bboxWidth * 0.02,
-      y: bboxWidth * 0.013
+      y: bboxWidth * 0.014
     }
 
     // Enlarge the bounding box in the bottom
