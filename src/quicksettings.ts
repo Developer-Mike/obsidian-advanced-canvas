@@ -2,7 +2,7 @@ import App, { SuggestModal } from "obsidian"
 import { DropdownSetting, Setting, StyleAttributesSetting } from "./@types/Settings"
 import { StyleAttribute } from "./canvas-extensions/advanced-styles/style-config"
 import AdvancedCanvasPlugin from "./main"
-import SettingsManager, { AdvancedCanvasPluginSettingsValues, DEFAULT_SETTINGS_VALUES, SETTINGS } from "./settings"
+import SettingsManager, { PluginSettings, DEFAULT_SETTINGS_VALUES, SETTINGS } from "./settings"
 
 export default class Quicksettings {
   plugin: AdvancedCanvasPlugin
@@ -168,7 +168,7 @@ class SetStyleAttributeModal extends SearchKeyValueSettingModal<string> {
     this.settingsKey = settingsKey
     this.styleAttributeKey = styleAttributeKey
     this.styleAttribute = styleAttribute
-    this.currentValueKey = (settingsManager.getSetting(settingsKey as keyof AdvancedCanvasPluginSettingsValues) as Record<string, string>)[styleAttributeKey] || null
+    this.currentValueKey = (settingsManager.getSetting(settingsKey as keyof PluginSettings) as Record<string, string>)[styleAttributeKey] || null
   }
 
   getSearchTitle(): string {
@@ -197,7 +197,7 @@ class SetStyleAttributeModal extends SearchKeyValueSettingModal<string> {
   }
 
   onSelectedSuggestion(key: string | null, _value: string): void {
-    const newValue = this.settingsManager.getSetting(this.settingsKey as keyof AdvancedCanvasPluginSettingsValues) as Record<string, string>
+    const newValue = this.settingsManager.getSetting(this.settingsKey as keyof PluginSettings) as Record<string, string>
 
     if (key === null) delete newValue[this.styleAttribute.datasetKey]
     else newValue[this.styleAttribute.datasetKey] = key
@@ -220,8 +220,8 @@ class SetTextOrNumberSettingModal extends SuggestModal<string> {
     this.settingsManager = settingsManager
     this.settingsKey = settingsKey
     this.setting = setting
-    this.defaultValue = DEFAULT_SETTINGS_VALUES[settingsKey as keyof AdvancedCanvasPluginSettingsValues].toString()
-    this.currentValue = settingsManager.getSetting(settingsKey as keyof AdvancedCanvasPluginSettingsValues).toString()
+    this.defaultValue = DEFAULT_SETTINGS_VALUES[settingsKey as keyof PluginSettings].toString()
+    this.currentValue = settingsManager.getSetting(settingsKey as keyof PluginSettings).toString()
 
     this.setPlaceholder('Enter new value...')
     this.setInstructions([{
@@ -268,8 +268,8 @@ class SetBooleanSettingModal extends SuggestModal<string> {
     super(app)
     this.settingsManager = settingsManager
     this.settingsKey = settingsKey
-    this.defaultValue = DEFAULT_SETTINGS_VALUES[settingsKey as keyof AdvancedCanvasPluginSettingsValues] as boolean
-    this.currentValue = settingsManager.getSetting(settingsKey as keyof AdvancedCanvasPluginSettingsValues) as boolean
+    this.defaultValue = DEFAULT_SETTINGS_VALUES[settingsKey as keyof PluginSettings] as boolean
+    this.currentValue = settingsManager.getSetting(settingsKey as keyof PluginSettings) as boolean
 
     this.setPlaceholder('Enter new value...')
     this.setInstructions([{
@@ -285,7 +285,7 @@ class SetBooleanSettingModal extends SuggestModal<string> {
   }
 
   getSuggestions(query: string): string[] {
-    const currentValue = this.settingsManager.getSetting(this.settingsKey as keyof AdvancedCanvasPluginSettingsValues)
+    const currentValue = this.settingsManager.getSetting(this.settingsKey as keyof PluginSettings)
     const suggestions = [currentValue.toString(), (!currentValue).toString()]
 
     return suggestions.filter(suggestion => suggestion.toLowerCase().includes(query.toLowerCase()))
@@ -320,8 +320,8 @@ class SetDropdownSettingModal extends SearchKeyValueSettingModal<string> {
     this.settingsManager = settingsManager
     this.settingsKey = settingsKey
     this.setting = setting
-    this.defaultValueKey = DEFAULT_SETTINGS_VALUES[settingsKey as keyof AdvancedCanvasPluginSettingsValues] as string
-    this.currentValueKey = settingsManager.getSetting(settingsKey as keyof AdvancedCanvasPluginSettingsValues) as string
+    this.defaultValueKey = DEFAULT_SETTINGS_VALUES[settingsKey as keyof PluginSettings] as string
+    this.currentValueKey = settingsManager.getSetting(settingsKey as keyof PluginSettings) as string
   }
 
   getSearchTitle(): string {

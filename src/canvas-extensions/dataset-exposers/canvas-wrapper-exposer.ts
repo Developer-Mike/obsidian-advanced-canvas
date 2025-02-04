@@ -1,9 +1,9 @@
 import { Canvas } from "src/@types/Canvas"
 import { CanvasEvent, PluginEvent } from "src/events"
-import { AdvancedCanvasPluginSettingsValues } from "src/settings"
+import { PluginSettings } from "src/settings"
 import CanvasExtension from "../canvas-extension"
 
-const EXPOSED_SETTINGS: (keyof AdvancedCanvasPluginSettingsValues)[] = [
+const EXPOSED_SETTINGS: (keyof PluginSettings)[] = [
   'disableFontSizeRelativeToZoom',
   'collapsibleGroupsFeatureEnabled',
   'collapsedGroupPreviewOnDrag',
