@@ -54,6 +54,8 @@ export interface AdvancedCanvasPluginSettingsValues {
   cloneNodeMargin: number
   expandNodeStepSize: number
 
+  autoEdgeSideFeatureEnabled: boolean
+
   flipEdgeFeatureEnabled: boolean
 
   betterExportFeatureEnabled: boolean
@@ -131,6 +133,8 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   zoomToClonedNode: true,
   cloneNodeMargin: 20,
   expandNodeStepSize: 20,
+
+  autoEdgeSideFeatureEnabled: false,
 
   flipEdgeFeatureEnabled: true,
 
@@ -359,6 +363,12 @@ export const SETTINGS = {
         parse: (value: string) => Math.max(1, parseInt(value) || 0)
       }
     }
+  },
+  autoEdgeSideFeatureEnabled: {
+    label: 'Auto edge side',
+    description: 'Create edges that are automatically placed on the most suitable side of the node by dragging the edge over the target node without placing it over a specific side connection point.',
+    infoSection: 'auto-edge-side',
+    children: { }
   },
   flipEdgeFeatureEnabled: {
     label: 'Flip edges',

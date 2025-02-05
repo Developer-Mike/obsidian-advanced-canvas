@@ -100,6 +100,8 @@ All features can be enabled/disabled in the settings.
   - Disable node popup menus
   - Lock the canvas' position
   - Lock the canvas' zoom
+- [Auto Edge Side](#auto-edge-side)
+  - Change the side of the edge automatically to the most suitable side
 - [Flip edge](#flip-edge)
   - Flip the direction of an edge with one click
 - [Encapsulate selection](#encapsulate-selection)
@@ -414,6 +416,9 @@ Move the current selection to a new canvas and create a link in the current canv
 - Select the nodes you want to encapsulate
 - Use the context menu (right click) to encapsulate the selection
 - OR use the command palette (`Advanced Canvas: Encapsulate selection`)
+
+## Auto Edge Side
+TODO
 
 ## Flip Edge
 Flip the direction of an edge with one click.

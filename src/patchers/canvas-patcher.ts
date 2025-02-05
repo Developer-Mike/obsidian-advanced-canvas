@@ -363,7 +363,26 @@ export default class CanvasPatcher extends Patcher {
         const result = next.call(this, ...args)
         that.triggerWorkspaceEvent(CanvasEvent.EdgeCenterRequested, this.canvas, edge, result)
         return result
-      })
+      }),
+      onConnectionPointerdown: PatchHelper.OverrideExisting(next => function (event: PointerEvent, t: any): void {
+        event.preventDefault()
+        
+        console.log('Connection started:', event)
+        this.canvas.handleDragWithPan(event, {
+          move: function (event: PointerEvent) {
+            console.log('Connection moved:', event)
+          },
+          end: function (event: PointerEvent) {
+            console.log('Connection ended:', event)
+          },
+          cancel: function () {
+
+          },
+          cleanup: function () {
+            
+          }
+        })
+      }),
     })
     
     this.runAfterInitialized(edge, () => {
