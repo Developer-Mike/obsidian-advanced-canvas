@@ -1,0 +1,25 @@
+diff --git a/node_modules/html-to-image/src/clone-node.ts b/node_modules/html-to-image/src/clone-node.ts
+index 500ce33..1f5cc94 100644
+--- a/node_modules/html-to-image/src/clone-node.ts
++++ b/node_modules/html-to-image/src/clone-node.ts
+@@ -107,6 +107,7 @@ async function cloneChildren<T extends HTMLElement>(
+   return clonedNode
+ }
+ 
++const userInteractionCSSProperties = new Set(["cursor", "pointer-events", "user-select", "tabindex", "outline", "outline-offset", "caret-color", "resize", "overflow", "touch-action", "scroll-behavior", "scroll-snap-type", "scroll-margin", "scroll-padding", "overscroll-behavior", "transition", "animation", "will-change"])
+ function cloneCSSStyle<T extends HTMLElement>(nativeNode: T, clonedNode: T) {
+   const targetStyle = clonedNode.style
+   if (!targetStyle) {
+@@ -120,6 +121,12 @@ function cloneCSSStyle<T extends HTMLElement>(nativeNode: T, clonedNode: T) {
+   } else {
+     toArray<string>(sourceStyle).forEach((name) => {
+       let value = sourceStyle.getPropertyValue(name)
++
++      console.log(name, userInteractionCSSProperties.has(name))
++      if (userInteractionCSSProperties.has(name)) {
++        return
++      }
++
+       if (name === 'font-size' && value.endsWith('px')) {
+         const reducedFont =
+           Math.floor(parseFloat(value.substring(0, value.length - 2))) - 0.1

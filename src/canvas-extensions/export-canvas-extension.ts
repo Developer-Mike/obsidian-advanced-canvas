@@ -6,8 +6,8 @@ import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "./canvas-extension"
 
 const MAX_ALLOWED_LOADING_TIME = 10_000
-const MAX_PIXEL_RATIO = 20
 
+// npx patch-package html-to-image
 export default class ExportCanvasExtension extends CanvasExtension {
   isEnabled() { return 'betterExportFeatureEnabled' as const }
 

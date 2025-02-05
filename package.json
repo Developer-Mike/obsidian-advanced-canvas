@@ -2,7 +2,8 @@
 	"main": "src/main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
-		"build": "node esbuild.config.mjs production"
+		"build": "node esbuild.config.mjs production",
+    "postinstall": "patch-package"
 	},
 	"devDependencies": {
 		"@types/node": "^16.11.6",
@@ -11,6 +12,7 @@
 		"builtin-modules": "3.3.0",
 		"esbuild": "0.19.4",
 		"obsidian": "latest",
+		"patch-package": "^8.0.0",
 		"tslib": "2.4.0",
 		"typescript": "4.7.4"
 	},
