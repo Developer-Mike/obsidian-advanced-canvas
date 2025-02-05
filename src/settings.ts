@@ -81,6 +81,7 @@ export interface AdvancedCanvasPluginSettingsValues {
   useArrowKeysToChangeSlides: boolean
   usePgUpPgDownKeysToChangeSlides: boolean
   zoomToSlideWithoutPadding: boolean
+  useUnclampedZoomWhilePresenting: boolean
   slideTransitionAnimationDuration: number
   slideTransitionAnimationIntensity: number
 
@@ -159,6 +160,7 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   useArrowKeysToChangeSlides: true,
   usePgUpPgDownKeysToChangeSlides: true,
   zoomToSlideWithoutPadding: true,
+  useUnclampedZoomWhilePresenting: false,
   slideTransitionAnimationDuration: 0.5,
   slideTransitionAnimationIntensity: 1.25,
 
@@ -468,6 +470,11 @@ export const SETTINGS = {
       zoomToSlideWithoutPadding: {
         label: 'Zoom to slide without padding',
         description: 'When enabled, the canvas will zoom to the slide without padding.',
+        type: 'boolean'
+      },
+      useUnclampedZoomWhilePresenting: {
+        label: 'Use unclamped zoom while presenting',
+        description: 'When enabled, the zoom will not be clamped while presenting.',
         type: 'boolean'
       },
       slideTransitionAnimationDuration: {
