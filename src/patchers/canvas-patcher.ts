@@ -1,7 +1,7 @@
 import { EditorView, ViewUpdate } from "@codemirror/view"
 import JSONSS from "json-stable-stringify"
 import { around } from "monkey-around"
-import { editorInfoField, requireApiVersion, WorkspaceLeaf } from "obsidian"
+import { editorInfoField, requireApiVersion, Side, WorkspaceLeaf } from "obsidian"
 import { BBox, Canvas, CanvasData, CanvasEdge, CanvasEdgeData, CanvasElement, CanvasNode, CanvasNodeData, CanvasPopupMenu, CanvasView, NodeInteractionLayer, Position, SelectionData } from "src/@types/Canvas"
 import PatchHelper from "src/utils/patch-helper"
 import JSONC from "tiny-jsonc"
@@ -323,7 +323,17 @@ export default class CanvasPatcher extends Patcher {
         const result = next.call(this, ...args)
         that.triggerWorkspaceEvent(CanvasEvent.NodeBBoxRequested, this.canvas, node, result)
         return result
-      })
+      }),
+      onConnectionPointerdown: PatchHelper.OverrideExisting(next => function (e: PointerEvent, side: Side): void {
+        const edge = Array.from(this.canvas.edgeFrom.get(this)).pop()
+
+        that.triggerWorkspaceEvent(CanvasEvent.EdgeConnectionDragging.Before, this.canvas, edge, e)
+        document.addEventListener('pointerup', (e: PointerEvent) => {
+          that.triggerWorkspaceEvent(CanvasEvent.EdgeConnectionDragging.After, this.canvas, edge, e)
+        }, { once: true })
+
+        return next.call(this, e, side)
+      }),
     })
     
     this.runAfterInitialized(node, () => {
@@ -339,10 +349,10 @@ export default class CanvasPatcher extends Patcher {
       setData: PatchHelper.OverrideExisting(next => function (data: CanvasEdgeData, addHistory?: boolean): void {
         const result = next.call(this, data)
 
-        if (edge.initialized && !edge.isDirty) {
-          edge.isDirty = true
-          that.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, this.canvas, edge)
-          delete edge.isDirty
+        if (this.initialized && !this.isDirty) {
+          this.isDirty = true
+          that.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, this.canvas, this)
+          delete this.isDirty
         }
 
         // Save the data to the file
@@ -356,32 +366,21 @@ export default class CanvasPatcher extends Patcher {
       }),
       render: PatchHelper.OverrideExisting(next => function (...args: any): void {
         const result = next.call(this, ...args)
-        that.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, this.canvas, edge)
+        that.triggerWorkspaceEvent(CanvasEvent.EdgeChanged, this.canvas, this)
         return result
       }),
       getCenter: PatchHelper.OverrideExisting(next => function (...args: any): Position {
         const result = next.call(this, ...args)
-        that.triggerWorkspaceEvent(CanvasEvent.EdgeCenterRequested, this.canvas, edge, result)
+        that.triggerWorkspaceEvent(CanvasEvent.EdgeCenterRequested, this.canvas, this, result)
         return result
       }),
-      onConnectionPointerdown: PatchHelper.OverrideExisting(next => function (event: PointerEvent, t: any): void {
-        event.preventDefault()
-        
-        console.log('Connection started:', event)
-        this.canvas.handleDragWithPan(event, {
-          move: function (event: PointerEvent) {
-            console.log('Connection moved:', event)
-          },
-          end: function (event: PointerEvent) {
-            console.log('Connection ended:', event)
-          },
-          cancel: function () {
+      onConnectionPointerdown: PatchHelper.OverrideExisting(next => function (e: PointerEvent): void {
+        that.triggerWorkspaceEvent(CanvasEvent.EdgeConnectionDragging.Before, this.canvas, this, e)
+        document.addEventListener('pointerup', (e: PointerEvent) => {
+          that.triggerWorkspaceEvent(CanvasEvent.EdgeConnectionDragging.After, this.canvas, this, e)
+        }, { once: true })
 
-          },
-          cleanup: function () {
-            
-          }
-        })
+        return next.call(this, e)
       }),
     })
     

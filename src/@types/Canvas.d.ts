@@ -37,6 +37,13 @@ export interface Canvas {
   edges: Map<string, CanvasEdge>
   getEdgesForNode(node: CanvasNode): CanvasEdge[]
 
+  edgeFrom: {
+    data: Map<CanvasNode, Set<CanvasEdge>>
+    add: (node: CanvasNode, edge: CanvasEdge) => void
+    get: (node: CanvasNode) => Set<CanvasEdge>
+  }
+  edgeTo: { data: Map<string, CanvasEdge> }
+
   dirty: Set<CanvasElement>
   markDirty(element: CanvasElement): void
   markMoved(element: CanvasNode): void
@@ -280,6 +287,8 @@ export interface CanvasNode extends CanvasElement {
   setData(data: CanvasNodeData, addHistory?: boolean): void
   getData(): CanvasNodeData
 
+  onConnectionPointerdown(e: PointerEvent, side: Side): void
+
   // Custom
   prevX: number
   prevY: number
@@ -357,15 +366,16 @@ export interface CanvasEdge extends CanvasElement {
 
   lineGroupEl: HTMLElement
   lineEndGroupEl: HTMLElement
-
-  /** Custom field */
-  center?: Position
   getCenter(): Position
   render(): void
   updatePath(): void
+  onConnectionPointerdown(e: PointerEvent): void
   
   setData(data: CanvasEdgeData, addHistory?: boolean): void
   getData(): CanvasEdgeData
+
+  /** Custom field */
+  center?: Position
 }
 
 export interface NodeInteractionLayer {

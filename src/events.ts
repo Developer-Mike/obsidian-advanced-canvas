@@ -29,6 +29,10 @@ export const CanvasEvent = {
   NodeChanged: `${PLUGIN_EVENT_PREFIX}:node-changed`,
   EdgeChanged: `${PLUGIN_EVENT_PREFIX}:edge-changed`,
   NodeTextContentChanged: `${PLUGIN_EVENT_PREFIX}:node-text-content-changed`,
+  EdgeConnectionDragging: {
+    Before: `${PLUGIN_EVENT_PREFIX}:edge-connection-dragging:before`,
+    After: `${PLUGIN_EVENT_PREFIX}:edge-connection-dragging:after`
+  },
   NodeRemoved: `${PLUGIN_EVENT_PREFIX}:node-removed`,
   EdgeRemoved: `${PLUGIN_EVENT_PREFIX}:edge-removed`,
   OnCopy: `${PLUGIN_EVENT_PREFIX}:copy`,
