@@ -53,6 +53,16 @@ export default class CommandsCanvasExtension extends CanvasExtension {
       )
     })
 
+    this.plugin.addCommand({
+      id: 'zoom-to-fit',
+      name: 'Zoom to fit',
+      checkCallback: CanvasHelper.canvasCommand(
+        this.plugin,
+        (_canvas: Canvas) => true,
+        (canvas: Canvas) => canvas.zoomToFit()
+      )
+    })
+
     for (const direction of DIRECTIONS) {
       this.plugin.addCommand({
         id: `clone-node-${direction}`,
