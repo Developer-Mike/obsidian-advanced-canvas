@@ -155,6 +155,8 @@ Advanced Canvas enables .canvas files to be indexed by the metadata cache. This 
   - Select all edges
 - `Advanced Canvas: Zoom to selection`
   - Zoom to the bounding box of the selected nodes
+- `Advanced Canvas: Zoom to fit`
+  - Zoom to fit all nodes
 - `Advanced Canvas: Clone node up/down/left/right`
   - Clone the selected node in the direction of the arrow keys
   - The cloned node will have the same dimensions and color as the original node
