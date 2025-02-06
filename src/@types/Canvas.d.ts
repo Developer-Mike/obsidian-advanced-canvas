@@ -110,6 +110,8 @@ export interface Canvas {
   handlePaste(): void
   requestSave(): void
 
+  onResize(): void
+
   // Custom
   isClearing?: boolean
   isCopying?: boolean

@@ -252,11 +252,15 @@ export default class PresentationCanvasExtension extends CanvasExtension {
   private async animateNodeTransition(canvas: Canvas, fromNode: CanvasNode|undefined, toNode: CanvasNode) {
     const useCustomZoomFunction = this.plugin.settings.getSetting('zoomToSlideWithoutPadding')
     const animationDurationMs = this.plugin.settings.getSetting('slideTransitionAnimationDuration') * 1000
+
+    const toNodeBBox = CanvasHelper.getSmallestAllowedZoomBBox(canvas, toNode.getBBox())
     
     if (animationDurationMs > 0 && fromNode) {
       const animationIntensity = this.plugin.settings.getSetting('slideTransitionAnimationIntensity')
 
-      const currentNodeBBoxEnlarged = BBoxHelper.scaleBBox(fromNode.getBBox(), animationIntensity)
+      const fromNodeBBox = CanvasHelper.getSmallestAllowedZoomBBox(canvas, fromNode.getBBox())
+
+      const currentNodeBBoxEnlarged = BBoxHelper.scaleBBox(fromNodeBBox, animationIntensity)
       if (useCustomZoomFunction) CanvasHelper.zoomToRealBBox(canvas, currentNodeBBoxEnlarged)
       else canvas.zoomToBbox(currentNodeBBoxEnlarged)
 
@@ -264,7 +268,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
 
       if (fromNode.getData().id !== toNode.getData().id) {
         // Add 0.1 to fix obsidian bug that causes the animation to skip if the bbox is the same
-        const nextNodeBBoxEnlarged = BBoxHelper.scaleBBox(toNode.getBBox(), animationIntensity + 0.1)
+        const nextNodeBBoxEnlarged = BBoxHelper.scaleBBox(toNodeBBox, animationIntensity + 0.1)
         if (useCustomZoomFunction) CanvasHelper.zoomToRealBBox(canvas, nextNodeBBoxEnlarged)
         else canvas.zoomToBbox(nextNodeBBoxEnlarged)
 
@@ -272,9 +276,8 @@ export default class PresentationCanvasExtension extends CanvasExtension {
       }
     }
 
-    let nodeBBox = toNode.getBBox()
-    if (useCustomZoomFunction) CanvasHelper.zoomToRealBBox(canvas, nodeBBox)
-    else canvas.zoomToBbox(nodeBBox)
+    if (useCustomZoomFunction) CanvasHelper.zoomToRealBBox(canvas, toNodeBBox)
+    else canvas.zoomToBbox(toNodeBBox)
   }
 
   private async startPresentation(canvas: Canvas, tryContinue: boolean = false) {
@@ -303,6 +306,10 @@ export default class PresentationCanvasExtension extends CanvasExtension {
 
     // Lock canvas
     canvas.setReadonly(true)
+
+    // Disable zoom clamping
+    if (this.plugin.settings.getSetting('useUnclampedZoomWhilePresenting'))
+      canvas.screenshotting = true
 
     // Register event handler for keyboard navigation
     canvas.wrapperEl.onkeydown = (e: any) => {
@@ -361,6 +368,10 @@ export default class PresentationCanvasExtension extends CanvasExtension {
 
     // Unlock canvas
     canvas.setReadonly(false)
+    
+    // Re-enable zoom clamping
+    if (this.plugin.settings.getSetting('useUnclampedZoomWhilePresenting'))
+      canvas.screenshotting = false
 
     // Exit fullscreen mode
     canvas.wrapperEl.classList.remove('presentation-mode')
@@ -420,10 +431,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     if (!fromNode) return
 
     const toNodeId = this.visitedNodeIds.last()
-    if (!toNodeId) return
-
-    let toNode = canvas.nodes.get(toNodeId)
-    if (!toNode) return
+    let toNode = toNodeId ? canvas.nodes.get(toNodeId) : null
 
     // Fall back to same node if there are no more nodes before
     if (!toNode) {

@@ -165,6 +165,8 @@ export default class CanvasHelper {
 
   static readonly MAX_ALLOWED_ZOOM = 1
   static getSmallestAllowedZoomBBox(canvas: Canvas, bbox: BBox): BBox {
+    if (canvas.screenshotting) return bbox // Zoom is not limited when taking screenshots
+
     if (canvas.canvasRect.width === 0 || canvas.canvasRect.height === 0) return bbox
 
     const widthZoom = canvas.canvasRect.width / (bbox.maxX - bbox.minX)
