@@ -18,10 +18,10 @@ export default class AutoEdgeSideCanvasExtension  extends CanvasExtension {
   }
 
   onEdgeStartedDragging(canvas: Canvas, edge: CanvasEdge, event: PointerEvent) {
-
+    
   }
 
   onEdgeStoppedDragging(canvas: Canvas, edge: CanvasEdge, event: PointerEvent) {
-    
+
   }
 }
