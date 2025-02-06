@@ -6,15 +6,22 @@ export default class AutoEdgeSideCanvasExtension  extends CanvasExtension {
   isEnabled() { return 'autoEdgeSideFeatureEnabled' as const }
 
   init() {
-    return;
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.EdgeConnectionDragging.Before,
+      (canvas: Canvas, edge: CanvasEdge, event: PointerEvent) => this.onEdgeStartedDragging(canvas, edge, event)
+    ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.EdgeChanged,
-      (canvas: Canvas, edge: CanvasEdge) => this.onEdgeChanged(canvas, edge)
+      CanvasEvent.EdgeConnectionDragging.After,
+      (canvas: Canvas, edge: CanvasEdge, event: PointerEvent) => this.onEdgeStoppedDragging(canvas, edge, event)
     ))
   }
 
-  private onEdgeChanged(canvas: Canvas, edge: CanvasEdge) {
-    console.log(canvas.isDragging)
+  onEdgeStartedDragging(canvas: Canvas, edge: CanvasEdge, event: PointerEvent) {
+
+  }
+
+  onEdgeStoppedDragging(canvas: Canvas, edge: CanvasEdge, event: PointerEvent) {
+    
   }
 }
