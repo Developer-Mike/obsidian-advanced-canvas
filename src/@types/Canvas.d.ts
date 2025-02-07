@@ -76,6 +76,8 @@ export interface Canvas {
 
   isDragging: boolean
   setDragging(dragging: boolean): void
+
+  pointer: Position
   
   zoomToFit(): void
   zoomToSelection(): void
@@ -312,10 +314,11 @@ export interface CanvasEdgeData {
 
   styleAttributes?: { [key: string]: string | null }
 
+  // Custom
   portalId?: string
-  isUnsaved?: boolean
 
-  [key: string]: any
+  fromFloating: boolean
+  toFloating: boolean
 }
 
 export interface CanvasEdge extends CanvasElement {

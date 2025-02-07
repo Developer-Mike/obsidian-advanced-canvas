@@ -35,7 +35,7 @@ import CollapsibleGroupsCanvasExtension from './canvas-extensions/collapsible-gr
 import FocusModeCanvasExtension from './canvas-extensions/focus-mode-canvas-extension'
 import FlipEdgeCanvasExtension from './canvas-extensions/flip-edge-canvas-extension'
 import ExportCanvasExtension from './canvas-extensions/export-canvas-extension'
-import AutoEdgeSideCanvasExtension from './canvas-extensions/auto-edge-side-canvas-extension'
+import FloatingEdgeCanvasExtension from './canvas-extensions/floating-edge-canvas-extension'
 
 // Advanced Styles
 import NodeStylesExtension from './canvas-extensions/advanced-styles/node-styles'
@@ -69,7 +69,7 @@ const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   VariableBreakpointCanvasExtension,
   BetterDefaultSettingsCanvasExtension,
   CommandsCanvasExtension,
-  AutoEdgeSideCanvasExtension,
+  FloatingEdgeCanvasExtension,
   FlipEdgeCanvasExtension,
   ZOrderingCanvasExtension,
   BetterReadonlyCanvasExtension,

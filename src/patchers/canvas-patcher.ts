@@ -328,14 +328,14 @@ export default class CanvasPatcher extends Patcher {
         let edge: CanvasEdge | undefined
         const addEdgeEventRef = that.plugin.app.workspace.on(CanvasEvent.EdgeAdded, (_canvas: Canvas, edge: CanvasEdge) => {
           edge = edge
-          that.triggerWorkspaceEvent(CanvasEvent.EdgeConnectionDragging.Before, this.canvas, edge, e)
+          that.triggerWorkspaceEvent(CanvasEvent.EdgeConnectionDragging.Before, this.canvas, edge, e, true)
           that.plugin.app.workspace.offref(addEdgeEventRef)
         })
 
         const result = next.call(this, e, side)
 
         document.addEventListener('pointerup', (e: PointerEvent) => {
-          that.triggerWorkspaceEvent(CanvasEvent.EdgeConnectionDragging.After, this.canvas, edge, e)
+          that.triggerWorkspaceEvent(CanvasEvent.EdgeConnectionDragging.After, this.canvas, edge, e, true)
         }, { once: true })
 
         return result
@@ -382,10 +382,10 @@ export default class CanvasPatcher extends Patcher {
       }),
       onConnectionPointerdown: PatchHelper.OverrideExisting(next => function (e: PointerEvent): void {
         const result = next.call(this, e)
-        
-        that.triggerWorkspaceEvent(CanvasEvent.EdgeConnectionDragging.Before, this.canvas, this, e)
+
+        that.triggerWorkspaceEvent(CanvasEvent.EdgeConnectionDragging.Before, this.canvas, this, e, false)
         document.addEventListener('pointerup', (e: PointerEvent) => {
-          that.triggerWorkspaceEvent(CanvasEvent.EdgeConnectionDragging.After, this.canvas, this, e)
+          that.triggerWorkspaceEvent(CanvasEvent.EdgeConnectionDragging.After, this.canvas, this, e, false)
         }, { once: true })
 
         return result

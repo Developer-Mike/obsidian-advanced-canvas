@@ -54,7 +54,8 @@ export interface AdvancedCanvasPluginSettingsValues {
   cloneNodeMargin: number
   expandNodeStepSize: number
 
-  autoEdgeSideFeatureEnabled: boolean
+  floatingEdgeFeatureEnabled: boolean
+  newEdgeFromSideFloating: boolean
 
   flipEdgeFeatureEnabled: boolean
 
@@ -135,7 +136,8 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   cloneNodeMargin: 20,
   expandNodeStepSize: 20,
 
-  autoEdgeSideFeatureEnabled: false,
+  floatingEdgeFeatureEnabled: false,
+  newEdgeFromSideFloating: false,
 
   flipEdgeFeatureEnabled: true,
 
@@ -366,11 +368,17 @@ export const SETTINGS = {
       }
     }
   },
-  autoEdgeSideFeatureEnabled: {
-    label: 'Auto edge side',
+  floatingEdgeFeatureEnabled: {
+    label: 'Floating edges (auto edge side)',
     description: 'Create edges that are automatically placed on the most suitable side of the node by dragging the edge over the target node without placing it over a specific side connection point.',
     infoSection: 'auto-edge-side',
-    children: { }
+    children: {
+      newEdgeFromSideFloating: {
+        label: 'New edge from side floating',
+        description: 'When enabled, the "from" side of the edge will always be floating.',
+        type: 'boolean'
+      }
+    }
   },
   flipEdgeFeatureEnabled: {
     label: 'Flip edges',
