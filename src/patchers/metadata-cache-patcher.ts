@@ -166,6 +166,12 @@ export default class MetadataCachePatcher extends Patcher {
         this.trigger('resolved') // TODO: Use workQueue like in the original function
       }),
       registerInternalLinkAC: _next => function (canvasName: string, from: string, to: string) {
+        // If the "from" node is the same as the "to" node, don't register the link
+        if (from === to) return
+
+        // If the "from" node is not a "md" or "canvas" file, don't register the link
+        if (!['md', 'canvas'].includes(PathHelper.extension(from) ?? '')) return
+
         // Update metadata cache for "from" node
         const fromFileHash = this.fileCache[from]?.hash ?? HashHelper.hash(from) // Some files might not be resolved yet
         const fromFileMetadataCache = (this.metadataCache[fromFileHash] ?? { v: 1 }) as ExtendedCachedMetadata
