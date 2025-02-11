@@ -317,7 +317,7 @@ Change z-ordering of nodes using the context menu.
 ## Custom Colors
 Add custom colors to the color picker. You can add them using the following css snippet:
 ```css
-:root {
+body {
     /* Where X is the index of the color in the palette */
     /* The colors 1-6 are already used by Obsidian */
     --canvas-color-X: 0, 255, 0; /* RGB */
