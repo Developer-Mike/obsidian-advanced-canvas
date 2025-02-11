@@ -15,6 +15,7 @@ const EDGE_PATHFINDING_METHODS: { [key: string]: new() => EdgePathfindingMethod 
   'a-star': EdgePathfindingAStar
 }
 
+const MAX_LIVE_UPDATE_SELECTION_SIZE = 5
 export default class EdgeStylesExtension extends CanvasExtension {
   allEdgeStyleAttributes: StyleAttribute[]
 
@@ -124,7 +125,7 @@ export default class EdgeStylesExtension extends CanvasExtension {
     // Skip if edge isn't dirty or selected
     if (!canvas.dirty.has(edge) && !canvas.selection.has(edge)) return
 
-    if (!this.shouldUpdateEdge(canvas)) return
+    if (!this.shouldUpdateEdge(canvas) && canvas.selection.size > MAX_LIVE_UPDATE_SELECTION_SIZE) return
 
     const edgeData = edge.getData()
     
