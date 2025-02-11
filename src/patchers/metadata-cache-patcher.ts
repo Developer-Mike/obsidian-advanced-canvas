@@ -29,7 +29,7 @@ export default class MetadataCachePatcher extends Patcher {
           return next.call(this, file, ...args)
 
         // Update the cache
-        const fileHash = HashHelper.hash(file.path)
+        const fileHash = await HashHelper.getFileHash(that.plugin, file)
         this.saveFileCache(file.path, {
           hash: fileHash, // Hash wouldn't get set in the original function
           mtime: file.stat.mtime,
@@ -165,15 +165,19 @@ export default class MetadataCachePatcher extends Patcher {
         this.trigger('resolve', file)
         this.trigger('resolved') // TODO: Use workQueue like in the original function
       }),
-      registerInternalLinkAC: _next => function (canvasName: string, from: string, to: string) {
+      registerInternalLinkAC: _next => async function (canvasName: string, from: string, to: string) {
         // If the "from" node is the same as the "to" node, don't register the link
         if (from === to) return
 
+        // Get the file object for the "from" node
+        const fromFile = this.vault.getAbstractFileByPath(from)
+        if (!fromFile || !(fromFile instanceof TFile)) return
+
         // If the "from" node is not a "md" or "canvas" file, don't register the link
-        if (!['md', 'canvas'].includes(PathHelper.extension(from) ?? '')) return
+        if (!['md', 'canvas'].includes(fromFile.extension)) return
 
         // Update metadata cache for "from" node
-        const fromFileHash = this.fileCache[from]?.hash ?? HashHelper.hash(from) // Some files might not be resolved yet
+        const fromFileHash = this.fileCache[from]?.hash ?? await HashHelper.getFileHash(that.plugin, fromFile) // Some files might not be resolved yet
         const fromFileMetadataCache = (this.metadataCache[fromFileHash] ?? { v: 1 }) as ExtendedCachedMetadata
         this.metadataCache[fromFileHash] = {
           ...fromFileMetadataCache,
