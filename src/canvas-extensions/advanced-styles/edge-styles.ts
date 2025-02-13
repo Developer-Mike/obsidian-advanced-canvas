@@ -125,7 +125,13 @@ export default class EdgeStylesExtension extends CanvasExtension {
     // Skip if edge isn't dirty or selected
     if (!canvas.dirty.has(edge) && !canvas.selection.has(edge)) return
 
-    if (!this.shouldUpdateEdge(canvas) && canvas.selection.size > MAX_LIVE_UPDATE_SELECTION_SIZE) return
+    if (!this.shouldUpdateEdge(canvas)) {
+      const tooManySelected = canvas.selection.size > MAX_LIVE_UPDATE_SELECTION_SIZE
+      if (tooManySelected) return
+
+      const groupNodesSelected = [...canvas.selection].some((item: any) => item.getData()?.type === 'group')
+      if (groupNodesSelected) return
+    }
 
     const edgeData = edge.getData()
     
