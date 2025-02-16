@@ -13,6 +13,19 @@ export interface StyleAttribute {
   options: StyleAttributeOption[]
 }
 
+export function styleAttributeValidator(json: Record<string, any>): boolean {
+  return (
+    json.datasetKey !== undefined &&
+    json.label !== undefined &&
+    Array.isArray(json.options) &&
+    json.options.every(option => 
+      option.icon !== undefined &&
+      option.label !== undefined &&
+      option.value !== undefined
+    )
+  )
+}
+
 export const BUILTIN_NODE_STYLE_ATTRIBUTES = [
   {
     datasetKey: 'textAlign',

@@ -1,5 +1,5 @@
 import { BBox, Canvas, CanvasEdge, CanvasNode, Position, Side } from "src/@types/Canvas"
-import { CanvasEvent, PluginEvent } from "src/events"
+import { CanvasEvent } from "src/events"
 import BBoxHelper from "src/utils/bbox-helper"
 import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "../canvas-extension"
@@ -7,7 +7,8 @@ import EdgePathfindingMethod from "./edge-pathfinding-methods/edge-pathfinding-m
 import EdgePathfindingAStar from "./edge-pathfinding-methods/pathfinding-a-star"
 import EdgePathfindingDirect from "./edge-pathfinding-methods/pathfinding-direct"
 import EdgePathfindingSquare from "./edge-pathfinding-methods/pathfinding-square"
-import { BUILTIN_EDGE_STYLE_ATTRIBUTES, StyleAttribute } from "./style-config"
+import { BUILTIN_EDGE_STYLE_ATTRIBUTES, StyleAttribute, styleAttributeValidator } from "./style-config"
+import CssStylesConfigManager from "src/managers/css-styles-config-manager"
 
 const EDGE_PATHFINDING_METHODS: { [key: string]: new() => EdgePathfindingMethod } = {
   'direct': EdgePathfindingDirect,
@@ -17,16 +18,12 @@ const EDGE_PATHFINDING_METHODS: { [key: string]: new() => EdgePathfindingMethod 
 
 const MAX_LIVE_UPDATE_SELECTION_SIZE = 5
 export default class EdgeStylesExtension extends CanvasExtension {
-  allEdgeStyleAttributes: StyleAttribute[]
+  cssStylesManager: CssStylesConfigManager<StyleAttribute>
 
   isEnabled() { return 'edgesStylingFeatureEnabled' as const }
 
   init() {
-    this.allEdgeStyleAttributes = [...BUILTIN_EDGE_STYLE_ATTRIBUTES, ...this.plugin.settings.getSetting('customEdgeStyleAttributes')]
-    this.plugin.registerEvent(this.plugin.app.workspace.on(
-      PluginEvent.SettingsChanged,
-      () => this.allEdgeStyleAttributes = [...BUILTIN_EDGE_STYLE_ATTRIBUTES, ...this.plugin.settings.getSetting('customEdgeStyleAttributes')]
-    ))
+    this.cssStylesManager = new CssStylesConfigManager(this.plugin, 'advanced-canvas-edge-style', styleAttributeValidator)
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.PopupMenuCreated,
@@ -87,7 +84,7 @@ export default class EdgeStylesExtension extends CanvasExtension {
       return
 
     CanvasHelper.addStyleAttributesToPopup(
-      this.plugin, canvas, this.allEdgeStyleAttributes,
+      this.plugin, canvas,  [...BUILTIN_EDGE_STYLE_ATTRIBUTES, ...this.cssStylesManager.getStyles()],
       selectedEdges[0].getData().styleAttributes ?? {},
       (attribute, value) => this.setStyleAttributeForSelection(canvas, attribute, value)
     )
