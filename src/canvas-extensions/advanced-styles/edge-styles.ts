@@ -100,7 +100,7 @@ export default class EdgeStylesExtension extends CanvasExtension {
         ...edgeData,
         styleAttributes: {
           ...edgeData.styleAttributes,
-          [attribute.datasetKey]: value
+          [attribute.key]: value
         }
       })
     }

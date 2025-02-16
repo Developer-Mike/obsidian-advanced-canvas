@@ -7,7 +7,7 @@ export interface StyleAttributeOption {
 }
 
 export interface StyleAttribute {
-  datasetKey: string
+  key: string
   label: string
   nodeTypes?: CanvasNodeType[]
   options: StyleAttributeOption[]
@@ -15,7 +15,7 @@ export interface StyleAttribute {
 
 export function styleAttributeValidator(json: Record<string, any>): boolean {
   return (
-    json.datasetKey !== undefined &&
+    json.key !== undefined &&
     json.label !== undefined &&
     Array.isArray(json.options) &&
     json.options.every(option => 
@@ -28,7 +28,7 @@ export function styleAttributeValidator(json: Record<string, any>): boolean {
 
 export const BUILTIN_NODE_STYLE_ATTRIBUTES = [
   {
-    datasetKey: 'textAlign',
+    key: 'textAlign',
     label: 'Text Alignment',
     nodeTypes: ['text'],
     options: [
@@ -50,7 +50,7 @@ export const BUILTIN_NODE_STYLE_ATTRIBUTES = [
     ]
   },
   {
-    datasetKey: 'shape',
+    key: 'shape',
     label: 'Shape',
     nodeTypes: ['text'],
     options: [
@@ -97,7 +97,7 @@ export const BUILTIN_NODE_STYLE_ATTRIBUTES = [
     ]
   },
   {
-    datasetKey: 'border',
+    key: 'border',
     label: 'Border',
     options: [
       {
@@ -126,7 +126,7 @@ export const BUILTIN_NODE_STYLE_ATTRIBUTES = [
 
 export const BUILTIN_EDGE_STYLE_ATTRIBUTES = [
   {
-    datasetKey: 'path',
+    key: 'path',
     label: 'Path Style',
     options: [
       {
@@ -152,7 +152,7 @@ export const BUILTIN_EDGE_STYLE_ATTRIBUTES = [
     ]
   },
   {
-    datasetKey: 'arrow',
+    key: 'arrow',
     label: 'Arrow Style',
     options: [
       {
@@ -198,7 +198,7 @@ export const BUILTIN_EDGE_STYLE_ATTRIBUTES = [
     ]
   },
   {
-    datasetKey: 'pathfindingMethod',
+    key: 'pathfindingMethod',
     label: 'Pathfinding Method',
     options: [
       {

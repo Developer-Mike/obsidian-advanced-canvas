@@ -190,11 +190,11 @@ export default class CanvasHelper {
   static addStyleAttributesButtons(canvas: Canvas, stylableAttributes: StyleAttribute[], currentStyleAttributes: { [key: string]: string | null }, setStyleAttribute: (attribute: StyleAttribute, value: string | null) => void) {
     for (const stylableAttribute of stylableAttributes) {
       const selectedStyle = stylableAttribute.options
-        .find(option => currentStyleAttributes[stylableAttribute.datasetKey] === option.value) ??
+        .find(option => currentStyleAttributes[stylableAttribute.key] === option.value) ??
         stylableAttribute.options.find(value => value.value === null)!!
 
       const menuOption = CanvasHelper.createExpandablePopupMenuOption({
-        id: `menu-option-${stylableAttribute.datasetKey}`,
+        id: `menu-option-${stylableAttribute.key}`,
         label: stylableAttribute.label,
         icon: selectedStyle.icon
       }, stylableAttribute.options.map((styleOption) => ({
@@ -205,7 +205,7 @@ export default class CanvasHelper {
           setStyleAttribute(stylableAttribute, styleOption.value)
 
           // Keep correct reference
-          currentStyleAttributes[stylableAttribute.datasetKey] = styleOption.value
+          currentStyleAttributes[stylableAttribute.key] = styleOption.value
 
           // Update icon
           setIcon(menuOption, styleOption.icon)
@@ -283,7 +283,7 @@ export default class CanvasHelper {
         iconElement.classList.add('menu-item-icon')
 
         let selectedStyle = stylableAttribute.options
-          .find(option => currentStyleAttributes[stylableAttribute.datasetKey] === option.value) ??
+          .find(option => currentStyleAttributes[stylableAttribute.key] === option.value) ??
           stylableAttribute.options.find(value => value.value === null)!!
         setIcon(iconElement, selectedStyle.icon)
 
@@ -348,7 +348,7 @@ export default class CanvasHelper {
                 setStyleAttribute(stylableAttribute, styleOption.value)
   
                 // Keep correct reference
-                currentStyleAttributes[stylableAttribute.datasetKey] = styleOption.value
+                currentStyleAttributes[stylableAttribute.key] = styleOption.value
                 selectedStyle = styleOption
   
                 // Update icon

@@ -48,7 +48,7 @@ export default class NodeStylesExtension extends CanvasExtension {
         ...nodeData,
         styleAttributes: {
           ...nodeData.styleAttributes,
-          [attribute.datasetKey]: value
+          [attribute.key]: value
         }
       })
     }

@@ -719,12 +719,12 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
         .setName(styleAttribute.label)
         .addDropdown(dropdown => dropdown
           .addOptions(Object.fromEntries(styleAttribute.options.map(option => [option.value, option.value === null ? `${option.label} (default)` : option.label])))
-          .setValue((this.settingsManager.getSetting(settingId) as { [key: string]: string })[styleAttribute.datasetKey] ?? 'null')
+          .setValue((this.settingsManager.getSetting(settingId) as { [key: string]: string })[styleAttribute.key] ?? 'null')
           .onChange(async (value) => {
             const newValue = this.settingsManager.getSetting(settingId) as { [key: string]: string }
 
-            if (value === 'null') delete newValue[styleAttribute.datasetKey]
-            else newValue[styleAttribute.datasetKey] = value
+            if (value === 'null') delete newValue[styleAttribute.key]
+            else newValue[styleAttribute.key] = value
 
             await this.settingsManager.setSetting({
               [settingId]: newValue
