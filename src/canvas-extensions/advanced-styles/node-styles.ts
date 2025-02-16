@@ -25,7 +25,7 @@ export default class NodeStylesExtension extends CanvasExtension {
       return
 
     const selectedNodeTypes = new Set(selectionNodeData.map(node => node.type))
-    const availableNodeStyles = [...BUILTIN_NODE_STYLE_ATTRIBUTES, ...this.cssStylesManager.getStyles()]
+    const availableNodeStyles = [...BUILTIN_NODE_STYLE_ATTRIBUTES, /* Legacy */ ...this.plugin.settings.getSetting('customNodeStyleAttributes'), ...this.cssStylesManager.getStyles()]
       .filter(style => !style.nodeTypes || style.nodeTypes.some(type => selectedNodeTypes.has(type)))
 
     CanvasHelper.addStyleAttributesToPopup(
