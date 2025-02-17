@@ -260,7 +260,7 @@ Custom style attributes for nodes and edges can easily be added.
    - To do this, navigate to `Settings > Appearance > *scroll down* > CSS snippets` and click on the folder icon to open the snippets folder
    - Create a new CSS file (e.g. `my-fancy-node-style.css`)
 2. Add the custom style attribute
-   - Open the CSS file and add the following code and replace the values how you like. The format needs to be **YAML** and needs to contain the same keys as in this example. The amount of options can be adjusted as needed (minimum of one option is required)
+   - Open the CSS file and add the following code and replace the values how you like. The format needs to be **YAML** and needs to contain the same keys as in this example. The amount of options can be adjusted as needed (minimum of one option is required). The `icon` key should contain the id of the icon you want to use. You can find the icons on [lucide.dev](https://lucide.dev/icons/)
    - Change the `@advanced-canvas-node-style` to `@advanced-canvas-edge-style` if you want to add a custom style attribute for edges
     ```css
     /* @advanced-canvas-node-style
