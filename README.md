@@ -295,7 +295,7 @@ Custom style attributes for nodes and edges can easily be added.
 3. Add the CSS styling
    - In the same (or another) CSS file, add the styling for the custom style attribute
     ```css
-    .canvas-node[data-<YOUR-CUSTOM-STYLE-KEY>] {
+    .canvas-node[data-<YOUR-CUSTOM-STYLE-KEY>="<VALUE>"] {
       /* Your custom styling */
     }
     ```
