@@ -7,8 +7,8 @@ export default class CssStylesConfigManager<T> {
 
   constructor(
     private plugin: AdvancedCanvasPlugin,
-    private trigger: string,
-    private validate: (json: Record<string, any>) => boolean
+    trigger: string,
+    private validate: (json: Record<string, any>) => T | null
   ) {
     // Regex to match CSS multi-line comments with the @trigger word at the beginning (same line such as /* @trigger \n ... */)
     this.configRegex = new RegExp(`\\/\\*\\s*@${trigger}\\s*\\n([\\s\\S]*?)\\*\\/`, 'g')
@@ -32,12 +32,10 @@ export default class CssStylesConfigManager<T> {
       
       const styleSheetConfigs = this.parseStyleConfigsFromCSS(sheet)
       for (const config of styleSheetConfigs) {
-        if (!this.validate(config)) {
-          console.error("Invalid CSS style config:", config)
-          continue
-        }
+        const validConfig = this.validate(config)
+        if (!validConfig) continue
 
-        this.cachedConfig.push(config as T)
+        this.cachedConfig.push(validConfig)
       }
     }
 
