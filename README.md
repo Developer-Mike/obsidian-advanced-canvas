@@ -258,9 +258,9 @@ Custom style attributes for nodes and edges can easily be added.
 
 1. Create a new CSS snippet in your vault
    - To do this, navigate to `Settings > Appearance > *scroll down* > CSS snippets` and click on the folder icon to open the snippets folder
-   - Create a new CSS file (e.g. `your-fancy-node-style.css`)
+   - Create a new CSS file (e.g. `my-fancy-node-style.css`)
 2. Add the custom style attribute
-   - Open the CSS file and add the following code and replace the placeholders with your values. The format needs to be **YAML** and the amount of options is unlimited and must be at least one.
+   - Open the CSS file and add the following code and replace the values how you like. The format needs to be **YAML** and needs to contain the same keys as in this example. The amount of options can be adjusted as needed (minimum of one option is required)
    - Change the `@advanced-canvas-node-style` to `@advanced-canvas-edge-style` if you want to add a custom style attribute for edges
     ```css
     /* @advanced-canvas-node-style
@@ -292,7 +292,7 @@ Custom style attributes for nodes and edges can easily be added.
 > [!IMPORTANT]
 > There needs to be **one** option with the value null
 
-1. Add the CSS styling
+3. Add the CSS styling
    - In the same (or another) CSS file, add the styling for the custom style attribute
     ```css
     .canvas-node[data-<YOUR-CUSTOM-STYLE-KEY>] {
@@ -323,58 +323,10 @@ Custom style attributes for nodes and edges can easily be added.
       content: "❌";
     }
     ```
-2. **Enable** the CSS snippet in the settings and enjoy your new custom style attribute!
+4. **Enable** the CSS snippet in the settings and enjoy your new custom style attribute!
     <br><img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/custom-style-attribute-example.png" alt="Custom Style Attribute Example"/>
 
-<details>
-    <summary>Final CSS Snippet</summary>
-    <pre>
-/* @advanced-canvas-node-style
-key: validation-state
-label: Validation State
-options: 
-  - 
-    label: Stateless
-    value: null
-    icon: circle-help
-
-  - 
-    label: Approved
-    value: approved
-    icon: circle-check
-
-  - 
-    label: Pending
-    value: pending
-    icon: circle-dot
-
-  - 
-    label: Rejected
-    value: rejected
-    icon: circle-x
-*/
-.canvas-node[data-validation-state] .canvas-node-content::after {
-  content: "";
-
-  position: absolute;
-  top: 10px;
-  right: 10px;
-
-  font-size: 1em;
-}
-
-.canvas-node[data-validation-state="approved"] .canvas-node-content::after {
-  content: "✔️";
-}
-
-.canvas-node[data-validation-state="pending"] .canvas-node-content::after {
-  content: "⏳";
-}
-
-.canvas-node[data-validation-state="rejected"] .canvas-node-content::after {
-  content: "❌";
-}
-    </pre>
+**Take a look at the whole file [here](https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/example-custom-node-style.css)**
 
 ## Variable Breakpoints
 Add breakpoints to nodes to change at which zoom factor the node's content gets unrendered.
