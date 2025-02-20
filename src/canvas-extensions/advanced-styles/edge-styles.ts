@@ -186,6 +186,8 @@ export default class EdgeStylesExtension extends CanvasExtension {
       return `0,0 5,10 0,20 -5,10`
     else if (arrowStyle === 'circle' || arrowStyle === 'circle-outline')
       return `0 0, 4.95 1.8, 7.5 6.45, 6.6 11.7, 2.7 15, -2.7 15, -6.6 11.7, -7.5 6.45, -4.95 1.8`
+    else if (arrowStyle === 'blunt')
+      return `-10,8 10,8 10,6 -10,6`
     else // Default triangle
       return `0,0 6.5,10.4 -6.5,10.4`
   }

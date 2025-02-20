@@ -214,6 +214,11 @@ export const BUILTIN_EDGE_STYLE_ATTRIBUTES = [
         icon: 'arrow-circle-outline',
         label: 'Circle Outline',
         value: 'circle-outline'
+      },
+      {
+        icon: 'tally-1',
+        label: 'Blunt',
+        value: 'blunt'
       }
     ]
   },
