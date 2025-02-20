@@ -106,6 +106,7 @@ export interface Canvas {
   removeEdge(edge: CanvasEdge): void
 
   getContainingNodes(bbox: BBox): CanvasNode[]
+  getViewportNodes(): CanvasNode[]
 
   history: CanvasHistory
   pushHistory(data: CanvasData): void

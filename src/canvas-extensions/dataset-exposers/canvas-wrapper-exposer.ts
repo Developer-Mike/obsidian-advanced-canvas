@@ -7,6 +7,7 @@ const EXPOSED_SETTINGS: (keyof AdvancedCanvasPluginSettingsValues)[] = [
   'disableFontSizeRelativeToZoom',
   'collapsibleGroupsFeatureEnabled',
   'collapsedGroupPreviewOnDrag',
+  'floatingEdgeFeatureEnabled',
 ]
 
 export default class CanvasWrapperExposerExtension extends CanvasExtension {

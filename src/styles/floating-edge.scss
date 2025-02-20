@@ -1,0 +1,29 @@
+.canvas-wrapper[data-floating-edge-feature-enabled="true"] .canvas.is-connecting {
+  .canvas-node:not(.canvas-node-group) {
+    &::after {
+      all: unset;
+      content: "";
+
+      $margin: 50px;
+      $size: max(10px, calc(100% - $margin * var(--zoom-multiplier) * 2));
+
+      z-index: 100;
+
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: $size;
+      height: $size;
+      transform: translate(-50%, -50%);
+
+      border-radius: var(--radius-m);
+      outline: calc(4px * var(--zoom-multiplier)) dashed hsla(var(--color-accent-hsl), 0.5);
+    }
+
+    &.hovering-floating-edge-zone::after {
+      outline-color: var(--color-accent);
+      outline-style: solid;
+      background-color: hsla(var(--color-accent-hsl), 0.1);
+    }
+  }
+}
