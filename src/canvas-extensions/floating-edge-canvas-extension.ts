@@ -46,14 +46,16 @@ export default class FloatingEdgeCanvasExtension  extends CanvasExtension {
 
     const dropZoneNode = side === 'from' ? edge.from.node : edge.to.node
     const floatingEdgeDropZone = this.getFloatingEdgeDropZoneForNode(dropZoneNode)
-    if (!BBoxHelper.insideBBox({ x: event.clientX, y: event.clientY }, floatingEdgeDropZone, true))
-      return // Edge was not dropped on a floating edge drop zone
+    const wasDroppedInFloatingEdgeDropZone = BBoxHelper.insideBBox({ x: event.clientX, y: event.clientY }, floatingEdgeDropZone, true)
 
-    const newEdgeData = edge.getData()
-    if (side === 'from') newEdgeData.fromFloating = true
-    else newEdgeData.toFloating = true
+    const edgeData = edge.getData()
+    if (side === 'from' && wasDroppedInFloatingEdgeDropZone == edgeData.fromFloating) return
+    if (side === 'to' && wasDroppedInFloatingEdgeDropZone == edgeData.toFloating) return
 
-    edge.setData(newEdgeData)
+    if (side === 'from') edgeData.fromFloating = wasDroppedInFloatingEdgeDropZone
+    else edgeData.toFloating = wasDroppedInFloatingEdgeDropZone
+
+    edge.setData(edgeData)
   }
 
   private getFloatingEdgeDropZoneForNode(node: CanvasNode): BBox {
@@ -63,6 +65,8 @@ export default class FloatingEdgeCanvasExtension  extends CanvasExtension {
       width: parseFloat(nodeFloatingEdgeDropZoneElStyle.getPropertyValue('width')),
       height: parseFloat(nodeFloatingEdgeDropZoneElStyle.getPropertyValue('height'))
     }
+
+    console.log(nodeFloatingEdgeDropZoneElStyle.getPropertyValue('width')) // TODO: sometimes auto
 
     return {
       minX: nodeElClientBoundingRect.left + (nodeElClientBoundingRect.width - nodeFloatingEdgeDropZoneSize.width) / 2,
