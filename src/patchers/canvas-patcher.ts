@@ -7,6 +7,7 @@ import PatchHelper from "src/utils/patch-helper"
 import JSONC from "tiny-jsonc"
 import { CanvasEvent } from "../events"
 import Patcher from "./patcher"
+import BBoxHelper from "src/utils/bbox-helper"
 
 export default class CanvasPatcher extends Patcher {
   protected async patch() {
@@ -326,12 +327,12 @@ export default class CanvasPatcher extends Patcher {
       }),
       onConnectionPointerdown: PatchHelper.OverrideExisting(next => function (e: PointerEvent, side: Side): void {
         const addEdgeEventRef = that.plugin.app.workspace.on(CanvasEvent.EdgeAdded, (_canvas: Canvas, edge: CanvasEdge) => {
-          that.triggerWorkspaceEvent(CanvasEvent.EdgeConnectionDragging.Before, this.canvas, edge, e, true)
+          that.triggerWorkspaceEvent(CanvasEvent.EdgeConnectionDragging.Before, this.canvas, edge, e, true, "to")
           that.plugin.app.workspace.offref(addEdgeEventRef)
 
           // Listen for pointer up event
           document.addEventListener('pointerup', (e: PointerEvent) => {
-            that.triggerWorkspaceEvent(CanvasEvent.EdgeConnectionDragging.After, this.canvas, edge, e, true)
+            that.triggerWorkspaceEvent(CanvasEvent.EdgeConnectionDragging.After, this.canvas, edge, e, true, "to")
           }, { once: true })
         })
 
@@ -381,9 +382,18 @@ export default class CanvasPatcher extends Patcher {
       onConnectionPointerdown: PatchHelper.OverrideExisting(next => function (e: PointerEvent): void {
         const result = next.call(this, e)
 
-        that.triggerWorkspaceEvent(CanvasEvent.EdgeConnectionDragging.Before, this.canvas, this, e, false)
+        // a = i.posFromEvt(e)
+        // s = M$(r.node.getBBox(), r.side)
+        // l = M$(o.node.getBBox(), o.side)
+        // c = Hl(a, s) > Hl(a, l) ? "to" : "from"
+        const eventPos = this.canvas.posFromEvt(e)
+        const fromPos = BBoxHelper.getCenterOfBBoxSide(this.from.node.getBBox(), this.from.side)
+        const toPos = BBoxHelper.getCenterOfBBoxSide(this.to.node.getBBox(), this.to.side)
+        const draggingSide = Math.hypot(eventPos.x - fromPos.x, eventPos.y - fromPos.y) > Math.hypot(eventPos.x - toPos.x, eventPos.y - toPos.y) ? "to" : "from"
+
+        that.triggerWorkspaceEvent(CanvasEvent.EdgeConnectionDragging.Before, this.canvas, this, e, false, draggingSide)
         document.addEventListener('pointerup', (e: PointerEvent) => {
-          that.triggerWorkspaceEvent(CanvasEvent.EdgeConnectionDragging.After, this.canvas, this, e, false)
+          that.triggerWorkspaceEvent(CanvasEvent.EdgeConnectionDragging.After, this.canvas, this, e, false, draggingSide)
         }, { once: true })
 
         return result

@@ -11,19 +11,19 @@ export default class FloatingEdgeCanvasExtension  extends CanvasExtension {
   init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.EdgeConnectionDragging.Before,
-      (canvas: Canvas, edge: CanvasEdge, event: PointerEvent, newEdge: boolean) => this.onEdgeStartedDragging(canvas, edge, event, newEdge)
+      (canvas: Canvas, edge: CanvasEdge, event: PointerEvent, newEdge: boolean, side: 'from' | 'to') => this.onEdgeStartedDragging(canvas, edge, event, newEdge, side)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.EdgeConnectionDragging.After,
-      (canvas: Canvas, edge: CanvasEdge, event: PointerEvent, newEdge: boolean) => this.onEdgeStoppedDragging(canvas, edge, event, newEdge)
+      (canvas: Canvas, edge: CanvasEdge, event: PointerEvent, newEdge: boolean, side: 'from' | 'to') => this.onEdgeStoppedDragging(canvas, edge, event, newEdge, side)
     ))
   }
 
-  onEdgeStartedDragging(canvas: Canvas, edge: CanvasEdge, _event: PointerEvent, newEdge: boolean) {
+  onEdgeStartedDragging(canvas: Canvas, edge: CanvasEdge, _event: PointerEvent, newEdge: boolean, _side: 'from' | 'to') {
     if (newEdge && this.plugin.settings.getSetting("newEdgeFromSideFloating")) edge.setData({
       ...edge.getData(),
-      fromFloating: true
+      fromFloating: true // New edges can only get dragged from the "from" side
     })
 
     let cachedViewportNodes: [CanvasNode, BBox][] | null = null
@@ -41,17 +41,19 @@ export default class FloatingEdgeCanvasExtension  extends CanvasExtension {
     document.addEventListener('pointermove', this.onPointerMove) // Listen for pointer move events
   }
 
-  onEdgeStoppedDragging(_canvas: Canvas, edge: CanvasEdge, event: PointerEvent, _newEdge: boolean) {
+  onEdgeStoppedDragging(_canvas: Canvas, edge: CanvasEdge, event: PointerEvent, _newEdge: boolean, side: 'from' | 'to') {
     document.removeEventListener('pointermove', this.onPointerMove) // Stop listening for pointer move events
 
-    const floatingEdgeDropZone = this.getFloatingEdgeDropZoneForNode(edge.to.node)
+    const dropZoneNode = side === 'from' ? edge.from.node : edge.to.node
+    const floatingEdgeDropZone = this.getFloatingEdgeDropZoneForNode(dropZoneNode)
     if (!BBoxHelper.insideBBox({ x: event.clientX, y: event.clientY }, floatingEdgeDropZone, true))
       return // Edge was not dropped on a floating edge drop zone
 
-    edge.setData({
-      ...edge.getData(),
-      toFloating: true
-    })
+    const newEdgeData = edge.getData()
+    if (side === 'from') newEdgeData.fromFloating = true
+    else newEdgeData.toFloating = true
+
+    edge.setData(newEdgeData)
   }
 
   private getFloatingEdgeDropZoneForNode(node: CanvasNode): BBox {
