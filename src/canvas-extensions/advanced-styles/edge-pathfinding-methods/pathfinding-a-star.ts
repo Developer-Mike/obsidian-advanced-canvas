@@ -40,11 +40,15 @@ export default class EdgePathfindingAStar extends EdgePathfindingMethod {
     const nodeBBoxes = [...canvas.nodes.values()]
       .filter(node => {
         const nodeData = node.getData()
-        
-        const isGroup = nodeData.type === 'group' // Exclude group nodes
-        const isOpenPortal = nodeData.portalToFile !== undefined // Exclude open portals
-        
-        return !isGroup && !isOpenPortal
+
+        if (nodeData.portalToFile !== undefined) return false // Exclude open portals
+
+        // Exclude (group) nodes that contain either the start or end position
+        const nodeBBox = node.getBBox()
+        const nodeContainsFromPos = BBoxHelper.insideBBox(fromPos, nodeBBox, true)
+        const nodeContainsToPos = BBoxHelper.insideBBox(toPos, nodeBBox, true)
+
+        return !nodeContainsFromPos && !nodeContainsToPos
       }).map(node => node.getBBox())
     
     const fromPosWithMargin = BBoxHelper.moveInDirection(fromPos, fromSide, 10)

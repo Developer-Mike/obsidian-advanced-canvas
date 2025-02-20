@@ -258,43 +258,77 @@ Set the pathfinding method of the edges (arrows) to default, straight, squared o
 ## Custom Styles
 Custom style attributes for nodes and edges can easily be added.
 
-1. Add a popup menu option
-   - Open the `<VAULT-PATH>/.obsidian/plugins/advanced-canvas/data.json` file
-   - If you want to add an option to node popup menu, search for `customNodeStyleAttributes` property, otherwise search for `customEdgeStyleAttributes` property. (Create it if it doesn't exist yet)
-   - Add the custom popup menu option (Remove the comments!)
-   ```json
-    "customNodeStyleAttributes": [
-        {
-            "datasetKey": "exampleStyleAttribute", // Must be unique and written in camelCase
-            "label": "Example Style Attribute",
-            "options": [
-                {
-                    "icon": "cloud-sun", // Choose an icon from lucide.dev
-                    "label": "Sunny Appearance",
-                    "value": null // Null means default
-                },
-                {
-                    "icon": "cloud-rain-wind", // Choose an icon from lucide.dev
-                    "label": "Rainy Appearance",
-                    "value": "rainy" // The value that gets set
-                }
-            ]   
-        }
-        // You can add more categories here
-    ]
-   ```
+1. Create a new CSS snippet in your vault
+   - To do this, navigate to `Settings > Appearance > *scroll down* > CSS snippets` and click on the folder icon to open the snippets folder
+   - Create a new CSS file (e.g. `my-fancy-node-style.css`)
+2. Add the custom style attribute
+   - Open the CSS file and add the following code and replace the values how you like. The format needs to be **YAML** and needs to contain the same keys as in this example. The amount of options can be adjusted as needed (minimum of one option is required). The `icon` key should contain the id of the icon you want to use. You can find the icons on [lucide.dev](https://lucide.dev/icons/)
+   - Change the `@advanced-canvas-node-style` to `@advanced-canvas-edge-style` if you want to add a custom style attribute for edges
+    ```css
+    /* @advanced-canvas-node-style
+    key: validation-state
+    label: Validation State
+    options: 
+      - 
+        label: Stateless
+        value: null
+        icon: circle-help
+
+      - 
+        label: Approved
+        value: approved
+        icon: circle-check
+
+      - 
+        label: Pending
+        value: pending
+        icon: circle-dot
+
+      - 
+        label: Rejected
+        value: rejected
+        icon: circle-x
+    */
+    ```
 
 > [!IMPORTANT]
 > There needs to be **one** option with the value null
 
-2. Create a new CSS snippet in your vault (And enable it in the settings)
-    ```css	
-    .canvas-node[data-<DATASET-KEY>="rainy"] { /* The dataset key is now written in kebab-case */
-        background-color: #7f7f7f;
+3. Add the CSS styling
+   - In the same (or another) CSS file, add the styling for the custom style attribute
+    ```css
+    .canvas-node[data-<YOUR-CUSTOM-STYLE-KEY>="<VALUE>"] {
+      /* Your custom styling */
     }
     ```
-3. Reload Obsidian and enjoy your new custom style!
+    in **my** case:
+    ```css
+    .canvas-node[data-validation-state] .canvas-node-content::after {
+      content: "";
+
+      position: absolute;
+      top: 10px;
+      right: 10px;
+
+      font-size: 1em;
+    }
+
+    .canvas-node[data-validation-state="approved"] .canvas-node-content::after {
+      content: "✔️";
+    }
+
+    .canvas-node[data-validation-state="pending"] .canvas-node-content::after {
+      content: "⏳";
+    }
+
+    .canvas-node[data-validation-state="rejected"] .canvas-node-content::after {
+      content: "❌";
+    }
+    ```
+4. **Enable** the CSS snippet in the settings and enjoy your new custom style attribute!
     <br><img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/custom-style-attribute-example.png" alt="Custom Style Attribute Example"/>
+
+**Take a look at the whole file [here](https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/example-custom-node-style.css)**
 
 ## Variable Breakpoints
 Add breakpoints to nodes to change at which zoom factor the node's content gets unrendered.
@@ -319,7 +353,7 @@ Change z-ordering of nodes using the context menu.
 ## Custom Colors
 Add custom colors to the color picker. You can add them using the following css snippet:
 ```css
-:root {
+body {
     /* Where X is the index of the color in the palette */
     /* The colors 1-6 are already used by Obsidian */
     --canvas-color-X: 0, 255, 0; /* RGB */
