@@ -1,4 +1,4 @@
-import { BBox, Canvas, CanvasEdge, CanvasNode, CanvasNodeData } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasEdge, CanvasNode, CanvasNodeData, Position, Side } from "src/@types/Canvas"
 import { CanvasEvent } from "src/events"
 import CanvasExtension from "./canvas-extension"
 import BBoxHelper from "src/utils/bbox-helper"
@@ -10,6 +10,12 @@ export default class FloatingEdgeCanvasExtension  extends CanvasExtension {
 
   init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.NodeMoved,
+      (canvas: Canvas, node: CanvasNode) => this.onNodeMoved(canvas, node)
+    ))
+
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.EdgeConnectionDragging.Before,
       (canvas: Canvas, edge: CanvasEdge, event: PointerEvent, newEdge: boolean, side: 'from' | 'to') => this.onEdgeStartedDragging(canvas, edge, event, newEdge, side)
     ))
@@ -20,7 +26,57 @@ export default class FloatingEdgeCanvasExtension  extends CanvasExtension {
     ))
   }
 
-  onEdgeStartedDragging(canvas: Canvas, edge: CanvasEdge, _event: PointerEvent, newEdge: boolean, _side: 'from' | 'to') {
+  private onNodeMoved(canvas: Canvas, node: CanvasNode) {
+    const nodeId = node.getData().id
+    const affectedEdges = canvas.getEdgesForNode(node)
+
+    for (const edge of affectedEdges) {
+      const edgeData = edge.getData()
+      if (!edgeData.fromFloating && !edgeData.toFloating) continue
+
+      if (edgeData.fromFloating && edge.from.node.id === nodeId) {
+        const fixedNodeConnectionPoint = BBoxHelper.getCenterOfBBoxSide(edge.to.node.getBBox(), edge.to.side)
+        const bestSide = this.getBestSideForFloatingEdge(fixedNodeConnectionPoint, edge.from.node)
+        if (bestSide === edge.from.side) continue
+
+        edge.setData({
+          ...edgeData,
+          fromSide: bestSide
+        })
+      } else if (edgeData.toFloating && edge.to.node.id === nodeId) {
+        const fixedNodeConnectionPoint = BBoxHelper.getCenterOfBBoxSide(edge.from.node.getBBox(), edge.from.side)
+        const bestSide = this.getBestSideForFloatingEdge(fixedNodeConnectionPoint, edge.to.node)
+        if (bestSide === edge.to.side) continue
+
+        edge.setData({
+          ...edgeData,
+          toSide: bestSide
+        })
+      }
+    }
+  }
+
+  private getBestSideForFloatingEdge(sourcePos: Position, target: CanvasNode): Side {
+    const targetBBox = target.getBBox()
+
+    const possibleSides = ['top', 'right', 'bottom', 'left'] as const
+    const possibleTargetPos = possibleSides.map(side => [side, BBoxHelper.getCenterOfBBoxSide(targetBBox, side)]) as [Side, Position][]
+
+    let bestSide: Side | null = null
+    let bestDistance = Infinity
+    for (const [side, pos] of possibleTargetPos) {
+      const distance = Math.sqrt(Math.pow(sourcePos.x - pos.x, 2) + Math.pow(sourcePos.y - pos.y, 2))
+
+      if (distance < bestDistance) {
+        bestDistance = distance
+        bestSide = side
+      }
+    }
+
+    return bestSide!
+  }
+
+  private onEdgeStartedDragging(canvas: Canvas, edge: CanvasEdge, _event: PointerEvent, newEdge: boolean, _side: 'from' | 'to') {
     if (newEdge && this.plugin.settings.getSetting("newEdgeFromSideFloating")) edge.setData({
       ...edge.getData(),
       fromFloating: true // New edges can only get dragged from the "from" side
@@ -50,7 +106,7 @@ export default class FloatingEdgeCanvasExtension  extends CanvasExtension {
     document.addEventListener('pointermove', this.onPointerMove) // Listen for pointer move events
   }
 
-  onEdgeStoppedDragging(_canvas: Canvas, edge: CanvasEdge, event: PointerEvent, _newEdge: boolean, side: 'from' | 'to') {
+  private onEdgeStoppedDragging(_canvas: Canvas, edge: CanvasEdge, event: PointerEvent, _newEdge: boolean, side: 'from' | 'to') {
     document.removeEventListener('pointermove', this.onPointerMove) // Stop listening for pointer move events
 
     const dropZoneNode = side === 'from' ? edge.from.node : edge.to.node

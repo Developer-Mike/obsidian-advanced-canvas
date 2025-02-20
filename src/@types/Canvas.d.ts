@@ -276,6 +276,7 @@ export interface CanvasNode extends CanvasElement {
   labelEl?: HTMLElement
   file?: TFile
 
+  id: string
   x: number
   y: number
   width: number
