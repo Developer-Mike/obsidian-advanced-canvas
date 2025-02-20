@@ -27,10 +27,19 @@ export default class FloatingEdgeCanvasExtension  extends CanvasExtension {
     })
 
     let cachedViewportNodes: [CanvasNode, BBox][] | null = null
+    let hasNaNFloatingEdgeDropZones = false
     this.onPointerMove = event => {
-      if (cachedViewportNodes === null || canvas.viewportChanged) {
+      if (cachedViewportNodes === null || hasNaNFloatingEdgeDropZones || canvas.viewportChanged) {
+        hasNaNFloatingEdgeDropZones = false
+
         cachedViewportNodes = canvas.getViewportNodes()
-          .map(node => [node, this.getFloatingEdgeDropZoneForNode(node)])
+          .map(node => {
+            const nodeFloatingEdgeDropZone = this.getFloatingEdgeDropZoneForNode(node)
+            if (isNaN(nodeFloatingEdgeDropZone.minX) || isNaN(nodeFloatingEdgeDropZone.minY) || isNaN(nodeFloatingEdgeDropZone.maxX) || isNaN(nodeFloatingEdgeDropZone.maxY))
+              hasNaNFloatingEdgeDropZones = true
+
+            return [node, nodeFloatingEdgeDropZone] as [CanvasNode, BBox]
+          })
       }
 
       for (const [node, nodeFloatingEdgeDropZoneClientRect] of cachedViewportNodes) {
@@ -65,8 +74,6 @@ export default class FloatingEdgeCanvasExtension  extends CanvasExtension {
       width: parseFloat(nodeFloatingEdgeDropZoneElStyle.getPropertyValue('width')),
       height: parseFloat(nodeFloatingEdgeDropZoneElStyle.getPropertyValue('height'))
     }
-
-    console.log(nodeFloatingEdgeDropZoneElStyle.getPropertyValue('width')) // TODO: sometimes auto
 
     return {
       minX: nodeElClientBoundingRect.left + (nodeElClientBoundingRect.width - nodeFloatingEdgeDropZoneSize.width) / 2,
