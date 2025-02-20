@@ -38,11 +38,20 @@ export default class FloatingEdgeCanvasExtension  extends CanvasExtension {
         node.nodeEl.classList.toggle('hovering-floating-edge-zone', hovering) // Update hovering state on node
       }
     }
-    document.addEventListener('pointermove', this.onPointerMove)
+    document.addEventListener('pointermove', this.onPointerMove) // Listen for pointer move events
   }
 
-  onEdgeStoppedDragging(canvas: Canvas, edge: CanvasEdge, event: PointerEvent, newEdge: boolean) {
-    document.removeEventListener('pointermove', this.onPointerMove)
+  onEdgeStoppedDragging(_canvas: Canvas, edge: CanvasEdge, event: PointerEvent, _newEdge: boolean) {
+    document.removeEventListener('pointermove', this.onPointerMove) // Stop listening for pointer move events
+
+    const floatingEdgeDropZone = this.getFloatingEdgeDropZoneForNode(edge.to.node)
+    if (!BBoxHelper.insideBBox({ x: event.clientX, y: event.clientY }, floatingEdgeDropZone, true))
+      return // Edge was not dropped on a floating edge drop zone
+
+    edge.setData({
+      ...edge.getData(),
+      toFloating: true
+    })
   }
 
   private getFloatingEdgeDropZoneForNode(node: CanvasNode): BBox {
