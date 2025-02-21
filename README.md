@@ -100,7 +100,7 @@ All features can be enabled/disabled in the settings.
   - Disable node popup menus
   - Lock the canvas' position
   - Lock the canvas' zoom
-- [Auto Edge Side](#auto-edge-side)
+- [Floating edges](#floating-edges-automatic-edge-side) (Automatic Edge Side)
   - Change the side of the edge automatically to the most suitable side
 - [Flip edge](#flip-edge)
   - Flip the direction of an edge with one click
@@ -453,8 +453,14 @@ Move the current selection to a new canvas and create a link in the current canv
 - Use the context menu (right click) to encapsulate the selection
 - OR use the command palette (`Advanced Canvas: Encapsulate selection`)
 
-## Auto Edge Side
-TODO
+## Floating Edges (Automatic Edge Side)
+Change the side of the edge automatically to the most suitable side.
+Drag the edge to the indicated drop zone inside the node to make the edge float.
+
+<details>
+    <summary>Floating Edges Example</summary>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/floating-edge-example.png" alt="Floating Edges Example"/>
+</details>
 
 ## Flip Edge
 Flip the direction of an edge with one click.
@@ -466,106 +472,7 @@ Flip the direction of an edge with one click.
 
 ## Canvas Events
 All custom events are prefixed with `advanced-canvas:` and can be listened to using `app.workspace.on` (Just like the default events).
-
-<details>
-    <summary>
-        All Events
-    </summary>
-
-  - `advanced-canvas:canvas-changed`
-    - Fired when a new canvas gets loaded
-    - Payload: `Canvas`
-  - `advanced-canvas:viewport-changed:before` and `advanced-canvas:viewport-changed:after`
-    - Fired before and after the viewport gets changed
-    - Payload: `Canvas`
-  - `advanced-canvas:node-moved`
-    - Fired when a node gets moved
-    - Payload: `Canvas`, `Node`, `keyboard: boolean`
-  - `advanced-canvas:node-resized`
-    - Fired when a node gets resized
-    - Payload: `Canvas`, `Node`
-  - `advanced-canvas:double-click`
-    - Fired when the canvas gets double-clicked
-    - Payload: `Canvas`, `MouseEvent`, `preventDefault: { value: Boolean }`
-  - `advanced-canvas:dragging-state-changed`
-    - Fired when the dragging state of the canvas changes
-    - Payload: `Canvas`, `boolean`
-  - `advanced-canvas:node-created`
-    - Fired when a new node gets created
-    - Payload: `Canvas`, `Node`
-  - `advanced-canvas:edge-created`
-    - Fired when a new edge gets created
-    - Payload: `Canvas`, `Edge`
-  - `advanced-canvas:node-added`
-    - Fired when a new node gets added
-    - Payload: `Canvas`, `Node`
-  - `advanced-canvas:edge-added`
-    - Fired when a new edge gets added
-    - Payload: `Canvas`, `Edge`
-    - Payload: `Canvas`, `Edge`
-  - `advanced-canvas:node-changed`
-    - Fired when any node gets changed
-    - Payload: `Canvas`, `Node`
-  - `advanced-canvas:edge-changed`
-    - Fired when any edge gets changed
-    - Payload: `Canvas`, `Edge`
-  - `advanced-canvas:node-text-content-changed`
-    - Fired when the text content of a node gets changed (While typing)
-    - Payload: `Canvas`, `Node`, `ViewUpdate (From CodeMirror)`
-  - `advanced-canvas:node-removed`
-    - Fired when a node gets removed
-    - Payload: `Canvas`, `Node`
-  - `advanced-canvas:edge-removed`
-    - Fired when an edge gets removed
-  - `advanced-canvas:copy`
-    - Fired when the selection gets copied
-    - Payload: `Canvas`, `SelectionData (Reference!)`
-  - `advanced-canvas:node-breakpoint-changed`
-    - Fired when the breakpoint of a node changes
-    - Payload: `Canvas`, `Node`, `breakpoint: { value: boolean }`
-  - `advanced-canvas:node-editing-state-changed`
-    - Fired when the editing state of a node changes
-    - Payload: `Canvas`, `Node`, `boolean (isEditing)`
-  - `advanced-canvas:node-bbox-requested`
-    - Fired when the bounding box of a node gets requested (e.g. for the edge path or when dragging a group)
-    - Payload: `Canvas`, `Node`, `BBox (Reference!)`
-  - `advanced-canvas:edge-center-requested`
-    - Fired when the center of an edge gets requested (e.g. for the edge label position)
-    - Payload: `Canvas`, `Edge`, `Position (Reference!)`
-  - `advanced-canvas:containing-nodes-requested`
-    - Fired when the nodes inside a bounding box get requested
-    - Payload: `Canvas`, `BBox`, `Node[] (Reference!)`
-  - `advanced-canvas:selection-changed`
-    - Fired when the selection of the canvas changes
-    - Payload: `Canvas`, `oldSelection: Set<Node|Edge>`, `updateSelection: (() => void) => void`
-  - `advanced-canvas:zoom-to-bbox:before` and `advanced-canvas:zoom-to-bbox:after`
-    - Fired before and after the canvas gets zoomed to a bounding box (e.g. zoom to selection, zoom to fit all)
-    - Payload: `Canvas`, `BBox`
-  - `advanced-canvas:popup-menu-created`
-    - Fired when the a node popup menu gets created (Not firing multiple times if it gets moved between nodes of the same type)
-    - Payload: `Canvas`
-  - `advanced-canvas:node-interaction`
-    - Fired when a node gets hovered over
-    - Payload: `Canvas`, `Node`
-  - `advanced-canvas:undo`
-    - Fired when undo gets called
-    - Payload: `Canvas`
-  - `advanced-canvas:redo`
-    - Fired when redo gets called
-    - Payload: `Canvas`
-  - `advanced-canvas:readonly-changed`
-    - Fired when the readonly state of the canvas changes
-    - Payload: `Canvas`, `boolean`
-  - `advanced-canvas:data-requested`
-    - Fired when the canvas data gets requested
-    - Payload: `Canvas`, `CanvasData (Reference!)`
-  - `advanced-canvas:load-data`
-    - Fired when the canvas data gets set
-    - Payload: `Canvas`, `CanvasData (Reference!)`, `setData: (CanvasData) => void`
-  - `advanced-canvas:canvas-saved:before` and `advanced-canvas:canvas-saved:after`
-    - Fired before and after the canvas gets saved
-    - Payload: `Canvas`
-</details>
+Check out the list of events [here](https://github.com/Developer-Mike/obsidian-advanced-canvas/blob/main/src/events.ts).
 
 ## Settings
 Every feature can be enabled/disabled in the settings. All features were made to be as customizable as possible.
