@@ -27,27 +27,32 @@ export default class FloatingEdgeCanvasExtension  extends CanvasExtension {
   }
 
   private onNodeMoved(canvas: Canvas, node: CanvasNode) {
-    const nodeId = node.getData().id
     const affectedEdges = canvas.getEdgesForNode(node)
 
-    for (const edge of affectedEdges) {
-      const edgeData = edge.getData()
-      if (!edgeData.fromFloating && !edgeData.toFloating) continue
+    for (const edge of affectedEdges)
+      this.updateEdgeConnectionSide(edge)
+  }
 
-      if (edgeData.fromFloating && edge.from.node.id === nodeId) {
-        const fixedNodeConnectionPoint = BBoxHelper.getCenterOfBBoxSide(edge.to.node.getBBox(), edge.to.side)
-        const bestSide = this.getBestSideForFloatingEdge(fixedNodeConnectionPoint, edge.from.node)
-        if (bestSide === edge.from.side) continue
+  private updateEdgeConnectionSide(edge: CanvasEdge) {
+    const edgeData = edge.getData()
 
+    if (edgeData.fromFloating) {
+      const fixedNodeConnectionPoint = BBoxHelper.getCenterOfBBoxSide(edge.to.node.getBBox(), edge.to.side)
+      const bestSide = this.getBestSideForFloatingEdge(fixedNodeConnectionPoint, edge.from.node)
+
+      if (bestSide !== edge.from.side) {
         edge.setData({
           ...edgeData,
           fromSide: bestSide
         })
-      } else if (edgeData.toFloating && edge.to.node.id === nodeId) {
-        const fixedNodeConnectionPoint = BBoxHelper.getCenterOfBBoxSide(edge.from.node.getBBox(), edge.from.side)
-        const bestSide = this.getBestSideForFloatingEdge(fixedNodeConnectionPoint, edge.to.node)
-        if (bestSide === edge.to.side) continue
-
+      }
+    }
+    
+    if (edgeData.toFloating) {
+      const fixedNodeConnectionPoint = BBoxHelper.getCenterOfBBoxSide(edge.from.node.getBBox(), edge.from.side)
+      const bestSide = this.getBestSideForFloatingEdge(fixedNodeConnectionPoint, edge.to.node)
+      
+      if (bestSide !== edge.to.side) {
         edge.setData({
           ...edgeData,
           toSide: bestSide
@@ -121,6 +126,8 @@ export default class FloatingEdgeCanvasExtension  extends CanvasExtension {
     else edgeData.toFloating = wasDroppedInFloatingEdgeDropZone
 
     edge.setData(edgeData)
+
+    this.updateEdgeConnectionSide(edge)
   }
 
   private getFloatingEdgeDropZoneForNode(node: CanvasNode): BBox {
