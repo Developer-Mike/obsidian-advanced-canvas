@@ -13,7 +13,7 @@
 	<a href="https://obsidian.md/plugins?id=advanced-canvas"><img src="https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/obsidianmd/obsidian-releases/master/community-plugin-stats.json&query=$.advanced-canvas.downloads&label=Downloads&style=for-the-badge&colorA=363a4f&colorB=d53984"/></a>
     <a href="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/LICENSE"><img src="https://img.shields.io/static/v1.svg?style=for-the-badge&label=License&message=GPL-3.0&colorA=363a4f&colorB=b7bdf8" alt="GPL-3.0 license"/></a>
     <br/><br/>
-    <b>⚡ Supercharge</b> your canvas experience! Create presentations, flowcharts and more!
+    <b>⚡ Supercharge</b> your canvas experience to help build your second brain! Graph view integration and unlimited node and edge styling options empower flowcharts, dynamic presentations, and interconnected knowledge.
 </p>
 
 ## ✨ Key Features
@@ -79,7 +79,7 @@ Advanced Canvas is packed with features, **all** of which can be toggled and cus
 
 *   **Full Metadata Cache Support:** Canvas files are fully integrated into Obsidian's metadata system.
     *   Canvas files are indexed in the graph view, backlinks, and outgoing links.
-    *   Option to create outgoing links when embeds in a canvas are connected by edges.
+    *   Option to create outgoing links when file nodes in a canvas are connected by edges.
     *   <details>
         <summary>Metadata Cache Support Examples</summary>
         <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/metadata-cache-support.png" alt="Metadata Cache Support Example"/>
@@ -197,7 +197,9 @@ Customize the appearance of edges to enhance clarity and visual communication.
 *   **Variable Breakpoints:** Control when node content unrenders based on zoom level, configurable via CSS.
     *   <details>
         <summary>Variable Breakpoint Example & Usage</summary>
+
         **CSS Snippet Example:**
+
         ```css
         .canvas-node[data-shape="pill"] {
             --variable-breakpoint: 0.5; /* Content unrenders at zoom level 0.5 */
@@ -208,13 +210,16 @@ Customize the appearance of edges to enhance clarity and visual communication.
 *   **Custom Colors:** Extend the color picker with your own custom color palette.
     *   <details>
         <summary>Custom Color Example & Usage</summary>
+
         **CSS Snippet Example:**
+
         ```css
         body {
             --canvas-color-7: 0, 255, 0; /* RGB for the 7th color slot */
             --canvas-color-8: 255, 0, 255; /* RGB for the 8th color slot */
         }
         ```
+
         <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/custom-colors.png" alt="Custom Colors In Palette"/>
         </details>
 
