@@ -454,7 +454,7 @@ Move the current selection to a new canvas and create a link in the current canv
 - OR use the command palette (`Advanced Canvas: Encapsulate selection`)
 
 ## Floating Edges (Automatic Edge Side)
-Change the side of the edge automatically to the most suitable side.
+Change the side of the edge automatically to the most suitable side. <br>
 Drag the edge to the indicated drop zone inside the node to make the edge float.
 
 <details>
@@ -471,7 +471,7 @@ Flip the direction of an edge with one click.
 </details>
 
 ## Canvas Events
-All custom events are prefixed with `advanced-canvas:` and can be listened to using `app.workspace.on` (Just like the default events).
+All custom events are prefixed with `advanced-canvas:` and can be listened to using `app.workspace.on` (Just like the default events). <br>
 Check out the list of events [here](https://github.com/Developer-Mike/obsidian-advanced-canvas/blob/main/src/events.ts).
 
 ## Settings
