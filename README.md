@@ -16,471 +16,290 @@
     <b>⚡ Supercharge</b> your canvas experience! Create presentations, flowcharts and more!
 </p>
 
-## Installation
-Open the Community Plugins tab in the settings and search for "Advanced Canvas" (or click [here](https://obsidian.md/plugins?id=advanced-canvas)).
+## ✨ Key Features
+
+This plugin enhances the Obsidian Canvas with a wide range of features to boost your productivity and creativity. Here's a highlight of what Advanced Canvas offers:
+
+*   **Enhanced Styling:** Customize the appearance of your canvas nodes and edges with shapes, border styles, arrow styles, path styles, and more.
+*   **Metadata Integration:** Seamlessly integrate canvas files with Obsidian's metadata cache, enabling graph view connections, backlinks, and outgoing links for canvas elements.
+*   **Presentation Mode:** Transform your canvases into interactive presentations with arrow-based navigation and presentation remote compatibility.
+*   **Portals:** Embed canvases within canvases, creating nested and interconnected visual workspaces.
+*   **Collapsible Groups:** Organize complex canvases by collapsing and expanding groups of nodes.
+*   **Advanced Export:** Export your canvases as high-quality PNG or SVG images, with options for transparency and custom branding.
+*   **Workflow Improvements:** Benefit from features like auto node resizing, focus mode, encapsulation, floating edges, and more to streamline your canvas workflows.
+
+## 🚀 Installation
+
+There are several ways to install Advanced Canvas:
+
+**Easy Installation (Recommended):**
+
+1.  Open Obsidian Settings > Community Plugins.
+2.  Click "Browse" and search for "Advanced Canvas".
+3.  Click "Install" and then "Enable".
+    Alternatively, click [here](https://obsidian.md/plugins?id=advanced-canvas) to open the plugin page directly in Obsidian.
 
 <details>
-    <summary>Other installation methods</summary>
+    <summary>Other Installation Methods</summary>
     <br/>
     <ul>
-        <li>Install it using <a href="https://github.com/TfTHacker/obsidian42-brat">BRAT</a></li>
-        <li>Manual folder creation
+        <li><strong>Install with BRAT (Obsidian42 - BRAT):</strong>
             <ol>
-                <li>Create a folder named <code>advanced-canvas</code> in your vault's plugins folder (<code>&lt;vault&gt;/.obsidian/plugins/</code>).</li>
-                <li>Download <code>main.js</code>, <code>styles.css</code> and <code>manifest.json</code> from the latest release and put them in the <code>advanced-canvas</code> folder.</li>
-                <li>Enable the plugin in Settings -> Community plugins -> Installed plugins</li>
+                <li>Install and enable the <a href="https://github.com/TfTHacker/obsidian42-brat">BRAT</a> plugin.</li>
+                <li>Open BRAT settings and add "Developer-Mike/obsidian-advanced-canvas" as a beta plugin.</li>
+                <li>Enable Advanced Canvas in Community Plugins.</li>
+            </ol>
+        </li>
+        <li><strong>Manual Installation:</strong>
+            <ol>
+                <li>Create a folder named <code>advanced-canvas</code> in your vault's plugins folder (<code><vault>/.obsidian/plugins/</code>).</li>
+                <li>Download <code>main.js</code>, <code>styles.css</code>, and <code>manifest.json</code> from the <a href="https://github.com/Developer-Mike/obsidian-advanced-canvas/releases/latest">latest release</a> and place them in the <code>advanced-canvas</code> folder.</li>
+                <li>Enable the plugin in Settings > Community plugins > Installed plugins.</li>
             </ol>
         </li>
     </ul>
 </details>
 
-## Features
-All features can be enabled/disabled in the settings.
-
-- Expose node data to style them using CSS
-- [Full Metadata Cache support](#full-metadata-cache-support)
-  - See embedded files and links of the canvas in the **graph view**, **outgoing-links** and **backlinks**
-- [Better default settings](#better-default-settings)
-- More [canvas commands](#canvas-commands)
-- [Node Styles](#node-styles)
-  - (Flowchart) [Node Shapes](#node-shapes)
-    - Terminal shape
-    - Process shape
-    - Decision shape
-    - Input/Output shape
-    - On-page Reference shape
-    - Predefined Process shape
-    - Document shape
-    - Database shape
-  - [Border Styles](#border-styles)
-    - Dotted
-    - Dashed
-    - Invisible
-  - Text Alignment
-    - Left
-    - Center
-    - Right
-- [Edge Styles](#edge-styles)
-  - [Path Styles](#path-styles)
-    - Dotted
-    - Short-dashed
-    - Long-dashed
-  - [Arrow Styles](#arrow-styles)
-    - Triangle Outline
-    - Halved Triangle
-    - Thin Triangle
-    - Diamond
-    - Diamond Outline
-    - Circle
-    - Circle Outline
-  - [Pathfinding Methods](#pathfinding-methods)
-    - Default
-    - Straight
-    - Square
-    - A*
-- Add [custom styles](#custom-styles) to nodes and edges for unlimited possibilities
-- Add [per-node breakpoints](#variable-breakpoints) to change at which zoom factor the node's content gets unrendered
-- [Z-Ordering control](#z-ordering-control) for nodes to control their stacking order
-- [Custom colors](#custom-colors) in the color picker
-- [Presentation mode](#presentation-mode)
-  - Create presentations by connecting nodes with arrows
-- [Portals](#portals)
-  - Embed other canvases inside your canvas
-  - Create edges (arrows) to the embedded canvas
-- [Collapsible groups](#collapsible-groups)
-  - Collapse and expand groups to organize your canvas
-- Better [Image Export](#image-export)
-  - Export the whole canvas or just a selection as an image
-  - Export the canvas as an png/**svg** image with transparency
-- [Auto node resizing](#auto-node-resizing)
-  - Resize nodes automatically when the text content changes
-- [Focus mode](#focus-mode)
-  - Focus on a single node and blur all other nodes
-- [Better readonly](#better-readonly)
-  - Disable node popup menus
-  - Lock the canvas' position
-  - Lock the canvas' zoom
-- [Floating edges](#floating-edges-automatic-edge-side) (Automatic Edge Side)
-  - Change the side of the edge automatically to the most suitable side
-- [Flip edge](#flip-edge)
-  - Flip the direction of an edge with one click
-- [Encapsulate selection](#encapsulate-selection)
-  - Create a new canvas from the selected nodes
-  - Create a link to the new canvas in the current canvas
-- Create groups independently of the nodes
-- Expose [canvas events](#canvas-events) to use them in other plugins
-
-## Support
-Please consider supporting the plugin. There are many hours of work and effort behind it. The two easiest ways to support the plugin are either by starring ⭐ the repository or by donating any amount on [Ko-fi](https://ko-fi.com/X8X27IA08) ❤️. Thank you!
-
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/X8X27IA08)
-<img src="https://img.shields.io/endpoint?url=https://wakapi.dev/api/compat/shields/v1/Developer-Mike/interval:all_time/project:obsidian-advanced-canvas&label=Time%20Spent&style=for-the-badge&colorA=ffffff&colorB=ff5e5b" alt="Time Spent">
-
-## Full Metadata Cache Support
-Advanced Canvas enables .canvas files to be indexed by the metadata cache. This means that there is now full compatibility with the graph view, outgoing links and backlinks. You can even enable (optional) the creation of an outgoing link if two embeds in a canvas are connected by an edge. This feature brings the full power of Obsidian's linking system to the canvas file format.
-
-<details>
-    <summary>Metadata Cache Support Example</summary>
-    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/metadata-cache-support.png" alt="Metadata Cache Support Example"/>
-</details>
-
-<details>
-    <summary>Outgoing Link Using An Edge Example</summary>
-    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/edge-metadata-cache.png" alt="Outgoing Link Using An Edge Example"/>
-</details>
-
-### Technical Details
-- The file cache of a .canvas file now contains a value for the hash key (Generated from the filepath) instead of an empty string
-  - Check the `app.metadataCache.fileCache[<filepath>]` object to see the changes
-- The metadata cache is located in the `app.metadataCache` object - the same object that is used by Obsidian for markdown files
-  - e.g. `app.metadataCache.getCache`/`app.metadataCache.getFileCache` now works with .canvas files
-  - The `position` object which is found inside metadata cache entries now contains a new key `nodeId` for .canvas files
-  - The metadata cache entry for a .canvas file now contains a new key `nodes` which is an object of type `{ [nodeId: string]: MetadataCacheEntry }` - this allows for other plugins to access the full metadata cache for single nodes. The `MetadataCacheEntry` object is the same as for markdown files (even created with the same function - 1:1 compatibility)
-- The resolved links object now has entries for .canvas files
-  - The `app.metadataCache.resolvedLinks` object values for .canvas files are implemented in the exact same way as for markdown files
-
-## Better Default Settings
-- Enforce all new nodes to be aligned to the grid
-- Customize default text node size
-- Customize default file node size
-- Modify the minimum node size
-- Disable the font scaling relative to the zoom level
-
-## Canvas Commands
-- `Advanced Canvas: Open Quicksettings`
-  - Open the quicksettings menu
-- `Advanced Canvas: Create text node`
-  - Create a new text node
-- `Advanced Canvas: Create file node`
-  - Create a new file node
-- `Advanced Canvas: Select all edges`
-  - Select all edges
-- `Advanced Canvas: Zoom to selection`
-  - Zoom to the bounding box of the selected nodes
-- `Advanced Canvas: Zoom to fit`
-  - Zoom to fit all nodes
-- `Advanced Canvas: Clone node up/down/left/right`
-  - Clone the selected node in the direction of the arrow keys
-  - The cloned node will have the same dimensions and color as the original node
-- `Advanced Canvas: Expand node up/down/left/right`
-  - Expand the selected node in the direction of the arrow keys
-- `Advanced Canvas: Flip selection horizontally/vertically`
-  - Flip the selected nodes and the respective edges horizontally or vertically
-
-## Node Styles
-You can customize the default node styles using the settings.
-
-### Node Shapes
-<details>
-    <summary>Flowchart Example</summary>
-    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/sample-flowchart.png" alt="Flowchart Example"/>
-</details>
-
-#### Usage
-- Use the updated popup menu set a node's shape
-
-#### Shapes
-<details>
-    <summary>Terminal Shape</summary>
-    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flowchart-nodes/terminal.png" alt="Terminal Shape"/>
-</details>
-
-<details>
-    <summary>Process/Center Shape</summary>
-    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flowchart-nodes/process.png" alt="Process/Center Shape"/>
-</details>
-
-<details>
-    <summary>Decision Shape</summary>
-    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flowchart-nodes/decision.png" alt="Decision Shape"/>
-</details>
-
-<details>
-    <summary>Input/Output Shape</summary>
-    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flowchart-nodes/input-output.png" alt="Input/Output Shape"/>
-</details>
-
-<details>
-    <summary>On-page Reference Shape</summary>
-    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flowchart-nodes/reference.png" alt="On-page Reference Shape"/>
-</details>
-
-<details>
-    <summary>Predefined Process Shape</summary>
-    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flowchart-nodes/predefined-process.png" alt="Predefined Process Shape"/>
-</details>
-
-<details>
-    <summary>Document Shape</summary>
-    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flowchart-nodes/document.png" alt="Document Shape"/>
-</details>
-
-<details>
-    <summary>Database Shape</summary>
-    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flowchart-nodes/database.png" alt="Database Shape"/>
-</details>
-
-### Border Styles
-Set the style of the border to dotted, dashed or invisible.
-
-<details>
-    <summary>Border Styles Example</summary>
-    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/border-styles.png" alt="Border Styles Example"/>
-</details>
-
-## Edge Styles
-You can customize the default edge styles using the settings.
-
-### Path Styles
-Set the style of the edge paths to dotted, short-dashed or long-dashed.
-
-<details>
-    <summary>Edge Styles Example</summary>
-    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/edge-path-styles.png" alt="Edge Path Styles Example"/>
-</details>
-
-### Arrow Styles
-Set the style of the arrows to triangle outline, halved triangle, thin triangle, diamond, diamond outline, circle or circle outline.
-
-<details>
-    <summary>Arrow Styles Example</summary>
-    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/edge-arrow-styles.png" alt="Edge Arrow Styles Example"/>
-</details>
-
-### Pathfinding Methods
-Set the pathfinding method of the edges (arrows) to default, straight, squared or A*.
-
-<details>
-    <summary>Path Styles Example</summary>
-    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/edge-pathfinding-methods.png" alt="Edge Pathfinding Methods Example"/>
-</details>
-
-## Custom Styles
-Custom style attributes for nodes and edges can easily be added.
-
-1. Create a new CSS snippet in your vault
-   - To do this, navigate to `Settings > Appearance > *scroll down* > CSS snippets` and click on the folder icon to open the snippets folder
-   - Create a new CSS file (e.g. `my-fancy-node-style.css`)
-2. Add the custom style attribute
-   - Open the CSS file and add the following code and replace the values how you like. The format needs to be **YAML** and needs to contain the same keys as in this example. The amount of options can be adjusted as needed (minimum of one option is required). The `icon` key should contain the id of the icon you want to use. You can find the icons on [lucide.dev](https://lucide.dev/icons/)
-   - Change the `@advanced-canvas-node-style` to `@advanced-canvas-edge-style` if you want to add a custom style attribute for edges
-    ```css
-    /* @advanced-canvas-node-style
-    key: validation-state
-    label: Validation State
-    options: 
-      - 
-        label: Stateless
-        value: null
-        icon: circle-help
-
-      - 
-        label: Approved
-        value: approved
-        icon: circle-check
-
-      - 
-        label: Pending
-        value: pending
-        icon: circle-dot
-
-      - 
-        label: Rejected
-        value: rejected
-        icon: circle-x
-    */
-    ```
-
-> [!IMPORTANT]
-> There needs to be **one** option with the value null
-
-3. Add the CSS styling
-   - In the same (or another) CSS file, add the styling for the custom style attribute
-    ```css
-    .canvas-node[data-<YOUR-CUSTOM-STYLE-KEY>="<VALUE>"] {
-      /* Your custom styling */
-    }
-    ```
-    in **my** case:
-    ```css
-    .canvas-node[data-validation-state] .canvas-node-content::after {
-      content: "";
-
-      position: absolute;
-      top: 10px;
-      right: 10px;
-
-      font-size: 1em;
-    }
-
-    .canvas-node[data-validation-state="approved"] .canvas-node-content::after {
-      content: "✔️";
-    }
-
-    .canvas-node[data-validation-state="pending"] .canvas-node-content::after {
-      content: "⏳";
-    }
-
-    .canvas-node[data-validation-state="rejected"] .canvas-node-content::after {
-      content: "❌";
-    }
-    ```
-4. **Enable** the CSS snippet in the settings and enjoy your new custom style attribute!
-    <br><img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/custom-style-attribute-example.png" alt="Custom Style Attribute Example"/>
-
-**Take a look at the whole file [here](https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/example-custom-node-style.css)**
-
-## Variable Breakpoints
-Add breakpoints to nodes to change at which zoom factor the node's content gets unrendered.
-
-Create a new CSS snippet in your vault (And enable it in the settings)
-```css	
-/* Any CSS selector can be used (As long as the .canvas-node element has the CSS variable defined) */
-.canvas-node[data-shape="pill"] {
-    /* The zoom factor at which the node's content gets unrendered (Zoom level can reach from 1 to -4) */
-    --variable-breakpoint: 0.5;
-}
-```
-
-## Z-Ordering Control
-Change z-ordering of nodes using the context menu.
-
-<details>
-    <summary>Z-Ordering Control Example</summary>
-    <img src="./assets/z-ordering-control.png" alt="Z-Ordering Control Example"/>
-</details>
-
-## Custom Colors
-Add custom colors to the color picker. You can add them using the following css snippet:
-```css
-body {
-    /* Where X is the index of the color in the palette */
-    /* The colors 1-6 are already used by Obsidian */
-    --canvas-color-X: 0, 255, 0; /* RGB */
-}
-```
-
-<details>
-    <summary>Custom Colors In Palette</summary>
-    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/custom-colors.png" alt="Custom Colors In Palette"/>
-</details>
-
-## Presentation Mode
-In presentation mode, you can navigate through the nodes using the arrow keys or the PageUp/PageDown keys (Compatible with most presentation remotes). The different slides/nodes are connected using arrows. If you want to have multiple arrows pointing from the same node, you can number them in the order you want to navigate through them. While in presentation mode, the canvas is in readonly mode (So [better readonly](#better-readonly) effects the presentation mode as well!). You can exit the presentation mode using the `ESC` key or the corresponding command. If you want to continue the presentation from the last slide you were on, you can use the `Advanced Canvas: Continue presentation` command.
-
-<img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/sample-presentation-simple.gif" alt="Presentation mode example"/>
-
-<details>
-    <summary>Canvas File</summary>
-    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/sample-presentation-simple.png" alt="Presentation canvas file"/>
-</details>
-
-### More Complex Example
-<img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/sample-presentation-complex.gif" alt="Complex presentation mode example"/>
-
-<details>
-    <summary>Canvas File</summary>
-    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/sample-presentation-complex.png" alt="Complex presentation canvas file"/>
-</details>
-
-### Usage
-- Create the first slide
-  - Create the first slide of the presentation using the updated popup menu
-  - OR create a node and mark it as the first slide using the updated card menu
-- Add more slides
-  - Link the slides using arrows
-    - If you want to loop back to a previous slide, you can number the arrows in the order you want to navigate through them
-  - <b>TIP:</b> Create slides with consistent dimensions by using the updated card menu
-- Control the presentation
-  - Start the presentation using the command palette (`Advanced Canvas: Start presentation`)
-  - Change slides using the arrow keys
-  - Exit the presentation using the `ESC` key
-
-## Portals
-Embed other canvases inside your canvas and create edges (arrows) to the embedded canvas.
-
-<img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/sample-portal-usage.png" alt="Portal example"/>
-
-### Usage
-- Embed a canvas file and click on the door icon of the popup menu to open a portal
-
-## Collapsible Groups
-Collapse and expand groups to organize your canvas.
-
-<details>
-    <summary>Collapsible Groups Example</summary>
-    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/collapsible-groups.png" alt="Collapsible Groups Example"/>
-</details>
-
-## Image Export
-Export the whole canvas/your selection as an png/svg image with transparency. Export options from the core plugin are also available - this includes "Privacy Mode" and "Show Logo" (Logo got extended to include Advanced Canvas).
-
-<details>
-    <summary>Image Export Example</summary>
-    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/image-export-example.svg" alt="Image Export Example"/>
-</details>
-
-## Auto Node Resizing
-Resize nodes automatically when the text content changes. Toggle this feature on a per-node basis using the updated popup menu.
-
-<details>
-    <summary>Auto Node Resizing Example</summary>
-    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/auto-node-resizing.gif" alt="Auto Node Resizing Example"/>
-</details>
-
-## Focus Mode
-Focus on a single node and blur all other nodes.
-
-<details>
-    <summary>Focus Mode Example</summary>
-    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/focus-mode.png" alt="Focus Mode"/>
-</details>
-
-## Better Readonly
-- Disable node popup menus
-- Lock the canvas' position
-- Lock the canvas' zoom
-- BUT to retain some interactivity, it allows zooming to a bounding box (e.g. zoom to selection, zoom to fit all)
-
-### Usage
-- Use the updated control menu to toggle the new features (Only shown if the canvas is in readonly mode)
-
-## Encapsulate Selection
-Move the current selection to a new canvas and create a link in the current canvas.
-
-### Usage
-- Select the nodes you want to encapsulate
-- Use the context menu (right click) to encapsulate the selection
-- OR use the command palette (`Advanced Canvas: Encapsulate selection`)
-
-## Floating Edges (Automatic Edge Side)
-Change the side of the edge automatically to the most suitable side. <br>
-Drag the edge to the indicated drop zone inside the node to make the edge float.
-
-<details>
-    <summary>Floating Edges Example</summary>
-    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/floating-edge-example.png" alt="Floating Edges Example"/>
-</details>
-
-## Flip Edge
-Flip the direction of an edge with one click.
-
-<details>
-    <summary>Flip Edge Example</summary>
-    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flip-edge.gif" alt="Flip Edge Example"/>
-</details>
-
-## Canvas Events
-All custom events are prefixed with `advanced-canvas:` and can be listened to using `app.workspace.on` (Just like the default events). <br>
-Check out the list of events [here](https://github.com/Developer-Mike/obsidian-advanced-canvas/blob/main/src/events.ts).
-
-## Settings
-Every feature can be enabled/disabled in the settings. All features were made to be as customizable as possible.
-
-## Contributing
-All code contributions are welcome! (PRs that only update the documentation won't get merged. Please open an issue instead.)
-You may want to check out issues with the `PRs appreciated` label to find issues you can start with.
-But feel free to work on any issue or non-issue you want to work on!
-
-## Star History
-![Star History Chart](https://api.star-history.com/svg?repos=Developer-Mike/obsidian-advanced-canvas&type=Date)
+## 💖 Support
+
+If you find Advanced Canvas helpful, please consider supporting its development!
+
+*   **Star the repository** ⭐ to show your appreciation.
+*   **Donate on Ko-fi** ❤️: [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/X8X27IA08)
+
+Thank you for your support!
+
+[![Time Spent](https://img.shields.io/endpoint?url=https://wakapi.by-mika.dev/api/compat/shields/v1/mika.dev/interval:any/project:obsidian-advanced-canvas&label=Time%20Spent&style=for-the-badge&colorA=ffffff&colorB=ff5e5b "Time Spent")](https://wakapi.by-mika.dev)
+
+## 🛠️ Features in Detail
+
+Advanced Canvas is packed with features, **all** of which can be toggled and customized in the plugin settings.
+
+### 🔗 Metadata & Linking
+
+*   **Full Metadata Cache Support:** Canvas files are fully integrated into Obsidian's metadata system.
+    *   Canvas files are indexed in the graph view, backlinks, and outgoing links.
+    *   Option to create outgoing links when embeds in a canvas are connected by edges.
+    *   <details>
+        <summary>Metadata Cache Support Examples</summary>
+        <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/metadata-cache-support.png" alt="Metadata Cache Support Example"/>
+        <br>
+        <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/edge-metadata-cache.png" alt="Outgoing Link Using An Edge Example"/>
+        <br>
+        <details>
+            <summary>Technical Details</summary>
+            <ul>
+                <li>File cache for .canvas files now includes a hash key.</li>
+                <li>Metadata cache (`app.metadataCache`) fully supports .canvas files (getCache, getFileCache, etc.).</li>
+                <li>Position object in metadata includes `nodeId` for canvas nodes.</li>
+                <li>New `nodes` key in canvas metadata entry: `{ [nodeId: string]: MetadataCacheEntry }` for node-level metadata access.</li>
+                <li>Resolved links object includes entries for .canvas files, mirroring markdown file behavior.</li>
+            </ul>
+        </details>
+        </details>
+
+### ✨ Styling Enhancements
+
+#### Node Styles
+
+Customize the visual appearance of your nodes to create clear and informative canvases.
+
+*   **Node Shapes:**  Visually categorize nodes using flowchart shapes.
+    *   Terminal, Process, Decision, Input/Output, On-page Reference, Predefined Process, Document, Database shapes available.
+    *   Access shapes via the node's popup menu.
+    *   <details>
+            <summary>See Node Shape Examples</summary>
+             <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/sample-flowchart.png" alt="Flowchart Example"/>
+             <br>
+             <details><summary>Terminal Shape</summary><img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flowchart-nodes/terminal.png" alt="Terminal Shape"/></details>
+             <details><summary>Process/Center Shape</summary><img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flowchart-nodes/process.png" alt="Process/Center Shape"/></details>
+             <details><summary>Decision Shape</summary><img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flowchart-nodes/decision.png" alt="Decision Shape"/></details>
+             <details><summary>Input/Output Shape</summary><img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flowchart-nodes/input-output.png" alt="Input/Output Shape"/></details>
+             <details><summary>On-page Reference Shape</summary><img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flowchart-nodes/reference.png" alt="On-page Reference Shape"/></details>
+             <details><summary>Predefined Process Shape</summary><img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flowchart-nodes/predefined-process.png" alt="Predefined Process Shape"/></details>
+             <details><summary>Document Shape</summary><img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flowchart-nodes/document.png" alt="Document Shape"/></details>
+             <details><summary>Database Shape</summary><img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flowchart-nodes/database.png" alt="Database Shape"/></details>
+        </details>
+
+*   **Border Styles:** Choose from different border styles for visual distinction.
+    *   Options: Dotted, Dashed, Invisible.
+    *   <details><summary>See Border Style Examples</summary><img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/border-styles.png" alt="Border Styles Example"/></details>
+
+*   **Text Alignment:** Control text alignment within nodes (Left, Center, Right).
+
+#### Edge Styles
+
+Customize the appearance of edges to enhance clarity and visual communication.
+
+*   **Path Styles:** Modify the line style of edges.
+    *   Options: Dotted, Short-dashed, Long-dashed.
+    *   <details><summary>See Edge Path Style Examples</summary><img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/edge-path-styles.png" alt="Edge Path Styles Example"/></details>
+
+*   **Arrow Styles:** Select from various arrow styles for different visual cues.
+    *   Options: Triangle Outline, Halved Triangle, Thin Triangle, Diamond, Diamond Outline, Circle, Circle Outline, Blunt.
+    *   <details><summary>See Arrow Style Examples</summary><img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/edge-arrow-styles.png" alt="Edge Arrow Styles Example"/></details>
+
+*   **Pathfinding Methods:**  Choose how edges are routed between nodes.
+    *   Options: Default, Straight, Square, A*.
+    *   <details><summary>See Pathfinding Method Examples</summary><img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/edge-pathfinding-methods.png" alt="Edge Pathfinding Methods Example"/></details>
+
+*   **Floating Edges (Automatic Edge Side):** Edges dynamically connect to the most suitable side of a node. Drag an edge to the indicated drop zone within a node to activate floating edges.
+    *   <details><summary>See Floating Edges Example</summary><img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/floating-edge-example.png" alt="Floating Edges Example"/></details>
+
+*   **Flip Edge:** Easily reverse the direction of an edge with a single click.
+    *   <details><summary>See Flip Edge Example</summary><img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flip-edge.gif" alt="Flip Edge Example"/></details>
+
+#### Custom Styles
+
+*   **Custom Style Attributes:** Add your own style attributes to nodes and edges for limitless customization using CSS snippets.
+    *   Define custom attributes with labels, options, and icons directly in your CSS.
+    *   <details>
+        <summary>Custom Style Attribute Example & Usage</summary>
+
+        **1. Create CSS Snippet:**  (e.g., `my-fancy-node-style.css`) in `Settings > Appearance > CSS snippets` folder.
+
+        **2. Define Custom Style Attribute (YAML format in CSS comment):**
+        ```css
+        /* @advanced-canvas-node-style
+        key: validation-state
+        label: Validation State
+        options:
+          -
+            label: Stateless
+            value: null
+            icon: circle-help
+          -
+            label: Approved
+            value: approved
+            icon: circle-check
+          -
+            label: Pending
+            value: pending
+            icon: circle-dot
+          -
+            label: Rejected
+            value: rejected
+            icon: circle-x
+        */
+        ```
+        **3. Add CSS Styling:**
+        ```css
+        .canvas-node[data-validation-state="approved"] { /* ... */ }
+        .canvas-node[data-validation-state="pending"] { /* ... */ }
+        .canvas-node[data-validation-state="rejected"] { /* ... */ }
+        ```
+        **4. Enable CSS Snippet:** In Obsidian settings.
+
+        <br><img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/custom-style-attribute-example.png" alt="Custom Style Attribute Example"/>
+        <br>**[See full example CSS file](https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/example-custom-node-style.css)**
+        </details>
+
+*   **Variable Breakpoints:** Control when node content unrenders based on zoom level, configurable via CSS.
+    *   <details>
+        <summary>Variable Breakpoint Example & Usage</summary>
+        **CSS Snippet Example:**
+        ```css
+        .canvas-node[data-shape="pill"] {
+            --variable-breakpoint: 0.5; /* Content unrenders at zoom level 0.5 */
+        }
+        ```
+        </details>
+
+*   **Custom Colors:** Extend the color picker with your own custom color palette.
+    *   <details>
+        <summary>Custom Color Example & Usage</summary>
+        **CSS Snippet Example:**
+        ```css
+        body {
+            --canvas-color-7: 0, 255, 0; /* RGB for the 7th color slot */
+            --canvas-color-8: 255, 0, 255; /* RGB for the 8th color slot */
+        }
+        ```
+        <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/custom-colors.png" alt="Custom Colors In Palette"/>
+        </details>
+
+### 🗂️ Organization & Structure
+
+*   **Collapsible Groups:**  Group nodes together and collapse/expand groups for better canvas organization and overview.
+    *   <details><summary>Collapsible Groups Example</summary><img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/collapsible-groups.png" alt="Collapsible Groups Example"/></details>
+
+*   **Z-Ordering Control:**  Manually adjust the stacking order of nodes using the context menu to bring specific nodes to the front or send them to the back.
+    *   <details><summary>Z-Ordering Control Example</summary><img src="./assets/z-ordering-control.png" alt="Z-Ordering Control Example"/></details>
+
+*   **Focus Mode:**  Highlight a single node by blurring all others, helping you concentrate on specific parts of your canvas.
+    *   <details><summary>Focus Mode Example</summary><img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/focus-mode.png" alt="Focus Mode"/></details>
+
+*   **Portals:** Embed entire canvases as nodes within other canvases, creating nested and linked visual systems. Double-click or use the "Open Portal" option to navigate into the embedded canvas.
+    *   <details><summary>Portal Example & Usage</summary><img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/sample-portal-usage.png" alt="Portal example"/></details>
+
+*   **Encapsulate Selection:**  Convert a selection of nodes into a new, separate canvas and automatically create a link to it from the original canvas, useful for breaking down complex canvases into smaller, manageable units.
+
+### 📤 Export & Sharing
+
+*   **Image Export:** Export the entire canvas or a selection as a PNG or SVG image with transparency. Includes Obsidian's "Privacy Mode" and extended "Show Logo" options.
+    *   <details><summary>Image Export Example</summary><img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/image-export-example.svg" alt="Image Export Example"/></details>
+
+### 🚀 Workflow Enhancements
+
+*   **Presentation Mode:** Turn your canvases into presentations.
+    *   Navigate slides (nodes) connected by arrows using arrow keys or presentation remotes.
+    *   Supports numbered arrows for custom presentation flow.
+    *   Readonly mode during presentations.
+    *   Commands: "Start presentation", "Continue presentation", "Exit presentation".
+    *   <details>
+        <summary>Presentation Mode Examples & Usage</summary>
+        <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/sample-presentation-simple.gif" alt="Presentation mode example"/>
+        <br>
+        <details><summary>Simple Presentation Canvas File</summary><img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/sample-presentation-simple.png" alt="Presentation canvas file"/></details>
+        <br><br>
+        <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/sample-presentation-complex.gif" alt="Complex presentation mode example"/>
+        <br>
+        <details><summary>Complex Presentation Canvas File</summary><img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/sample-presentation-complex.png" alt="Complex presentation canvas file"/></details>
+        </details>
+
+*   **Auto Node Resizing:** Nodes automatically resize to fit their text content. Toggle per-node.
+    *   <details><summary>Auto Node Resizing Example</summary><img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/auto-node-resizing.gif" alt="Auto Node Resizing Example"/></details>
+
+*   **Better Readonly Mode:** Enhanced readonly mode with options to:
+    *   Disable node popup menus.
+    *   Lock canvas position and zoom.
+    *   Retains zoom-to-fit and zoom-to-selection functionality.
+    *   Control menu in readonly mode to toggle features.
+
+*   **Canvas Commands:** Extend canvas functionality with new commands accessible via the command palette.
+    *   `Advanced Canvas: Open Quicksettings` - Opens the plugin's quick settings menu.
+    *   `Advanced Canvas: Create text node` - Creates a new text node.
+    *   `Advanced Canvas: Create file node` - Creates a new file node.
+    *   `Advanced Canvas: Select all edges` - Selects all edges on the canvas.
+    *   `Advanced Canvas: Zoom to selection` - Zooms to the bounding box of selected nodes.
+    *   `Advanced Canvas: Zoom to fit` - Zooms to fit all nodes on the canvas.
+    *   `Advanced Canvas: Clone node up/down/left/right` - Clones selected node in the arrow key direction.
+    *   `Advanced Canvas: Expand node up/down/left/right` - Expands selected node in the arrow key direction.
+    *   `Advanced Canvas: Flip selection horizontally/vertically` - Flips selected nodes and edges.
+
+*   **Better Default Settings:** Customize default canvas behavior.
+    *   Enforce grid alignment for new nodes.
+    *   Customize default text and file node sizes.
+    *   Modify minimum node size.
+    *   Disable font scaling relative to zoom.
+
+*   **Create Groups Independently:** Create groups without needing to pre-select nodes.
+
+### ⚙️ Canvas Events
+
+*   **Exposed Canvas Events:** Integrate with other plugins by utilizing custom canvas events.
+    *   Events prefixed with `advanced-canvas:`.
+    *   Listen to events using `app.workspace.on`.
+    *   [See the list of events here](https://github.com/Developer-Mike/obsidian-advanced-canvas/blob/main/src/events.ts).
+
+## 🤝 Contributing
+
+Contributions are welcome! If you're interested in contributing to Advanced Canvas:
+
+*   Check for issues labeled "PRs appreciated" for starting points.
+*   Feel free to work on any issue or suggest new features.
+*   Pull requests that solely update documentation may not be merged; please open an issue for documentation suggestions instead.
+
+## 📈 Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Developer-Mike/obsidian-advanced-canvas&type=Date)](https://star-history.com/#Developer-Mike/obsidian-advanced-canvas&Date)
