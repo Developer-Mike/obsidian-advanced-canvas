@@ -12,6 +12,16 @@ export default class CommandsCanvasExtension extends CanvasExtension {
 
   init() {
     this.plugin.addCommand({
+      id: 'toggle-readonly',
+      name: 'Toggle readonly',
+      checkCallback: CanvasHelper.canvasCommand(
+        this.plugin,
+        (_canvas: Canvas) => true,
+        (canvas: Canvas) => canvas.setReadonly(!canvas.readonly)
+      )
+    })
+
+    this.plugin.addCommand({
       id: 'create-text-node',
       name: 'Create text node',
       checkCallback: CanvasHelper.canvasCommand(

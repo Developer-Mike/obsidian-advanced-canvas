@@ -149,6 +149,8 @@ Advanced Canvas enables .canvas files to be indexed by the metadata cache. This 
 ## Canvas Commands
 - `Advanced Canvas: Open Quicksettings`
   - Open the quicksettings menu
+- `Advanced Canvas: Toggle readonly`
+  - Toggle the readonly state of the canvas
 - `Advanced Canvas: Create text node`
   - Create a new text node
 - `Advanced Canvas: Create file node`
