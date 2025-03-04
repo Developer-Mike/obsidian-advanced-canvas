@@ -123,6 +123,7 @@ export interface Canvas {
   onResize(): void
 
   // Custom
+  zoomToRealBbox(bbox: BBox): void
   isClearing?: boolean
   isCopying?: boolean
   lockedX: number

@@ -7,6 +7,8 @@ import CanvasExtension from "./canvas-extension"
 export default class BetterReadonlyCanvasExtension extends CanvasExtension {
   isEnabled() { return 'betterReadonlyEnabled' as const }
 
+  private isMovingToBBox = false
+
   init() {
     /* Popup listener */
     this.plugin.registerEvent(this.plugin.app.workspace.on(
@@ -14,42 +16,15 @@ export default class BetterReadonlyCanvasExtension extends CanvasExtension {
       (canvas: Canvas, _node: any) => this.updatePopupMenu(canvas)
     ))
 
-    /* Zoom and Pan listener */
-    let movingToBBox = false
-
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.ViewportChanged.Before,
-      (canvas: Canvas) => {
-        // Only allow viewport change once when using zoom to bbox
-        if (movingToBBox) {
-          movingToBBox = false
-
-          this.updateLockedZoom(canvas)
-          this.updateLockedPan(canvas)
-
-          return
-        }
-
-        if (!canvas.readonly) return
-
-        if (this.plugin.settings.getSetting('disableZoom')) {
-          canvas.zoom = canvas.lockedZoom ?? canvas.zoom
-          canvas.tZoom = canvas.lockedZoom ?? canvas.tZoom
-        }
-
-        if (this.plugin.settings.getSetting('disablePan')) {
-          canvas.x = canvas.lockedX ?? canvas.x
-          canvas.tx = canvas.lockedX ?? canvas.tx
-          canvas.y = canvas.lockedY ?? canvas.y
-          canvas.ty = canvas.lockedY ?? canvas.ty
-        }
-      }
+      (canvas: Canvas) => this.onBeforeViewPortChanged(canvas)
     ))
 
     // Allow viewport change when using zoom to bbox
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.ZoomToBbox.Before,
-      () => movingToBBox = true
+      () => this.isMovingToBBox = true
     ))
 
     /* Readonly listener */
@@ -69,7 +44,33 @@ export default class BetterReadonlyCanvasExtension extends CanvasExtension {
     ))
   }
 
-  addQuickSettings(canvas: Canvas) {
+  private onBeforeViewPortChanged(canvas: Canvas) {
+    // Only allow viewport change once when using zoom to bbox
+    if (this.isMovingToBBox) {
+      this.isMovingToBBox = false
+
+      this.updateLockedZoom(canvas)
+      this.updateLockedPan(canvas)
+
+      return
+    }
+
+    if (!canvas.readonly) return
+
+    if (this.plugin.settings.getSetting('disableZoom')) {
+      canvas.zoom = canvas.lockedZoom ?? canvas.zoom
+      canvas.tZoom = canvas.lockedZoom ?? canvas.tZoom
+    }
+
+    if (this.plugin.settings.getSetting('disablePan')) {
+      canvas.x = canvas.lockedX ?? canvas.x
+      canvas.tx = canvas.lockedX ?? canvas.tx
+      canvas.y = canvas.lockedY ?? canvas.y
+      canvas.ty = canvas.lockedY ?? canvas.ty
+    }
+  }
+
+  private addQuickSettings(canvas: Canvas) {
     const settingsContainer = canvas.quickSettingsButton?.parentElement
     if (!settingsContainer) return
 

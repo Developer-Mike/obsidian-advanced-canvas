@@ -261,7 +261,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
       const fromNodeBBox = CanvasHelper.getSmallestAllowedZoomBBox(canvas, fromNode.getBBox())
 
       const currentNodeBBoxEnlarged = BBoxHelper.scaleBBox(fromNodeBBox, animationIntensity)
-      if (useCustomZoomFunction) CanvasHelper.zoomToRealBBox(canvas, currentNodeBBoxEnlarged)
+      if (useCustomZoomFunction) canvas.zoomToRealBbox(currentNodeBBoxEnlarged)
       else canvas.zoomToBbox(currentNodeBBoxEnlarged)
 
       await sleep(animationDurationMs / 2)
@@ -269,14 +269,14 @@ export default class PresentationCanvasExtension extends CanvasExtension {
       if (fromNode.getData().id !== toNode.getData().id) {
         // Add 0.1 to fix obsidian bug that causes the animation to skip if the bbox is the same
         const nextNodeBBoxEnlarged = BBoxHelper.scaleBBox(toNodeBBox, animationIntensity + 0.1)
-        if (useCustomZoomFunction) CanvasHelper.zoomToRealBBox(canvas, nextNodeBBoxEnlarged)
+        if (useCustomZoomFunction) canvas.zoomToRealBbox(nextNodeBBoxEnlarged)
         else canvas.zoomToBbox(nextNodeBBoxEnlarged)
 
         await sleep(animationDurationMs / 2)
       }
     }
 
-    if (useCustomZoomFunction) CanvasHelper.zoomToRealBBox(canvas, toNodeBBox)
+    if (useCustomZoomFunction) canvas.zoomToRealBbox(toNodeBBox)
     else canvas.zoomToBbox(toNodeBBox)
   }
 

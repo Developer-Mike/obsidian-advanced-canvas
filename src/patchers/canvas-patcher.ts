@@ -192,6 +192,25 @@ export default class CanvasPatcher extends Patcher {
         that.triggerWorkspaceEvent(CanvasEvent.ZoomToBbox.After, this, bbox)
         return result
       }),
+      // Custom
+      zoomToRealBbox: (_next: any) => function (bbox: BBox): void {
+        if (this.canvasRect.width === 0 || this.canvasRect.height === 0) return
+
+        that.triggerWorkspaceEvent(CanvasEvent.ZoomToBbox.Before, this, bbox)
+    
+        const widthZoom = this.canvasRect.width / (bbox.maxX - bbox.minX)
+        const heightZoom = this.canvasRect.height / (bbox.maxY - bbox.minY)
+        const zoom = this.screenshotting ? Math.min(widthZoom, heightZoom) : Math.clamp(Math.min(widthZoom, heightZoom), -4, 1)
+        this.tZoom = Math.log2(zoom)
+        this.zoomCenter = null
+    
+        this.tx = (bbox.minX + bbox.maxX) / 2
+        this.ty = (bbox.minY + bbox.maxY) / 2
+        
+        this.markViewportChanged()
+
+        that.triggerWorkspaceEvent(CanvasEvent.ZoomToBbox.After, this, bbox)
+      },
       setReadonly: PatchHelper.OverrideExisting(next => function (readonly: boolean): void {
         const result = next.call(this, readonly)
         that.triggerWorkspaceEvent(CanvasEvent.ReadonlyChanged, this, readonly)

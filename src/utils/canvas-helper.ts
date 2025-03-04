@@ -148,21 +148,6 @@ export default class CanvasHelper {
     return BBoxHelper.combineBBoxes(bBoxes)
   }
 
-  static zoomToRealBBox(canvas: Canvas, bbox: BBox) {
-    if (canvas.canvasRect.width === 0 || canvas.canvasRect.height === 0) return
-
-    const widthZoom = canvas.canvasRect.width / (bbox.maxX - bbox.minX)
-    const heightZoom = canvas.canvasRect.height / (bbox.maxY - bbox.minY)
-    const zoom = canvas.screenshotting ? Math.min(widthZoom, heightZoom) : Math.clamp(Math.min(widthZoom, heightZoom), -4, 1)
-    canvas.tZoom = Math.log2(zoom)
-    canvas.zoomCenter = null
-
-    canvas.tx = (bbox.minX + bbox.maxX) / 2
-    canvas.ty = (bbox.minY + bbox.maxY) / 2
-    
-    canvas.markViewportChanged()
-  }
-
   static readonly MAX_ALLOWED_ZOOM = 1
   static getSmallestAllowedZoomBBox(canvas: Canvas, bbox: BBox): BBox {
     if (canvas.screenshotting) return bbox // Zoom is not limited when taking screenshots

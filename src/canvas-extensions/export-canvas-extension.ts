@@ -6,7 +6,6 @@ import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "./canvas-extension"
 
 const MAX_ALLOWED_LOADING_TIME = 10_000
-const MAX_PIXEL_RATIO = 20
 
 export default class ExportCanvasExtension extends CanvasExtension {
   isEnabled() { return 'betterExportFeatureEnabled' as const }
@@ -213,7 +212,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
       }
 
       // Zoom to the bounding box of the elements to export
-      CanvasHelper.zoomToRealBBox(canvas, adjustedBoundingBox) // Zoom to the bounding box (without padding)
+      canvas.zoomToRealBbox(adjustedBoundingBox) // Zoom to the bounding box (without padding)
       canvas.setViewport(canvas.tx, canvas.ty, canvas.tZoom) // Accelerate zoomToBbox by setting the canvas to the desired position and zoom
       await sleep(10) // Wait for viewport to update
 
@@ -230,7 +229,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
       enlargedTargetBoundingBox = BBoxHelper.combineBBoxes([enlargedTargetBoundingBox, enlargedEdgePathsBBox])
       adjustedBoundingBox = BBoxHelper.combineBBoxes([adjustedBoundingBox, enlargedEdgePathsBBox])
 
-      CanvasHelper.zoomToRealBBox(canvas, adjustedBoundingBox) // Zoom to the bounding box
+      canvas.zoomToRealBbox(adjustedBoundingBox) // Zoom to the bounding box
       canvas.setViewport(canvas.tx, canvas.ty, canvas.tZoom) // Accelerate zoomToBbox by setting the canvas to the desired position and zoom
       await sleep(10) // Wait for viewport to update
 
