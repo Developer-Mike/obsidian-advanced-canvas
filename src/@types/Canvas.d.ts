@@ -23,6 +23,7 @@ export interface Canvas {
   options: CanvasOptions
   metadata: CanvasMetadata
 
+  unload(): void
   /**
    * @deprecated Use getData instead -> Can be outdated
    */
@@ -171,11 +172,14 @@ export interface CanvasView extends ItemView {
   getViewData(): string
   setViewData(data: string): void
 
+  data: string
+  lastSavedData: string
   requestSave(): void
 }
 
 export interface CanvasWorkspaceLeaf extends WorkspaceLeaf {
   id: string
+  rebuildView(): void
 }
 
 export interface NodeOptions {

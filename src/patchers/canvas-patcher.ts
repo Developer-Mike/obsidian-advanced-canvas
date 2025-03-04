@@ -2,7 +2,7 @@ import { EditorView, ViewUpdate } from "@codemirror/view"
 import JSONSS from "json-stable-stringify"
 import { around } from "monkey-around"
 import { editorInfoField, requireApiVersion, Side, WorkspaceLeaf } from "obsidian"
-import { BBox, Canvas, CanvasData, CanvasEdge, CanvasEdgeData, CanvasElement, CanvasNode, CanvasNodeData, CanvasPopupMenu, CanvasView, NodeInteractionLayer, Position, SelectionData } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasData, CanvasEdge, CanvasEdgeData, CanvasElement, CanvasNode, CanvasNodeData, CanvasPopupMenu, CanvasView, CanvasWorkspaceLeaf, NodeInteractionLayer, Position, SelectionData } from "src/@types/Canvas"
 import PatchHelper from "src/utils/patch-helper"
 import JSONC from "tiny-jsonc"
 import { CanvasEvent } from "../events"
@@ -301,9 +301,16 @@ export default class CanvasPatcher extends Patcher {
     this.plugin.app.workspace.iterateAllLeaves((leaf: WorkspaceLeaf) => {
       if (leaf.view.getViewType() !== 'canvas') return
 
-      const canvasView = leaf.view as CanvasView
-      // @ts-ignore
+      const canvasView = leaf.view as any as Omit<CanvasView, 'onClose'> & { onClose: () => void }
+      const hasChangesToSave = canvasView.lastSavedData !== canvasView.data
+
+      // Skip saving the canvas data if there are no changes to save (Remote sync compatibility)
+      const originalOnClose = canvasView.onClose
+      if (!hasChangesToSave) canvasView.onClose = () => canvasView.canvas?.unload()
+
       canvasView.leaf.rebuildView()
+
+      if (!hasChangesToSave) canvasView.onClose = originalOnClose
     })
   }
 
@@ -320,9 +327,9 @@ export default class CanvasPatcher extends Patcher {
           delete node.isDirty
         }
 
-        // Save the data to the file
+        // Save the data to the file (only if the canvas isn't loading)
         this.canvas.data = this.canvas.getData()
-        this.canvas.view.requestSave()
+        if (this.initialized) this.canvas.view.requestSave()
 
         // Add to the undo stack
         if (addHistory) this.canvas.pushHistory(this.canvas.data)
@@ -379,9 +386,9 @@ export default class CanvasPatcher extends Patcher {
           delete this.isDirty
         }
 
-        // Save the data to the file
+        // Save the data to the file (only if the canvas isn't loading)
         this.canvas.data = this.canvas.getData()
-        this.canvas.view.requestSave()
+        if (this.initialized) this.canvas.view.requestSave()
 
         // Add to the undo stack
         if (addHistory) this.canvas.pushHistory(this.canvas.getData())
