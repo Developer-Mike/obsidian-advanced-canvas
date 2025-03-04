@@ -70,7 +70,7 @@ export default class CanvasPatcher extends Patcher {
           console.error('Invalid JSON, repairing through Advanced Canvas:', e)
 
           // Invalid JSON
-          that.plugin.createFileSnapshot(this.file.path, json)
+          if (this.file) that.plugin.createFileSnapshot(this.file.path, json)
 
           // Try to parse it with trailing commas
           json = JSON.stringify(JSONC.parse(json), null, 2)
