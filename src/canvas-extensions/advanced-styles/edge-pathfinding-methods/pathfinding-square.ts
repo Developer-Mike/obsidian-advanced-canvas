@@ -8,30 +8,31 @@ import EdgePathfindingMethod, { EdgePath } from "./edge-pathfinding-method"
 const ROUNDED_EDGE_RADIUS = 5
 
 export default class EdgePathfindingSquare extends EdgePathfindingMethod {
-  getPath(plugin: AdvancedCanvasPlugin, _canvas: Canvas, fromPos: Position, fromBBoxSidePos: Position, fromSide: Side, toPos: Position, toBBoxSidePos: Position, toSide: Side): EdgePath {
+  getPath(): EdgePath {
     let pathArray: Position[]
     let center: Position
-    const isFromHorizontal = BBoxHelper.isHorizontal(fromSide)
-    const isToHorizontal = BBoxHelper.isHorizontal(toSide)
+    const isFromHorizontal = BBoxHelper.isHorizontal(this.fromSide)
+    const isToHorizontal = BBoxHelper.isHorizontal(this.toSide)
   
-    if (fromSide === toSide) {
-      const direction = BBoxHelper.direction(fromSide)
+    if (this.fromSide === this.toSide) {
+      // U shape: same side
+      const direction = BBoxHelper.direction(this.fromSide)
 
       if (isFromHorizontal) {
-        const x = Math.max(fromBBoxSidePos.x, toBBoxSidePos.x) + direction * CanvasHelper.GRID_SIZE
+        const x = Math.max(this.fromBBoxSidePos.x, this.toBBoxSidePos.x) + direction * CanvasHelper.GRID_SIZE
         pathArray = [
-          fromPos,
-          { x: x, y: fromBBoxSidePos.y },
-          { x: x, y: toBBoxSidePos.y },
-          toPos
+          this.fromPos,
+          { x: x, y: this.fromBBoxSidePos.y },
+          { x: x, y: this.toBBoxSidePos.y },
+          this.toPos
         ]
       } else {
-        const y = Math.max(fromBBoxSidePos.y, toBBoxSidePos.y) + direction * CanvasHelper.GRID_SIZE
+        const y = Math.max(this.fromBBoxSidePos.y, this.toBBoxSidePos.y) + direction * CanvasHelper.GRID_SIZE
         pathArray = [
-          fromPos,
-          { x: fromBBoxSidePos.x, y: y },
-          { x: toBBoxSidePos.x, y: y },
-          toPos
+          this.fromPos,
+          { x: this.fromBBoxSidePos.x, y: y },
+          { x: this.toBBoxSidePos.x, y: y },
+          this.toPos
         ]
       }
       
@@ -42,133 +43,87 @@ export default class EdgePathfindingSquare extends EdgePathfindingMethod {
     } else if (isFromHorizontal === isToHorizontal) {
       // Z shape: same axis, different sides
       if (isFromHorizontal) {
-        const midX = fromBBoxSidePos.x + (toBBoxSidePos.x - fromBBoxSidePos.x) / 2
+        const midX = this.fromBBoxSidePos.x + (this.toBBoxSidePos.x - this.fromBBoxSidePos.x) / 2
         pathArray = [
-          fromPos,
-          { x: midX, y: fromBBoxSidePos.y },
-          { x: midX, y: toBBoxSidePos.y },
-          toPos
+          this.fromPos,
+          { x: midX, y: this.fromBBoxSidePos.y },
+          { x: midX, y: this.toBBoxSidePos.y },
+          this.toPos
         ]
       } else {
-        const midY = fromBBoxSidePos.y + (toBBoxSidePos.y - fromBBoxSidePos.y) / 2
+        const midY = this.fromBBoxSidePos.y + (this.toBBoxSidePos.y - this.fromBBoxSidePos.y) / 2
         pathArray = [
-          fromPos,
-          { x: fromBBoxSidePos.x, y: midY },
-          { x: toBBoxSidePos.x, y: midY },
-          toPos
+          this.fromPos,
+          { x: this.fromBBoxSidePos.x, y: midY },
+          { x: this.toBBoxSidePos.x, y: midY },
+          this.toPos
         ]
       }
 
       center = {
-        x: (fromBBoxSidePos.x + toBBoxSidePos.x) / 2,
-        y: (fromBBoxSidePos.y + toBBoxSidePos.y) / 2
+        x: (this.fromBBoxSidePos.x + this.toBBoxSidePos.x) / 2,
+        y: (this.fromBBoxSidePos.y + this.toBBoxSidePos.y) / 2
       }
-    } else { // Different axis -> L-shape or 5-point detour
-      if (BBoxHelper.isHorizontal(fromSide)) {
-        // Horizontal (left/right) to Vertical (top/bottom)
-        const isLeft = fromSide === 'left'
-        const needsDetour = isLeft 
-          ? toBBoxSidePos.x < fromBBoxSidePos.x // Left-side facing left
-          : toBBoxSidePos.x > fromBBoxSidePos.x // Right-side facing right
-    
-        if (needsDetour) {
-          const grid = CanvasHelper.GRID_SIZE
-          const toDir = BBoxHelper.direction(toSide) // -1 for top, 1 for bottom
-          const detourX = fromBBoxSidePos.x + (isLeft ? -grid : grid)
-          const detourY = toBBoxSidePos.y + toDir * grid
-    
-          pathArray = [
-            fromPos,
-            { x: detourX, y: fromBBoxSidePos.y }, // Escape perpendicular
-            { x: detourX, y: detourY },           // Align vertically
-            { x: toBBoxSidePos.x, y: detourY },   // Approach horizontally
-            toPos
-          ]
-          center = {
-            x: detourX,
-            y: (fromBBoxSidePos.y + detourY) / 2
+    } else {
+      // Different axis -> L-shape or 5-point path
+      const idealCenter = isFromHorizontal ? {
+        x: this.toBBoxSidePos.x,
+        y: this.fromBBoxSidePos.y
+      } : {
+        x: this.fromBBoxSidePos.x,
+        y: this.toBBoxSidePos.y
+      }
+
+      const isPathCollidingAtFrom = this.fromSide === "top" && idealCenter.y > this.fromPos.y ||
+        this.fromSide === "bottom" && idealCenter.y < this.fromPos.y ||
+        this.fromSide === "left" && idealCenter.x > this.fromPos.x ||
+        this.fromSide === "right" && idealCenter.x < this.fromPos.x
+
+      const isPathCollidingAtTo = this.toSide === "top" && idealCenter.y > this.toPos.y ||
+        this.toSide === "bottom" && idealCenter.y < this.toPos.y ||
+        this.toSide === "left" && idealCenter.x > this.toPos.x ||
+        this.toSide === "right" && idealCenter.x < this.toPos.x
+
+      if (isPathCollidingAtFrom || isPathCollidingAtTo) {
+        pathArray = [this.fromPos]
+
+        if (isPathCollidingAtFrom) {
+          const direction = BBoxHelper.direction(this.fromSide)
+
+          const firstDetourPoint = isFromHorizontal ? {
+            x: this.fromBBoxSidePos.x + direction * CanvasHelper.GRID_SIZE,
+            y: this.fromBBoxSidePos.y
+          } : {
+            x: this.fromBBoxSidePos.x,
+            y: this.fromBBoxSidePos.y + direction * CanvasHelper.GRID_SIZE
           }
-        } else {
-          // Straight L-shape
-          pathArray = [
-            fromPos,
-            { x: toBBoxSidePos.x, y: fromBBoxSidePos.y },
-            toPos
-          ]
-          center = { x: pathArray[1].x, y: pathArray[1].y }
+
+          pathArray.push(firstDetourPoint)
         }
-      } else { // Different axis -> L-shape or 5-point detour
-        if (BBoxHelper.isHorizontal(fromSide)) {
-          // Horizontal (left/right) to Vertical (top/bottom)
-          const isLeft = fromSide === 'left'
-          const needsDetour = isLeft 
-            ? toBBoxSidePos.x > fromBBoxSidePos.x  // Left-side: detour if target is to the right
-            : toBBoxSidePos.x < fromBBoxSidePos.x // Right-side: detour if target is to the left
-      
-          if (needsDetour) {
-            const grid = CanvasHelper.GRID_SIZE
-            const toDir = BBoxHelper.direction(toSide) // -1 for top, 1 for bottom
-            const detourX = fromBBoxSidePos.x + (isLeft ? -grid : grid)
-            const detourY = toBBoxSidePos.y + toDir * grid
-      
-            pathArray = [
-              fromPos,
-              { x: detourX, y: fromBBoxSidePos.y }, // Step 1: Move perpendicular to fromSide
-              { x: detourX, y: detourY },           // Step 2: Align vertically
-              { x: toBBoxSidePos.x, y: detourY },   // Step 3: Move horizontally to target
-              toPos
-            ]
-            center = { 
-              x: detourX,
-              y: (fromBBoxSidePos.y + detourY) / 2
-            }
-          } else {
-            // Straight L-shape
-            pathArray = [
-              fromPos,
-              { x: toBBoxSidePos.x, y: fromBBoxSidePos.y },
-              toPos
-            ]
-            center = { x: pathArray[1].x, y: pathArray[1].y }
-          }
-        } else {
-          // Vertical (top/bottom) to Horizontal (left/right)
-          const isTop = fromSide === 'top'
-          const needsDetour = isTop 
-            ? toBBoxSidePos.y > fromBBoxSidePos.y  // Top-side: detour if target is below
-            : toBBoxSidePos.y < fromBBoxSidePos.y // Bottom-side: detour if target is above
-      
-          if (needsDetour) {
-            const grid = CanvasHelper.GRID_SIZE
-            const toDir = BBoxHelper.direction(toSide) // -1 for left, 1 for right
-            const detourY = fromBBoxSidePos.y + (isTop ? -grid : grid)
-            const detourX = toBBoxSidePos.x + toDir * grid
-      
-            pathArray = [
-              fromPos,
-              { x: fromBBoxSidePos.x, y: detourY }, // Step 1: Move perpendicular to fromSide
-              { x: detourX, y: detourY },           // Step 2: Align horizontally
-              { x: detourX, y: toBBoxSidePos.y },   // Step 3: Move vertically to target
-              toPos
-            ]
-            center = {
-              x: (fromBBoxSidePos.x + detourX) / 2,
-              y: detourY
-            }
-          } else {
-            // Straight L-shape
-            pathArray = [
-              fromPos,
-              { x: fromBBoxSidePos.x, y: toBBoxSidePos.y },
-              toPos
-            ]
-            center = { x: pathArray[1].x, y: pathArray[1].y }
-          }
+
+        pathArray.push(this.toPos)
+
+        // TODO: Calculate center
+        center = { 
+          x: (this.fromPos.x + this.toPos.x) / 2,
+          y: (this.fromPos.y + this.toPos.y) / 2
+        }
+      } else {
+        // L-shape: Different axis, no collision
+        pathArray = [
+          this.fromPos,
+          idealCenter,
+          this.toPos
+        ]
+
+        center = { 
+          x: pathArray[1].x,
+          y: pathArray[1].y
         }
       }
     }
 
-    const svgPath = plugin.settings.getSetting('edgeStyleSquarePathRounded')
+    const svgPath = this.plugin.settings.getSetting('edgeStyleSquarePathRounded')
       ? SvgPathHelper.pathArrayToRoundedSvgPath(pathArray, ROUNDED_EDGE_RADIUS)
       : SvgPathHelper.pathArrayToSvgPath(pathArray)
 

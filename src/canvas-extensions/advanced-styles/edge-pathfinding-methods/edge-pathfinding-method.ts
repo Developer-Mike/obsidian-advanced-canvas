@@ -2,7 +2,18 @@ import { Canvas, Position, Side } from "src/@types/Canvas"
 import AdvancedCanvasPlugin from "src/main"
 
 export default abstract class EdgePathfindingMethod {
-  abstract getPath(plugin: AdvancedCanvasPlugin, canvas: Canvas, fromPos: Position, fromBBoxSidePos: Position, fromSide: Side, toPos: Position, toBBoxSidePos: Position, toSide: Side): EdgePath | null
+  constructor(
+    protected plugin: AdvancedCanvasPlugin,
+    protected canvas: Canvas,
+    protected fromPos: Position,
+    protected fromBBoxSidePos: Position,
+    protected fromSide: Side,
+    protected toPos: Position,
+    protected toBBoxSidePos: Position,
+    protected toSide: Side
+  ) {}
+
+  abstract getPath(): EdgePath | null
 }
 
 export interface EdgePath {

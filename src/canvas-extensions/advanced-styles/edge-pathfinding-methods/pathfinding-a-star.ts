@@ -1,5 +1,4 @@
-import { BBox, Canvas, Position, Side } from "src/@types/Canvas"
-import AdvancedCanvasPlugin from "src/main"
+import { BBox, Position } from "src/@types/Canvas"
 import BBoxHelper from "src/utils/bbox-helper"
 import SvgPathHelper from "src/utils/svg-path-helper"
 import EdgePathfindingMethod, { EdgePath } from "./edge-pathfinding-method"
@@ -37,8 +36,8 @@ class Node {
 }
 
 export default class EdgePathfindingAStar extends EdgePathfindingMethod {
-  getPath(plugin: AdvancedCanvasPlugin, canvas: Canvas, fromPos: Position, _fromBBoxSidePos: Position, fromSide: Side, toPos: Position, _toBBoxSidePos: Position, toSide: Side): EdgePath | null {        
-    const nodeBBoxes = [...canvas.nodes.values()]
+  getPath(): EdgePath | null {        
+    const nodeBBoxes = [...this.canvas.nodes.values()]
       .filter(node => {
         const nodeData = node.getData()
 
@@ -46,25 +45,25 @@ export default class EdgePathfindingAStar extends EdgePathfindingMethod {
 
         // Exclude (group) nodes that contain either the start or end position
         const nodeBBox = node.getBBox()
-        const nodeContainsFromPos = BBoxHelper.insideBBox(fromPos, nodeBBox, true)
-        const nodeContainsToPos = BBoxHelper.insideBBox(toPos, nodeBBox, true)
+        const nodeContainsFromPos = BBoxHelper.insideBBox(this.fromPos, nodeBBox, true)
+        const nodeContainsToPos = BBoxHelper.insideBBox(this.toPos, nodeBBox, true)
 
         return !nodeContainsFromPos && !nodeContainsToPos
       }).map(node => node.getBBox())
     
-    const fromPosWithMargin = BBoxHelper.moveInDirection(fromPos, fromSide, 10)
-    const toPosWithMargin = BBoxHelper.moveInDirection(toPos, toSide, 10)
+    const fromPosWithMargin = BBoxHelper.moveInDirection(this.fromPos, this.fromSide, 10)
+    const toPosWithMargin = BBoxHelper.moveInDirection(this.toPos, this.toSide, 10)
 
-    const gridResolution = plugin.settings.getSetting('edgeStylePathfinderGridResolution')
-    let pathArray = this.aStarAlgorithm(fromPosWithMargin, fromSide, toPosWithMargin, toSide, nodeBBoxes, gridResolution)
+    const gridResolution = this.plugin.settings.getSetting('edgeStylePathfinderGridResolution')
+    let pathArray = this.aStarAlgorithm(fromPosWithMargin, toPosWithMargin, nodeBBoxes, gridResolution)
     if (!pathArray) return null // No path found - use default path
 
     // Make connection points to the node removing the margin
-    pathArray.splice(0, 0, fromPos)
-    pathArray.splice(pathArray.length, 0, toPos)
+    pathArray.splice(0, 0, this.fromPos)
+    pathArray.splice(pathArray.length, 0, this.toPos)
 
     // Smoothen path
-    if (plugin.settings.getSetting('edgeStylePathfinderPathRounded'))
+    if (this.plugin.settings.getSetting('edgeStylePathfinderPathRounded'))
       pathArray = SvgPathHelper.smoothenPathArray(pathArray, SMOOTHEN_PATH_TENSION)
 
     const svgPath = SvgPathHelper.pathArrayToSvgPath(pathArray)
@@ -76,22 +75,22 @@ export default class EdgePathfindingAStar extends EdgePathfindingMethod {
     }
   }
 
-  private aStarAlgorithm(fromPos: Position, fromSide: Side, toPos: Position, toSide: Side, obstacles: BBox[], gridResolution: number): Position[] | null {
+  private aStarAlgorithm(fromPos: Position, toPos: Position, obstacles: BBox[], gridResolution: number): Position[] | null {
     const start: Node = new Node(
       Math.floor(fromPos.x / gridResolution) * gridResolution,
       Math.floor(fromPos.y / gridResolution) * gridResolution
     )
     // Round start and end positions to the nearest grid cell outside of the nodes to connect
-    if (fromSide === 'right' && fromPos.x !== start.x) start.x += gridResolution
-    if (fromSide === 'bottom' && fromPos.y !== start.y) start.y += gridResolution
+    if (this.fromSide === 'right' && fromPos.x !== start.x) start.x += gridResolution
+    if (this.fromSide === 'bottom' && fromPos.y !== start.y) start.y += gridResolution
   
     const end: Node = new Node(
       Math.floor(toPos.x / gridResolution) * gridResolution,
       Math.floor(toPos.y / gridResolution) * gridResolution
     )
     // Round start and end positions to the nearest grid cell outside of the nodes to connect
-    if (toSide === 'right' && toPos.x !== end.x) end.x += gridResolution
-    if (toSide === 'bottom' && toPos.y !== end.y) end.y += gridResolution
+    if (this.toSide === 'right' && toPos.x !== end.x) end.x += gridResolution
+    if (this.toSide === 'bottom' && toPos.y !== end.y) end.y += gridResolution
     
     // Check if start and end positions are valid
     if (this.isInsideObstacle(start, obstacles) || this.isInsideObstacle(end, obstacles)) return null
