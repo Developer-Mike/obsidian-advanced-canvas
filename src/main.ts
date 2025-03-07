@@ -1,19 +1,29 @@
 import { ItemView, Plugin } from 'obsidian'
-import CanvasPatcher from './core/canvas-patcher'
 import { Canvas, CanvasView } from './@types/Canvas'
+import Quicksettings from './quicksettings'
 
 // Utils
 import IconsHelper from './utils/icons-helper'
 import DebugHelper from './utils/debug-helper'
+import MigrationHelper from './utils/migration-helper'
 
 // Managers
 import SettingsManager from './settings'
-import WindowsManager from './windows-manager'
+import WindowsManager from './managers/windows-manager'
+
+// Patchers
+import Patcher from './patchers/patcher'
+import CanvasPatcher from './patchers/canvas-patcher'
+import MetadataCachePatcher from './patchers/metadata-cache-patcher'
+import BacklinksPatcher from './patchers/backlinks-patcher'
+import OutgoingLinksPatcher from './patchers/outgoing-links-patcher'
 
 // Canvas Extensions
-import CanvasExtension from './core/canvas-extension'
+import CanvasExtension from './canvas-extensions/canvas-extension'
+import VariableBreakpointCanvasExtension from './canvas-extensions/variable-breakpoint-canvas-extension'
 import GroupCanvasExtension from './canvas-extensions/group-canvas-extension'
 import PresentationCanvasExtension from './canvas-extensions/presentation-canvas-extension'
+import ZOrderingCanvasExtension from './canvas-extensions/z-ordering-canvas-extension'
 import BetterReadonlyCanvasExtension from './canvas-extensions/better-readonly-canvas-extension'
 import EncapsulateCanvasExtension from './canvas-extensions/encapsulate-canvas-extension'
 import CommandsCanvasExtension from './canvas-extensions/commands-canvas-extension'
@@ -23,6 +33,9 @@ import BetterDefaultSettingsCanvasExtension from './canvas-extensions/better-def
 import ColorPaletteCanvasExtension from './canvas-extensions/color-palette-canvas-extension'
 import CollapsibleGroupsCanvasExtension from './canvas-extensions/collapsible-groups-canvas-extension'
 import FocusModeCanvasExtension from './canvas-extensions/focus-mode-canvas-extension'
+import FlipEdgeCanvasExtension from './canvas-extensions/flip-edge-canvas-extension'
+import ExportCanvasExtension from './canvas-extensions/export-canvas-extension'
+import FloatingEdgeCanvasExtension from './canvas-extensions/floating-edge-canvas-extension'
 
 // Advanced Styles
 import NodeStylesExtension from './canvas-extensions/advanced-styles/node-styles'
@@ -33,8 +46,13 @@ import NodeInteractionExposerExtension from './canvas-extensions/dataset-exposer
 import NodeExposerExtension from './canvas-extensions/dataset-exposers/node-exposer'
 import EdgeExposerExtension from './canvas-extensions/dataset-exposers/edge-exposer'
 import CanvasWrapperExposerExtension from './canvas-extensions/dataset-exposers/canvas-wrapper-exposer'
-import MigrationHelper from './utils/migration-helper'
-import Quicksettings from './quicksettings'
+
+const PATCHERS = [
+  CanvasPatcher,
+  MetadataCachePatcher,
+  BacklinksPatcher,
+  OutgoingLinksPatcher
+]
 
 const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   // Dataset Exposers
@@ -48,10 +66,15 @@ const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   EdgeStylesExtension,
 
   // Basic Extensions
+  VariableBreakpointCanvasExtension,
   BetterDefaultSettingsCanvasExtension,
   CommandsCanvasExtension,
+  FloatingEdgeCanvasExtension,
+  FlipEdgeCanvasExtension,
+  ZOrderingCanvasExtension,
   BetterReadonlyCanvasExtension,
   AutoResizeNodeCanvasExtension,
+  ExportCanvasExtension,
   GroupCanvasExtension,
 
   // More Advanced Extensions
@@ -71,7 +94,7 @@ export default class AdvancedCanvasPlugin extends Plugin {
   quicksettings: Quicksettings
   windowsManager: WindowsManager
 
-  canvasPatcher: CanvasPatcher
+  patchers: Patcher[]
   canvasExtensions: CanvasExtension[]
 
 	async onload() {
@@ -88,7 +111,7 @@ export default class AdvancedCanvasPlugin extends Plugin {
 
     this.windowsManager = new WindowsManager(this)
 
-    this.canvasPatcher = new CanvasPatcher(this)
+    this.patchers = PATCHERS.map((Patcher: any) => new Patcher(this))
     this.canvasExtensions = CANVAS_EXTENSIONS.map((Extension: any) => new Extension(this))
 	}
 

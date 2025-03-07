@@ -1,9 +1,9 @@
 import { Menu } from "obsidian"
 import { Canvas } from "src/@types/Canvas"
-import { FileNameModal } from "src/utils/modal-helper"
+import { CanvasEvent } from "src/events"
 import CanvasHelper from "src/utils/canvas-helper"
-import CanvasExtension from "../core/canvas-extension"
-import { CanvasEvent } from "src/core/events"
+import { FileNameModal } from "src/utils/modal-helper"
+import CanvasExtension from "./canvas-extension"
 
 const ENCAPSULATED_FILE_NODE_SIZE = { width: 300, height: 300 }
 
@@ -40,12 +40,16 @@ export default class EncapsulateCanvasExtension extends CanvasExtension {
     const selection = canvas.getSelectionData()
 
     // Create new file
-    const sourceFileFolder = canvas.view.file.parent?.path
-    if (!sourceFileFolder) return // Should never happen
+    const canvasSettings = this.plugin.app.internalPlugins.plugins.canvas.instance.options
+
+    const defaultNewCanvasLocation = canvasSettings.newFileLocation
+    let targetFolderPath = this.plugin.app.vault.getRoot().path // If setting is "root"
+    if (defaultNewCanvasLocation === 'current') targetFolderPath = canvas.view.file?.parent?.path ?? targetFolderPath
+    else if (defaultNewCanvasLocation === 'folder') targetFolderPath = canvasSettings.newFileFolderPath ?? targetFolderPath
 
     const targetFilePath = await new FileNameModal(
       this.plugin.app,
-      sourceFileFolder,
+      targetFolderPath,
       'canvas'
     ).awaitInput()
 

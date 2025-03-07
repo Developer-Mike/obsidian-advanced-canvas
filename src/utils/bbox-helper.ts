@@ -1,4 +1,4 @@
-import { BBox, CanvasNodeData, Position, Side } from "src/@types/Canvas"
+import { BBox, Position, Side } from "src/@types/Canvas"
 
 export default class BBoxHelper {
   static combineBBoxes(bboxes: BBox[]): BBox {
@@ -92,6 +92,19 @@ export default class BBoxHelper {
         return { x: -1, y: 0 }
       default:
         return { x: 0, y: 0 }
+    }
+  }
+
+  static getOppositeSide(side: Side): Side {
+    switch (side) {
+      case 'top':
+        return 'bottom'
+      case 'right':
+        return 'left'
+      case 'bottom':
+        return 'top'
+      case 'left':
+        return 'right'
     }
   }
 

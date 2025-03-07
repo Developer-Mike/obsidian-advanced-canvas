@@ -1,5 +1,5 @@
 import { WorkspaceWindow } from "obsidian"
-import AdvancedCanvasPlugin from "./main"
+import AdvancedCanvasPlugin from "src/main"
 
 export default class WindowsManager {
   plugin: AdvancedCanvasPlugin

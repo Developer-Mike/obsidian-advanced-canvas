@@ -1,21 +1,17 @@
 import { Canvas } from "src/@types/Canvas"
+import { CanvasEvent } from "src/events"
 import CanvasHelper from "src/utils/canvas-helper"
-import { CanvasEvent } from "src/core/events"
-import CanvasExtension from "../../core/canvas-extension"
-import { BUILTIN_NODE_STYLE_ATTRIBUTES, StyleAttribute } from "./style-config"
-import SettingsManager from "src/settings"
+import CanvasExtension from "../canvas-extension"
+import { BUILTIN_NODE_STYLE_ATTRIBUTES, StyleAttribute, styleAttributeValidator } from "./style-config"
+import CssStylesConfigManager from "src/managers/css-styles-config-manager"
 
 export default class NodeStylesExtension extends CanvasExtension {
-  allNodeStyles: StyleAttribute[]
+  cssStylesManager: CssStylesConfigManager<StyleAttribute>
 
   isEnabled() { return 'nodeStylingFeatureEnabled' as const }
 
   init() {
-    this.allNodeStyles = [...BUILTIN_NODE_STYLE_ATTRIBUTES, ...this.plugin.settings.getSetting('customNodeStyleAttributes')]
-    this.plugin.registerEvent(this.plugin.app.workspace.on(
-      SettingsManager.SETTINGS_CHANGED_EVENT,
-      () => this.allNodeStyles = [...BUILTIN_NODE_STYLE_ATTRIBUTES, ...this.plugin.settings.getSetting('customNodeStyleAttributes')]
-    ))
+    this.cssStylesManager = new CssStylesConfigManager(this.plugin, 'advanced-canvas-node-style', styleAttributeValidator)
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.PopupMenuCreated,
@@ -29,7 +25,8 @@ export default class NodeStylesExtension extends CanvasExtension {
       return
 
     const selectedNodeTypes = new Set(selectionNodeData.map(node => node.type))
-    const availableNodeStyles = this.allNodeStyles.filter(style => !style.nodeTypes || style.nodeTypes.some(type => selectedNodeTypes.has(type)))
+    const availableNodeStyles = [...BUILTIN_NODE_STYLE_ATTRIBUTES, /* Legacy */ ...this.plugin.settings.getSetting('customNodeStyleAttributes'), ...this.cssStylesManager.getStyles()]
+      .filter(style => !style.nodeTypes || style.nodeTypes.some(type => selectedNodeTypes.has(type)))
 
     CanvasHelper.addStyleAttributesToPopup(
       this.plugin, canvas, availableNodeStyles,
@@ -51,7 +48,7 @@ export default class NodeStylesExtension extends CanvasExtension {
         ...nodeData,
         styleAttributes: {
           ...nodeData.styleAttributes,
-          [attribute.datasetKey]: value
+          [attribute.key]: value
         }
       })
     }

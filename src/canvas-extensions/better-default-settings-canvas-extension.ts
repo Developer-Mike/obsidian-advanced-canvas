@@ -1,9 +1,8 @@
 import { Canvas, CanvasEdge, CanvasNode } from "src/@types/Canvas"
-import { CanvasEvent } from "src/core/events"
-import SettingsManager from "src/settings"
-import { FileSelectModal } from "src/utils/modal-helper"
-import CanvasExtension from "../core/canvas-extension"
+import { CanvasEvent, PluginEvent } from "src/events"
 import CanvasHelper from "src/utils/canvas-helper"
+import { FileSelectModal } from "src/utils/modal-helper"
+import CanvasExtension from "./canvas-extension"
 
 export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtension {
   isEnabled() { return true }
@@ -12,7 +11,7 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
     this.modifyCanvasSettings(this.plugin.getCurrentCanvas())
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      SettingsManager.SETTINGS_CHANGED_EVENT,
+      PluginEvent.SettingsChanged,
       () => this.modifyCanvasSettings(this.plugin.getCurrentCanvas())
     ))
 
@@ -82,7 +81,7 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
     }
   }
 
-  private enforceNodeGridAlignment(canvas: Canvas, node: CanvasNode) {
+  private enforceNodeGridAlignment(_canvas: Canvas, node: CanvasNode) {
     if (!this.plugin.settings.getSetting('alignNewNodesToGrid')) return
 
     const nodeData = node.getData()

@@ -1,9 +1,9 @@
 import { setIcon } from "obsidian"
 import { BBox, Canvas, CanvasData, CanvasNode, SelectionData } from "src/@types/Canvas"
-import { CanvasEvent } from "src/core/events"
+import { CanvasEvent } from "src/events"
 import BBoxHelper from "src/utils/bbox-helper"
-import CanvasExtension from "../core/canvas-extension"
 import CanvasHelper from "src/utils/canvas-helper"
+import CanvasExtension from "./canvas-extension"
 
 const COLLAPSE_BUTTON_ID = 'group-collapse-button'
 

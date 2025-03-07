@@ -3,6 +3,10 @@
 
   &:not(.is-focused) {
     pointer-events: none;
+
+    .canvas-node-label {
+      pointer-events: all;
+    }
   }
 
   .canvas-node-container {

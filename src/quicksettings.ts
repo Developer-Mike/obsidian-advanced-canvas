@@ -1,8 +1,8 @@
 import App, { SuggestModal } from "obsidian"
-import AdvancedCanvasPlugin from "./main"
-import SettingsManager, { SETTINGS, AdvancedCanvasPluginSettingsValues, DEFAULT_SETTINGS_VALUES } from "./settings"
 import { DropdownSetting, Setting, StyleAttributesSetting } from "./@types/Settings"
 import { StyleAttribute } from "./canvas-extensions/advanced-styles/style-config"
+import AdvancedCanvasPlugin from "./main"
+import SettingsManager, { AdvancedCanvasPluginSettingsValues, DEFAULT_SETTINGS_VALUES, SETTINGS } from "./settings"
 
 export default class Quicksettings {
   plugin: AdvancedCanvasPlugin
@@ -138,7 +138,7 @@ class SearchStyleAttributeModal extends SearchKeyValueSettingModal<StyleAttribut
 
   getAllSuggestions(): KeyValuePair<StyleAttribute>[] {
     return this.setting.getParameters(this.settingsManager)
-      .map(styleAttribute => [styleAttribute.datasetKey, styleAttribute])
+      .map(styleAttribute => [styleAttribute.key, styleAttribute])
   }
 
   doesSuggestionMatchQuery(key: string, value: StyleAttribute, query: string): boolean {
@@ -199,8 +199,8 @@ class SetStyleAttributeModal extends SearchKeyValueSettingModal<string> {
   onSelectedSuggestion(key: string | null, _value: string): void {
     const newValue = this.settingsManager.getSetting(this.settingsKey as keyof AdvancedCanvasPluginSettingsValues) as Record<string, string>
 
-    if (key === null) delete newValue[this.styleAttribute.datasetKey]
-    else newValue[this.styleAttribute.datasetKey] = key
+    if (key === null) delete newValue[this.styleAttribute.key]
+    else newValue[this.styleAttribute.key] = key
 
     this.settingsManager.setSetting({
       [this.settingsKey]: newValue

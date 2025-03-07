@@ -23,15 +23,27 @@ export interface Canvas {
   options: CanvasOptions
   metadata: CanvasMetadata
 
+  unload(): void
+  /**
+   * @deprecated Use getData instead -> Can be outdated
+   */
+  data: CanvasData
   getData(): CanvasData
   setData(data: CanvasData): void
-
   /** Basically setData (if clearCanvas == true), but without modifying the history */
-  importData(data: CanvasData, clearCanvas?: boolean): void
+  importData(data: CanvasData, clearCanvas?: boolean, /* custom */ silent?: boolean): void
+  clear(): void
 
   nodes: Map<string, CanvasNode>
   edges: Map<string, CanvasEdge>
   getEdgesForNode(node: CanvasNode): CanvasEdge[]
+
+  edgeFrom: {
+    data: Map<CanvasNode, Set<CanvasEdge>>
+    add: (node: CanvasNode, edge: CanvasEdge) => void
+    get: (node: CanvasNode) => Set<CanvasEdge>
+  }
+  edgeTo: { data: Map<string, CanvasEdge> }
 
   dirty: Set<CanvasElement>
   markDirty(element: CanvasElement): void
@@ -39,7 +51,7 @@ export interface Canvas {
 
   wrapperEl: HTMLElement
   canvasEl: HTMLElement
-  menu: PopupMenu
+  menu: CanvasPopupMenu
   cardMenuEl: HTMLElement
   canvasControlsEl: HTMLElement
   quickSettingsButton: HTMLElement
@@ -48,21 +60,29 @@ export interface Canvas {
   canvasRect: DOMRect
   getViewportBBox(): BBox
   setViewport(tx: number, ty: number, tZoom: number): void
+
+  viewportChanged: boolean
   markViewportChanged(): void
 
   x: number
   y: number
   zoom: number
+  zoomCenter: Position | null
+  zoomBreakpoint: number
 
   tx: number
   ty: number
   tZoom: number
+  screenshotting: boolean
 
   isDragging: boolean
   setDragging(dragging: boolean): void
+
+  pointer: Position
   
-  zoomToBbox(bbox: BBox): void
+  zoomToFit(): void
   zoomToSelection(): void
+  zoomToBbox(bbox: BBox): void
 
   readonly: boolean
   setReadonly(readonly: boolean): void
@@ -78,6 +98,8 @@ export interface Canvas {
   createTextNode(options: { [key: string]: any }): CanvasNode
   createGroupNode(options: { [key: string]: any }): CanvasNode
   createFileNode(options: { [key: string]: any }): CanvasNode
+  createFileNodes(filepaths: string[], position: Position): CanvasNode[]
+  createLinkNode(options: { [key: string]: any }): CanvasNode
 
   addNode(node: CanvasNode): void
   removeNode(node: CanvasNode): void
@@ -85,6 +107,7 @@ export interface Canvas {
   removeEdge(edge: CanvasEdge): void
 
   getContainingNodes(bbox: BBox): CanvasNode[]
+  getViewportNodes(): CanvasNode[]
 
   history: CanvasHistory
   pushHistory(data: CanvasData): void
@@ -93,10 +116,15 @@ export interface Canvas {
 
   posFromEvt(event: MouseEvent): Position
   onDoubleClick(event: MouseEvent): void
+  handleCopy(e: ClipboardEvent): void
+
   handlePaste(): void
   requestSave(): void
 
+  onResize(): void
+
   // Custom
+  zoomToRealBbox(bbox: BBox): void
   isClearing?: boolean
   isCopying?: boolean
   lockedX: number
@@ -125,9 +153,7 @@ export interface CanvasHistory {
   redo: () => CanvasData|null
 }
 
-export interface SelectionData {
-  nodes: CanvasNodeData[]
-  edges: CanvasEdgeData[]
+export interface SelectionData extends CanvasData {
   center: Position
 }
 
@@ -145,10 +171,15 @@ export interface CanvasView extends ItemView {
 
   getViewData(): string
   setViewData(data: string): void
+
+  data: string
+  lastSavedData: string
+  requestSave(): void
 }
 
 export interface CanvasWorkspaceLeaf extends WorkspaceLeaf {
   id: string
+  rebuildView(): void
 }
 
 export interface NodeOptions {
@@ -192,6 +223,7 @@ export interface CanvasElement {
   initialize(): void
   setColor(color: string): void
   
+  updateBreakpoint(breakpoint: boolean): void
   setIsEditing(editing: boolean): void
   getBBox(): BBox
   
@@ -244,23 +276,33 @@ export interface CanvasNode extends CanvasElement {
 
   nodeEl: HTMLElement
   contentEl: HTMLElement
+  isContentMounted?: boolean
 
   labelEl?: HTMLElement
   file?: TFile
 
+  id: string
   x: number
   y: number
   width: number
   height: number
-
-  /** Move node to the front. */
+  
   zIndex: number
+  /** Move node to the front. */
   updateZIndex(): void
-
+  
   color: string
-
+  
   setData(data: CanvasNodeData, addHistory?: boolean): void
   getData(): CanvasNodeData
+
+  onConnectionPointerdown(e: PointerEvent, side: Side): void
+
+  // Custom
+  prevX: number
+  prevY: number
+  prevWidth: number
+  prevHeight: number
 }
 
 type Side = 'top' | 'right' | 'bottom' | 'left'
@@ -279,10 +321,11 @@ export interface CanvasEdgeData {
 
   styleAttributes?: { [key: string]: string | null }
 
+  // Custom
   portalId?: string
-  isUnsaved?: boolean
 
-  [key: string]: any
+  fromFloating: boolean
+  toFloating: boolean
 }
 
 export interface CanvasEdge extends CanvasElement {
@@ -331,22 +374,28 @@ export interface CanvasEdge extends CanvasElement {
     render(): void
   }
 
-  /** Custom field */
-  center?: Position
+  lineGroupEl: HTMLElement
+  lineEndGroupEl: HTMLElement
   getCenter(): Position
   render(): void
   updatePath(): void
+  onConnectionPointerdown(e: PointerEvent): void
   
   setData(data: CanvasEdgeData, addHistory?: boolean): void
   getData(): CanvasEdgeData
+
+  /** Custom field */
+  center?: Position
 }
 
 export interface NodeInteractionLayer {
+  canvas: Canvas
   interactionEl: HTMLElement
   setTarget(node: CanvasNode): void
 }
 
-export interface PopupMenu {
+export interface CanvasPopupMenu {
+  canvas: Canvas
   menuEl: HTMLElement
   render(): void
 }

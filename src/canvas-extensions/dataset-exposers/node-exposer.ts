@@ -1,7 +1,7 @@
 import { Canvas, CanvasNode, CanvasNodeData } from "src/@types/Canvas"
-import { CanvasEvent } from "src/core/events"
+import { CanvasEvent } from "src/events"
 import SettingsManager from "src/settings"
-import CanvasExtension from "../../core/canvas-extension"
+import CanvasExtension from "../canvas-extension"
 
 export function getExposedNodeData(settings: SettingsManager): (keyof CanvasNodeData)[] {
   const exposedData: (keyof CanvasNodeData)[] = []
@@ -29,7 +29,7 @@ export default class NodeExposerExtension extends CanvasExtension {
             ? Object.entries(nodeData[exposedDataKey])
             : [[exposedDataKey, nodeData[exposedDataKey]]]
 
-          for (const [key, value] of datasetPairs) {
+          for (const [key, value] of datasetPairs as [string, string][]) {
             if (!value) delete node.nodeEl.dataset[key]
             else node.nodeEl.dataset[key] = value
           }

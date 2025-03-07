@@ -141,10 +141,10 @@
         position: absolute;
         top: 0;
   
-        width: var(--border-width);
+        width: 0;
         height: 100%;
-  
-        background-color: var(--border-color);
+
+        border-left: var(--border-width) solid var(--border-color);
       }
   
       &::before {
@@ -277,7 +277,27 @@
   //#endregion
 
   //#region Combinations
-  &[data-border='dashed'][data-shape='document'] .canvas-node-container {
+  &[data-border][data-shape='predefined-process'] {
+    --border-width: 2px;
+    
+    .is-focused, .is-selected {
+      --border-width: 2px;
+    }
+  }
+
+  &[data-border='dashed'][data-shape='predefined-process'] .canvas-node-container {
+    &::before, &::after {
+      border-left: var(--border-width) dashed var(--border-color);
+    }
+  }
+
+  &[data-border='dotted'][data-shape='predefined-process'] .canvas-node-container {
+    &::before, &::after {
+      border-left: var(--border-width) dotted var(--border-color);
+    }
+  }
+
+  &[data-border][data-shape='document'] .canvas-node-container {
     border-top: none;
     border-bottom: none;
   }

@@ -1,14 +1,14 @@
-import { BBox, Canvas, CanvasEdge, CanvasElement, CanvasNode, Position, Side } from "src/@types/Canvas"
-import CanvasHelper from "src/utils/canvas-helper"
-import { CanvasEvent } from "src/core/events"
+import { BBox, Canvas, CanvasEdge, CanvasNode, Position, Side } from "src/@types/Canvas"
+import { CanvasEvent } from "src/events"
 import BBoxHelper from "src/utils/bbox-helper"
-import CanvasExtension from "../../core/canvas-extension"
-import { BUILTIN_EDGE_STYLE_ATTRIBUTES, StyleAttribute } from "./style-config"
-import SettingsManager from "src/settings"
+import CanvasHelper from "src/utils/canvas-helper"
+import CanvasExtension from "../canvas-extension"
 import EdgePathfindingMethod from "./edge-pathfinding-methods/edge-pathfinding-method"
+import EdgePathfindingAStar from "./edge-pathfinding-methods/pathfinding-a-star"
 import EdgePathfindingDirect from "./edge-pathfinding-methods/pathfinding-direct"
 import EdgePathfindingSquare from "./edge-pathfinding-methods/pathfinding-square"
-import EdgePathfindingAStar from "./edge-pathfinding-methods/pathfinding-a-star"
+import { BUILTIN_EDGE_STYLE_ATTRIBUTES, StyleAttribute, styleAttributeValidator } from "./style-config"
+import CssStylesConfigManager from "src/managers/css-styles-config-manager"
 
 const EDGE_PATHFINDING_METHODS: { [key: string]: new() => EdgePathfindingMethod } = {
   'direct': EdgePathfindingDirect,
@@ -16,17 +16,14 @@ const EDGE_PATHFINDING_METHODS: { [key: string]: new() => EdgePathfindingMethod 
   'a-star': EdgePathfindingAStar
 }
 
+const MAX_LIVE_UPDATE_SELECTION_SIZE = 5
 export default class EdgeStylesExtension extends CanvasExtension {
-  allEdgeStyleAttributes: StyleAttribute[]
+  cssStylesManager: CssStylesConfigManager<StyleAttribute>
 
   isEnabled() { return 'edgesStylingFeatureEnabled' as const }
 
   init() {
-    this.allEdgeStyleAttributes = [...BUILTIN_EDGE_STYLE_ATTRIBUTES, ...this.plugin.settings.getSetting('customEdgeStyleAttributes')]
-    this.plugin.registerEvent(this.plugin.app.workspace.on(
-      SettingsManager.SETTINGS_CHANGED_EVENT,
-      () => this.allEdgeStyleAttributes = [...BUILTIN_EDGE_STYLE_ATTRIBUTES, ...this.plugin.settings.getSetting('customEdgeStyleAttributes')]
-    ))
+    this.cssStylesManager = new CssStylesConfigManager(this.plugin, 'advanced-canvas-edge-style', styleAttributeValidator)
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.PopupMenuCreated,
@@ -52,7 +49,7 @@ export default class EdgeStylesExtension extends CanvasExtension {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       CanvasEvent.NodeMoved,
       // Only update edges this way if a node got moved with the arrow keys
-      (canvas: Canvas, node: CanvasNode) => node.initialized && !canvas.isDragging ? this.updateAllEdgesInArea(canvas, node.getBBox()) : void 0
+      (canvas: Canvas, node: CanvasNode, keyboard: boolean) => node.initialized && keyboard ? this.updateAllEdgesInArea(canvas, node.getBBox()) : void 0
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
@@ -87,7 +84,7 @@ export default class EdgeStylesExtension extends CanvasExtension {
       return
 
     CanvasHelper.addStyleAttributesToPopup(
-      this.plugin, canvas, this.allEdgeStyleAttributes,
+      this.plugin, canvas,  [...BUILTIN_EDGE_STYLE_ATTRIBUTES, /* Legacy */ ...this.plugin.settings.getSetting('customEdgeStyleAttributes'), ...this.cssStylesManager.getStyles()],
       selectedEdges[0].getData().styleAttributes ?? {},
       (attribute, value) => this.setStyleAttributeForSelection(canvas, attribute, value)
     )
@@ -103,7 +100,7 @@ export default class EdgeStylesExtension extends CanvasExtension {
         ...edgeData,
         styleAttributes: {
           ...edgeData.styleAttributes,
-          [attribute.datasetKey]: value
+          [attribute.key]: value
         }
       })
     }
@@ -125,7 +122,13 @@ export default class EdgeStylesExtension extends CanvasExtension {
     // Skip if edge isn't dirty or selected
     if (!canvas.dirty.has(edge) && !canvas.selection.has(edge)) return
 
-    if (!this.shouldUpdateEdge(canvas)) return
+    if (!this.shouldUpdateEdge(canvas)) {
+      const tooManySelected = canvas.selection.size > MAX_LIVE_UPDATE_SELECTION_SIZE
+      if (tooManySelected) return
+
+      const groupNodesSelected = [...canvas.selection].some((item: any) => item.getData()?.type === 'group')
+      if (groupNodesSelected) return
+    }
 
     const edgeData = edge.getData()
     
@@ -183,6 +186,8 @@ export default class EdgeStylesExtension extends CanvasExtension {
       return `0,0 5,10 0,20 -5,10`
     else if (arrowStyle === 'circle' || arrowStyle === 'circle-outline')
       return `0 0, 4.95 1.8, 7.5 6.45, 6.6 11.7, 2.7 15, -2.7 15, -6.6 11.7, -7.5 6.45, -4.95 1.8`
+    else if (arrowStyle === 'blunt')
+      return `-10,8 10,8 10,6 -10,6`
     else // Default triangle
       return `0,0 6.5,10.4 -6.5,10.4`
   }

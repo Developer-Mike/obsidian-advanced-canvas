@@ -1,6 +1,10 @@
 const CANVAS_EVENT_PREFIX = 'canvas'
 const PLUGIN_EVENT_PREFIX = 'advanced-canvas'
 
+export const PluginEvent = {
+  SettingsChanged: `${PLUGIN_EVENT_PREFIX}:settings-changed`
+}
+
 export const CanvasEvent = {
   // Built-in events
   SelectionContextMenu: `${CANVAS_EVENT_PREFIX}:selection-menu`,
@@ -15,6 +19,7 @@ export const CanvasEvent = {
     After: `${PLUGIN_EVENT_PREFIX}:viewport-changed:after`
   },
   NodeMoved: `${PLUGIN_EVENT_PREFIX}:node-moved`,
+  NodeResized: `${PLUGIN_EVENT_PREFIX}:node-resized`,
   DoubleClick: `${PLUGIN_EVENT_PREFIX}:double-click`,
   DraggingStateChanged: `${PLUGIN_EVENT_PREFIX}:dragging-state-changed`,
   NodeCreated: `${PLUGIN_EVENT_PREFIX}:node-created`,
@@ -24,10 +29,15 @@ export const CanvasEvent = {
   NodeChanged: `${PLUGIN_EVENT_PREFIX}:node-changed`,
   EdgeChanged: `${PLUGIN_EVENT_PREFIX}:edge-changed`,
   NodeTextContentChanged: `${PLUGIN_EVENT_PREFIX}:node-text-content-changed`,
+  EdgeConnectionDragging: {
+    Before: `${PLUGIN_EVENT_PREFIX}:edge-connection-dragging:before`,
+    After: `${PLUGIN_EVENT_PREFIX}:edge-connection-dragging:after`
+  },
   NodeRemoved: `${PLUGIN_EVENT_PREFIX}:node-removed`,
   EdgeRemoved: `${PLUGIN_EVENT_PREFIX}:edge-removed`,
   OnCopy: `${PLUGIN_EVENT_PREFIX}:copy`,
   NodeEditingStateChanged: `${PLUGIN_EVENT_PREFIX}:node-editing-state-changed`,
+  NodeBreakpointChanged: `${PLUGIN_EVENT_PREFIX}:node-breakpoint-changed`,
   NodeBBoxRequested: `${PLUGIN_EVENT_PREFIX}:node-bbox-requested`,
   EdgeCenterRequested: `${PLUGIN_EVENT_PREFIX}:edge-center-requested`,
   ContainingNodesRequested: `${PLUGIN_EVENT_PREFIX}:containing-nodes-requested`,

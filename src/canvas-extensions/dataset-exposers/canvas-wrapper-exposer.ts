@@ -1,12 +1,13 @@
 import { Canvas } from "src/@types/Canvas"
-import { CanvasEvent } from "src/core/events"
-import SettingsManager, { AdvancedCanvasPluginSettingsValues } from "src/settings"
-import CanvasExtension from "../../core/canvas-extension"
+import { CanvasEvent, PluginEvent } from "src/events"
+import { AdvancedCanvasPluginSettingsValues } from "src/settings"
+import CanvasExtension from "../canvas-extension"
 
 const EXPOSED_SETTINGS: (keyof AdvancedCanvasPluginSettingsValues)[] = [
   'disableFontSizeRelativeToZoom',
   'collapsibleGroupsFeatureEnabled',
   'collapsedGroupPreviewOnDrag',
+  'floatingEdgeFeatureEnabled',
 ]
 
 export default class CanvasWrapperExposerExtension extends CanvasExtension {
@@ -14,7 +15,7 @@ export default class CanvasWrapperExposerExtension extends CanvasExtension {
 
   init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      SettingsManager.SETTINGS_CHANGED_EVENT,
+      PluginEvent.SettingsChanged,
       () => this.updateExposedSettings(this.plugin.getCurrentCanvas())
     ))
 

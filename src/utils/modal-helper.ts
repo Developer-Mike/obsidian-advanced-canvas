@@ -8,7 +8,7 @@ export class FileNameModal extends SuggestModal<string> {
   constructor(app: App, parentPath: string, fileExtension: string) {
     super(app)
 
-    this.parentPath = parentPath
+    this.parentPath = parentPath.replace(/^\//, '').replace(/\/$/, '')
     this.fileExtension = fileExtension
   }
 
@@ -17,11 +17,12 @@ export class FileNameModal extends SuggestModal<string> {
     if (queryWithoutExtension === '') return []
 
     const queryWithExtension = queryWithoutExtension + '.' + this.fileExtension
-    const suggestions = [`${this.parentPath}/${queryWithExtension}`, queryWithExtension]
-      // Filter out suggestions for files that already exist
-      .filter(s => this.app.vault.getAbstractFileByPath(s) === null)
+    const suggestions = [queryWithExtension]
 
-    return suggestions
+    if (this.parentPath.length > 0) suggestions.splice(0, 0, `${this.parentPath}/${queryWithExtension}`)
+      
+    // Filter out suggestions for files that already exist
+    return suggestions.filter(s => this.app.vault.getAbstractFileByPath(s) === null)
   }
 
   renderSuggestion(text: string, el: HTMLElement) {

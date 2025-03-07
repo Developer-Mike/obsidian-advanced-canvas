@@ -1,5 +1,5 @@
 import { Canvas } from "src/@types/Canvas"
-import { CanvasEvent } from "src/core/events"
+import { CanvasEvent } from "src/events"
 import AdvancedCanvasPlugin from "src/main"
 
 export default class MigrationHelper {
@@ -18,7 +18,7 @@ export default class MigrationHelper {
       CanvasEvent.CanvasChanged,
       (canvas: Canvas) => {
         for (const node of canvas.nodes.values()) {
-          const nodeData = node.getData()
+          const nodeData = node.getData() as any
 
           const newStyleAttributes: { [key: string]: string | null } = {}
 

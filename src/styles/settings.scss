@@ -15,12 +15,16 @@
   }
 }
 
-.ac-settings-heading {
+.ac-settings-heading {  
+  border-bottom: 1px solid var(--color-accent);
+
   &:not(:first-child) {
     margin-top: var(--size-4-10) !important;
   }
-  
-  border-bottom: 1px solid var(--color-accent);
+
+  .setting-item-description {
+    margin-inline-end: 20px;
+  }
 }
 
 details.setting-item {

@@ -1,7 +1,8 @@
-import { Canvas } from "src/@types/Canvas"
+import { Canvas, CanvasEdgeData } from "src/@types/Canvas"
+import BBoxHelper from "src/utils/bbox-helper"
 import CanvasHelper from "src/utils/canvas-helper"
 import { FileSelectModal } from "src/utils/modal-helper"
-import CanvasExtension from "../core/canvas-extension"
+import CanvasExtension from "./canvas-extension"
 
 type Direction = 'up' | 'down' | 'left' | 'right'
 const DIRECTIONS = ['up', 'down', 'left', 'right'] as Direction[]
@@ -10,6 +11,16 @@ export default class CommandsCanvasExtension extends CanvasExtension {
   isEnabled() { return 'commandsFeatureEnabled' as const }
 
   init() {
+    this.plugin.addCommand({
+      id: 'toggle-readonly',
+      name: 'Toggle readonly',
+      checkCallback: CanvasHelper.canvasCommand(
+        this.plugin,
+        (_canvas: Canvas) => true,
+        (canvas: Canvas) => canvas.setReadonly(!canvas.readonly)
+      )
+    })
+
     this.plugin.addCommand({
       id: 'create-text-node',
       name: 'Create text node',
@@ -52,6 +63,16 @@ export default class CommandsCanvasExtension extends CanvasExtension {
       )
     })
 
+    this.plugin.addCommand({
+      id: 'zoom-to-fit',
+      name: 'Zoom to fit',
+      checkCallback: CanvasHelper.canvasCommand(
+        this.plugin,
+        (_canvas: Canvas) => true,
+        (canvas: Canvas) => canvas.zoomToFit()
+      )
+    })
+
     for (const direction of DIRECTIONS) {
       this.plugin.addCommand({
         id: `clone-node-${direction}`,
@@ -73,6 +94,26 @@ export default class CommandsCanvasExtension extends CanvasExtension {
         )
       })
     }
+
+    this.plugin.addCommand({
+      id: 'flip-selection-horizontally',
+      name: 'Flip selection horizontally',
+      checkCallback: CanvasHelper.canvasCommand(
+        this.plugin,
+        (canvas: Canvas) => !canvas.readonly && canvas.selection.size > 0,
+        (canvas: Canvas) => this.flipSelection(canvas, true 
+      ))
+    })
+
+    this.plugin.addCommand({
+      id: 'flip-selection-vertically',
+      name: 'Flip selection vertically',
+      checkCallback: CanvasHelper.canvasCommand(
+        this.plugin,
+        (canvas: Canvas) => !canvas.readonly && canvas.selection.size > 0,
+        (canvas: Canvas) => this.flipSelection(canvas, false)
+      )
+    })
   }
 
   private createTextNode(canvas: Canvas) {
@@ -137,5 +178,55 @@ export default class CommandsCanvasExtension extends CanvasExtension {
       width: node.width + expand.x * expandNodeStepSize,
       height: node.height + expand.y * expandNodeStepSize
     })
+  }
+
+  private flipSelection(canvas: Canvas, horizontally: boolean) {
+    const selectionData = canvas.getSelectionData()
+    if (selectionData.nodes.length === 0) return
+
+    const nodeIds = new Set()
+
+    // Flip nodes
+    for (const nodeData of selectionData.nodes) {
+      nodeIds.add(nodeData.id)
+
+      const node = canvas.nodes.get(nodeData.id)
+      if (!node) continue
+      
+      const newX = horizontally ?
+        2 * selectionData.center.x - nodeData.x - nodeData.width :
+        nodeData.x
+
+      const newY = horizontally ?
+        nodeData.y :
+        2 * selectionData.center.y - nodeData.y - nodeData.height
+
+      node.setData({
+        ...nodeData,
+        x: newX,
+        y: newY
+      })
+    }
+
+    // Flip edges
+    for (const edge of canvas.edges.values()) {
+      const edgeData = edge.getData() as CanvasEdgeData
+
+      let newFromSide = edgeData.fromSide
+      if (nodeIds.has(edgeData.fromNode) && BBoxHelper.isHorizontal(edgeData.fromSide) === horizontally)
+        newFromSide = BBoxHelper.getOppositeSide(edgeData.fromSide)
+
+      let newToSide = edgeData.toSide
+      if (nodeIds.has(edgeData.toNode) && BBoxHelper.isHorizontal(edgeData.toSide) === horizontally)
+        newToSide = BBoxHelper.getOppositeSide(edgeData.toSide)
+
+      edge.setData({
+        ...edgeData,
+        fromSide: newFromSide,
+        toSide: newToSide
+      })
+    }
+
+    canvas.pushHistory(canvas.getData())
   }
 }

@@ -1,5 +1,5 @@
 import { setIcon, setTooltip } from "obsidian"
-import { BBox, Canvas, CanvasNode, CanvasNodeData, Position, Size } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasEdge, CanvasNode, CanvasNodeData, Position, Size } from "src/@types/Canvas"
 import { StyleAttribute } from "src/canvas-extensions/advanced-styles/style-config"
 import AdvancedCanvasPlugin from "src/main"
 import BBoxHelper from "./bbox-helper"
@@ -134,41 +134,36 @@ export default class CanvasHelper {
     }
   }
 
-  static getBBox(canvasNodes: (CanvasNode | CanvasNodeData)[]) {
-    let minX = Infinity
-    let minY = Infinity
-    let maxX = -Infinity
-    let maxY = -Infinity
+  static getBBox(canvasElements: (CanvasNode | CanvasNodeData | CanvasEdge)[]) {
+    const bBoxes = canvasElements.map(element => {
+      if ((element as any).getBBox) return (element as CanvasNode).getBBox()
+      
+      const nodeData = (element as CanvasNodeData)
+      if (nodeData.x !== undefined && nodeData.y !== undefined && nodeData.width !== undefined && nodeData.height !== undefined)
+        return { minX: nodeData.x, minY: nodeData.y, maxX: nodeData.x + nodeData.width, maxY: nodeData.y + nodeData.height }
 
-    for (const node of canvasNodes) {
-      const nodeData = node.getData ? node.getData() : node
+      return null
+    }).filter(bbox => bbox !== null) as BBox[]
 
-      minX = Math.min(minX, nodeData.x)
-      minY = Math.min(minY, nodeData.y)
-      maxX = Math.max(maxX, nodeData.x + nodeData.width)
-      maxY = Math.max(maxY, nodeData.y + nodeData.height)
-    }
-
-    return { minX, minY, maxX, maxY }
+    return BBoxHelper.combineBBoxes(bBoxes)
   }
 
-  static zoomToBBox(canvas: Canvas, bbox: BBox) {
-    /* const zoomX = canvas.canvasRect.width / (1.1 * (bbox.maxX - bbox.minX))
-    const zoomY = canvas.canvasRect.height / (1.1 * (bbox.maxY - bbox.minY))
-    const zoom = Math.clamp(Math.min(zoomX, zoomY), -4, 1) */
+  static readonly MAX_ALLOWED_ZOOM = 1
+  static getSmallestAllowedZoomBBox(canvas: Canvas, bbox: BBox): BBox {
+    if (canvas.screenshotting) return bbox // Zoom is not limited when taking screenshots
 
-    const PADDING_CORRECTION_FACTOR = 1 / 1.1
-    const zoomedBBox = BBoxHelper.scaleBBox(bbox, PADDING_CORRECTION_FACTOR)
+    if (canvas.canvasRect.width === 0 || canvas.canvasRect.height === 0) return bbox
 
-    canvas.zoomToBbox(zoomedBBox)
-    
-    // Calculate zoom factor without clamp
-    const scaleFactor = Math.min(
-      canvas.canvasRect.width / (bbox.maxX - bbox.minX),
-      canvas.canvasRect.height / (bbox.maxY - bbox.minY)
-    )
+    const widthZoom = canvas.canvasRect.width / (bbox.maxX - bbox.minX)
+    const heightZoom = canvas.canvasRect.height / (bbox.maxY - bbox.minY)
+    const requiredZoom = Math.min(widthZoom, heightZoom)
 
-    canvas.tZoom = Math.log2(scaleFactor)
+    if (requiredZoom > CanvasHelper.MAX_ALLOWED_ZOOM) {
+      const scaleFactor = requiredZoom / CanvasHelper.MAX_ALLOWED_ZOOM
+      return BBoxHelper.scaleBBox(bbox, scaleFactor)
+    }
+
+    return bbox
   }
 
   static addStyleAttributesToPopup(plugin: AdvancedCanvasPlugin, canvas: Canvas, styleAttributes: StyleAttribute[], currentStyleAttributes: { [key: string]: string | null }, setStyleAttribute: (attribute: StyleAttribute, value: string | null) => void) {
@@ -180,11 +175,11 @@ export default class CanvasHelper {
   static addStyleAttributesButtons(canvas: Canvas, stylableAttributes: StyleAttribute[], currentStyleAttributes: { [key: string]: string | null }, setStyleAttribute: (attribute: StyleAttribute, value: string | null) => void) {
     for (const stylableAttribute of stylableAttributes) {
       const selectedStyle = stylableAttribute.options
-        .find(option => currentStyleAttributes[stylableAttribute.datasetKey] === option.value) ??
+        .find(option => currentStyleAttributes[stylableAttribute.key] === option.value) ??
         stylableAttribute.options.find(value => value.value === null)!!
 
       const menuOption = CanvasHelper.createExpandablePopupMenuOption({
-        id: `menu-option-${stylableAttribute.datasetKey}`,
+        id: `menu-option-${stylableAttribute.key}`,
         label: stylableAttribute.label,
         icon: selectedStyle.icon
       }, stylableAttribute.options.map((styleOption) => ({
@@ -195,10 +190,10 @@ export default class CanvasHelper {
           setStyleAttribute(stylableAttribute, styleOption.value)
 
           // Keep correct reference
-          currentStyleAttributes[stylableAttribute.datasetKey] = styleOption.value
+          currentStyleAttributes[stylableAttribute.key] = styleOption.value
 
           // Update icon
-         setIcon(menuOption, styleOption.icon)
+          setIcon(menuOption, styleOption.icon)
 
           // Close menu
           menuOption.dispatchEvent(new Event('click'))
@@ -273,7 +268,7 @@ export default class CanvasHelper {
         iconElement.classList.add('menu-item-icon')
 
         let selectedStyle = stylableAttribute.options
-          .find(option => currentStyleAttributes[stylableAttribute.datasetKey] === option.value) ??
+          .find(option => currentStyleAttributes[stylableAttribute.key] === option.value) ??
           stylableAttribute.options.find(value => value.value === null)!!
         setIcon(iconElement, selectedStyle.icon)
 
@@ -330,21 +325,24 @@ export default class CanvasHelper {
 
           // Add style options
           for (const styleOption of stylableAttribute.options) {
-            const styleMenuDropdownSubmenuOptionElement = document.createElement('div')
-            styleMenuDropdownSubmenuOptionElement.classList.add('menu-item')
-            styleMenuDropdownSubmenuOptionElement.classList.add('tappable')
-
-            // Add icon
-            const submenuIconElement = document.createElement('div')
-            submenuIconElement.classList.add('menu-item-icon')
-            setIcon(submenuIconElement, styleOption.icon)
-            styleMenuDropdownSubmenuOptionElement.appendChild(submenuIconElement)
-
-            // Add label
-            const submenuLabelElement = document.createElement('div')
-            submenuLabelElement.classList.add('menu-item-title')
-            submenuLabelElement.textContent = styleOption.label
-            styleMenuDropdownSubmenuOptionElement.appendChild(submenuLabelElement)
+            const styleMenuDropdownSubmenuOptionElement = this.createDropdownOptionElement({
+              label: styleOption.label,
+              icon: styleOption.icon,
+              callback: () => {
+                // Set style attribute
+                setStyleAttribute(stylableAttribute, styleOption.value)
+  
+                // Keep correct reference
+                currentStyleAttributes[stylableAttribute.key] = styleOption.value
+                selectedStyle = styleOption
+  
+                // Update icon
+                setIcon(iconElement, styleOption.icon)
+  
+                // Close menu
+                styleMenuDropdownSubmenuElement.remove()
+              }
+            })
 
             // Add selected icon
             if (selectedStyle === styleOption) {
@@ -360,31 +358,6 @@ export default class CanvasHelper {
 
             // Add to dropdown submenu
             styleMenuDropdownSubmenuElement.appendChild(styleMenuDropdownSubmenuOptionElement)
-
-            // Add hover effect
-            styleMenuDropdownSubmenuOptionElement.addEventListener('pointerenter', () => {
-              styleMenuDropdownSubmenuOptionElement.classList.add('selected')
-            })
-
-            styleMenuDropdownSubmenuOptionElement.addEventListener('pointerleave', () => {
-              styleMenuDropdownSubmenuOptionElement.classList.remove('selected')
-            })
-
-            // Add click event
-            styleMenuDropdownSubmenuOptionElement.addEventListener('click', () => {
-              // Set style attribute
-              setStyleAttribute(stylableAttribute, styleOption.value)
-
-              // Keep correct reference
-              currentStyleAttributes[stylableAttribute.datasetKey] = styleOption.value
-              selectedStyle = styleOption
-
-              // Update icon
-              setIcon(iconElement, styleOption.icon)
-
-              // Close menu
-              styleMenuDropdownSubmenuElement.remove()
-            })
           }
 
           // Append to body
@@ -395,5 +368,46 @@ export default class CanvasHelper {
       // Append to body
       popupMenuElement.appendChild(styleMenuDropdownElement)
     })
+  }
+
+  static createDropdownOptionElement(menuOption: MenuOption): HTMLElement {
+    const menuDropdownOptionElement = document.createElement('div')
+    menuDropdownOptionElement.classList.add('menu-item')
+    menuDropdownOptionElement.classList.add('tappable')
+
+    // Add icon
+    const iconElement = document.createElement('div')
+    iconElement.classList.add('menu-item-icon')
+    setIcon(iconElement, menuOption.icon)
+    menuDropdownOptionElement.appendChild(iconElement)
+
+    // Add label
+    const labelElement = document.createElement('div')
+    labelElement.classList.add('menu-item-title')
+    labelElement.textContent = menuOption.label
+    menuDropdownOptionElement.appendChild(labelElement)
+
+    // Add hover effect
+    menuDropdownOptionElement.addEventListener('pointerenter', () => {
+      menuDropdownOptionElement.classList.add('selected')
+    })
+
+    menuDropdownOptionElement.addEventListener('pointerleave', () => {
+      menuDropdownOptionElement.classList.remove('selected')
+    })
+
+    // Add click event
+    menuDropdownOptionElement.addEventListener('click', () => {
+      menuOption.callback?.()
+    })
+
+    return menuDropdownOptionElement
+  }
+
+  static createDropdownSeparatorElement(): HTMLElement {
+    const separatorElement = document.createElement('div')
+    separatorElement.classList.add('menu-separator')
+
+    return separatorElement
   }
 }

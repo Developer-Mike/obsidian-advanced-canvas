@@ -1,8 +1,8 @@
 import { BBox, Canvas, Position, Side } from "src/@types/Canvas"
-import EdgePathfindingMethod, { EdgePath } from "./edge-pathfinding-method"
-import SvgPathHelper from "src/utils/svg-path-helper"
 import AdvancedCanvasPlugin from "src/main"
 import BBoxHelper from "src/utils/bbox-helper"
+import SvgPathHelper from "src/utils/svg-path-helper"
+import EdgePathfindingMethod, { EdgePath } from "./edge-pathfinding-method"
 
 const MAX_MS_CALCULATION = 100
 const DIRECTIONS = [
@@ -10,6 +10,7 @@ const DIRECTIONS = [
   { dx: 1, dy: 1 }, { dx: -1, dy: 1 }, { dx: 1, dy: -1 }, { dx: -1, dy: -1 },
 ] as const
 const DIAGONAL_COST = Math.sqrt(2)
+const SMOOTHEN_PATH_TENSION = 0.2
 
 class Node {
   x: number
@@ -40,26 +41,33 @@ export default class EdgePathfindingAStar extends EdgePathfindingMethod {
     const nodeBBoxes = [...canvas.nodes.values()]
       .filter(node => {
         const nodeData = node.getData()
-        
-        const isGroup = nodeData.type === 'group' // Exclude group nodes
-        const isOpenPortal = nodeData.portalToFile !== undefined // Exclude open portals
-        
-        return !isGroup && !isOpenPortal
+
+        if (nodeData.portalToFile !== undefined) return false // Exclude open portals
+
+        // Exclude (group) nodes that contain either the start or end position
+        const nodeBBox = node.getBBox()
+        const nodeContainsFromPos = BBoxHelper.insideBBox(fromPos, nodeBBox, true)
+        const nodeContainsToPos = BBoxHelper.insideBBox(toPos, nodeBBox, true)
+
+        return !nodeContainsFromPos && !nodeContainsToPos
       }).map(node => node.getBBox())
     
     const fromPosWithMargin = BBoxHelper.moveInDirection(fromPos, fromSide, 10)
     const toPosWithMargin = BBoxHelper.moveInDirection(toPos, toSide, 10)
 
     const gridResolution = plugin.settings.getSetting('edgeStylePathfinderGridResolution')
-    const pathArray = this.aStarAlgorithm(fromPosWithMargin, fromSide, toPosWithMargin, toSide, nodeBBoxes, gridResolution)
+    let pathArray = this.aStarAlgorithm(fromPosWithMargin, fromSide, toPosWithMargin, toSide, nodeBBoxes, gridResolution)
     if (!pathArray) return null // No path found - use default path
 
     // Make connection points to the node removing the margin
     pathArray.splice(0, 0, fromPos)
     pathArray.splice(pathArray.length, 0, toPos)
 
-    const roundedPath = plugin.settings.getSetting('edgeStylePathfinderPathRounded')
-    const svgPath = SvgPathHelper.pathArrayToSvgPath(pathArray, roundedPath)
+    // Smoothen path
+    if (plugin.settings.getSetting('edgeStylePathfinderPathRounded'))
+      pathArray = SvgPathHelper.smoothenPathArray(pathArray, SMOOTHEN_PATH_TENSION)
+
+    const svgPath = SvgPathHelper.pathArrayToSvgPath(pathArray)
 
     return {
       svgPath: svgPath,

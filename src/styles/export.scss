@@ -1,0 +1,25 @@
+.canvas.is-exporting {
+  --zoom-multiplier: 1;
+
+  * {
+    pointer-events: none !important;
+    transition: none !important;
+  }
+
+  & > .canvas-node {
+    --variable-breakpoint: -999999999;
+  }
+
+  #watermark-ac {
+    z-index: 9999999;
+    position: absolute;
+  }
+}
+
+.progress-bar-modal-ac {
+  margin-top: .75em;
+
+  &.error .setting-progress-bar {
+    color: var(--color-error);
+  }
+}

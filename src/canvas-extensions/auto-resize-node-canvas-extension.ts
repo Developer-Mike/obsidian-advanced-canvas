@@ -1,8 +1,8 @@
-import { Canvas, CanvasNode, CanvasNodeData } from "src/@types/Canvas"
-import { CanvasEvent } from "src/core/events"
-import CanvasExtension from "../core/canvas-extension"
-import CanvasHelper from "src/utils/canvas-helper"
 import { ViewUpdate } from "@codemirror/view"
+import { Canvas, CanvasNode, CanvasNodeData } from "src/@types/Canvas"
+import { CanvasEvent } from "src/events"
+import CanvasHelper from "src/utils/canvas-helper"
+import CanvasExtension from "./canvas-extension"
 
 export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
   isEnabled() { return 'autoResizeNodeFeatureEnabled' as const }

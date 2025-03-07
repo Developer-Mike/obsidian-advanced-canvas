@@ -1,4 +1,5 @@
 import { CanvasNodeType } from "src/@types/Canvas"
+import TextHelper from "src/utils/text-helper"
 
 export interface StyleAttributeOption {
   icon: string
@@ -7,15 +8,47 @@ export interface StyleAttributeOption {
 }
 
 export interface StyleAttribute {
-  datasetKey: string
+  key: string
   label: string
   nodeTypes?: CanvasNodeType[]
   options: StyleAttributeOption[]
 }
 
+export function styleAttributeValidator(json: Record<string, any>): StyleAttribute | null {
+  const hasKey = json.key !== undefined
+  const hasLabel = json.label !== undefined
+  const hasOptions = Array.isArray(json.options)
+
+  if (!hasKey) console.error('Style attribute is missing the "key" property')
+  if (!hasLabel) console.error('Style attribute is missing the "label" property')
+  if (!hasOptions) console.error('Style attribute is missing the "options" property or it is not an array')
+
+  // Camel case the key
+  json.key = TextHelper.toCamelCase(json.key)
+
+  let optionsValid = true
+  let hasDefault = false
+  for (const option of json.options) {
+    const hasIcon = option.icon !== undefined
+    const hasLabel = option.label !== undefined
+    const hasValue = option.value !== undefined
+
+    if (!hasIcon) console.error(`Style attribute option (${option.value ?? option.label}) is missing the "icon" property`)
+    if (!hasLabel) console.error(`Style attribute option (${option.value}) is missing the "label" property`)
+    if (!hasValue) console.error(`Style attribute option (${option.label}) is missing the "value" property`)
+
+    if (!hasIcon || !hasLabel || !hasValue) optionsValid = false
+    if (option.value === null) hasDefault = true
+  }
+  if (!hasDefault) console.error('Style attribute is missing a default option (option with a "value" of null)')
+
+  const isValid = hasKey && hasLabel && hasOptions && optionsValid && hasDefault
+  return isValid ? json as StyleAttribute : null
+}
+
 export const BUILTIN_NODE_STYLE_ATTRIBUTES = [
   {
-    datasetKey: 'textAlign',
+    key: 'textAlign',
     label: 'Text Alignment',
     nodeTypes: ['text'],
     options: [
@@ -37,7 +70,7 @@ export const BUILTIN_NODE_STYLE_ATTRIBUTES = [
     ]
   },
   {
-    datasetKey: 'shape',
+    key: 'shape',
     label: 'Shape',
     nodeTypes: ['text'],
     options: [
@@ -84,7 +117,7 @@ export const BUILTIN_NODE_STYLE_ATTRIBUTES = [
     ]
   },
   {
-    datasetKey: 'border',
+    key: 'border',
     label: 'Border',
     options: [
       {
@@ -113,7 +146,7 @@ export const BUILTIN_NODE_STYLE_ATTRIBUTES = [
 
 export const BUILTIN_EDGE_STYLE_ATTRIBUTES = [
   {
-    datasetKey: 'path',
+    key: 'path',
     label: 'Path Style',
     options: [
       {
@@ -139,7 +172,7 @@ export const BUILTIN_EDGE_STYLE_ATTRIBUTES = [
     ]
   },
   {
-    datasetKey: 'arrow',
+    key: 'arrow',
     label: 'Arrow Style',
     options: [
       {
@@ -181,11 +214,16 @@ export const BUILTIN_EDGE_STYLE_ATTRIBUTES = [
         icon: 'arrow-circle-outline',
         label: 'Circle Outline',
         value: 'circle-outline'
+      },
+      {
+        icon: 'tally-1',
+        label: 'Blunt',
+        value: 'blunt'
       }
     ]
   },
   {
-    datasetKey: 'pathfindingMethod',
+    key: 'pathfindingMethod',
     label: 'Pathfinding Method',
     options: [
       {
