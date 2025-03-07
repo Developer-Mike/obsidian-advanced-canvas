@@ -40,6 +40,7 @@ export interface AdvancedCanvasPluginSettingsValues {
   defaultEdgeLineDirection: keyof typeof SETTINGS.edgesStylingFeatureEnabled.children.defaultEdgeLineDirection.options
   defaultEdgeStyleAttributes: { [key: string]: string }
   edgeStyleUpdateWhileDragging: boolean
+  edgeStyleSquarePathRounded: boolean
   edgeStyleDirectRotateArrow: boolean
   edgeStylePathfinderGridResolution: number
   edgeStylePathfinderPathRounded: boolean
@@ -122,6 +123,7 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   defaultEdgeLineDirection: 'unidirectional',
   defaultEdgeStyleAttributes: {},
   edgeStyleUpdateWhileDragging: false,
+  edgeStyleSquarePathRounded: true,
   edgeStyleDirectRotateArrow: false,
   edgeStylePathfinderGridResolution: 10,
   edgeStylePathfinderPathRounded: true,
@@ -306,6 +308,11 @@ export const SETTINGS = {
       edgeStyleUpdateWhileDragging: {
         label: 'Update edge style while dragging (Can be very slow)',
         description: 'When enabled, the edge style will be updated while dragging an edge.',
+        type: 'boolean'
+      },
+      edgeStyleSquarePathRounded: {
+        label: 'Square path rounded',
+        description: 'When enabled, the square path\'s corners will be rounded.',
         type: 'boolean'
       },
       edgeStyleDirectRotateArrow: {

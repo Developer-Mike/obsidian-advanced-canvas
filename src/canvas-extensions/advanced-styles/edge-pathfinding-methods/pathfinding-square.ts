@@ -5,8 +5,10 @@ import CanvasHelper from "src/utils/canvas-helper"
 import SvgPathHelper from "src/utils/svg-path-helper"
 import EdgePathfindingMethod, { EdgePath } from "./edge-pathfinding-method"
 
+const ROUNDED_EDGE_RADIUS = 5
+
 export default class EdgePathfindingSquare extends EdgePathfindingMethod {
-  getPath(_plugin: AdvancedCanvasPlugin, _canvas: Canvas, fromPos: Position, fromBBoxSidePos: Position, fromSide: Side, toPos: Position, toBBoxSidePos: Position, toSide: Side): EdgePath {
+  getPath(plugin: AdvancedCanvasPlugin, _canvas: Canvas, fromPos: Position, fromBBoxSidePos: Position, fromSide: Side, toPos: Position, toBBoxSidePos: Position, toSide: Side): EdgePath {
     let pathArray: Position[] = []
     let center: Position = { x: 0, y: 0 }
 
@@ -79,7 +81,9 @@ export default class EdgePathfindingSquare extends EdgePathfindingMethod {
     }
 
     return {
-      svgPath: SvgPathHelper.pathArrayToSvgPath(pathArray, false),
+      svgPath: plugin.settings.getSetting('edgeStyleSquarePathRounded') ?
+        SvgPathHelper.pathArrayToRoundedSvgPath(pathArray, ROUNDED_EDGE_RADIUS) :
+        SvgPathHelper.pathArrayToSvgPath(pathArray),
       center: center,
       rotateArrows: false
     }
