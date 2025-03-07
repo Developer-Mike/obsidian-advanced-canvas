@@ -63,64 +63,64 @@ export default class SvgPathHelper {
     ).join(' ')
   }
 
-  static pathArrayToRoundedSvgPath(pathArray: Position[], radius: number): string {
-    const spacedPathArray: Position[] = []
-    if (pathArray.length >= 1) spacedPathArray.push(pathArray[0])
+  static pathArrayToRoundedSvgPath(pathArray: Position[], targetRadius: number): string {
+    if (pathArray.length < 3)
+      return this.pathArrayToSvgPath(pathArray)
 
-    for (let i = 0; i < pathArray.length - 1; i++) {
-      const start = pathArray[i]
-      const end = pathArray[i + 1]
-    
-      const delta = {
-        x: end.x - start.x,
-        y: end.y - start.y
-      }
-      const unit = {
-        x: Math.max(-1, Math.min(1, delta.x)),
-        y: Math.max(-1, Math.min(1, delta.y))
-      }
-    
-      // Check if the line is already shorter than the radius -> Would result in a weird curve
-      if (Math.max(Math.abs(delta.x), Math.abs(delta.y)) <= radius * 2)
+    const commands: string[] = []
+    commands.push(`M ${pathArray[0].x} ${pathArray[0].y}`)
+
+    for (let i = 1; i < pathArray.length - 1; i++) {
+      const previous = pathArray[i - 1]
+      const current = pathArray[i]
+      const next = pathArray[i + 1]
+
+      const prevDelta = { x: current.x - previous.x, y: current.y - previous.y }
+      const nextDelta = { x: next.x - current.x, y: next.y - current.y }
+      const prevLen = Math.sqrt(prevDelta.x * prevDelta.x + prevDelta.y * prevDelta.y)
+      const nextLen = Math.sqrt(nextDelta.x * nextDelta.x + nextDelta.y * nextDelta.y)
+
+      const prevUnit = prevLen ? { x: prevDelta.x / prevLen, y: prevDelta.y / prevLen } : { x: 0, y: 0 }
+      const nextUnit = nextLen ? { x: nextDelta.x / nextLen, y: nextDelta.y / nextLen } : { x: 0, y: 0 }
+
+      let dot = prevUnit.x * nextUnit.x + prevUnit.y * nextUnit.y
+      dot = Math.max(-1, Math.min(1, dot))
+      const angle = Math.acos(dot)
+
+      // if the angle is nearly 0 (or almost straight) no rounding is needed
+      if (angle < 0.01 || Math.abs(Math.PI - angle) < 0.01) {
+        commands.push(`L ${current.x} ${current.y}`)
         continue
-    
-      let adjustedStart = i > 0 ? {
-        x: start.x + unit.x * radius,
-        y: start.y + unit.y * radius
-      } : start
-      let adjustedEnd = i < pathArray.length - 2 ? {
-        x: end.x - unit.x * radius,
-        y: end.y - unit.y * radius
-      } : end
+      }
 
-      spacedPathArray.push(adjustedStart)
-      spacedPathArray.push(adjustedEnd)
+      // compute the desired offset along the segments for the target radius
+      const desiredOffset = targetRadius * Math.tan(angle / 2)
+      // clamp the offset to half of each adjacent segment so it doesn't overshoot
+      const d = Math.min(desiredOffset, prevLen / 2, nextLen / 2)
+      // recalc the effective radius in case d was clamped
+      const effectiveRadius = d / Math.tan(angle / 2)
+
+      const firstAnchor = {
+        x: current.x - prevUnit.x * d,
+        y: current.y - prevUnit.y * d
+      }
+      const secondAnchor = {
+        x: current.x + nextUnit.x * d,
+        y: current.y + nextUnit.y * d
+      }
+
+      commands.push(`L ${firstAnchor.x} ${firstAnchor.y}`)
+
+      // determine the sweep flag using the cross product
+      const cross = prevDelta.x * nextDelta.y - prevDelta.y * nextDelta.x
+      const sweepFlag = cross < 0 ? 0 : 1
+
+      commands.push(`A ${effectiveRadius} ${effectiveRadius} 0 0 ${sweepFlag} ${secondAnchor.x} ${secondAnchor.y}`)
     }
-    
-    if (pathArray.length >= 1) spacedPathArray.push(pathArray[pathArray.length - 1])
 
-    return spacedPathArray.map((position, index) => {
-      if (index === 0) return `M ${position.x} ${position.y}`
-      if (index % 2 === 0 || index === 1 || index === spacedPathArray.length - 1) return `L ${position.x} ${position.y}`
+    const last = pathArray[pathArray.length - 1]
+    commands.push(`L ${last.x} ${last.y}`)
 
-      const previousLine = {
-        x: spacedPathArray[index - 1].x - spacedPathArray[index - 2].x,
-        y: spacedPathArray[index - 1].y - spacedPathArray[index - 2].y
-      }
-      const previousLineHorizontal = previousLine.x !== 0
-      const previousLinePositive = previousLine.x > 0 || previousLine.y > 0
-
-      const upcomingLine = {
-        x: spacedPathArray[index + 1].x - spacedPathArray[index].x,
-        y: spacedPathArray[index + 1].y - spacedPathArray[index].y
-      }
-      const upcomingLineHorizontal = upcomingLine.x !== 0
-      const upcomingLinePositive = upcomingLine.x > 0 || upcomingLine.y > 0
-
-      if (previousLineHorizontal === upcomingLineHorizontal) return `L ${position.x} ${position.y}` // Shouldn't happen
-
-      const southEastDirection = (previousLinePositive === upcomingLinePositive) === previousLineHorizontal === (index % 2 === 1)
-      return `A ${radius} ${radius} 0 0 ${southEastDirection ? 1 : 0} ${position.x} ${position.y}`
-    }).join(' ')
+    return commands.join(' ')
   }
 }
