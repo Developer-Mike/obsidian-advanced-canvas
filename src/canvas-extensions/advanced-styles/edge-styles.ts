@@ -10,7 +10,7 @@ import EdgePathfindingSquare from "./edge-pathfinding-methods/pathfinding-square
 import { BUILTIN_EDGE_STYLE_ATTRIBUTES, StyleAttribute, styleAttributeValidator } from "./style-config"
 import CssStylesConfigManager from "src/managers/css-styles-config-manager"
 
-const EDGE_PATHFINDING_METHODS: { [key: string]: new() => EdgePathfindingMethod } = {
+const EDGE_PATHFINDING_METHODS: { [key: string]: typeof EdgePathfindingMethod } = {
   'direct': EdgePathfindingDirect,
   'square': EdgePathfindingSquare,
   'a-star': EdgePathfindingAStar
@@ -140,17 +140,24 @@ export default class EdgeStylesExtension extends CanvasExtension {
     // Set pathfinding method
     const pathfindingMethod = edgeData.styleAttributes?.pathfindingMethod
     if (pathfindingMethod) {
-      const fromBBoxSidePos = BBoxHelper.getCenterOfBBoxSide(edge.from.node.getBBox(), edge.from.side)
+      const fromNodeBBox = edge.from.node.getBBox()
+      const fromBBoxSidePos = BBoxHelper.getCenterOfBBoxSide(fromNodeBBox, edge.from.side)
       const fromPos = edge.from.end === 'none' ? 
         fromBBoxSidePos :
         edge.bezier.from
       
-      const toBBoxSidePos = BBoxHelper.getCenterOfBBoxSide(edge.to.node.getBBox(), edge.to.side)
+      const toNodeBBox = edge.to.node.getBBox()
+      const toBBoxSidePos = BBoxHelper.getCenterOfBBoxSide(toNodeBBox, edge.to.side)
       const toPos = edge.to.end === 'none' ? 
         toBBoxSidePos :
         edge.bezier.to
 
-      const path = new EDGE_PATHFINDING_METHODS[pathfindingMethod]().getPath(this.plugin, canvas, fromPos, fromBBoxSidePos, edge.from.side, toPos, toBBoxSidePos, edge.to.side)
+      const path = new (EDGE_PATHFINDING_METHODS[pathfindingMethod] as any)(
+        this.plugin, 
+        canvas, 
+        fromNodeBBox, fromPos, fromBBoxSidePos, edge.from.side, 
+        toNodeBBox, toPos, toBBoxSidePos, edge.to.side
+      ).getPath()
       if (!path) return
 
       edge.center = path.center

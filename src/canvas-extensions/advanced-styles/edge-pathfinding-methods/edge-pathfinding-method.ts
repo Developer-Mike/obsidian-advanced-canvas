@@ -1,13 +1,15 @@
-import { Canvas, Position, Side } from "src/@types/Canvas"
+import { BBox, Canvas, Position, Side } from "src/@types/Canvas"
 import AdvancedCanvasPlugin from "src/main"
 
 export default abstract class EdgePathfindingMethod {
   constructor(
     protected plugin: AdvancedCanvasPlugin,
     protected canvas: Canvas,
+    protected fromNodeBBox: BBox,
     protected fromPos: Position,
     protected fromBBoxSidePos: Position,
     protected fromSide: Side,
+    protected toNodeBBox: BBox,
     protected toPos: Position,
     protected toBBoxSidePos: Position,
     protected toSide: Side

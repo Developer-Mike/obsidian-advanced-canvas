@@ -1,5 +1,4 @@
-import { Canvas, Position, Side } from "src/@types/Canvas"
-import AdvancedCanvasPlugin from "src/main"
+import { Position, Side } from "src/@types/Canvas"
 import BBoxHelper from "src/utils/bbox-helper"
 import CanvasHelper from "src/utils/canvas-helper"
 import SvgPathHelper from "src/utils/svg-path-helper"
@@ -8,65 +7,26 @@ import EdgePathfindingMethod, { EdgePath } from "./edge-pathfinding-method"
 const ROUNDED_EDGE_RADIUS = 5
 
 export default class EdgePathfindingSquare extends EdgePathfindingMethod {
-  getPath(): EdgePath {
-    let pathArray: Position[]
-    let center: Position
-    const isFromHorizontal = BBoxHelper.isHorizontal(this.fromSide)
-    const isToHorizontal = BBoxHelper.isHorizontal(this.toSide)
+  getPath(): EdgePath | null {
+    const pathArray: Position[] = []
+    let center: Position = { 
+      x: (this.fromPos.x + this.toPos.x) / 2, 
+      y: (this.fromPos.y + this.toPos.y) / 2
+    }
   
     if (this.fromSide === this.toSide) {
-      // U shape: same side
-      const direction = BBoxHelper.direction(this.fromSide)
+      const uPath = this.getUPath(this.fromPos, this.toPos, this.fromSide, this.toSide)
 
-      if (isFromHorizontal) {
-        const x = Math.max(this.fromBBoxSidePos.x, this.toBBoxSidePos.x) + direction * CanvasHelper.GRID_SIZE
-        pathArray = [
-          this.fromPos,
-          { x: x, y: this.fromBBoxSidePos.y },
-          { x: x, y: this.toBBoxSidePos.y },
-          this.toPos
-        ]
-      } else {
-        const y = Math.max(this.fromBBoxSidePos.y, this.toBBoxSidePos.y) + direction * CanvasHelper.GRID_SIZE
-        pathArray = [
-          this.fromPos,
-          { x: this.fromBBoxSidePos.x, y: y },
-          { x: this.toBBoxSidePos.x, y: y },
-          this.toPos
-        ]
-      }
-      
-      center = {
-        x: (pathArray[1].x + pathArray[2].x) / 2,
-        y: (pathArray[1].y + pathArray[2].y) / 2
-      }
-    } else if (isFromHorizontal === isToHorizontal) {
-      // Z shape: same axis, different sides
-      if (isFromHorizontal) {
-        const midX = this.fromBBoxSidePos.x + (this.toBBoxSidePos.x - this.fromBBoxSidePos.x) / 2
-        pathArray = [
-          this.fromPos,
-          { x: midX, y: this.fromBBoxSidePos.y },
-          { x: midX, y: this.toBBoxSidePos.y },
-          this.toPos
-        ]
-      } else {
-        const midY = this.fromBBoxSidePos.y + (this.toBBoxSidePos.y - this.fromBBoxSidePos.y) / 2
-        pathArray = [
-          this.fromPos,
-          { x: this.fromBBoxSidePos.x, y: midY },
-          { x: this.toBBoxSidePos.x, y: midY },
-          this.toPos
-        ]
-      }
+      pathArray.push(...uPath.pathArray)
+      center = uPath.center
+    } else if (BBoxHelper.isHorizontal(this.fromSide) === BBoxHelper.isHorizontal(this.toSide)) {
+      const zPath = this.getZPath(this.fromPos, this.toPos, this.fromSide, this.toSide)
 
-      center = {
-        x: (this.fromBBoxSidePos.x + this.toBBoxSidePos.x) / 2,
-        y: (this.fromBBoxSidePos.y + this.toBBoxSidePos.y) / 2
-      }
+      pathArray.push(...zPath.pathArray)
+      center = zPath.center
     } else {
       // Different axis -> L-shape or 5-point path
-      const idealCenter = isFromHorizontal ? {
+      const idealCenter = BBoxHelper.isHorizontal(this.fromSide) ? {
         x: this.toBBoxSidePos.x,
         y: this.fromBBoxSidePos.y
       } : {
@@ -85,36 +45,77 @@ export default class EdgePathfindingSquare extends EdgePathfindingMethod {
         this.toSide === "right" && idealCenter.x < this.toPos.x
 
       if (isPathCollidingAtFrom || isPathCollidingAtTo) {
-        pathArray = [this.fromPos]
+        pathArray.push(this.fromPos)
 
-        if (isPathCollidingAtFrom) {
-          const direction = BBoxHelper.direction(this.fromSide)
+        if (isPathCollidingAtFrom && isPathCollidingAtTo) {
+          // TODO: Calculate
+          return null
+        } else {
+          if (isPathCollidingAtFrom) {
+            const direction = BBoxHelper.direction(this.fromSide)
 
-          const firstDetourPoint = isFromHorizontal ? {
-            x: this.fromBBoxSidePos.x + direction * CanvasHelper.GRID_SIZE,
-            y: this.fromBBoxSidePos.y
-          } : {
-            x: this.fromBBoxSidePos.x,
-            y: this.fromBBoxSidePos.y + direction * CanvasHelper.GRID_SIZE
+            const firstFromDetourPoint = BBoxHelper.isHorizontal(this.fromSide) ? {
+              x: this.fromBBoxSidePos.x + direction * CanvasHelper.GRID_SIZE,
+              y: this.fromBBoxSidePos.y
+            } : {
+              x: this.fromBBoxSidePos.x,
+              y: this.fromBBoxSidePos.y + direction * CanvasHelper.GRID_SIZE
+            }
+            
+            const secondFromDetourPoint = BBoxHelper.isHorizontal(this.fromSide) ? {
+              x: firstFromDetourPoint.x,
+              y: BBoxHelper.getCenterOfBBoxSide(this.fromNodeBBox, BBoxHelper.getOppositeSide(this.toSide)).y
+            } : {
+              x: BBoxHelper.getCenterOfBBoxSide(this.fromNodeBBox, BBoxHelper.getOppositeSide(this.toSide)).x,
+              y: firstFromDetourPoint.y
+            }
+            
+            const zPath = this.getZPath(secondFromDetourPoint, this.toPos, BBoxHelper.getOppositeSide(this.toSide), this.toSide)
+
+            pathArray.push(firstFromDetourPoint)
+            pathArray.push(secondFromDetourPoint)
+            pathArray.push(...zPath.pathArray)
+
+            center = zPath.center
+          } 
+          
+          if (isPathCollidingAtTo) {
+            const direction = BBoxHelper.direction(this.toSide)
+
+            const firstToDetourPoint = BBoxHelper.isHorizontal(this.toSide) ? {
+              x: this.toBBoxSidePos.x + direction * CanvasHelper.GRID_SIZE,
+              y: this.toBBoxSidePos.y
+            } : {
+              x: this.toBBoxSidePos.x,
+              y: this.toBBoxSidePos.y + direction * CanvasHelper.GRID_SIZE
+            }
+
+            const secondToDetourPoint = BBoxHelper.isHorizontal(this.toSide) ? {
+              x: firstToDetourPoint.x,
+              y: BBoxHelper.getCenterOfBBoxSide(this.toNodeBBox, BBoxHelper.getOppositeSide(this.fromSide)).y
+            } : {
+              x: BBoxHelper.getCenterOfBBoxSide(this.toNodeBBox, BBoxHelper.getOppositeSide(this.fromSide)).x,
+              y: firstToDetourPoint.y
+            }
+
+            const zPath = this.getZPath(this.fromPos, secondToDetourPoint, this.fromSide, BBoxHelper.getOppositeSide(this.fromSide))
+            
+            pathArray.push(...zPath.pathArray)
+            pathArray.push(secondToDetourPoint)
+            pathArray.push(firstToDetourPoint)
+            
+            center = zPath.center
           }
-
-          pathArray.push(firstDetourPoint)
         }
 
         pathArray.push(this.toPos)
-
-        // TODO: Calculate center
-        center = { 
-          x: (this.fromPos.x + this.toPos.x) / 2,
-          y: (this.fromPos.y + this.toPos.y) / 2
-        }
       } else {
         // L-shape: Different axis, no collision
-        pathArray = [
+        pathArray.push(
           this.fromPos,
           idealCenter,
           this.toPos
-        ]
+        )
 
         center = { 
           x: pathArray[1].x,
@@ -129,4 +130,75 @@ export default class EdgePathfindingSquare extends EdgePathfindingMethod {
 
     return { svgPath, center, rotateArrows: false }
   }
+
+  private getUPath(fromPos: Position, toPos: Position, fromSide: Side, toSide: Side): PartialPath {
+    const direction = BBoxHelper.direction(fromSide)
+
+    if (BBoxHelper.isHorizontal(fromSide)) {
+      const x = Math.max(fromPos.x, toPos.x) + direction * CanvasHelper.GRID_SIZE
+      return {
+        pathArray: [
+          fromPos,
+          { x: x, y: fromPos.y },
+          { x: x, y: toPos.y },
+          toPos
+        ],
+        center: {
+          x: (fromPos.x + x) / 2,
+          y: (fromPos.y + toPos.y) / 2
+        }
+      }
+    } else {
+      const y = Math.max(fromPos.y, toPos.y) + direction * CanvasHelper.GRID_SIZE
+      return {
+        pathArray: [
+          fromPos,
+          { x: fromPos.x, y: y },
+          { x: toPos.x, y: y },
+          toPos
+        ],
+        center: {
+          x: (fromPos.x + toPos.x) / 2,
+          y: (fromPos.y + y) / 2
+        }
+      }
+    }
+  }
+
+  private getZPath(fromPos: Position, toPos: Position, fromSide: Side, toSide: Side): PartialPath {
+    if (BBoxHelper.isHorizontal(fromSide)) {
+      const midX = fromPos.x + (toPos.x - fromPos.x) / 2
+      return {
+        pathArray: [
+          fromPos,
+          { x: midX, y: fromPos.y },
+          { x: midX, y: toPos.y },
+          toPos
+        ],
+        center: {
+          x: midX,
+          y: (fromPos.y + toPos.y) / 2
+        }
+      }
+    } else {
+      const midY = fromPos.y + (toPos.y - fromPos.y) / 2
+      return {
+        pathArray: [
+          fromPos,
+          { x: fromPos.x, y: midY },
+          { x: toPos.x, y: midY },
+          toPos
+        ],
+        center: {
+          x: (fromPos.x + toPos.x) / 2,
+          y: midY
+        }
+      }
+    }
+  }
+}
+
+interface PartialPath {
+  pathArray: Position[]
+  center: Position
 }
