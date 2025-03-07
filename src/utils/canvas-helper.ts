@@ -410,4 +410,8 @@ export default class CanvasHelper {
 
     return separatorElement
   }
+
+  static alignToGrid(value: number, gridSize: number = this.GRID_SIZE): number {
+    return Math.round(value / gridSize) * gridSize
+  }
 }

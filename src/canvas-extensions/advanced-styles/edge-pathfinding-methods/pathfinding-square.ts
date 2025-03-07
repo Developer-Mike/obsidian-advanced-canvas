@@ -48,18 +48,40 @@ export default class EdgePathfindingSquare extends EdgePathfindingMethod {
         pathArray.push(this.fromPos)
 
         if (isPathCollidingAtFrom && isPathCollidingAtTo) {
-          // TODO: Calculate
-          return null
+          const direction = BBoxHelper.direction(this.fromSide)
+
+          let firstFromDetourPoint: Position
+          if (BBoxHelper.isHorizontal(this.fromSide)) {
+            const combinedBBoxes = BBoxHelper.combineBBoxes([this.fromNodeBBox, this.toNodeBBox])
+
+            firstFromDetourPoint = {
+              x: CanvasHelper.alignToGrid((direction > 0 ? combinedBBoxes.maxX : combinedBBoxes.minX) + direction * CanvasHelper.GRID_SIZE),
+              y: this.fromBBoxSidePos.y
+            }
+          } else {
+            const combinedBBoxes = BBoxHelper.combineBBoxes([this.fromNodeBBox, this.toNodeBBox])
+
+            firstFromDetourPoint = {
+              x: this.fromBBoxSidePos.x,
+              y: CanvasHelper.alignToGrid((direction > 0 ? combinedBBoxes.maxY : combinedBBoxes.minY) + direction * CanvasHelper.GRID_SIZE)
+            }
+          }
+
+          // TODO: fromPos doesn't result in any margin
+          const uPath = this.getUPath(firstFromDetourPoint, this.toPos, this.toSide, this.toSide)
+          pathArray.push(...uPath.pathArray)
+
+          center = pathArray[Math.floor(pathArray.length / 2)]
         } else {
           if (isPathCollidingAtFrom) {
             const direction = BBoxHelper.direction(this.fromSide)
 
             const firstFromDetourPoint = BBoxHelper.isHorizontal(this.fromSide) ? {
-              x: this.fromBBoxSidePos.x + direction * CanvasHelper.GRID_SIZE,
+              x: CanvasHelper.alignToGrid(this.fromBBoxSidePos.x + direction * CanvasHelper.GRID_SIZE),
               y: this.fromBBoxSidePos.y
             } : {
               x: this.fromBBoxSidePos.x,
-              y: this.fromBBoxSidePos.y + direction * CanvasHelper.GRID_SIZE
+              y: CanvasHelper.alignToGrid(this.fromBBoxSidePos.y + direction * CanvasHelper.GRID_SIZE)
             }
             
             const secondFromDetourPoint = BBoxHelper.isHorizontal(this.fromSide) ? {
@@ -83,11 +105,11 @@ export default class EdgePathfindingSquare extends EdgePathfindingMethod {
             const direction = BBoxHelper.direction(this.toSide)
 
             const firstToDetourPoint = BBoxHelper.isHorizontal(this.toSide) ? {
-              x: this.toBBoxSidePos.x + direction * CanvasHelper.GRID_SIZE,
+              x: CanvasHelper.alignToGrid(this.toBBoxSidePos.x + direction * CanvasHelper.GRID_SIZE),
               y: this.toBBoxSidePos.y
             } : {
               x: this.toBBoxSidePos.x,
-              y: this.toBBoxSidePos.y + direction * CanvasHelper.GRID_SIZE
+              y: CanvasHelper.alignToGrid(this.toBBoxSidePos.y + direction * CanvasHelper.GRID_SIZE)
             }
 
             const secondToDetourPoint = BBoxHelper.isHorizontal(this.toSide) ? {
@@ -135,7 +157,8 @@ export default class EdgePathfindingSquare extends EdgePathfindingMethod {
     const direction = BBoxHelper.direction(fromSide)
 
     if (BBoxHelper.isHorizontal(fromSide)) {
-      const x = Math.max(fromPos.x, toPos.x) + direction * CanvasHelper.GRID_SIZE
+      const xExtremum = direction > 0 ? Math.max(fromPos.x, toPos.x) : Math.min(fromPos.x, toPos.x)
+      const x = CanvasHelper.alignToGrid(xExtremum + direction * CanvasHelper.GRID_SIZE)
       return {
         pathArray: [
           fromPos,
@@ -149,7 +172,8 @@ export default class EdgePathfindingSquare extends EdgePathfindingMethod {
         }
       }
     } else {
-      const y = Math.max(fromPos.y, toPos.y) + direction * CanvasHelper.GRID_SIZE
+      const yExtremum = direction > 0 ? Math.max(fromPos.y, toPos.y) : Math.min(fromPos.y, toPos.y)
+      const y = CanvasHelper.alignToGrid(yExtremum + direction * CanvasHelper.GRID_SIZE)
       return {
         pathArray: [
           fromPos,
