@@ -77,7 +77,19 @@ body.is-mobile .kofi-button.sticky {
   align-items: center;
   flex-direction: column;
 
-  background-color: rgba(255, 255, 255, 0.9);
+  &::before {
+    content: "";
+    z-index: -1;
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    background-color: var(--color-base-00);
+    opacity: 0.95;
+  }
 
   h1 {
     margin-bottom: 0;
