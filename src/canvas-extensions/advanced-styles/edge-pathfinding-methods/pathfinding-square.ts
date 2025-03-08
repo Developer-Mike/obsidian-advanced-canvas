@@ -13,6 +13,24 @@ export default class EdgePathfindingSquare extends EdgePathfindingMethod {
       x: (this.fromPos.x + this.toPos.x) / 2, 
       y: (this.fromPos.y + this.toPos.y) / 2
     }
+
+    const idealCenter = BBoxHelper.isHorizontal(this.fromSide) ? {
+      x: this.toBBoxSidePos.x,
+      y: this.fromBBoxSidePos.y
+    } : {
+      x: this.fromBBoxSidePos.x,
+      y: this.toBBoxSidePos.y
+    }
+
+    const isPathCollidingAtFrom = this.fromSide === "top" && idealCenter.y > this.fromPos.y ||
+      this.fromSide === "bottom" && idealCenter.y < this.fromPos.y ||
+      this.fromSide === "left" && idealCenter.x > this.fromPos.x ||
+      this.fromSide === "right" && idealCenter.x < this.fromPos.x
+
+    const isPathCollidingAtTo = this.toSide === "top" && idealCenter.y > this.toPos.y ||
+      this.toSide === "bottom" && idealCenter.y < this.toPos.y ||
+      this.toSide === "left" && idealCenter.x > this.toPos.x ||
+      this.toSide === "right" && idealCenter.x < this.toPos.x
   
     if (this.fromSide === this.toSide) {
       const uPath = this.getUPath(this.fromPos, this.toPos, this.fromSide, this.toSide)
@@ -20,30 +38,46 @@ export default class EdgePathfindingSquare extends EdgePathfindingMethod {
       pathArray.push(...uPath.pathArray)
       center = uPath.center
     } else if (BBoxHelper.isHorizontal(this.fromSide) === BBoxHelper.isHorizontal(this.toSide)) {
-      const zPath = this.getZPath(this.fromPos, this.toPos, this.fromSide, this.toSide)
+      let zPath: PartialPath
+      if (!isPathCollidingAtFrom || !isPathCollidingAtTo) {
+        zPath = this.getZPath(this.fromPos, this.toPos, this.fromSide, this.toSide)
 
-      pathArray.push(...zPath.pathArray)
+        pathArray.push(...zPath.pathArray)
+      } else {
+        const fromDirection = BBoxHelper.direction(this.fromSide)
+        const firstFromDetourPoint = BBoxHelper.isHorizontal(this.fromSide) ? {
+          x: CanvasHelper.alignToGrid(this.fromBBoxSidePos.x + fromDirection * CanvasHelper.GRID_SIZE),
+          y: this.fromBBoxSidePos.y
+        } : {
+          x: this.fromBBoxSidePos.x,
+          y: CanvasHelper.alignToGrid(this.fromBBoxSidePos.y + fromDirection * CanvasHelper.GRID_SIZE)
+        }
+
+        const toDirection = BBoxHelper.direction(this.toSide)
+        const firstToDetourPoint = BBoxHelper.isHorizontal(this.toSide) ? {
+          x: CanvasHelper.alignToGrid(this.toBBoxSidePos.x + toDirection * CanvasHelper.GRID_SIZE),
+          y: this.toBBoxSidePos.y
+        } : {
+          x: this.toBBoxSidePos.x,
+          y: CanvasHelper.alignToGrid(this.toBBoxSidePos.y + toDirection * CanvasHelper.GRID_SIZE)
+        }
+
+        const newFromSide = BBoxHelper.isHorizontal(this.fromSide) ? (
+          firstFromDetourPoint.y < this.fromPos.y ? "top" : "bottom"
+        ) : (
+          firstFromDetourPoint.x < firstToDetourPoint.x ? "right" : "left"
+        )
+
+        zPath = this.getZPath(firstFromDetourPoint, firstToDetourPoint, newFromSide, BBoxHelper.getOppositeSide(newFromSide))
+
+        pathArray.push(this.fromPos)
+        pathArray.push(...zPath.pathArray)
+        pathArray.push(this.toPos)
+      }
+
       center = zPath.center
     } else {
       // Different axis -> L-shape or 5-point path
-      const idealCenter = BBoxHelper.isHorizontal(this.fromSide) ? {
-        x: this.toBBoxSidePos.x,
-        y: this.fromBBoxSidePos.y
-      } : {
-        x: this.fromBBoxSidePos.x,
-        y: this.toBBoxSidePos.y
-      }
-
-      const isPathCollidingAtFrom = this.fromSide === "top" && idealCenter.y > this.fromPos.y ||
-        this.fromSide === "bottom" && idealCenter.y < this.fromPos.y ||
-        this.fromSide === "left" && idealCenter.x > this.fromPos.x ||
-        this.fromSide === "right" && idealCenter.x < this.fromPos.x
-
-      const isPathCollidingAtTo = this.toSide === "top" && idealCenter.y > this.toPos.y ||
-        this.toSide === "bottom" && idealCenter.y < this.toPos.y ||
-        this.toSide === "left" && idealCenter.x > this.toPos.x ||
-        this.toSide === "right" && idealCenter.x < this.toPos.x
-
       if (isPathCollidingAtFrom || isPathCollidingAtTo) {
         if (isPathCollidingAtFrom && isPathCollidingAtTo) {
           const direction = BBoxHelper.direction(this.fromSide)
