@@ -129,21 +129,31 @@ export default class EdgePathfindingSquare extends EdgePathfindingMethod {
               y: CanvasHelper.alignToGrid(this.fromBBoxSidePos.y + direction * CanvasHelper.GRID_SIZE)
             }
 
+            const useUPath = BBoxHelper.isHorizontal(this.fromSide) ?
+              (this.toPos.y > BBoxHelper.getCenterOfBBoxSide(this.fromNodeBBox, BBoxHelper.getOppositeSide(this.toSide)).y) === (BBoxHelper.direction(this.toSide) > 0) :
+              (this.toPos.x > BBoxHelper.getCenterOfBBoxSide(this.fromNodeBBox, BBoxHelper.getOppositeSide(this.toSide)).x) === (BBoxHelper.direction(this.toSide) > 0)
+
+            const connectionSide = useUPath ?
+              this.toSide :
+              BBoxHelper.getOppositeSide(this.toSide)
+
             const secondFromDetourPoint = BBoxHelper.isHorizontal(this.fromSide) ? {
               x: firstFromDetourPoint.x,
-              y: BBoxHelper.getCenterOfBBoxSide(this.fromNodeBBox, BBoxHelper.getOppositeSide(this.toSide)).y
+              y: BBoxHelper.getCenterOfBBoxSide(this.fromNodeBBox, connectionSide).y
             } : {
-              x: BBoxHelper.getCenterOfBBoxSide(this.fromNodeBBox, BBoxHelper.getOppositeSide(this.toSide)).x,
+              x: BBoxHelper.getCenterOfBBoxSide(this.fromNodeBBox, connectionSide).x,
               y: firstFromDetourPoint.y
             }
             
-            const zPath = this.getZPath(secondFromDetourPoint, this.toPos, BBoxHelper.getOppositeSide(this.toSide), this.toSide)
+            const path = useUPath ?
+              this.getUPath(secondFromDetourPoint, this.toPos, this.toSide, this.toSide) :
+              this.getZPath(secondFromDetourPoint, this.toPos, this.toSide, this.toSide)
 
             pathArray.push(this.fromPos)
             pathArray.push(firstFromDetourPoint)
-            pathArray.push(...zPath.pathArray)
+            pathArray.push(...path.pathArray)
 
-            center = zPath.center
+            center = path.center
           } 
           
           if (isPathCollidingAtTo) {
@@ -157,22 +167,32 @@ export default class EdgePathfindingSquare extends EdgePathfindingMethod {
               y: CanvasHelper.alignToGrid(this.toBBoxSidePos.y + direction * CanvasHelper.GRID_SIZE)
             }
 
+            const useUPath = BBoxHelper.isHorizontal(this.toSide) ?
+              (this.fromPos.y > BBoxHelper.getCenterOfBBoxSide(this.toNodeBBox, BBoxHelper.getOppositeSide(this.fromSide)).y) === (BBoxHelper.direction(this.fromSide) > 0) :
+              (this.fromPos.x > BBoxHelper.getCenterOfBBoxSide(this.toNodeBBox, BBoxHelper.getOppositeSide(this.fromSide)).x) === (BBoxHelper.direction(this.fromSide) > 0)
+
+            const connectionSide = useUPath ?
+              this.fromSide :
+              BBoxHelper.getOppositeSide(this.fromSide)
+
             const secondToDetourPoint = BBoxHelper.isHorizontal(this.toSide) ? {
               x: firstToDetourPoint.x,
-              y: BBoxHelper.getCenterOfBBoxSide(this.toNodeBBox, BBoxHelper.getOppositeSide(this.fromSide)).y
+              y: BBoxHelper.getCenterOfBBoxSide(this.toNodeBBox, connectionSide).y
             } : {
-              x: BBoxHelper.getCenterOfBBoxSide(this.toNodeBBox, BBoxHelper.getOppositeSide(this.fromSide)).x,
+              x: BBoxHelper.getCenterOfBBoxSide(this.toNodeBBox, connectionSide).x,
               y: firstToDetourPoint.y
             }
 
-            const zPath = this.getZPath(this.fromPos, secondToDetourPoint, this.fromSide, BBoxHelper.getOppositeSide(this.fromSide))
+            const path = useUPath ? 
+              this.getUPath(this.fromPos, secondToDetourPoint, this.fromSide, this.fromSide) :
+              this.getZPath(this.fromPos, secondToDetourPoint, this.fromSide, this.fromSide)
             
-            pathArray.push(...zPath.pathArray)
+            pathArray.push(...path.pathArray)
             pathArray.push(secondToDetourPoint)
             pathArray.push(firstToDetourPoint)
             pathArray.push(this.toPos)
             
-            center = zPath.center
+            center = path.center
           }
         }
       } else {
