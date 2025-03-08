@@ -603,27 +603,32 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
         heading.disableToggle ? null : headingId as keyof AdvancedCanvasPluginSettingsValues
       )
 
+      const settingsHeaderChildrenContainerEl = document.createElement('div')
+      settingsHeaderChildrenContainerEl.classList.add('settings-header-children')
+      settingsHeaderChildrenContainerEl.appendChild(document.createElement('span')) // Add empty span to not trigger the :first-child selector in the CSS
+      containerEl.appendChild(settingsHeaderChildrenContainerEl)
+
       for (let [settingId, setting] of Object.entries(heading.children) as [keyof AdvancedCanvasPluginSettingsValues, Setting][]) {
         if (!(settingId in DEFAULT_SETTINGS_VALUES)) continue
 
         switch (setting.type) {
           case 'text':
-            this.createTextSetting(containerEl, settingId, setting as TextSetting)
+            this.createTextSetting(settingsHeaderChildrenContainerEl, settingId, setting as TextSetting)
             break
           case 'number':
-            this.createNumberSetting(containerEl, settingId, setting as NumberSetting)
+            this.createNumberSetting(settingsHeaderChildrenContainerEl, settingId, setting as NumberSetting)
             break
           case 'boolean':
-            this.createBooleanSetting(containerEl, settingId, setting as BooleanSetting)
+            this.createBooleanSetting(settingsHeaderChildrenContainerEl, settingId, setting as BooleanSetting)
             break
           case 'dropdown':
-            this.createDropdownSetting(containerEl, settingId, setting as DropdownSetting)
+            this.createDropdownSetting(settingsHeaderChildrenContainerEl, settingId, setting as DropdownSetting)
             break
           case 'button':
-            this.createButtonSetting(containerEl, settingId, setting as ButtonSetting)
+            this.createButtonSetting(settingsHeaderChildrenContainerEl, settingId, setting as ButtonSetting)
             break
           case 'styles':
-            this.createStylesSetting(containerEl, settingId, setting as StyleAttributesSetting)
+            this.createStylesSetting(settingsHeaderChildrenContainerEl, settingId, setting as StyleAttributesSetting)
             break
         }
       }
