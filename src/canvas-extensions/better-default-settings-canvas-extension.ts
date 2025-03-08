@@ -87,8 +87,8 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
     const nodeData = node.getData()
     node.setData({
       ...nodeData,
-      x: Math.round(nodeData.x / CanvasHelper.GRID_SIZE) * CanvasHelper.GRID_SIZE,
-      y: Math.round(nodeData.y / CanvasHelper.GRID_SIZE) * CanvasHelper.GRID_SIZE
+      x: CanvasHelper.alignToGrid(nodeData.x),
+      y: CanvasHelper.alignToGrid(nodeData.y)
     })
   }
 
