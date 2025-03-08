@@ -45,8 +45,6 @@ export default class EdgePathfindingSquare extends EdgePathfindingMethod {
         this.toSide === "right" && idealCenter.x < this.toPos.x
 
       if (isPathCollidingAtFrom || isPathCollidingAtTo) {
-        pathArray.push(this.fromPos)
-
         if (isPathCollidingAtFrom && isPathCollidingAtTo) {
           const direction = BBoxHelper.direction(this.fromSide)
 
@@ -80,6 +78,7 @@ export default class EdgePathfindingSquare extends EdgePathfindingMethod {
 
           const uPath = this.getUPath(secondFromDetourPoint, this.toPos, this.toSide, this.toSide)
 
+          pathArray.push(this.fromPos)
           pathArray.push(firstFromDetourPoint)
           pathArray.push(...uPath.pathArray)
 
@@ -95,7 +94,7 @@ export default class EdgePathfindingSquare extends EdgePathfindingMethod {
               x: this.fromBBoxSidePos.x,
               y: CanvasHelper.alignToGrid(this.fromBBoxSidePos.y + direction * CanvasHelper.GRID_SIZE)
             }
-            
+
             const secondFromDetourPoint = BBoxHelper.isHorizontal(this.fromSide) ? {
               x: firstFromDetourPoint.x,
               y: BBoxHelper.getCenterOfBBoxSide(this.fromNodeBBox, BBoxHelper.getOppositeSide(this.toSide)).y
@@ -106,6 +105,7 @@ export default class EdgePathfindingSquare extends EdgePathfindingMethod {
             
             const zPath = this.getZPath(secondFromDetourPoint, this.toPos, BBoxHelper.getOppositeSide(this.toSide), this.toSide)
 
+            pathArray.push(this.fromPos)
             pathArray.push(firstFromDetourPoint)
             pathArray.push(...zPath.pathArray)
 
@@ -136,12 +136,11 @@ export default class EdgePathfindingSquare extends EdgePathfindingMethod {
             pathArray.push(...zPath.pathArray)
             pathArray.push(secondToDetourPoint)
             pathArray.push(firstToDetourPoint)
+            pathArray.push(this.toPos)
             
             center = zPath.center
           }
         }
-
-        pathArray.push(this.toPos)
       } else {
         // L-shape: Different axis, no collision
         pathArray.push(

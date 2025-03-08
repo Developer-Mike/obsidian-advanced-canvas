@@ -67,6 +67,14 @@ export default class SvgPathHelper {
     if (pathArray.length < 3)
       return this.pathArrayToSvgPath(pathArray)
 
+    // Remove duplicate points
+    pathArray = pathArray.filter((position, index) => {
+      if (index === 0) return true
+
+      const previous = pathArray[index - 1]
+      return !(position.x === previous.x && position.y === previous.y)
+    })
+
     const commands: string[] = []
     commands.push(`M ${pathArray[0].x} ${pathArray[0].y}`)
 
