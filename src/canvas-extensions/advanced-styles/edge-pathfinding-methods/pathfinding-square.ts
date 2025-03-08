@@ -51,12 +51,18 @@ export default class EdgePathfindingSquare extends EdgePathfindingMethod {
           const direction = BBoxHelper.direction(this.fromSide)
 
           let firstFromDetourPoint: Position
+          let secondFromDetourPoint: Position
           if (BBoxHelper.isHorizontal(this.fromSide)) {
             const combinedBBoxes = BBoxHelper.combineBBoxes([this.fromNodeBBox, this.toNodeBBox])
 
             firstFromDetourPoint = {
               x: CanvasHelper.alignToGrid((direction > 0 ? combinedBBoxes.maxX : combinedBBoxes.minX) + direction * CanvasHelper.GRID_SIZE),
               y: this.fromBBoxSidePos.y
+            }
+
+            secondFromDetourPoint = {
+              x: firstFromDetourPoint.x,
+              y: BBoxHelper.getCenterOfBBoxSide(this.fromNodeBBox, this.toSide).y
             }
           } else {
             const combinedBBoxes = BBoxHelper.combineBBoxes([this.fromNodeBBox, this.toNodeBBox])
@@ -65,10 +71,16 @@ export default class EdgePathfindingSquare extends EdgePathfindingMethod {
               x: this.fromBBoxSidePos.x,
               y: CanvasHelper.alignToGrid((direction > 0 ? combinedBBoxes.maxY : combinedBBoxes.minY) + direction * CanvasHelper.GRID_SIZE)
             }
+
+            secondFromDetourPoint = {
+              x: BBoxHelper.getCenterOfBBoxSide(this.fromNodeBBox, this.toSide).x,
+              y: firstFromDetourPoint.y
+            }
           }
 
-          // TODO: fromPos doesn't result in any margin
-          const uPath = this.getUPath(firstFromDetourPoint, this.toPos, this.toSide, this.toSide)
+          const uPath = this.getUPath(secondFromDetourPoint, this.toPos, this.toSide, this.toSide)
+
+          pathArray.push(firstFromDetourPoint)
           pathArray.push(...uPath.pathArray)
 
           center = pathArray[Math.floor(pathArray.length / 2)]
@@ -95,7 +107,6 @@ export default class EdgePathfindingSquare extends EdgePathfindingMethod {
             const zPath = this.getZPath(secondFromDetourPoint, this.toPos, BBoxHelper.getOppositeSide(this.toSide), this.toSide)
 
             pathArray.push(firstFromDetourPoint)
-            pathArray.push(secondFromDetourPoint)
             pathArray.push(...zPath.pathArray)
 
             center = zPath.center
@@ -167,7 +178,7 @@ export default class EdgePathfindingSquare extends EdgePathfindingMethod {
           toPos
         ],
         center: {
-          x: (fromPos.x + x) / 2,
+          x: x,
           y: (fromPos.y + toPos.y) / 2
         }
       }
@@ -183,7 +194,7 @@ export default class EdgePathfindingSquare extends EdgePathfindingMethod {
         ],
         center: {
           x: (fromPos.x + toPos.x) / 2,
-          y: (fromPos.y + y) / 2
+          y: y
         }
       }
     }
