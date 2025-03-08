@@ -37,6 +37,11 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
       CanvasEvent.EdgeCreated,
       (canvas: Canvas, edge: CanvasEdge) => this.applyDefaultEdgeStyles(canvas, edge)
     ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      CanvasEvent.NodeResized,
+      (canvas: Canvas, node: CanvasNode) => this.enforceMaxNodeWidth(canvas, node)
+    ))
   }
 
   private modifyCanvasSettings(canvas: Canvas | null) {
@@ -130,6 +135,22 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
       ...edge.getData(),
       fromEnd: lineDirection === 'bidirectional' ? 'arrow' : 'none',
       toEnd: lineDirection === 'nondirectional' ? 'none' : 'arrow',
+    })
+  }
+
+  private enforceMaxNodeWidth(_canvas: Canvas, node: CanvasNode) {
+    const maxNodeWidth = this.plugin.settings.getSetting('maxNodeWidth')
+    if (maxNodeWidth <= 0) return
+
+    const nodeData = node.getData()
+    if (nodeData.type !== 'text' && nodeData.type !== 'file') return
+
+    if (nodeData.width <= maxNodeWidth) return
+
+    node.setData({
+      ...nodeData,
+      x: node.prevX !== undefined ? node.prevX : nodeData.x, // Reset the position to the previous value
+      width: maxNodeWidth
     })
   }
 }

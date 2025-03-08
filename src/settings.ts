@@ -24,6 +24,7 @@ export interface AdvancedCanvasPluginSettingsValues {
   defaultFileNodeWidth: number
   defaultFileNodeHeight: number
   minNodeSize: number
+  maxNodeWidth: number
   disableFontSizeRelativeToZoom: boolean
 
   canvasMetadataCompatibilityEnabled: boolean
@@ -107,6 +108,7 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   defaultFileNodeWidth: 400,
   defaultFileNodeHeight: 400,
   minNodeSize: 60,
+  maxNodeWidth: -1,
   disableFontSizeRelativeToZoom: false,
 
   canvasMetadataCompatibilityEnabled: true,
@@ -230,6 +232,12 @@ export const SETTINGS = {
         description: 'The minimum size of a node.',
         type: 'number',
         parse: (value: string) => Math.max(1, parseInt(value) || 0)
+      },
+      maxNodeWidth: {
+        label: 'Maximum node width',
+        description: 'The maximum width of a node. Set to -1 for no limit.',
+        type: 'number',
+        parse: (value: string) => Math.max(-1, parseInt(value) || 0)
       },
       disableFontSizeRelativeToZoom: {
         label: 'Disable font size relative to zoom',
