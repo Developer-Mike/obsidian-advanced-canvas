@@ -27,7 +27,6 @@ import ZOrderingCanvasExtension from './canvas-extensions/z-ordering-canvas-exte
 import BetterReadonlyCanvasExtension from './canvas-extensions/better-readonly-canvas-extension'
 import EncapsulateCanvasExtension from './canvas-extensions/encapsulate-canvas-extension'
 import CommandsCanvasExtension from './canvas-extensions/commands-canvas-extension'
-import NavigationShortcutsCanvasExtension from './canvas-extensions/navigation-shortcuts-canvas-extension'
 import AutoResizeNodeCanvasExtension from './canvas-extensions/auto-resize-node-canvas-extension'
 import PortalsCanvasExtension from './canvas-extensions/portals-canvas-extension'
 import BetterDefaultSettingsCanvasExtension from './canvas-extensions/better-default-settings-canvas-extension'
@@ -70,7 +69,6 @@ const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   VariableBreakpointCanvasExtension,
   BetterDefaultSettingsCanvasExtension,
   CommandsCanvasExtension,
-  NavigationShortcutsCanvasExtension,
   FloatingEdgeCanvasExtension,
   FlipEdgeCanvasExtension,
   ZOrderingCanvasExtension,
