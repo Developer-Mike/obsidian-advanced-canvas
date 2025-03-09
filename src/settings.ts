@@ -64,6 +64,7 @@ export interface AdvancedCanvasPluginSettingsValues {
   betterExportFeatureEnabled: boolean
 
   betterReadonlyEnabled: boolean
+  hideBackgroundGridWhenInReadonly: boolean
   disableNodePopup: boolean
   disableZoom: boolean
   disablePan: boolean
@@ -148,6 +149,7 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   betterExportFeatureEnabled: true,
 
   betterReadonlyEnabled: true,
+  hideBackgroundGridWhenInReadonly: true,
   disableNodePopup: false,
   disableZoom: false,
   disablePan: false,
@@ -406,21 +408,11 @@ export const SETTINGS = {
     description: 'Improve the readonly mode.',
     infoSection: 'better-readonly',
     children: {
-      disableNodePopup: {
-        label: 'Disable node popup',
-        description: 'When enabled, the node popup will be disabled.',
+      hideBackgroundGridWhenInReadonly: {
+        label: 'Hide background grid when in readonly',
+        description: 'When enabled, the background grid will be hidden when in readonly mode.',
         type: 'boolean'
       },
-      disableZoom: {
-        label: 'Disable zoom',
-        description: 'When enabled, zooming will be disabled.',
-        type: 'boolean'
-      },
-      disablePan: {
-        label: 'Disable pan',
-        description: 'When enabled, panning will be disabled.',
-        type: 'boolean'
-      }
     }
   },
   autoResizeNodeFeatureEnabled: {

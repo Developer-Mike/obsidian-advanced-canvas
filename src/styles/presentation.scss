@@ -6,10 +6,6 @@
   .canvas-card-menu {
     visibility: hidden;
   }
-
-  .canvas-background {
-    visibility: hidden;
-  }
 }
 
 .canvas-wrapper:not(.presentation-mode) .canvas-node[data-is-start-node=true]::before {
