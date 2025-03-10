@@ -1,6 +1,5 @@
 import { ItemView, Plugin } from 'obsidian'
 import { Canvas, CanvasView } from './@types/Canvas'
-import Quicksettings from './quicksettings'
 
 // Utils
 import IconsHelper from './utils/icons-helper'
@@ -91,7 +90,6 @@ export default class AdvancedCanvasPlugin extends Plugin {
   debugHelper: DebugHelper
 
   settings: SettingsManager
-  quicksettings: Quicksettings
   windowsManager: WindowsManager
 
   patchers: Patcher[]
@@ -106,8 +104,6 @@ export default class AdvancedCanvasPlugin extends Plugin {
     this.settings = new SettingsManager(this)
     await this.settings.loadSettings()
     this.settings.addSettingsTab()
-    
-    this.quicksettings = new Quicksettings(this)
 
     this.windowsManager = new WindowsManager(this)
 

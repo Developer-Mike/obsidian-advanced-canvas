@@ -1,6 +1,6 @@
 import { TFile } from "obsidian"
 import { BBox, Canvas, CanvasData, CanvasElement, CanvasNode, CanvasNodeData, CanvasView } from "src/@types/Canvas"
-import { CanvasEvent } from "src/events"
+import { CanvasEvent } from "src/@types/CustomWorkspaceEvents"
 import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "./canvas-extension"
 
@@ -44,17 +44,17 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.NodeMoved,
+      'advanced-canvas:node-moved',
       (canvas: Canvas, node: CanvasNode, _keyboard: boolean) => this.onNodeMoved(canvas, node)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.NodeResized,
+      'advanced-canvas:node-resized',
       (canvas: Canvas, node: CanvasNode) => this.onNodeResized(canvas, node)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.DraggingStateChanged,
+      'advanced-canvas:dragging-state-changed',
       (canvas: Canvas, startedDragging: boolean) => this.onDraggingStateChanged(canvas, startedDragging)
     ))
 

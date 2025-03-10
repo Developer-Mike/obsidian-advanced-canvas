@@ -1,5 +1,4 @@
 import { BBox, Canvas, CanvasEdge, CanvasNode, Position, Side } from "src/@types/Canvas"
-import { CanvasEvent } from "src/events"
 import BBoxHelper from "src/utils/bbox-helper"
 import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "../canvas-extension"
@@ -26,39 +25,39 @@ export default class EdgeStylesExtension extends CanvasExtension {
     this.cssStylesManager = new CssStylesConfigManager(this.plugin, 'advanced-canvas-edge-style', styleAttributeValidator)
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.PopupMenuCreated,
+      'advanced-canvas:popup-menu-created',
       (canvas: Canvas) => this.onPopupMenuCreated(canvas)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.EdgeChanged,
+      'advanced-canvas:edge-changed',
       (canvas: Canvas, edge: CanvasEdge) => this.onEdgeChanged(canvas, edge)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.EdgeCenterRequested,
+      'advanced-canvas:edge-center-requested',
       (canvas: Canvas, edge: CanvasEdge, center: Position) => this.onEdgeCenterRequested(canvas, edge, center)
     ))
 
     // TODO: Could be optimized and ignore initial node creation
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.NodeAdded,
+      'advanced-canvas:node-added',
       (canvas: Canvas, node: CanvasNode) => this.updateAllEdgesInArea(canvas, node.getBBox())
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.NodeMoved,
+      'advanced-canvas:node-moved',
       // Only update edges this way if a node got moved with the arrow keys
       (canvas: Canvas, node: CanvasNode, keyboard: boolean) => node.initialized && keyboard ? this.updateAllEdgesInArea(canvas, node.getBBox()) : void 0
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.NodeRemoved,
+      'advanced-canvas:node-removed',
       (canvas: Canvas, node: CanvasNode) => this.updateAllEdgesInArea(canvas, node.getBBox())
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.DraggingStateChanged,
+      'advanced-canvas:dragging-state-changed',
       (canvas: Canvas, isDragging: boolean) => {
         if (isDragging) return
 

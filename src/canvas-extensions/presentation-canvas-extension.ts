@@ -1,6 +1,6 @@
 import { Menu, Notice } from 'obsidian'
 import { BBox, Canvas, CanvasEdge, CanvasElement, CanvasNode, Position, Size } from 'src/@types/Canvas'
-import { CanvasEvent } from 'src/events'
+import { CanvasEvent } from 'src/@types/CustomWorkspaceEvents'
 import BBoxHelper from "src/utils/bbox-helper"
 import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from './canvas-extension'
@@ -19,7 +19,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
   init() {
     /* Add wrap in slide option to context menu */
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.SelectionContextMenu,
+      'canvas:selection-menu',
       (menu: Menu, canvas: Canvas) => {
         menu.addItem((item) =>
           item
@@ -106,7 +106,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
 
     // Register events
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.CanvasChanged,
+      'advanced-canvas:canvas-changed',
       (canvas: Canvas) => this.onCanvasChanged(canvas)
     ))
 
@@ -116,7 +116,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.NodeResized,
+      'advanced-canvas:node-resized',
       (canvas: Canvas, node: CanvasNode) => this.onNodeResized(canvas, node)
     ))
   }

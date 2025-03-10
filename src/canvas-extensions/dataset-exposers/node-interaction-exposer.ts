@@ -1,5 +1,4 @@
 import { Canvas, CanvasNode } from "src/@types/Canvas"
-import { CanvasEvent } from "src/events"
 import CanvasExtension from "../canvas-extension"
 import { getExposedNodeData } from "./node-exposer"
 
@@ -10,7 +9,7 @@ export default class NodeInteractionExposerExtension extends CanvasExtension {
 
   init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.NodeInteraction,
+      'advanced-canvas:node-interaction',
       (canvas: Canvas, node: CanvasNode) => {
         const nodeData = node?.getData()
         if (!nodeData) return

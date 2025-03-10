@@ -1,5 +1,4 @@
 import { Canvas } from "src/@types/Canvas"
-import { CanvasEvent, PluginEvent } from "src/events"
 import { AdvancedCanvasPluginSettingsValues } from "src/settings"
 import CanvasExtension from "../canvas-extension"
 
@@ -16,17 +15,17 @@ export default class CanvasWrapperExposerExtension extends CanvasExtension {
 
   init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      PluginEvent.SettingsChanged,
+      'advanced-canvas:settings-changed',
       () => this.updateExposedSettings(this.plugin.getCurrentCanvas())
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.CanvasChanged,
+      'advanced-canvas:canvas-changed',
       (canvas: Canvas) => this.updateExposedSettings(canvas)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.DraggingStateChanged,
+      'advanced-canvas:dragging-state-changed',
       (canvas: Canvas, dragging: boolean) => {
         if (dragging) canvas.wrapperEl.dataset.isDragging = 'true'
         else delete canvas.wrapperEl.dataset.isDragging

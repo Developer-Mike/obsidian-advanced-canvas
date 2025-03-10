@@ -1,5 +1,5 @@
 import { Canvas } from "src/@types/Canvas"
-import { CanvasEvent } from "src/events"
+import { CanvasEvent } from "src/@types/CustomWorkspaceEvents"
 import AdvancedCanvasPlugin from "src/main"
 
 export default class MigrationHelper {
@@ -15,7 +15,7 @@ export default class MigrationHelper {
 
   private migrateNodeAndEdgeStyles(): void {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.CanvasChanged,
+      'advanced-canvas:canvas-changed',
       (canvas: Canvas) => {
         for (const node of canvas.nodes.values()) {
           const nodeData = node.getData() as any

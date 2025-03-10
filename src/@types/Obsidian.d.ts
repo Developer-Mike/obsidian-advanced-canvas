@@ -1,4 +1,5 @@
 import { CachedMetadata, EmbedCache, LinkCache, Pos } from "obsidian"
+import { CustomWorkspaceEvents } from "./CustomWorkspaceEvents"
 
 export * from "obsidian"
 
@@ -22,8 +23,29 @@ declare module "obsidian" {
 
     /** @public */
     metadataCache: ExtendedMetadataCache
-    /** @public */
-    workspace: Workspace & ExtendedWorkspace
+    /** @public */ // exclude only the on method that takes a string and not a specific event name
+    workspace: Omit<Omit<Workspace, 'on'>, 'trigger'> & {
+      on<K extends keyof CustomWorkspaceEvents>(name: K, callback: (...args: Parameters<CustomWorkspaceEvents[K]>) => void): EventRef
+      trigger<K extends keyof CustomWorkspaceEvents>(name: K, ...args: Parameters<CustomWorkspaceEvents[K]>): void
+
+      // Inbuilt
+      on(name: 'quick-preview', callback: (file: TFile, data: string) => any, ctx?: any): EventRef
+      on(name: 'resize', callback: () => any, ctx?: any): EventRef
+      on(name: 'active-leaf-change', callback: (leaf: WorkspaceLeaf | null) => any, ctx?: any): EventRef
+      on(name: 'file-open', callback: (file: TFile | null) => any, ctx?: any): EventRef
+      on(name: 'layout-change', callback: () => any, ctx?: any): EventRef
+      on(name: 'window-open', callback: (win: WorkspaceWindow, window: Window) => any, ctx?: any): EventRef
+      on(name: 'window-close', callback: (win: WorkspaceWindow, window: Window) => any, ctx?: any): EventRef
+      on(name: 'css-change', callback: () => any, ctx?: any): EventRef
+      on(name: 'file-menu', callback: (menu: Menu, file: TAbstractFile, source: string, leaf?: WorkspaceLeaf) => any, ctx?: any): EventRef
+      on(name: 'files-menu', callback: (menu: Menu, files: TAbstractFile[], source: string, leaf?: WorkspaceLeaf) => any, ctx?: any): EventRef
+      on(name: 'url-menu', callback: (menu: Menu, url: string) => any, ctx?: any): EventRef
+      on(name: 'editor-menu', callback: (menu: Menu, editor: Editor, info: MarkdownView | MarkdownFileInfo) => any, ctx?: any): EventRef
+      on(name: 'editor-change', callback: (editor: Editor, info: MarkdownView | MarkdownFileInfo) => any, ctx?: any): EventRef
+      on(name: 'editor-paste', callback: (evt: ClipboardEvent, editor: Editor, info: MarkdownView | MarkdownFileInfo) => any, ctx?: any): EventRef
+      on(name: 'editor-drop', callback: (evt: DragEvent, editor: Editor, info: MarkdownView | MarkdownFileInfo) => any, ctx?: any): EventRef
+      on(name: 'quit', callback: (tasks: Tasks) => any, ctx?: any): EventRef
+    }
   }
 
   export interface ExtendedVault extends Vault {
@@ -49,14 +71,6 @@ declare module "obsidian" {
 
     // Custom
     registerInternalLinkAC: (canvasName: string, from: string, to: string) => void
-  }
-
-  export interface ExtendedWorkspace {
-    on(name: string, callback: (...args: any) => void): EventRef
-  }
-
-  export interface EventRef {
-    fn: (...args: any) => any
   }
 }
 

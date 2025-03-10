@@ -1,6 +1,6 @@
 import { Menu } from "obsidian"
 import { Canvas, CanvasNode } from "src/@types/Canvas"
-import { CanvasEvent } from "src/events"
+import { CanvasEvent } from "src/@types/CustomWorkspaceEvents"
 import BBoxHelper from "src/utils/bbox-helper"
 import CanvasExtension from "./canvas-extension"
 
@@ -9,12 +9,12 @@ export default class ZOrderingCanvasExtension  extends CanvasExtension {
 
   init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.NodeContextMenu,
+      'canvas:node-menu',
       (menu: Menu, node: CanvasNode) => this.nodeContextMenu(node, menu)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.SelectionContextMenu,
+      'canvas:selection-menu',
       (menu: Menu, canvas: Canvas) => this.selectionContextMenu(canvas, menu)
     ))
   }

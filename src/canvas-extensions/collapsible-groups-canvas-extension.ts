@@ -1,6 +1,5 @@
 import { setIcon } from "obsidian"
 import { BBox, Canvas, CanvasData, CanvasNode, SelectionData } from "src/@types/Canvas"
-import { CanvasEvent } from "src/events"
 import BBoxHelper from "src/utils/bbox-helper"
 import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "./canvas-extension"
@@ -12,27 +11,27 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
 
   init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.NodeChanged,
+      'advanced-canvas:node-changed',
       (canvas: Canvas, node: CanvasNode) => this.onNodeChanged(canvas, node)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.NodeBBoxRequested,
+      'advanced-canvas:node-bbox-requested',
       (canvas: Canvas, node: CanvasNode, bbox: BBox) => this.onNodeBBoxRequested(canvas, node, bbox)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.OnCopy,
+      'advanced-canvas:copy',
       (canvas: Canvas, selectionData: SelectionData) => this.onCopy(canvas, selectionData)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.DataRequested,
+      'advanced-canvas:data-requested',
       (_canvas: Canvas, data: CanvasData) => this.expandCollapsedNodes(data)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.LoadData,
+      'advanced-canvas:load-data',
       (_canvas: Canvas, data: CanvasData, _setData: (data: CanvasData) => void) => this.collapseNodes(data)
     ))
   }

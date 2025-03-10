@@ -1,5 +1,5 @@
 import { Canvas } from "src/@types/Canvas"
-import { CanvasEvent } from "src/events"
+import { CanvasEvent } from "src/@types/CustomWorkspaceEvents"
 import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "./canvas-extension"
 
@@ -20,7 +20,7 @@ export default class FocusModeCanvasExtension extends CanvasExtension {
     })
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.CanvasChanged,
+      'advanced-canvas:canvas-changed',
       (canvas: Canvas) => this.addControlMenuToggle(canvas)
     ))
   }

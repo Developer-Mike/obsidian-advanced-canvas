@@ -1,5 +1,4 @@
 import { Canvas, CanvasNode, CanvasNodeData } from "src/@types/Canvas"
-import { CanvasEvent } from "src/events"
 import SettingsManager from "src/settings"
 import CanvasExtension from "../canvas-extension"
 
@@ -19,7 +18,7 @@ export default class NodeExposerExtension extends CanvasExtension {
 
   init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.NodeChanged,
+      'advanced-canvas:node-changed',
       (_canvas: Canvas, node: CanvasNode) => {
         const nodeData = node?.getData()
         if (!nodeData) return

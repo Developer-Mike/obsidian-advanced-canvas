@@ -1,5 +1,4 @@
 import { Canvas, CanvasEdge, CanvasEdgeData } from "src/@types/Canvas"
-import { CanvasEvent } from "src/events"
 import SettingsManager from "src/settings"
 import CanvasExtension from "../canvas-extension"
 
@@ -16,7 +15,7 @@ export default class EdgeExposerExtension extends CanvasExtension {
 
   init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.EdgeChanged,
+      'advanced-canvas:edge-changed',
       (_canvas: Canvas, edge: CanvasEdge) => {
         const edgeData = edge?.getData()
         if (!edgeData) return
@@ -27,16 +26,19 @@ export default class EdgeExposerExtension extends CanvasExtension {
               : [[exposedDataKey, edgeData[exposedDataKey]]]
 
             for (const [key, value] of datasetPairs) {
+              const stringifiedKey = key?.toString()
+              if (!stringifiedKey) continue
+
               if (!value) {
-                delete edge.path.display.dataset[key]
+                delete edge.path.display.dataset[stringifiedKey]
 
-                if (edge.fromLineEnd?.el) delete edge.fromLineEnd.el.dataset[key]
-                if (edge.toLineEnd?.el) delete edge.toLineEnd.el.dataset[key]
+                if (edge.fromLineEnd?.el) delete edge.fromLineEnd.el.dataset[stringifiedKey]
+                if (edge.toLineEnd?.el) delete edge.toLineEnd.el.dataset[stringifiedKey]
               } else {
-                edge.path.display.dataset[key] = value
+                edge.path.display.dataset[stringifiedKey] = value.toString()
 
-                if (edge.fromLineEnd?.el) edge.fromLineEnd.el.dataset[key] = value
-                if (edge.toLineEnd?.el) edge.toLineEnd.el.dataset[key] = value
+                if (edge.fromLineEnd?.el) edge.fromLineEnd.el.dataset[stringifiedKey] = value.toString()
+                if (edge.toLineEnd?.el) edge.toLineEnd.el.dataset[stringifiedKey] = value.toString()
               }
             }
         }

@@ -1,5 +1,4 @@
-import { BBox, Canvas, CanvasEdge, CanvasNode, CanvasNodeData, Position, Side } from "src/@types/Canvas"
-import { CanvasEvent } from "src/events"
+import { BBox, Canvas, CanvasEdge, CanvasNode, Position, Side } from "src/@types/Canvas"
 import CanvasExtension from "./canvas-extension"
 import BBoxHelper from "src/utils/bbox-helper"
 
@@ -10,18 +9,18 @@ export default class FloatingEdgeCanvasExtension  extends CanvasExtension {
 
   init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.NodeMoved,
+      'advanced-canvas:node-moved',
       (canvas: Canvas, node: CanvasNode) => this.onNodeMoved(canvas, node)
     ))
 
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.EdgeConnectionDragging.Before,
+      'advanced-canvas:edge-connection-dragging:before',
       (canvas: Canvas, edge: CanvasEdge, event: PointerEvent, newEdge: boolean, side: 'from' | 'to') => this.onEdgeStartedDragging(canvas, edge, event, newEdge, side)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.EdgeConnectionDragging.After,
+      'advanced-canvas:edge-connection-dragging:after',
       (canvas: Canvas, edge: CanvasEdge, event: PointerEvent, newEdge: boolean, side: 'from' | 'to') => this.onEdgeStoppedDragging(canvas, edge, event, newEdge, side)
     ))
   }

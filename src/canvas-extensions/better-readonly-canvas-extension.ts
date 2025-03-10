@@ -1,5 +1,4 @@
 import { Canvas } from "src/@types/Canvas"
-import { CanvasEvent } from "src/events"
 import { AdvancedCanvasPluginSettingsValues } from "src/settings"
 import CanvasHelper, { MenuOption } from "src/utils/canvas-helper"
 import CanvasExtension from "./canvas-extension"
@@ -12,24 +11,24 @@ export default class BetterReadonlyCanvasExtension extends CanvasExtension {
   init() {
     /* Popup listener */
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.PopupMenuCreated,
-      (canvas: Canvas, _node: any) => this.updatePopupMenu(canvas)
+      'advanced-canvas:popup-menu-created',
+      (canvas: Canvas) => this.updatePopupMenu(canvas)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.ViewportChanged.Before,
+      'advanced-canvas:viewport-changed:before',
       (canvas: Canvas) => this.onBeforeViewPortChanged(canvas)
     ))
 
     // Allow viewport change when using zoom to bbox
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.ZoomToBbox.Before,
+      'advanced-canvas:zoom-to-bbox:before',
       () => this.isMovingToBBox = true
     ))
 
     /* Readonly listener */
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.ReadonlyChanged,
+      'advanced-canvas:readonly-changed',
       (canvas: Canvas, _readonly: boolean) => {
         this.updatePopupMenu(canvas)
         this.updateLockedZoom(canvas)
@@ -39,7 +38,7 @@ export default class BetterReadonlyCanvasExtension extends CanvasExtension {
 
     /* Add settings */
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.CanvasChanged,
+      'advanced-canvas:canvas-changed',
       (canvas: Canvas) => this.addQuickSettings(canvas)
     ))
   }

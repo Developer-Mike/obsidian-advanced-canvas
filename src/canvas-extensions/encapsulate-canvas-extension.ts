@@ -1,6 +1,6 @@
 import { Menu } from "obsidian"
 import { Canvas } from "src/@types/Canvas"
-import { CanvasEvent } from "src/events"
+import { CanvasEvent } from "src/@types/CustomWorkspaceEvents"
 import CanvasHelper from "src/utils/canvas-helper"
 import { FileNameModal } from "src/utils/modal-helper"
 import CanvasExtension from "./canvas-extension"
@@ -24,7 +24,7 @@ export default class EncapsulateCanvasExtension extends CanvasExtension {
 
     /* Add encapsulate option to context menu */
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.SelectionContextMenu,
+      'canvas:selection-menu',
       (menu: Menu, canvas: Canvas) => {
         menu.addItem((item) =>
           item

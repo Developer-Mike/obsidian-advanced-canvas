@@ -2,7 +2,6 @@ import { Notice, PluginSettingTab, Setting as SettingEl } from "obsidian"
 import { BooleanSetting, ButtonSetting, DropdownSetting, NumberSetting, Setting, SettingsHeading, StyleAttributesSetting, TextSetting } from "./@types/Settings"
 import { BUILTIN_EDGE_STYLE_ATTRIBUTES, BUILTIN_NODE_STYLE_ATTRIBUTES, StyleAttribute } from "./canvas-extensions/advanced-styles/style-config"
 import { VARIABLE_BREAKPOINT_CSS_VAR } from "./canvas-extensions/variable-breakpoint-canvas-extension"
-import { PluginEvent } from "./events"
 import AdvancedCanvasPlugin from "./main"
 
 const README_URL = 'https://github.com/Developer-Mike/obsidian-advanced-canvas?tab=readme-ov-file'
@@ -551,7 +550,7 @@ export default class SettingsManager {
 
   async loadSettings() {
     this.settings = Object.assign({}, DEFAULT_SETTINGS_VALUES, await this.plugin.loadData())
-    this.plugin.app.workspace.trigger(PluginEvent.SettingsChanged)
+    this.plugin.app.workspace.trigger("advanced-canvas:settings-changed")
   }
 
   async saveSettings() {
@@ -565,7 +564,7 @@ export default class SettingsManager {
   async setSetting(data: Partial<AdvancedCanvasPluginSettingsValues>) {
     this.settings = Object.assign(this.settings, data)
     await this.saveSettings()
-    this.plugin.app.workspace.trigger(PluginEvent.SettingsChanged)
+    this.plugin.app.workspace.trigger("advanced-canvas:settings-changed")
   }
 
   addSettingsTab() {

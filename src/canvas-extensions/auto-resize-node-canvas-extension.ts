@@ -1,6 +1,5 @@
 import { ViewUpdate } from "@codemirror/view"
 import { Canvas, CanvasNode, CanvasNodeData } from "src/@types/Canvas"
-import { CanvasEvent } from "src/events"
 import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "./canvas-extension"
 
@@ -9,22 +8,22 @@ export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
 
   init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.NodeCreated,
+      'advanced-canvas:node-created',
       (canvas: Canvas, node: CanvasNode) => this.onNodeCreated(canvas, node)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.PopupMenuCreated,
+      'advanced-canvas:canvas-changed',
       (canvas: Canvas) => this.onPopupMenuCreated(canvas)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.NodeEditingStateChanged,
+      'advanced-canvas:node-editing-state-changed',
       (canvas: Canvas, node: CanvasNode, editing: boolean) => this.onNodeEditingStateChanged(canvas, node, editing)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.NodeTextContentChanged,
+      'advanced-canvas:node-text-content-changed',
       (canvas: Canvas, node: CanvasNode, viewUpdate: ViewUpdate) => this.onNodeTextContentChanged(canvas, node, viewUpdate.view.dom)
     ))
   }

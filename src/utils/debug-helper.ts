@@ -1,6 +1,6 @@
 import { BBox, Canvas, CanvasNode } from "src/@types/Canvas"
 import AdvancedCanvasPlugin from "src/main"
-import { CanvasEvent } from "../events"
+import { CanvasEvent } from "../@types/CustomWorkspaceEvents"
 
 export default class DebugHelper {
   plugin: AdvancedCanvasPlugin
@@ -15,7 +15,7 @@ export default class DebugHelper {
     this.plugin = plugin
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.CanvasChanged,
+      'advanced-canvas:canvas-changed',
       (_canvas: Canvas) => {
         this.nodeAddedCount = 0
         this.nodeChangedCount = 0

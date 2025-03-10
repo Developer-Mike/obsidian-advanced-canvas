@@ -1,5 +1,4 @@
 import { Canvas, CanvasEdge, CanvasNode } from "src/@types/Canvas"
-import { CanvasEvent, PluginEvent } from "src/events"
 import CanvasHelper from "src/utils/canvas-helper"
 import { FileSelectModal } from "src/utils/modal-helper"
 import CanvasExtension from "./canvas-extension"
@@ -11,22 +10,22 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
     this.modifyCanvasSettings(this.plugin.getCurrentCanvas())
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      PluginEvent.SettingsChanged,
+      'advanced-canvas:settings-changed',
       () => this.modifyCanvasSettings(this.plugin.getCurrentCanvas())
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.CanvasChanged,
+      'advanced-canvas:canvas-changed',
       (canvas: Canvas) => this.modifyCanvasSettings(canvas)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.DoubleClick,
+      'advanced-canvas:double-click',
       (canvas: Canvas, event: MouseEvent, preventDefault: { value: boolean }) => this.onDoubleClick(canvas, event, preventDefault)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.NodeCreated,
+      'advanced-canvas:node-created',
       (canvas: Canvas, node: CanvasNode) => {
         this.enforceNodeGridAlignment(canvas, node)
         this.applyDefaultNodeStyles(canvas, node)
@@ -34,12 +33,12 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.EdgeCreated,
+      'advanced-canvas:edge-created',
       (canvas: Canvas, edge: CanvasEdge) => this.applyDefaultEdgeStyles(canvas, edge)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.NodeResized,
+      'advanced-canvas:node-resized',
       (canvas: Canvas, node: CanvasNode) => this.enforceMaxNodeWidth(canvas, node)
     ))
   }
