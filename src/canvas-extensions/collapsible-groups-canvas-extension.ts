@@ -1,5 +1,5 @@
 import { setIcon } from "obsidian"
-import { BBox, Canvas, CanvasData, CanvasNode, SelectionData } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasData, CanvasNode, CanvasNodeData, SelectionData } from "src/@types/Canvas"
 import BBoxHelper from "src/utils/bbox-helper"
 import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "./canvas-extension"
@@ -27,7 +27,7 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       'advanced-canvas:data-requested',
-      (_canvas: Canvas, data: CanvasData) => this.expandCollapsedNodes(data)
+      (_canvas: Canvas, data: CanvasData) => this.expandAllCollapsedNodes(data)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
@@ -89,7 +89,7 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
     bbox.maxY = bbox.minY
   }
 
-  private expandCollapsedNodes(data: CanvasData) {
+  private expandAllCollapsedNodes(data: CanvasData) {
     data.nodes = data.nodes.flatMap((groupNodeData) => {
       const collapsedData = groupNodeData.collapsedData
       if (collapsedData === undefined) return [groupNodeData]
@@ -97,7 +97,7 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
       groupNodeData.collapsedData = undefined
 
       data.edges.push(...collapsedData.edges)
-      return [groupNodeData, ...collapsedData.nodes.map((nodeData) => (
+      return [groupNodeData, ...collapsedData.nodes.map(nodeData => (
         {
           ...nodeData,
           // Restore the relative position of the node to the group
@@ -107,6 +107,34 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
       ))]
     })
   }
+
+  /*
+  private expandAllCollapsedNodes(data: CanvasData) {
+    const groupNodesData = data.nodes.filter(nodeData => nodeData.type === 'group' && nodeData.isCollapsed)
+
+    for (const groupNodeData of groupNodesData) {
+      this.expandCollapsedNode({ data, groupNodeData })
+    }
+
+    console.log(data)
+  }
+
+  private expandCollapsedNode(ref: { data: CanvasData, groupNodeData: CanvasNodeData }) {
+    ref.groupNodeData.isCollapsed = false
+
+    const collapsedData = ref.groupNodeData.collapsedData
+    if (collapsedData === undefined) return
+
+    ref.data.nodes.push(...collapsedData.nodes.map((nodeData) => {
+      nodeData.x += ref.groupNodeData.x,
+      nodeData.y += ref.groupNodeData.y
+
+      return nodeData
+    }))
+    ref.data.edges.push(...collapsedData.edges)
+
+    delete ref.groupNodeData.collapsedData
+  }*/
 
   private collapseNodes(data: CanvasData) {
     data.nodes.forEach((groupNodeData) => {
