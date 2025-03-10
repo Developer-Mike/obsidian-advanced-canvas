@@ -1,5 +1,5 @@
 import App, { SuggestModal, TFile } from 'obsidian'
-import PathHelper from 'src/utils/path-helper'
+import FilepathHelper from 'src/utils/filepath-helper'
 
 export class FileNameModal extends SuggestModal<string> {
   parentPath: string
@@ -48,7 +48,7 @@ export class FileSelectModal extends SuggestModal<string> {
 
     this.files = this.app.vault.getFiles()
       .map(file => file.path)
-      .filter(path => PathHelper.extension(path)?.match(extensionsRegex ?? /.*/))
+      .filter(path => FilepathHelper.extension(path)?.match(extensionsRegex ?? /.*/))
     this.suggestNewFile = suggestNewFile
 
     this.setPlaceholder('Type to search...')
@@ -96,7 +96,7 @@ export class FileSelectModal extends SuggestModal<string> {
 
         if (!this.suggestNewFile) return
 
-        if (PathHelper.extension(path) === undefined) path += '.md'
+        if (FilepathHelper.extension(path) === undefined) path += '.md'
         const newFile = this.app.vault.create(path, '')
         resolve(newFile)
       }

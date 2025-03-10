@@ -1,7 +1,6 @@
 import { ExtendedVault, TAbstractFile, TFile, TFolder } from "obsidian"
-import PatchHelper from "src/utils/patch-helper"
 import Patcher from "./patcher"
-import Backlink from "src/@types/Backlinks"
+import Backlink from "src/@types/BacklinkPlugin"
 
 export default class BacklinksPatcher extends Patcher {
   private isRecomputingBacklinks: boolean = false
@@ -10,10 +9,10 @@ export default class BacklinksPatcher extends Patcher {
     if (!this.plugin.settings.getSetting('canvasMetadataCompatibilityEnabled')) return
 
     const that = this
-    const backlinkPatch = PatchHelper.tryPatchWorkspacePrototype<Backlink>(this.plugin, () => (
+    const backlinkPatch = Patcher.tryPatchWorkspacePrototype<Backlink>(this.plugin, () => (
       (this.plugin.app.workspace.getLeavesOfType('backlink').first()?.view as any)?.backlink
     ), {
-      recomputeBacklink: PatchHelper.OverrideExisting(next => function (file: TFile, ...args: any[]): void {
+      recomputeBacklink: Patcher.OverrideExisting(next => function (file: TFile, ...args: any[]): void {
         that.isRecomputingBacklinks = true
         const result = next.call(this, file, ...args)
         that.isRecomputingBacklinks = false
@@ -21,7 +20,7 @@ export default class BacklinksPatcher extends Patcher {
       })
     })
 
-    const vaultPatch = PatchHelper.patchPrototype<ExtendedVault>(this.plugin, this.plugin.app.vault, {
+    const vaultPatch = Patcher.patchPrototype<ExtendedVault>(this.plugin, this.plugin.app.vault, {
       recurseChildrenAC: _next => function (origin: TAbstractFile, traverse: (file: TAbstractFile) => void) {
         for (var stack = [origin]; stack.length > 0;) {
           var current = stack.pop()
@@ -33,7 +32,7 @@ export default class BacklinksPatcher extends Patcher {
           }
         }
       },
-      getMarkdownFiles: PatchHelper.OverrideExisting(next => function (...args: any[]): TFile[] {
+      getMarkdownFiles: Patcher.OverrideExisting(next => function (...args: any[]): TFile[] {
         if (!that.isRecomputingBacklinks) return next.call(this, ...args)
 
         // If we are recomputing backlinks, we need to include markdown as well as canvas files

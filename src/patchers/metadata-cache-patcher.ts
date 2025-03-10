@@ -2,8 +2,7 @@ import { ExtendedMetadataCache, TFile } from "obsidian"
 import { CanvasData, CanvasNodeData } from "src/@types/Canvas"
 import { ExtendedCachedMetadata, MetadataCacheMap } from "src/@types/Obsidian"
 import HashHelper from "src/utils/hash-helper"
-import PatchHelper from "src/utils/patch-helper"
-import PathHelper from "src/utils/path-helper"
+import FilepathHelper from "src/utils/filepath-helper"
 import Patcher from "./patcher"
 
 export default class MetadataCachePatcher extends Patcher {
@@ -11,10 +10,10 @@ export default class MetadataCachePatcher extends Patcher {
     if (!this.plugin.settings.getSetting('canvasMetadataCompatibilityEnabled')) return
 
     const that = this
-    PatchHelper.patchPrototype<ExtendedMetadataCache>(this.plugin, this.plugin.app.metadataCache, {
-      getCache: PatchHelper.OverrideExisting(next => function (filepath: string, ...args: any[]): ExtendedCachedMetadata | null {
+    Patcher.patchPrototype<ExtendedMetadataCache>(this.plugin, this.plugin.app.metadataCache, {
+      getCache: Patcher.OverrideExisting(next => function (filepath: string, ...args: any[]): ExtendedCachedMetadata | null {
         // Bypass the "md" extension check by handling the "canvas" extension here
-        if (PathHelper.extension(filepath) === 'canvas') {
+        if (FilepathHelper.extension(filepath) === 'canvas') {
           if (!this.fileCache.hasOwnProperty(filepath)) return null
           
           const hash = this.fileCache[filepath].hash
@@ -23,9 +22,9 @@ export default class MetadataCachePatcher extends Patcher {
 
         return next.call(this, filepath, ...args)
       }),
-      computeFileMetadataAsync: PatchHelper.OverrideExisting(next => async function (file: TFile, ...args: any[]) {
+      computeFileMetadataAsync: Patcher.OverrideExisting(next => async function (file: TFile, ...args: any[]) {
         // Call the original function if the file is not a canvas file
-        if (PathHelper.extension(file.path) !== 'canvas')
+        if (FilepathHelper.extension(file.path) !== 'canvas')
           return next.call(this, file, ...args)
 
         // Update the cache
@@ -115,9 +114,9 @@ export default class MetadataCachePatcher extends Patcher {
         // Resolve links (This wouldn't get called in the original function too)
         this.resolveLinks(file.path, content)
       }),
-      resolveLinks: PatchHelper.OverrideExisting(next => async function (filepath: string, cachedContent: Partial<CanvasData>) { // Custom argument cachedContent
+      resolveLinks: Patcher.OverrideExisting(next => async function (filepath: string, cachedContent: Partial<CanvasData>) { // Custom argument cachedContent
         // Call the original function if the file is not a canvas file
-        if (PathHelper.extension(filepath) !== 'canvas')
+        if (FilepathHelper.extension(filepath) !== 'canvas')
           return next.call(this, filepath)
 
         // Get file object
@@ -203,7 +202,7 @@ export default class MetadataCachePatcher extends Patcher {
     // metadataCache.watchVaultChanges makes a copy of computeFileMetadataAsync that gets called on the "modify" event
     // To fix this, AC creates a new event listener for "modify" that only handles canvas files
     this.plugin.registerEvent(this.plugin.app.vault.on('modify', (file: TFile) => {
-      if (PathHelper.extension(file.path) !== 'canvas') return
+      if (FilepathHelper.extension(file.path) !== 'canvas') return
       this.plugin.app.metadataCache.computeFileMetadataAsync(file)
     }))
   }
