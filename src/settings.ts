@@ -94,7 +94,6 @@ export interface AdvancedCanvasPluginSettingsValues {
   canvasEncapsulationEnabled: boolean
 
   portalsFeatureEnabled: boolean
-  maintainClosedPortalSize: boolean
   showEdgesIntoDisabledPortals: boolean
 }
 
@@ -179,7 +178,6 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   canvasEncapsulationEnabled: true,
 
   portalsFeatureEnabled: true,
-  maintainClosedPortalSize: true,
   showEdgesIntoDisabledPortals: true
 }
 
@@ -527,11 +525,6 @@ export const SETTINGS = {
     description: 'Create portals to other canvases.',
     infoSection: 'portals',
     children: {
-      maintainClosedPortalSize: {
-        label: 'Maintain closed portal size',
-        description: 'When enabled, the portal will maintain its size when closed.',
-        type: 'boolean'
-      },
       showEdgesIntoDisabledPortals: {
         label: 'Show edges into disabled portals',
         description: 'When enabled, edges into disabled portals will be shown.',

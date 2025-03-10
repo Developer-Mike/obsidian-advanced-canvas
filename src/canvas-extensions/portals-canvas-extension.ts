@@ -315,15 +315,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     for (const portalNodeData of data.nodes) {
       if (portalNodeData.type !== 'file') continue
 
-      // Reset portal size
-      if (this.plugin.settings.getSetting('maintainClosedPortalSize')) {
-        portalNodeData.width = portalNodeData.closedPortalWidth ?? portalNodeData.width
-        portalNodeData.height = portalNodeData.closedPortalHeight ?? portalNodeData.height
-      }
-
       // Remove references to portal nodes and edges
-      delete portalNodeData.closedPortalWidth
-      delete portalNodeData.closedPortalHeight
       delete portalNodeData.portalIdMaps
     }
   }
