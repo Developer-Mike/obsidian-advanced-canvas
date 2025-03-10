@@ -396,6 +396,9 @@ export default class CanvasPatcher extends Patcher {
       render: Patcher.OverrideExisting(next => function (...args: any): void {
         const result = next.call(this, ...args)
         that.plugin.app.workspace.trigger('advanced-canvas:edge-changed', this.canvas, this)
+
+        // TODO: EdgeStyleExtension console.count(`Edge Rendered ${this.canvas.isClearing}`) 
+
         return result
       }),
       getCenter: Patcher.OverrideExisting(next => function (...args: any): Position {

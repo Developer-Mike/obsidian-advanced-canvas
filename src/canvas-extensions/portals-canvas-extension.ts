@@ -285,11 +285,14 @@ export default class PortalsCanvasExtension extends CanvasExtension {
   }
 
   private removePortalCanvasData(_canvas: Canvas, data: CanvasData) {
+    // Performance improvement: Create a map of nodes by id
+    const nodesIdMap: Map<string, CanvasNodeData> = new Map(data.nodes.map(nodeData => [nodeData.id, nodeData]))
+
     data.edges = data.edges.filter(edgeData => {
       if (edgeData.portalId !== undefined) return false
 
-      const fromNodeData = data.nodes.find(nodeData => nodeData.id === edgeData.fromNode)
-      const toNodeData = data.nodes.find(nodeData => nodeData.id === edgeData.toNode)
+      const fromNodeData = nodesIdMap.get(edgeData.fromNode)
+      const toNodeData = nodesIdMap.get(edgeData.toNode)
       if (!fromNodeData || !toNodeData) return true
 
       if (fromNodeData.portalId === undefined && toNodeData.portalId === undefined) { // Normal edge
@@ -309,14 +312,14 @@ export default class PortalsCanvasExtension extends CanvasExtension {
       }
     })
 
-    data.nodes = data.nodes.filter(nodeData => nodeData.portalId === undefined)
-
-    for (const portalNodeData of data.nodes) {
-      if (portalNodeData.type !== 'file') continue
+    data.nodes = data.nodes.filter(nodeData => {
+      // Remove nodes if they are from a portal
+      if (nodeData.portalId !== undefined) return false
 
       // Remove references to portal nodes and edges
-      delete portalNodeData.portalIdMaps
-    }
+      if (nodeData.type === 'file') delete nodeData.portalIdMaps
+      return true
+    })
   }
 
   private async getCanvasDataWithPortals(canvas: Canvas, dataRef: CanvasData): Promise<CanvasData> {

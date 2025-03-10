@@ -11,7 +11,7 @@ export default class VariableBreakpointCanvasExtension extends CanvasExtension {
       'advanced-canvas:node-breakpoint-changed',
       (canvas: Canvas, node: CanvasNode, breakpointRef: { value: boolean }) => {
         const computedStyle = window.getComputedStyle(node.nodeEl)
-        const variableBreakpointString = computedStyle.getPropertyValue(VARIABLE_BREAKPOINT_CSS_VAR)
+        const variableBreakpointString = computedStyle.getPropertyValue(VARIABLE_BREAKPOINT_CSS_VAR) // FIXME: Performance issue
         if (variableBreakpointString.length === 0) return
 
         const variableBreakpoint = parseFloat(variableBreakpointString)

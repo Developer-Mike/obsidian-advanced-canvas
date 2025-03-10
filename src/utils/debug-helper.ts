@@ -1,6 +1,5 @@
-import { BBox, Canvas, CanvasNode } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasEdge, CanvasNode } from "src/@types/Canvas"
 import AdvancedCanvasPlugin from "src/main"
-import { CanvasEvent } from "../@types/CustomWorkspaceEvents"
 
 export default class DebugHelper {
   plugin: AdvancedCanvasPlugin
@@ -25,7 +24,7 @@ export default class DebugHelper {
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.NodeAdded,
+      'advanced-canvas:node-added',
       (_canvas: Canvas, _node: CanvasNode) => {
         if (this.logging) console.count('🟢 NodeAdded')
         this.nodeAddedCount++
@@ -33,7 +32,7 @@ export default class DebugHelper {
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.NodeChanged,
+      'advanced-canvas:node-changed',
       (_canvas: Canvas, _node: CanvasNode) => {
         if (this.logging) console.count('🟡 NodeChanged')
         this.nodeChangedCount++
@@ -41,16 +40,16 @@ export default class DebugHelper {
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.EdgeAdded,
-      (_canvas: Canvas, _edge: CanvasNode) => {
+      'advanced-canvas:edge-added',
+      (_canvas: Canvas, _edge: CanvasEdge) => {
         if (this.logging) console.count('🟢 EdgeAdded')
         this.edgeAddedCount++
       }
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.EdgeChanged,
-      (_canvas: Canvas, _edge: CanvasNode) => {
+      'advanced-canvas:edge-changed',
+      (_canvas: Canvas, _edge: CanvasEdge) => {
         if (this.logging) console.count('🟡 EdgeChanged')
         this.edgeChangedCount++
       }

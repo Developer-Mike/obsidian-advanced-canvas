@@ -129,7 +129,7 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   edgeStylePathfinderGridResolution: 10,
   edgeStylePathfinderPathRounded: true,
 
-  variableBreakpointFeatureEnabled: true,
+  variableBreakpointFeatureEnabled: false,
 
   zOrderingFeatureEnabled: true,
   zOrderingShowOneLayerShiftOptions: false,

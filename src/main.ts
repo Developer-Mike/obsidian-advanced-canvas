@@ -62,7 +62,7 @@ const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
 
   // Advanced Styles
   NodeStylesExtension,
-  EdgeStylesExtension,
+  // FIXME: EdgeStylesExtension,
 
   // Basic Extensions
   VariableBreakpointCanvasExtension,
