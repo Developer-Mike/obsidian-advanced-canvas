@@ -298,11 +298,15 @@ export default class CanvasPatcher extends Patcher {
     })])
 
     // Canvas is now patched - update all open canvas views
-    this.plugin.app.workspace.iterateAllLeaves((leaf: WorkspaceLeaf) => {
+    this.plugin.app.workspace.iterateAllLeaves(async (leaf: WorkspaceLeaf) => {
       if (leaf.view.getViewType() !== 'canvas') return
 
       const canvasView = leaf.view as any as Omit<CanvasView, 'onClose'> & { onClose: () => void }
-      const hasChangesToSave = canvasView.lastSavedData !== canvasView.data
+      const currentData = canvasView.getViewData()
+      const savedData = canvasView.file ? await this.plugin.app.vault.read(canvasView.file) : null
+      const hasChangesToSave = currentData !== savedData
+
+      console.debug(`Reloading canvas view (Saving: ${hasChangesToSave})`)
 
       // Skip saving the canvas data if there are no changes to save (Remote sync compatibility)
       const originalOnClose = canvasView.onClose
