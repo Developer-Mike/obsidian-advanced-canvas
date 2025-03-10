@@ -10,10 +10,10 @@ export interface CustomWorkspaceEvents {
   'advanced-canvas:settings-changed': () => void
 
   // Built-in canvas events
-  'canvas:selection-menu': (menu: Menu, node: CanvasNode | CanvasEdge) => void
+  'canvas:selection-menu': (menu: Menu, canvas: Canvas) => void
   'canvas:node-menu': (menu: Menu, node: CanvasNode) => void
-  'canvas:edge-menu': (menu: Menu, edge: CanvasEdge) => void
-  'canvas:node-connection-drop-menu': (menu: Menu, node: CanvasNode) => void
+  'canvas:edge-menu': (menu: Menu, canvas: Canvas) => void
+  'canvas:node-connection-drop-menu': (menu: Menu, canvas: Canvas) => void
 
   // Custom canvas events
   /** Fired when a new canvas gets loaded */
@@ -63,13 +63,13 @@ export interface CustomWorkspaceEvents {
   /** Fired when the center of an edge gets requested (e.g. for the edge label position) */
   'advanced-canvas:edge-center-requested': (canvas: Canvas, edge: CanvasEdge, position: Position) => void
   /** Fired when the nodes inside a bounding box get requested */
-  'advanced-canvas:containing-nodes-requested': (canvas: Canvas, bbox: { value: any }, nodes: { value: CanvasNode[] }) => void
+  'advanced-canvas:containing-nodes-requested': (canvas: Canvas, bbox: BBox, nodes: CanvasNode[]) => void
   /** Fired when the selection of the canvas changes */
-  'advanced-canvas:selection-changed': (canvas: Canvas, oldSelection: Set<CanvasElement>, updateSelection: () => void) => void
+  'advanced-canvas:selection-changed': (canvas: Canvas, oldSelection: Set<CanvasElement>, updateSelection: (update: () => void) => void) => void
   /** Fired before the canvas gets zoomed to a bounding box (e.g. zoom to selection, zoom to fit all) */
-  'advanced-canvas:zoom-to-bbox:before': (canvas: Canvas, bbox: { value: BBox }) => void
+  'advanced-canvas:zoom-to-bbox:before': (canvas: Canvas, bbox: BBox) => void
   /** Fired after the canvas gets zoomed to a bounding box (e.g. zoom to selection, zoom to fit all) */
-  'advanced-canvas:zoom-to-bbox:after': (canvas: Canvas, bbox: { value: BBox }) => void
+  'advanced-canvas:zoom-to-bbox:after': (canvas: Canvas, bbox: BBox) => void
   /** Fired when the a node popup menu gets created (Not firing multiple times if it gets moved between nodes of the same type) */
   'advanced-canvas:popup-menu-created': (canvas: Canvas) => void
   /** Fired when a node gets hovered over */

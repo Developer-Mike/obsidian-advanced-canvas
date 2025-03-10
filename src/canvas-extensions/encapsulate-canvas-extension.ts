@@ -1,6 +1,5 @@
 import { Menu } from "obsidian"
 import { Canvas } from "src/@types/Canvas"
-import { CanvasEvent } from "src/@types/CustomWorkspaceEvents"
 import CanvasHelper from "src/utils/canvas-helper"
 import { FileNameModal } from "src/utils/modal-helper"
 import CanvasExtension from "./canvas-extension"

@@ -1,5 +1,4 @@
 import { Canvas, Position } from "src/@types/Canvas"
-import { CanvasEvent } from "src/@types/CustomWorkspaceEvents"
 import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "./canvas-extension"
 

@@ -1,6 +1,5 @@
 import { Menu } from "obsidian"
 import { Canvas, CanvasNode } from "src/@types/Canvas"
-import { CanvasEvent } from "src/@types/CustomWorkspaceEvents"
 import BBoxHelper from "src/utils/bbox-helper"
 import CanvasExtension from "./canvas-extension"
 

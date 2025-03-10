@@ -119,13 +119,13 @@ export default class CanvasPatcher extends Patcher {
       }),
       getContainingNodes: Patcher.OverrideExisting(next => function (bbox: BBox): CanvasNode[] {
         const result = next.call(this, bbox)
-        that.plugin.app.workspace.trigger(CanvasEvent.ContainingNodesRequested, this, bbox, result)
+        that.plugin.app.workspace.trigger('advanced-canvas:containing-nodes-requested', this, bbox, result)
         return result
       }),
       updateSelection: Patcher.OverrideExisting(next => function (update: () => void): void {
         const oldSelection = new Set(this.selection)
         const result = next.call(this, update)
-        that.plugin.app.workspace.trigger(CanvasEvent.SelectionChanged, this, oldSelection, ((update: () => void) => next.call(this, update)))
+        that.plugin.app.workspace.trigger('advanced-canvas:selection-changed', this, oldSelection, (update: () => void) => next.call(this, update))
         return result
       }),
       createTextNode: Patcher.OverrideExisting(next => function (...args: any): CanvasNode {
@@ -164,12 +164,12 @@ export default class CanvasPatcher extends Patcher {
       }),
       removeNode: Patcher.OverrideExisting(next => function (node: CanvasNode): void {
         const result = next.call(this, node)
-        if (!this.isClearing) that.plugin.app.workspace.trigger(CanvasEvent.NodeRemoved, this, node)
+        if (!this.isClearing) that.plugin.app.workspace.trigger('advanced-canvas:node-removed', this, node)
         return result
       }),
       removeEdge: Patcher.OverrideExisting(next => function (edge: CanvasEdge): void {
         const result = next.call(this, edge)
-        if (!this.isClearing) that.plugin.app.workspace.trigger(CanvasEvent.EdgeRemoved, this, edge)
+        if (!this.isClearing) that.plugin.app.workspace.trigger('advanced-canvas:edge-removed', this, edge)
         return result
       }),
       handleCopy: Patcher.OverrideExisting(next => function (...args: any): void {
@@ -181,20 +181,20 @@ export default class CanvasPatcher extends Patcher {
       }),
       getSelectionData: Patcher.OverrideExisting(next => function (...args: any): SelectionData {
         const result = next.call(this, ...args)
-        if (this.isCopying) that.plugin.app.workspace.trigger(CanvasEvent.OnCopy, this, result)
+        if (this.isCopying) that.plugin.app.workspace.trigger('advanced-canvas:copy', this, result)
         return result
       }),
       zoomToBbox: Patcher.OverrideExisting(next => function (bbox: BBox): void {
-        that.plugin.app.workspace.trigger(CanvasEvent.ZoomToBbox.Before, this, bbox)
+        that.plugin.app.workspace.trigger('advanced-canvas:zoom-to-bbox:before', this, bbox)
         const result = next.call(this, bbox)
-        that.plugin.app.workspace.trigger(CanvasEvent.ZoomToBbox.After, this, bbox)
+        that.plugin.app.workspace.trigger('advanced-canvas:zoom-to-bbox:after', this, bbox)
         return result
       }),
       // Custom
       zoomToRealBbox: (_next: any) => function (bbox: BBox): void {
         if (this.canvasRect.width === 0 || this.canvasRect.height === 0) return
 
-        that.plugin.app.workspace.trigger(CanvasEvent.ZoomToBbox.Before, this, bbox)
+        that.plugin.app.workspace.trigger('advanced-canvas:zoom-to-bbox:before', this, bbox)
     
         const widthZoom = this.canvasRect.width / (bbox.maxX - bbox.minX)
         const heightZoom = this.canvasRect.height / (bbox.maxY - bbox.minY)
@@ -207,23 +207,23 @@ export default class CanvasPatcher extends Patcher {
         
         this.markViewportChanged()
 
-        that.plugin.app.workspace.trigger(CanvasEvent.ZoomToBbox.After, this, bbox)
+        that.plugin.app.workspace.trigger('advanced-canvas:zoom-to-bbox:after', this, bbox)
       },
       setReadonly: Patcher.OverrideExisting(next => function (readonly: boolean): void {
         const result = next.call(this, readonly)
-        that.plugin.app.workspace.trigger(CanvasEvent.ReadonlyChanged, this, readonly)
+        that.plugin.app.workspace.trigger('advanced-canvas:readonly-changed', this, readonly)
         return result
       }),
       undo: Patcher.OverrideExisting(next => function (...args: any): void {
         const result = next.call(this, ...args)
         this.importData(this.getData(), true) // Force update the canvas data
-        that.plugin.app.workspace.trigger(CanvasEvent.Undo, this)
+        that.plugin.app.workspace.trigger('advanced-canvas:undo', this)
         return result
       }),
       redo: Patcher.OverrideExisting(next => function (...args: any): void {
         const result = next.call(this, ...args)
         this.importData(this.getData(), true) // Force update the canvas data
-        that.plugin.app.workspace.trigger(CanvasEvent.Redo, this)
+        that.plugin.app.workspace.trigger('advanced-canvas:redo', this)
         return result
       }),
       clear: Patcher.OverrideExisting(next => function (...args: any): void {
@@ -240,7 +240,7 @@ export default class CanvasPatcher extends Patcher {
       }),*/
       getData: Patcher.OverrideExisting(next => function (...args: any): CanvasData {
         const result = next.call(this, ...args)
-        that.plugin.app.workspace.trigger(CanvasEvent.DataRequested, this, result)
+        that.plugin.app.workspace.trigger('advanced-canvas:data-requested', this, result)
         return result
       }),
       importData: Patcher.OverrideExisting(next => function (data: CanvasData, clearCanvas?: boolean, silent?: boolean): void {
@@ -252,15 +252,15 @@ export default class CanvasPatcher extends Patcher {
           this.importData(data, true, true)
         }
 
-        if (!silent) that.plugin.app.workspace.trigger(CanvasEvent.LoadData, this, data, setData)
+        if (!silent) that.plugin.app.workspace.trigger('advanced-canvas:load-data', this, data, setData)
         const result = next.call(this, data, clearCanvas)
 
         return result
       }),
       requestSave: Patcher.OverrideExisting(next => function (...args: any): void {
-        that.plugin.app.workspace.trigger(CanvasEvent.CanvasSaved.Before, this)
+        that.plugin.app.workspace.trigger('advanced-canvas:canvas-saved:before', this)
         const result = next.call(this, ...args)
-        that.plugin.app.workspace.trigger(CanvasEvent.CanvasSaved.After, this)
+        that.plugin.app.workspace.trigger('advanced-canvas:canvas-saved:after', this)
         return result
       })
     })
@@ -269,7 +269,7 @@ export default class CanvasPatcher extends Patcher {
     Patcher.patchPrototype<CanvasPopupMenu>(this.plugin, canvasView.canvas.menu, {
       render: Patcher.OverrideExisting(next => function (...args: any): void {
         const result = next.call(this, ...args)
-        that.plugin.app.workspace.trigger(CanvasEvent.PopupMenuCreated, this.canvas)
+        that.plugin.app.workspace.trigger('advanced-canvas:popup-menu-created', this.canvas)
         next.call(this) // Re-Center the popup menu
         return result
       })
@@ -279,7 +279,7 @@ export default class CanvasPatcher extends Patcher {
     Patcher.patchPrototype<NodeInteractionLayer>(this.plugin, canvasView.canvas.nodeInteractionLayer, {
       setTarget: Patcher.OverrideExisting(next => function (node: CanvasNode): void {
         const result = next.call(this, node)
-        that.plugin.app.workspace.trigger(CanvasEvent.NodeInteraction, this.canvas, node)
+        that.plugin.app.workspace.trigger('advanced-canvas:node-interaction', this.canvas, node)
         return result
       })
     })
@@ -292,7 +292,7 @@ export default class CanvasPatcher extends Patcher {
       const node = editor.node as CanvasNode | undefined
       if (!node) return
 
-      that.plugin.app.workspace.trigger(CanvasEvent.NodeTextContentChanged, node.canvas, node, update)
+      that.plugin.app.workspace.trigger('advanced-canvas:node-text-content-changed', node.canvas, node, update)
     })])
 
     // Canvas is now patched - update all open canvas views
@@ -321,7 +321,7 @@ export default class CanvasPatcher extends Patcher {
 
         if (node.initialized && !node.isDirty) {
           node.isDirty = true
-          that.plugin.app.workspace.trigger(CanvasEvent.NodeChanged, this.canvas, node)
+          that.plugin.app.workspace.trigger('advanced-canvas:node-changed', this.canvas, node)
           delete node.isDirty
         }
 
@@ -336,27 +336,27 @@ export default class CanvasPatcher extends Patcher {
       }),
       setIsEditing: Patcher.OverrideExisting(next => function (editing: boolean, ...args: any): void {
         const result = next.call(this, editing, ...args)
-        that.plugin.app.workspace.trigger(CanvasEvent.NodeEditingStateChanged, this.canvas, node, editing)
+        that.plugin.app.workspace.trigger('advanced-canvas:node-editing-state-changed', this.canvas, node, editing)
         return result
       }),
       updateBreakpoint: Patcher.OverrideExisting(next => function (breakpoint: boolean): void {
         const breakpointRef = { value: breakpoint }
-        that.plugin.app.workspace.trigger(CanvasEvent.NodeBreakpointChanged, this.canvas, node, breakpointRef)
+        that.plugin.app.workspace.trigger('advanced-canvas:node-breakpoint-changed', this.canvas, node, breakpointRef)
         return next.call(this, breakpointRef.value)
       }),
       getBBox: Patcher.OverrideExisting(next => function (...args: any): BBox {
         const result = next.call(this, ...args)
-        that.plugin.app.workspace.trigger(CanvasEvent.NodeBBoxRequested, this.canvas, node, result)
+        that.plugin.app.workspace.trigger('advanced-canvas:node-bbox-requested', this.canvas, node, result)
         return result
       }),
       onConnectionPointerdown: Patcher.OverrideExisting(next => function (e: PointerEvent, side: Side): void {
-        const addEdgeEventRef = that.plugin.app.workspace.on(CanvasEvent.EdgeAdded, (_canvas: Canvas, edge: CanvasEdge) => {
-          that.plugin.app.workspace.trigger(CanvasEvent.EdgeConnectionDragging.Before, this.canvas, edge, e, true, "to")
+        const addEdgeEventRef = that.plugin.app.workspace.on('advanced-canvas:edge-added', (_canvas: Canvas, edge: CanvasEdge) => {
+          that.plugin.app.workspace.trigger('advanced-canvas:edge-connection-dragging:before', this.canvas, edge, e, true, "to")
           that.plugin.app.workspace.offref(addEdgeEventRef)
 
           // Listen for pointer up event
           document.addEventListener('pointerup', (e: PointerEvent) => {
-            that.plugin.app.workspace.trigger(CanvasEvent.EdgeConnectionDragging.After, this.canvas, edge, e, true, "to")
+            that.plugin.app.workspace.trigger('advanced-canvas:edge-connection-dragging:after', this.canvas, edge, e, true, "to")
           }, { once: true })
         })
 
@@ -366,8 +366,8 @@ export default class CanvasPatcher extends Patcher {
     })
     
     this.runAfterInitialized(node, () => {
-      this.plugin.app.workspace.trigger(CanvasEvent.NodeAdded, node.canvas, node)
-      this.plugin.app.workspace.trigger(CanvasEvent.NodeChanged, node.canvas, node)
+      this.plugin.app.workspace.trigger('advanced-canvas:node-added', node.canvas, node)
+      this.plugin.app.workspace.trigger('advanced-canvas:node-changed', node.canvas, node)
     })
   }
 
@@ -380,7 +380,7 @@ export default class CanvasPatcher extends Patcher {
 
         if (this.initialized && !this.isDirty) {
           this.isDirty = true
-          that.plugin.app.workspace.trigger(CanvasEvent.EdgeChanged, this.canvas, this)
+          that.plugin.app.workspace.trigger('advanced-canvas:edge-changed', this.canvas, this)
           delete this.isDirty
         }
 
@@ -395,12 +395,12 @@ export default class CanvasPatcher extends Patcher {
       }),
       render: Patcher.OverrideExisting(next => function (...args: any): void {
         const result = next.call(this, ...args)
-        that.plugin.app.workspace.trigger(CanvasEvent.EdgeChanged, this.canvas, this)
+        that.plugin.app.workspace.trigger('advanced-canvas:edge-changed', this.canvas, this)
         return result
       }),
       getCenter: Patcher.OverrideExisting(next => function (...args: any): Position {
         const result = next.call(this, ...args)
-        that.plugin.app.workspace.trigger(CanvasEvent.EdgeCenterRequested, this.canvas, this, result)
+        that.plugin.app.workspace.trigger('advanced-canvas:edge-center-requested', this.canvas, this, result)
         return result
       }),
       onConnectionPointerdown: Patcher.OverrideExisting(next => function (e: PointerEvent): void {
@@ -415,9 +415,9 @@ export default class CanvasPatcher extends Patcher {
         const toPos = BBoxHelper.getCenterOfBBoxSide(this.to.node.getBBox(), this.to.side)
         const draggingSide = Math.hypot(eventPos.x - fromPos.x, eventPos.y - fromPos.y) > Math.hypot(eventPos.x - toPos.x, eventPos.y - toPos.y) ? "to" : "from"
 
-        that.plugin.app.workspace.trigger(CanvasEvent.EdgeConnectionDragging.Before, this.canvas, this, e, false, draggingSide)
+        that.plugin.app.workspace.trigger('advanced-canvas:edge-connection-dragging:before', this.canvas, this, e, false, draggingSide)
         document.addEventListener('pointerup', (e: PointerEvent) => {
-          that.plugin.app.workspace.trigger(CanvasEvent.EdgeConnectionDragging.After, this.canvas, this, e, false, draggingSide)
+          that.plugin.app.workspace.trigger('advanced-canvas:edge-connection-dragging:after', this.canvas, this, e, false, draggingSide)
         }, { once: true })
 
         return result
@@ -425,7 +425,7 @@ export default class CanvasPatcher extends Patcher {
     })
     
     this.runAfterInitialized(edge, () => {
-      this.plugin.app.workspace.trigger(CanvasEvent.EdgeAdded, edge.canvas, edge)
+      this.plugin.app.workspace.trigger('advanced-canvas:edge-added', edge.canvas, edge)
       // this.plugin.app.workspace.trigger(CanvasEvent.EdgeChanged, edge.canvas, edge) - already fired in render function
     })
   }

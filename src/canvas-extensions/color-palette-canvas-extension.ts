@@ -1,13 +1,12 @@
 import { WorkspaceWindow } from "obsidian"
 import { Canvas } from "src/@types/Canvas"
-import { CanvasEvent } from "src/@types/CustomWorkspaceEvents"
 import CanvasExtension from "./canvas-extension"
 
 const DEFAULT_COLORS_COUNT = 6
 const CUSTOM_COLORS_MOD_STYLES_ID = 'mod-custom-colors'
 
 export default class ColorPaletteCanvasExtension extends CanvasExtension {
-  observer: MutationObserver|null = null
+  observer: MutationObserver | null = null
   
   isEnabled() { return true }
   
@@ -25,7 +24,7 @@ export default class ColorPaletteCanvasExtension extends CanvasExtension {
     this.updateCustomColorModStyleClasses()
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.PopupMenuCreated,
+      'advanced-canvas:popup-menu-created',
       (canvas: Canvas) => this.patchColorSelection(canvas)
     ))
 

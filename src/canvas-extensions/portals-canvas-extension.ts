@@ -1,6 +1,5 @@
 import { TFile } from "obsidian"
 import { BBox, Canvas, CanvasData, CanvasElement, CanvasNode, CanvasNodeData, CanvasView } from "src/@types/Canvas"
-import { CanvasEvent } from "src/@types/CustomWorkspaceEvents"
 import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "./canvas-extension"
 
@@ -34,12 +33,12 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     }))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.PopupMenuCreated,
+      'advanced-canvas:popup-menu-created',
       (canvas: Canvas) => this.updatePopupMenu(canvas)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.NodeRemoved,
+      'advanced-canvas:node-removed',
       (canvas: Canvas, node: CanvasNode) => this.onNodeRemoved(canvas, node)
     ))
 
@@ -59,22 +58,22 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.ContainingNodesRequested,
+      'advanced-canvas:containing-nodes-requested',
       (canvas: Canvas, bbox: BBox, nodes: CanvasNode[]) => this.onContainingNodesRequested(canvas, bbox, nodes)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.SelectionChanged,
+      'advanced-canvas:selection-changed',
       (canvas: Canvas, oldSelection: Set<CanvasElement>, updateSelection: (update: () => void) => void) => this.onSelectionChanged(canvas, oldSelection, updateSelection)
     ))
     
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.DataRequested,
+      'advanced-canvas:data-requested',
       (canvas: Canvas, data: CanvasData) => this.removePortalCanvasData(canvas, data)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.LoadData,
+      'advanced-canvas:load-data',
       (canvas: Canvas, data: CanvasData, setData: (data: CanvasData) => void) => {
         this.getCanvasDataWithPortals(canvas, data)
           .then((newData: CanvasData) => {

@@ -1,14 +1,13 @@
 import { Canvas, CanvasEdge } from "src/@types/Canvas"
-import { CanvasEvent } from "src/@types/CustomWorkspaceEvents"
-import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "./canvas-extension"
+import CanvasHelper from "src/utils/canvas-helper"
 
 export default class FlipEdgeCanvasExtension extends CanvasExtension {
   isEnabled() { return 'flipEdgeFeatureEnabled' as const }
 
   init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      CanvasEvent.PopupMenuCreated,
+      'advanced-canvas:popup-menu-created',
       (canvas: Canvas) => this.onPopupMenuCreated(canvas)
     ))
   }
