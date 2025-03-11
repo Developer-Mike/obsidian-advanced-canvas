@@ -19,6 +19,7 @@ declare module "obsidian" {
     lastEvent: UserEvent | null
 
     internalPlugins: any
+    viewRegistry: any
 
     /** @public */
     metadataCache: ExtendedMetadataCache

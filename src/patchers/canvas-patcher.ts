@@ -10,298 +10,275 @@ import Patcher from "./patcher"
 import BBoxHelper from "src/utils/bbox-helper"
 
 export default class CanvasPatcher extends Patcher {
-  private async getLoadedCanvasViews(): Promise<CanvasView[] | null> {
-    const canvasLeafs = this.plugin.app.workspace.getLeavesOfType('canvas')
-    if (canvasLeafs.length === 0) return null
-
-    const loadedLeafs = canvasLeafs.filter(leaf => !requireApiVersion('1.7.2') || !leaf.isDeferred)
-    if (loadedLeafs.length === 0) return null
-
-    const canvasViews = loadedLeafs.map(leaf => leaf.view as CanvasView)
-    return canvasViews
-  }
-
-  private async waitForCanvasViews(): Promise<CanvasView[]> {
-    return new Promise<CanvasView[]>(resolve => {
-      const event = this.plugin.app.workspace.on('layout-change', async () => {
-        const canvasViews = await this.getLoadedCanvasViews()
-        resolve(canvasViews ? canvasViews : await this.waitForCanvasViews()) // Recursively wait for canvas views
-
-        this.plugin.app.workspace.offref(event)
-      })
-
-      this.plugin.registerEvent(event)
-    })
-  }
-
   protected async patch() {
+    // Check if there are already loaded canvas view leafs
+    const loadedCanvasViewLeafs = this.plugin.app.workspace.getLeavesOfType("canvas")
+      .filter((leaf: WorkspaceLeaf) => !requireApiVersion('1.7.2') || !leaf.isDeferred)
+
+    if (loadedCanvasViewLeafs.length > 0) {
+      console.debug(`Patching and reloading loaded canvas views (Count: ${loadedCanvasViewLeafs.length})`)
+
+      // Patch the loaded canvas views
+      this.patchCanvas(loadedCanvasViewLeafs.first()!.view as CanvasView)
+
+      // Reload the canvas views
+      for (const leaf of loadedCanvasViewLeafs) (leaf as any).rebuildView()
+    } else {
+      // Patch the canvas view as soon it gets requested
+      await Patcher.patchViewOnRequest<CanvasView>(this.plugin, "canvas", view => this.patchCanvas(view))
+      console.debug(`Patched canvas view on first request`)
+    }
+  }
+
+  private patchCanvas(view: CanvasView) {
     const that = this
 
-    // Wait for layout ready -> Support deferred view initialization
-    await new Promise<void>(resolve => this.plugin.app.workspace.onLayoutReady(() => resolve()))
+    // Patch canvas view
+    PatchHelper.patchPrototype<CanvasView>(this.plugin, view, {
+      getViewData: PatchHelper.OverrideExisting(next => function (...args: any): string {
+        const canvasData = this.canvas.getData()
 
-    // Get the current canvas view OR wait for one to be created
-    let canvasViews = await this.getLoadedCanvasViews()
-    canvasViews ??= await this.waitForCanvasViews()
-    
-    // Patch all canvas views including the prototype
-    for (let canvasView of [null, ...canvasViews]) {
-      // Check if patch prototype
-      let patchPrototype = false
-      if (canvasView === null) {
-        patchPrototype = true
-        canvasView = canvasViews.first()!
-      }
-
-      console.log('Patching canvas view:', canvasView, patchPrototype)
-
-      // Patch canvas view
-      PatchHelper.patch<CanvasView>(this.plugin, canvasView, {
-        getViewData: PatchHelper.OverrideExisting(next => function (...args: any): string {
-          const canvasData = this.canvas.getData()
+        try {
+          const stringified = JSONSS(canvasData, { space: 2 })
+          if (stringified === undefined) throw new Error('Failed to stringify canvas data using json-stable-stringify')
+            
+          return stringified
+        } catch (e) {
+          console.error('Failed to stringify canvas data using json-stable-stringify:', e)
 
           try {
-            const stringified = JSONSS(canvasData, { space: 2 })
-            if (stringified === undefined) throw new Error('Failed to stringify canvas data using json-stable-stringify')
-              
-            return stringified
+            return JSON.stringify(canvasData, null, 2)
           } catch (e) {
-            console.error('Failed to stringify canvas data using json-stable-stringify:', e)
-
-            try {
-              return JSON.stringify(canvasData, null, 2)
-            } catch (e) {
-              console.error('Failed to stringify canvas data using JSON.stringify:', e)
-              return next.call(this, ...args)
-            }
+            console.error('Failed to stringify canvas data using JSON.stringify:', e)
+            return next.call(this, ...args)
           }
-        }),
-        setViewData: PatchHelper.OverrideExisting(next => function (json: string, ...args: any): void {
-          json = json !== '' ? json : '{}'
+        }
+      }),
+      setViewData: PatchHelper.OverrideExisting(next => function (json: string, ...args: any): void {
+        json = json !== '' ? json : '{}'
 
-          let result
-          try {
-            result = next.call(this, json, ...args)
-          } catch (e) {
-            console.error('Invalid JSON, repairing through Advanced Canvas:', e)
+        let result
+        try {
+          result = next.call(this, json, ...args)
+        } catch (e) {
+          console.error('Invalid JSON, repairing through Advanced Canvas:', e)
 
-            // Invalid JSON
-            if (this.file) that.plugin.createFileSnapshot(this.file.path, json)
+          // Invalid JSON
+          if (this.file) that.plugin.createFileSnapshot(this.file.path, json)
 
-            // Try to parse it with trailing commas
-            json = JSON.stringify(JSONC.parse(json), null, 2)
-            result = next.call(this, json, ...args)
-          }
+          // Try to parse it with trailing commas
+          json = JSON.stringify(JSONC.parse(json), null, 2)
+          result = next.call(this, json, ...args)
+        }
 
-          that.triggerWorkspaceEvent(CanvasEvent.CanvasChanged, this.canvas)
-          return result
-        })
-      }, patchPrototype)
+        that.triggerWorkspaceEvent(CanvasEvent.CanvasChanged, this.canvas)
+        return result
+      })
+    })
 
-      // Patch canvas
-      PatchHelper.patch<Canvas>(this.plugin, canvasView.canvas, {
-        markViewportChanged: PatchHelper.OverrideExisting(next => function (...args: any): void {
-          that.triggerWorkspaceEvent(CanvasEvent.ViewportChanged.Before, this)
-          const result = next.call(this, ...args)
-          that.triggerWorkspaceEvent(CanvasEvent.ViewportChanged.After, this)
-          return result
-        }),
-        markMoved: PatchHelper.OverrideExisting(next => function (node: CanvasNode): void {
-          const result = next.call(this, node)
+    // Patch canvas
+    PatchHelper.patchPrototype<Canvas>(this.plugin, view.canvas, {
+      markViewportChanged: PatchHelper.OverrideExisting(next => function (...args: any): void {
+        that.triggerWorkspaceEvent(CanvasEvent.ViewportChanged.Before, this)
+        const result = next.call(this, ...args)
+        that.triggerWorkspaceEvent(CanvasEvent.ViewportChanged.After, this)
+        return result
+      }),
+      markMoved: PatchHelper.OverrideExisting(next => function (node: CanvasNode): void {
+        const result = next.call(this, node)
 
-          if (!this.viewportChanged) {
-            if (node.prevX !== node.x || node.prevY !== node.y)
-              that.triggerWorkspaceEvent(CanvasEvent.NodeMoved, this, node, !this.isDragging)
+        if (!this.viewportChanged) {
+          if (node.prevX !== node.x || node.prevY !== node.y)
+            that.triggerWorkspaceEvent(CanvasEvent.NodeMoved, this, node, !this.isDragging)
 
-            if (node.prevWidth !== node.width || node.prevHeight !== node.height)
-              that.triggerWorkspaceEvent(CanvasEvent.NodeResized, this, node)
-          }
+          if (node.prevWidth !== node.width || node.prevHeight !== node.height)
+            that.triggerWorkspaceEvent(CanvasEvent.NodeResized, this, node)
+        }
 
-          // Save the current position and size
-          node.prevX = node.x
-          node.prevY = node.y
-          node.prevWidth = node.width
-          node.prevHeight = node.height
+        // Save the current position and size
+        node.prevX = node.x
+        node.prevY = node.y
+        node.prevWidth = node.width
+        node.prevHeight = node.height
 
-          return result
-        }),
-        onDoubleClick: PatchHelper.OverrideExisting(next => function (event: MouseEvent): void {
-          const preventDefault = { value: false }
-          that.triggerWorkspaceEvent(CanvasEvent.DoubleClick, this, event, preventDefault)
-          if (!preventDefault.value) next.call(this, event)
-        }),
-        setDragging: PatchHelper.OverrideExisting(next => function (dragging: boolean): void {
-          const result = next.call(this, dragging)
-          that.triggerWorkspaceEvent(CanvasEvent.DraggingStateChanged, this, dragging)
-          return result
-        }),
-        getContainingNodes: PatchHelper.OverrideExisting(next => function (bbox: BBox): CanvasNode[] {
-          const result = next.call(this, bbox)
-          that.triggerWorkspaceEvent(CanvasEvent.ContainingNodesRequested, this, bbox, result)
-          return result
-        }),
-        updateSelection: PatchHelper.OverrideExisting(next => function (update: () => void): void {
-          const oldSelection = new Set(this.selection)
-          const result = next.call(this, update)
-          that.triggerWorkspaceEvent(CanvasEvent.SelectionChanged, this, oldSelection, ((update: () => void) => next.call(this, update)))
-          return result
-        }),
-        createTextNode: PatchHelper.OverrideExisting(next => function (...args: any): CanvasNode {
-          const node = next.call(this, ...args)
-          that.triggerWorkspaceEvent(CanvasEvent.NodeCreated, this, node)
-          return node
-        }),
-        createFileNode: PatchHelper.OverrideExisting(next => function (...args: any): CanvasNode {
-          const node = next.call(this, ...args)
-          that.triggerWorkspaceEvent(CanvasEvent.NodeCreated, this, node)
-          return node
-        }),
-        createFileNodes: PatchHelper.OverrideExisting(next => function (...args: any): CanvasNode[] {
-          const nodes = next.call(this, ...args)
-          nodes.forEach((node: CanvasNode) => that.triggerWorkspaceEvent(CanvasEvent.NodeCreated, this, node))
-          return nodes
-        }),
-        createGroupNode: PatchHelper.OverrideExisting(next => function (...args: any): CanvasNode {
-          const node = next.call(this, ...args)
-          that.triggerWorkspaceEvent(CanvasEvent.NodeCreated, this, node)
-          return node
-        }),
-        createLinkNode: PatchHelper.OverrideExisting(next => function (...args: any): CanvasNode {
-          const node = next.call(this, ...args)
-          that.triggerWorkspaceEvent(CanvasEvent.NodeCreated, this, node)
-          return node
-        }),
-        addNode: PatchHelper.OverrideExisting(next => function (node: CanvasNode): void {
-          that.patchNode(node)
-          return next.call(this, node)
-        }),
-        addEdge: PatchHelper.OverrideExisting(next => function (edge: CanvasEdge): void {
-          that.patchEdge(edge)
-          if (!this.viewportChanged) that.triggerWorkspaceEvent(CanvasEvent.EdgeCreated, this, edge)
-          return next.call(this, edge)
-        }),
-        removeNode: PatchHelper.OverrideExisting(next => function (node: CanvasNode): void {
-          const result = next.call(this, node)
-          if (!this.isClearing) that.triggerWorkspaceEvent(CanvasEvent.NodeRemoved, this, node)
-          return result
-        }),
-        removeEdge: PatchHelper.OverrideExisting(next => function (edge: CanvasEdge): void {
-          const result = next.call(this, edge)
-          if (!this.isClearing) that.triggerWorkspaceEvent(CanvasEvent.EdgeRemoved, this, edge)
-          return result
-        }),
-        handleCopy: PatchHelper.OverrideExisting(next => function (...args: any): void {
-          this.isCopying = true
-          const result = next.call(this, ...args)
-          this.isCopying = false
+        return result
+      }),
+      onDoubleClick: PatchHelper.OverrideExisting(next => function (event: MouseEvent): void {
+        const preventDefault = { value: false }
+        that.triggerWorkspaceEvent(CanvasEvent.DoubleClick, this, event, preventDefault)
+        if (!preventDefault.value) next.call(this, event)
+      }),
+      setDragging: PatchHelper.OverrideExisting(next => function (dragging: boolean): void {
+        const result = next.call(this, dragging)
+        that.triggerWorkspaceEvent(CanvasEvent.DraggingStateChanged, this, dragging)
+        return result
+      }),
+      getContainingNodes: PatchHelper.OverrideExisting(next => function (bbox: BBox): CanvasNode[] {
+        const result = next.call(this, bbox)
+        that.triggerWorkspaceEvent(CanvasEvent.ContainingNodesRequested, this, bbox, result)
+        return result
+      }),
+      updateSelection: PatchHelper.OverrideExisting(next => function (update: () => void): void {
+        const oldSelection = new Set(this.selection)
+        const result = next.call(this, update)
+        that.triggerWorkspaceEvent(CanvasEvent.SelectionChanged, this, oldSelection, ((update: () => void) => next.call(this, update)))
+        return result
+      }),
+      createTextNode: PatchHelper.OverrideExisting(next => function (...args: any): CanvasNode {
+        const node = next.call(this, ...args)
+        that.triggerWorkspaceEvent(CanvasEvent.NodeCreated, this, node)
+        return node
+      }),
+      createFileNode: PatchHelper.OverrideExisting(next => function (...args: any): CanvasNode {
+        const node = next.call(this, ...args)
+        that.triggerWorkspaceEvent(CanvasEvent.NodeCreated, this, node)
+        return node
+      }),
+      createFileNodes: PatchHelper.OverrideExisting(next => function (...args: any): CanvasNode[] {
+        const nodes = next.call(this, ...args)
+        nodes.forEach((node: CanvasNode) => that.triggerWorkspaceEvent(CanvasEvent.NodeCreated, this, node))
+        return nodes
+      }),
+      createGroupNode: PatchHelper.OverrideExisting(next => function (...args: any): CanvasNode {
+        const node = next.call(this, ...args)
+        that.triggerWorkspaceEvent(CanvasEvent.NodeCreated, this, node)
+        return node
+      }),
+      createLinkNode: PatchHelper.OverrideExisting(next => function (...args: any): CanvasNode {
+        const node = next.call(this, ...args)
+        that.triggerWorkspaceEvent(CanvasEvent.NodeCreated, this, node)
+        return node
+      }),
+      addNode: PatchHelper.OverrideExisting(next => function (node: CanvasNode): void {
+        that.patchNode(node)
+        return next.call(this, node)
+      }),
+      addEdge: PatchHelper.OverrideExisting(next => function (edge: CanvasEdge): void {
+        that.patchEdge(edge)
+        if (!this.viewportChanged) that.triggerWorkspaceEvent(CanvasEvent.EdgeCreated, this, edge)
+        return next.call(this, edge)
+      }),
+      removeNode: PatchHelper.OverrideExisting(next => function (node: CanvasNode): void {
+        const result = next.call(this, node)
+        if (!this.isClearing) that.triggerWorkspaceEvent(CanvasEvent.NodeRemoved, this, node)
+        return result
+      }),
+      removeEdge: PatchHelper.OverrideExisting(next => function (edge: CanvasEdge): void {
+        const result = next.call(this, edge)
+        if (!this.isClearing) that.triggerWorkspaceEvent(CanvasEvent.EdgeRemoved, this, edge)
+        return result
+      }),
+      handleCopy: PatchHelper.OverrideExisting(next => function (...args: any): void {
+        this.isCopying = true
+        const result = next.call(this, ...args)
+        this.isCopying = false
 
-          return result
-        }),
-        getSelectionData: PatchHelper.OverrideExisting(next => function (...args: any): SelectionData {
-          const result = next.call(this, ...args)
-          if (this.isCopying) that.triggerWorkspaceEvent(CanvasEvent.OnCopy, this, result)
-          return result
-        }),
-        zoomToBbox: PatchHelper.OverrideExisting(next => function (bbox: BBox): void {
-          that.triggerWorkspaceEvent(CanvasEvent.ZoomToBbox.Before, this, bbox)
-          const result = next.call(this, bbox)
-          that.triggerWorkspaceEvent(CanvasEvent.ZoomToBbox.After, this, bbox)
-          return result
-        }),
-        // Custom
-        zoomToRealBbox: (_next: any) => function (bbox: BBox): void {
-          if (this.canvasRect.width === 0 || this.canvasRect.height === 0) return
+        return result
+      }),
+      getSelectionData: PatchHelper.OverrideExisting(next => function (...args: any): SelectionData {
+        const result = next.call(this, ...args)
+        if (this.isCopying) that.triggerWorkspaceEvent(CanvasEvent.OnCopy, this, result)
+        return result
+      }),
+      zoomToBbox: PatchHelper.OverrideExisting(next => function (bbox: BBox): void {
+        that.triggerWorkspaceEvent(CanvasEvent.ZoomToBbox.Before, this, bbox)
+        const result = next.call(this, bbox)
+        that.triggerWorkspaceEvent(CanvasEvent.ZoomToBbox.After, this, bbox)
+        return result
+      }),
+      // Custom
+      zoomToRealBbox: (_next: any) => function (bbox: BBox): void {
+        if (this.canvasRect.width === 0 || this.canvasRect.height === 0) return
 
-          that.triggerWorkspaceEvent(CanvasEvent.ZoomToBbox.Before, this, bbox)
-      
-          const widthZoom = this.canvasRect.width / (bbox.maxX - bbox.minX)
-          const heightZoom = this.canvasRect.height / (bbox.maxY - bbox.minY)
-          const zoom = this.screenshotting ? Math.min(widthZoom, heightZoom) : Math.clamp(Math.min(widthZoom, heightZoom), -4, 1)
-          this.tZoom = Math.log2(zoom)
-          this.zoomCenter = null
-      
-          this.tx = (bbox.minX + bbox.maxX) / 2
-          this.ty = (bbox.minY + bbox.maxY) / 2
-          
-          this.markViewportChanged()
+        that.triggerWorkspaceEvent(CanvasEvent.ZoomToBbox.Before, this, bbox)
 
-          that.triggerWorkspaceEvent(CanvasEvent.ZoomToBbox.After, this, bbox)
-        },
-        setReadonly: PatchHelper.OverrideExisting(next => function (readonly: boolean): void {
-          const result = next.call(this, readonly)
-          that.triggerWorkspaceEvent(CanvasEvent.ReadonlyChanged, this, readonly)
-          return result
-        }),
-        undo: PatchHelper.OverrideExisting(next => function (...args: any): void {
-          const result = next.call(this, ...args)
-          this.importData(this.getData(), true) // Force update the canvas data
-          that.triggerWorkspaceEvent(CanvasEvent.Undo, this)
-          return result
-        }),
-        redo: PatchHelper.OverrideExisting(next => function (...args: any): void {
-          const result = next.call(this, ...args)
-          this.importData(this.getData(), true) // Force update the canvas data
-          that.triggerWorkspaceEvent(CanvasEvent.Redo, this)
-          return result
-        }),
-        clear: PatchHelper.OverrideExisting(next => function (...args: any): void {
-          this.isClearing = true
-          const result = next.call(this, ...args)
-          this.isClearing = false
-          return result
-        }),
-        /*setData: PatchHelper.OverrideExisting(next => function (...args: any): void {
-          //
-          const result = next.call(this, ...args)
-          //
-          return result
-        }),*/
-        getData: PatchHelper.OverrideExisting(next => function (...args: any): CanvasData {
-          const result = next.call(this, ...args)
-          that.triggerWorkspaceEvent(CanvasEvent.DataRequested, this, result)
-          return result
-        }),
-        importData: PatchHelper.OverrideExisting(next => function (data: CanvasData, clearCanvas?: boolean, silent?: boolean): void {
-          const targetFilePath = this.view.file.path
-          const setData = (data: CanvasData) => {
-            // Skip if the canvas got unloaded or the file changed
-            if (!this.view.file || this.view.file.path !== targetFilePath) return
+        const widthZoom = this.canvasRect.width / (bbox.maxX - bbox.minX)
+        const heightZoom = this.canvasRect.height / (bbox.maxY - bbox.minY)
+        const zoom = this.screenshotting ? Math.min(widthZoom, heightZoom) : Math.clamp(Math.min(widthZoom, heightZoom), -4, 1)
+        this.tZoom = Math.log2(zoom)
+        this.zoomCenter = null
 
-            this.importData(data, true, true)
-          }
+        this.tx = (bbox.minX + bbox.maxX) / 2
+        this.ty = (bbox.minY + bbox.maxY) / 2
+        
+        this.markViewportChanged()
 
-          if (!silent) that.triggerWorkspaceEvent(CanvasEvent.LoadData, this, data, setData)
-          const result = next.call(this, data, clearCanvas)
+        that.triggerWorkspaceEvent(CanvasEvent.ZoomToBbox.After, this, bbox)
+      },
+      setReadonly: PatchHelper.OverrideExisting(next => function (readonly: boolean): void {
+        const result = next.call(this, readonly)
+        that.triggerWorkspaceEvent(CanvasEvent.ReadonlyChanged, this, readonly)
+        return result
+      }),
+      undo: PatchHelper.OverrideExisting(next => function (...args: any): void {
+        const result = next.call(this, ...args)
+        this.importData(this.getData(), true) // Force update the canvas data
+        that.triggerWorkspaceEvent(CanvasEvent.Undo, this)
+        return result
+      }),
+      redo: PatchHelper.OverrideExisting(next => function (...args: any): void {
+        const result = next.call(this, ...args)
+        this.importData(this.getData(), true) // Force update the canvas data
+        that.triggerWorkspaceEvent(CanvasEvent.Redo, this)
+        return result
+      }),
+      clear: PatchHelper.OverrideExisting(next => function (...args: any): void {
+        this.isClearing = true
+        const result = next.call(this, ...args)
+        this.isClearing = false
+        return result
+      }),
+      /*setData: PatchHelper.OverrideExisting(next => function (...args: any): void {
+        //
+        const result = next.call(this, ...args)
+        //
+        return result
+      }),*/
+      getData: PatchHelper.OverrideExisting(next => function (...args: any): CanvasData {
+        const result = next.call(this, ...args)
+        that.triggerWorkspaceEvent(CanvasEvent.DataRequested, this, result)
+        return result
+      }),
+      importData: PatchHelper.OverrideExisting(next => function (data: CanvasData, clearCanvas?: boolean, silent?: boolean): void {
+        const targetFilePath = this.view.file.path
+        const setData = (data: CanvasData) => {
+          // Skip if the canvas got unloaded or the file changed
+          if (!this.view.file || this.view.file.path !== targetFilePath) return
 
-          return result
-        }),
-        requestSave: PatchHelper.OverrideExisting(next => function (...args: any): void {
-          that.triggerWorkspaceEvent(CanvasEvent.CanvasSaved.Before, this)
-          const result = next.call(this, ...args)
-          that.triggerWorkspaceEvent(CanvasEvent.CanvasSaved.After, this)
-          return result
-        })
-      }, patchPrototype)
+          this.importData(data, true, true)
+        }
 
-      // Patch canvas popup menu
-      PatchHelper.patch<CanvasPopupMenu>(this.plugin, canvasView.canvas.menu, {
-        render: PatchHelper.OverrideExisting(next => function (...args: any): void {
-          const result = next.call(this, ...args)
-          that.triggerWorkspaceEvent(CanvasEvent.PopupMenuCreated, this.canvas)
-          next.call(this) // Re-Center the popup menu
-          return result
-        })
-      }, patchPrototype)
+        if (!silent) that.triggerWorkspaceEvent(CanvasEvent.LoadData, this, data, setData)
+        const result = next.call(this, data, clearCanvas)
 
-      // Patch interaction layer
-      PatchHelper.patch<NodeInteractionLayer>(this.plugin, canvasView.canvas.nodeInteractionLayer, {
-        setTarget: PatchHelper.OverrideExisting(next => function (node: CanvasNode): void {
-          const result = next.call(this, node)
-          that.triggerWorkspaceEvent(CanvasEvent.NodeInteraction, this.canvas, node)
-          return result
-        })
-      }, patchPrototype)
-    }
+        return result
+      }),
+      requestSave: PatchHelper.OverrideExisting(next => function (...args: any): void {
+        that.triggerWorkspaceEvent(CanvasEvent.CanvasSaved.Before, this)
+        const result = next.call(this, ...args)
+        that.triggerWorkspaceEvent(CanvasEvent.CanvasSaved.After, this)
+        return result
+      })
+    })
+
+    // Patch canvas popup menu
+    PatchHelper.patchPrototype<CanvasPopupMenu>(this.plugin, view.canvas.menu, {
+      render: PatchHelper.OverrideExisting(next => function (...args: any): void {
+        const result = next.call(this, ...args)
+        that.triggerWorkspaceEvent(CanvasEvent.PopupMenuCreated, this.canvas)
+        next.call(this) // Re-Center the popup menu
+        return result
+      })
+    })
+
+    // Patch interaction layer
+    PatchHelper.patchPrototype<NodeInteractionLayer>(this.plugin, view.canvas.nodeInteractionLayer, {
+      setTarget: PatchHelper.OverrideExisting(next => function (node: CanvasNode): void {
+        const result = next.call(this, node)
+        that.triggerWorkspaceEvent(CanvasEvent.NodeInteraction, this.canvas, node)
+        return result
+      })
+    })
 
     // Add editor extension for node text content change listener
     this.plugin.registerEditorExtension([EditorView.updateListener.of((update: ViewUpdate) => {
