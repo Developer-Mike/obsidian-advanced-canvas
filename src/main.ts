@@ -61,11 +61,11 @@ const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   NodeInteractionExposerExtension,
 
   // Advanced Styles
-  NodeStylesExtension,
-  // FIXME: EdgeStylesExtension,
+  // NodeStylesExtension,
+  EdgeStylesExtension,
 
   // Basic Extensions
-  VariableBreakpointCanvasExtension,
+  /* VariableBreakpointCanvasExtension,
   BetterDefaultSettingsCanvasExtension,
   CommandsCanvasExtension,
   FloatingEdgeCanvasExtension,
@@ -82,7 +82,7 @@ const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   EncapsulateCanvasExtension,
   ColorPaletteCanvasExtension,
   PresentationCanvasExtension,
-  PortalsCanvasExtension
+  PortalsCanvasExtension */
 ]
 
 export default class AdvancedCanvasPlugin extends Plugin {
@@ -108,7 +108,13 @@ export default class AdvancedCanvasPlugin extends Plugin {
     this.windowsManager = new WindowsManager(this)
 
     this.patchers = PATCHERS.map((Patcher: any) => new Patcher(this))
-    this.canvasExtensions = CANVAS_EXTENSIONS.map((Extension: any) => new Extension(this))
+    this.canvasExtensions = CANVAS_EXTENSIONS.map((Extension: any) => {
+      try { 
+        return new Extension(this)
+      } catch (e) {
+        console.error(`Error initializing ${Extension.name}:`, e)
+      }
+    })
 	}
 
   onunload() {}

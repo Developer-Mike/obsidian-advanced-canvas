@@ -173,6 +173,13 @@ export default class CanvasPatcher extends Patcher {
 
         return result
       }),
+      handlePaste: Patcher.OverrideExisting(next => function (...args: any): void {
+        this.isPasting = true
+        const result = next.call(this, ...args)
+        this.isPasting = false
+
+        return result
+      }),
       getSelectionData: Patcher.OverrideExisting(next => function (...args: any): SelectionData {
         const result = next.call(this, ...args)
         if (this.isCopying) that.plugin.app.workspace.trigger('advanced-canvas:copy', this, result)

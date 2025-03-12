@@ -35,6 +35,7 @@ class Node {
   }
 }
 
+// FIXME: Performance improvements
 export default class EdgePathfindingAStar extends EdgePathfindingMethod {
   getPath(): EdgePath | null {        
     const nodeBBoxes = [...this.canvas.nodes.values()]

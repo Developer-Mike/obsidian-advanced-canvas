@@ -398,6 +398,7 @@ export interface Canvas {
   zoomToRealBbox(bbox: BBox): void
   isClearing?: boolean
   isCopying?: boolean
+  isPasting?: boolean
   lockedX: number
   lockedY: number
   lockedZoom: number
