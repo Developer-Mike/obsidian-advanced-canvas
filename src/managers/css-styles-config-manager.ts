@@ -14,7 +14,7 @@ export default class CssStylesConfigManager<T> {
     this.configRegex = new RegExp(`\\/\\*\\s*@${trigger}\\s*\\n([\\s\\S]*?)\\*\\/`, 'g')
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      "css-change",
+      'css-change',
       () => { this.cachedConfig = null }
     ))
   }

@@ -165,6 +165,7 @@ export interface CanvasNode extends CanvasElement {
   onConnectionPointerdown(e: PointerEvent, side: Side): void
 
   // Custom
+  breakpoint?: number | null
   prevX: number
   prevY: number
   prevWidth: number

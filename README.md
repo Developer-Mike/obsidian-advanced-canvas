@@ -337,6 +337,9 @@ Custom style attributes for nodes and edges can easily be added.
 ## Variable Breakpoints
 Add breakpoints to nodes to change at which zoom factor the node's content gets unrendered.
 
+>[!IMPORTANT]
+> Due to performance reasons, custom breakpoints get cached and are only re-fetched when the canvas gets reloaded. This means that changes in the CSS snippet won't be applied immediately (Only after a reopening of the canvas).
+
 Create a new CSS snippet in your vault (And enable it in the settings)
 ```css	
 /* Any CSS selector can be used (As long as the .canvas-node element has the CSS variable defined) */
