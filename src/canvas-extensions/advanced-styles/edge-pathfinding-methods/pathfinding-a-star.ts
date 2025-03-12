@@ -2,13 +2,24 @@ import { BBox, Position } from "src/@types/Canvas"
 import BBoxHelper from "src/utils/bbox-helper"
 import SvgPathHelper from "src/utils/svg-path-helper"
 import EdgePathfindingMethod, { EdgePath } from "./edge-pathfinding-method"
+import CanvasHelper from "src/utils/canvas-helper"
 
 const MAX_MS_CALCULATION = 100
-const DIRECTIONS = [
-  { dx: 1, dy: 0 }, { dx: -1, dy: 0 }, { dx: 0, dy: 1 }, { dx: 0, dy: -1 },
-  { dx: 1, dy: 1 }, { dx: -1, dy: 1 }, { dx: 1, dy: -1 }, { dx: -1, dy: -1 },
+const BASIC_DIRECTIONS = [
+  { dx: 1, dy: 0 }, 
+  { dx: -1, dy: 0 }, 
+  { dx: 0, dy: 1 }, 
+  { dx: 0, dy: -1 },
+] as const
+const DIAGONAL_DIRECTIONS = [
+  { dx: 1, dy: 1 }, 
+  { dx: -1, dy: 1 }, 
+  { dx: 1, dy: -1 }, 
+  { dx: -1, dy: -1 },
 ] as const
 const DIAGONAL_COST = Math.sqrt(2)
+
+const ROUND_PATH_RADIUS = 5
 const SMOOTHEN_PATH_TENSION = 0.2
 
 class Node {
@@ -17,7 +28,7 @@ class Node {
   gCost: number
   hCost: number
   fCost: number
-  parent: Node|null
+  parent: Node | null
 
   constructor(x: number, y: number) {
     this.x = x
@@ -55,8 +66,8 @@ export default class EdgePathfindingAStar extends EdgePathfindingMethod {
     const fromPosWithMargin = BBoxHelper.moveInDirection(this.fromPos, this.fromSide, 10)
     const toPosWithMargin = BBoxHelper.moveInDirection(this.toPos, this.toSide, 10)
 
-    const gridResolution = this.plugin.settings.getSetting('edgeStylePathfinderGridResolution')
-    let pathArray = this.aStarAlgorithm(fromPosWithMargin, toPosWithMargin, nodeBBoxes, gridResolution)
+    const allowDiagonal = this.plugin.settings.getSetting('edgeStylePathfinderAllowDiagonal')
+    let pathArray = this.aStarAlgorithm(fromPosWithMargin, toPosWithMargin, nodeBBoxes, CanvasHelper.GRID_SIZE / 2, allowDiagonal)
     if (!pathArray) return null // No path found - use default path
 
     // Make connection points to the node removing the margin
@@ -64,10 +75,14 @@ export default class EdgePathfindingAStar extends EdgePathfindingMethod {
     pathArray.splice(pathArray.length, 0, this.toPos)
 
     // Smoothen path
-    if (this.plugin.settings.getSetting('edgeStylePathfinderPathRounded'))
-      pathArray = SvgPathHelper.smoothenPathArray(pathArray, SMOOTHEN_PATH_TENSION)
-
-    const svgPath = SvgPathHelper.pathArrayToSvgPath(pathArray)
+    let svgPath: string
+    const roundPath = this.plugin.settings.getSetting('edgeStylePathfinderPathRounded')
+    if (roundPath) {
+      if (allowDiagonal)
+        svgPath = SvgPathHelper.pathArrayToSvgPath(SvgPathHelper.smoothenPathArray(pathArray, SMOOTHEN_PATH_TENSION))
+      else
+        svgPath = SvgPathHelper.pathArrayToRoundedSvgPath(pathArray, ROUND_PATH_RADIUS)
+    } else svgPath = SvgPathHelper.pathArrayToSvgPath(pathArray)
 
     return {
       svgPath: svgPath,
@@ -76,7 +91,7 @@ export default class EdgePathfindingAStar extends EdgePathfindingMethod {
     }
   }
 
-  private aStarAlgorithm(fromPos: Position, toPos: Position, obstacles: BBox[], gridResolution: number): Position[] | null {
+  private aStarAlgorithm(fromPos: Position, toPos: Position, obstacles: BBox[], gridResolution: number, allowDiagonal: boolean): Position[] | null {
     const start: Node = new Node(
       Math.floor(fromPos.x / gridResolution) * gridResolution,
       Math.floor(fromPos.y / gridResolution) * gridResolution
@@ -134,16 +149,16 @@ export default class EdgePathfindingAStar extends EdgePathfindingMethod {
         continue
   
       // Expand neighbors
-      for (const neighbor of this.getPossibleNeighbors(current, obstacles, gridResolution)) {
+      for (const neighbor of this.getPossibleNeighbors(current, obstacles, gridResolution, allowDiagonal)) {
         // Skip if already processed
         if (neighbor.inList(closedSet))
           continue
   
         // Calculate tentative gCost
-        const tentativeGCost = current.gCost + this.getMovementCost({
+        const tentativeGCost = current.gCost + (allowDiagonal ? this.getMovementCost({
           dx: neighbor.x - current.x,
           dy: neighbor.y - current.y,
-        })
+        }) : 1)
   
         // Check if neighbor is not already in the open set or if the new gCost is lower
         if (!neighbor.inList(openSet) || tentativeGCost < neighbor.gCost) {
@@ -181,10 +196,11 @@ export default class EdgePathfindingAStar extends EdgePathfindingMethod {
     return direction.dx !== 0 && direction.dy !== 0 ? DIAGONAL_COST : 1
   }
   
-  private getPossibleNeighbors(node: Node, obstacles: BBox[], gridResolution: number): Node[] {
+  private getPossibleNeighbors(node: Node, obstacles: BBox[], gridResolution: number, allowDiagonal: boolean): Node[] {
     const neighbors: Node[] = []
     
-    for (const direction of DIRECTIONS) {
+    const availableDirections = allowDiagonal ? [...BASIC_DIRECTIONS, ...DIAGONAL_DIRECTIONS] : BASIC_DIRECTIONS
+    for (const direction of availableDirections) {
       const neighbor = new Node(
         node.x + direction.dx * gridResolution, 
         node.y + direction.dy * gridResolution

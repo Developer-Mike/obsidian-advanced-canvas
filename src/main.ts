@@ -61,11 +61,11 @@ const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   NodeInteractionExposerExtension,
 
   // Advanced Styles
-  // NodeStylesExtension,
+  NodeStylesExtension,
   EdgeStylesExtension,
 
   // Basic Extensions
-  /* VariableBreakpointCanvasExtension,
+  VariableBreakpointCanvasExtension,
   BetterDefaultSettingsCanvasExtension,
   CommandsCanvasExtension,
   FloatingEdgeCanvasExtension,
@@ -82,7 +82,7 @@ const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   EncapsulateCanvasExtension,
   ColorPaletteCanvasExtension,
   PresentationCanvasExtension,
-  PortalsCanvasExtension */
+  PortalsCanvasExtension
 ]
 
 export default class AdvancedCanvasPlugin extends Plugin {

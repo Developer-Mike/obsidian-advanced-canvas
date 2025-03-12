@@ -33,16 +33,19 @@ export default class BBoxHelper {
     return bbox1.minX <= bbox2.maxX && bbox1.maxX >= bbox2.minX && bbox1.minY <= bbox2.maxY && bbox1.maxY >= bbox2.minY
   }
 
-  static insideBBox(position: Position|BBox, bbox: BBox, canTouchEdge: Boolean): boolean {
-    const providedBBox = {
-      minX: (position as BBox).minX ?? (position as Position).x,
-      minY: (position as BBox).minY ?? (position as Position).y,
-      maxX: (position as BBox).maxX ?? (position as Position).x,
-      maxY: (position as BBox).maxY ?? (position as Position).y
+  static insideBBox(position: Position | BBox, bbox: BBox, canTouchEdge: boolean): boolean {
+    if ('x' in position) {
+      const x = position.x, y = position.y
+      return canTouchEdge
+        ? x >= bbox.minX && x <= bbox.maxX && y >= bbox.minY && y <= bbox.maxY
+        : x > bbox.minX && x < bbox.maxX && y > bbox.minY && y < bbox.maxY
     }
-    
-    return canTouchEdge ? providedBBox.minX >= bbox.minX && providedBBox.maxX <= bbox.maxX && providedBBox.minY >= bbox.minY && providedBBox.maxY <= bbox.maxY :
-      providedBBox.minX > bbox.minX && providedBBox.maxX < bbox.maxX && providedBBox.minY > bbox.minY && providedBBox.maxY < bbox.maxY
+  
+    return canTouchEdge
+      ? position.minX >= bbox.minX && position.maxX <= bbox.maxX &&
+        position.minY >= bbox.minY && position.maxY <= bbox.maxY
+      : position.minX > bbox.minX && position.maxX < bbox.maxX &&
+        position.minY > bbox.minY && position.maxY < bbox.maxY
   }
 
   static enlargeBBox(bbox: BBox, padding: number): BBox {

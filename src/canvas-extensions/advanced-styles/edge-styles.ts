@@ -43,7 +43,7 @@ export default class EdgeStylesExtension extends CanvasExtension {
       'advanced-canvas:node-added',
       (canvas: Canvas, node: CanvasNode) => {
         if (canvas.dirty.size > 1 && !canvas.isPasting) return // Skip if multiple nodes are added at once (e.g. on initial load)
-        console.log('node-added', canvas.dirty.size)
+        
         this.updateAllEdgesInArea(canvas, node.getBBox())
       }
     ))

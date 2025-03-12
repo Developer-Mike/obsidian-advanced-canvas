@@ -42,7 +42,7 @@ export interface AdvancedCanvasPluginSettingsValues {
   edgeStyleUpdateWhileDragging: boolean
   edgeStyleSquarePathRounded: boolean
   edgeStyleDirectRotateArrow: boolean
-  edgeStylePathfinderGridResolution: number
+  edgeStylePathfinderAllowDiagonal: boolean
   edgeStylePathfinderPathRounded: boolean
 
   variableBreakpointFeatureEnabled: boolean
@@ -126,7 +126,7 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   edgeStyleUpdateWhileDragging: false,
   edgeStyleSquarePathRounded: true,
   edgeStyleDirectRotateArrow: false,
-  edgeStylePathfinderGridResolution: 10,
+  edgeStylePathfinderAllowDiagonal: false,
   edgeStylePathfinderPathRounded: true,
 
   variableBreakpointFeatureEnabled: false,
@@ -327,11 +327,10 @@ export const SETTINGS = {
         description: 'When enabled, the arrow will be rotated to the direction of the edge if the pathfinding method is set to "Direct".',
         type: 'boolean'
       },
-      edgeStylePathfinderGridResolution: {
-        label: 'A* grid resolution',
-        description: 'The resolution of the grid when using the A* path style. The lower the value, the more precise the path will be. But it will also take longer to calculate.',
-        type: 'number',
-        parse: (value: string) => Math.max(5, parseInt(value) || 0)
+      edgeStylePathfinderAllowDiagonal: {
+        label: 'A* allow diagonal',
+        description: 'When enabled, the A* path style will allow diagonal paths.',
+        type: 'boolean'
       },
       edgeStylePathfinderPathRounded: {
         label: 'A* rounded path',
