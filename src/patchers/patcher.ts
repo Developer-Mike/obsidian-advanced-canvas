@@ -1,5 +1,5 @@
-import AdvancedCanvasPlugin from "src/main"
 import { around } from "monkey-around"
+import AdvancedCanvasPlugin from "src/main"
 import { Plugin } from "obsidian"
 
 // Is any
@@ -39,6 +39,25 @@ export default abstract class Patcher {
   }
 
   protected abstract patch(): Promise<void>
+
+  protected static async patchViewOnRequest<T>(plugin: AdvancedCanvasPlugin, viewType: string, patch: (view: T) => void): Promise<T> {
+    return new Promise(resolve => {
+      const uninstaller = around(plugin.app.viewRegistry.viewByType, {
+        [viewType]: (next: any) => function (...args: any): any {
+          const view = next.call(this, ...args)
+          patch(view)
+
+          // Create a new view
+          const patchedView = next.call(this, ...args)
+
+          uninstaller()
+          resolve(patchedView)
+
+          return patchedView
+        }
+      })
+    })
+  }
 
   static OverrideExisting<T, K extends FunctionKeys<T>, R extends ReturnType<KeyFunction<T, K>>>(
     fn: PatchFunctionWrapper<T, K, R> & { __overrideExisting?: boolean }

@@ -9,36 +9,30 @@ import BBoxHelper from "src/utils/bbox-helper"
 
 export default class CanvasPatcher extends Patcher {
   protected async patch() {
+    // Check if there are already loaded canvas view leafs
+    const loadedCanvasViewLeafs = this.plugin.app.workspace.getLeavesOfType("canvas")
+      .filter((leaf: WorkspaceLeaf) => !requireApiVersion('1.7.2') || !leaf.isDeferred)
+
+    if (loadedCanvasViewLeafs.length > 0) {
+      console.debug(`Patching and reloading loaded canvas views (Count: ${loadedCanvasViewLeafs.length})`)
+
+      // Patch the loaded canvas views
+      this.patchCanvas(loadedCanvasViewLeafs.first()!.view as CanvasView)
+
+      // Reload the canvas views
+      for (const leaf of loadedCanvasViewLeafs) (leaf as any).rebuildView()
+    } else {
+      // Patch the canvas view as soon it gets requested
+      await Patcher.patchViewOnRequest<CanvasView>(this.plugin, "canvas", view => this.patchCanvas(view))
+      console.debug(`Patched canvas view on first request`)
+    }
+  }
+
+  private patchCanvas(view: CanvasView) {
     const that = this
 
-    // Wait for layout ready -> Support deferred view initialization
-    await new Promise<void>(resolve => this.plugin.app.workspace.onLayoutReady(() => resolve()))
-
-    // Get the current canvas view fully loaded
-    const getCanvasView = async (): Promise<CanvasView | null> => {
-      const canvasLeaf = this.plugin.app.workspace.getLeavesOfType('canvas')?.first()
-      if (!canvasLeaf) return null
-
-      if (requireApiVersion('1.7.2')) await canvasLeaf.loadIfDeferred() // Load the canvas if the view is deferred
-      return canvasLeaf.view as CanvasView
-    }
-
-    // Get the current canvas view or wait for it to be created
-    let canvasView = await getCanvasView()
-    canvasView ??= await new Promise<CanvasView>(resolve => {
-      const event = this.plugin.app.workspace.on('layout-change', async () => {
-        const newCanvasView = await getCanvasView()
-        if (!newCanvasView) return
-
-        resolve(newCanvasView)
-        this.plugin.app.workspace.offref(event)
-      })
-
-      this.plugin.registerEvent(event)
-    })
-    
     // Patch canvas view
-    Patcher.patchPrototype<CanvasView>(this.plugin, canvasView, {
+    Patcher.patchPrototype<CanvasView>(this.plugin, view, {
       getViewData: Patcher.OverrideExisting(next => function (...args: any): string {
         const canvasData = this.canvas.getData()
 
@@ -81,7 +75,7 @@ export default class CanvasPatcher extends Patcher {
     })
 
     // Patch canvas
-    Patcher.patchPrototype<Canvas>(this.plugin, canvasView.canvas, {
+    Patcher.patchPrototype<Canvas>(this.plugin, view.canvas, {
       markViewportChanged: Patcher.OverrideExisting(next => function (...args: any): void {
         that.plugin.app.workspace.trigger('advanced-canvas:viewport-changed:before', this)
         const result = next.call(this, ...args)
@@ -201,7 +195,7 @@ export default class CanvasPatcher extends Patcher {
         const zoom = this.screenshotting ? Math.min(widthZoom, heightZoom) : Math.clamp(Math.min(widthZoom, heightZoom), -4, 1)
         this.tZoom = Math.log2(zoom)
         this.zoomCenter = null
-    
+
         this.tx = (bbox.minX + bbox.maxX) / 2
         this.ty = (bbox.minY + bbox.maxY) / 2
         
@@ -266,7 +260,7 @@ export default class CanvasPatcher extends Patcher {
     })
 
     // Patch canvas popup menu
-    Patcher.patchPrototype<CanvasPopupMenu>(this.plugin, canvasView.canvas.menu, {
+    Patcher.patchPrototype<CanvasPopupMenu>(this.plugin, view.canvas.menu, {
       render: Patcher.OverrideExisting(next => function (...args: any): void {
         const result = next.call(this, ...args)
         that.plugin.app.workspace.trigger('advanced-canvas:popup-menu-created', this.canvas)
@@ -276,7 +270,7 @@ export default class CanvasPatcher extends Patcher {
     })
 
     // Patch interaction layer
-    Patcher.patchPrototype<NodeInteractionLayer>(this.plugin, canvasView.canvas.nodeInteractionLayer, {
+    Patcher.patchPrototype<NodeInteractionLayer>(this.plugin, view.canvas.nodeInteractionLayer, {
       setTarget: Patcher.OverrideExisting(next => function (node: CanvasNode): void {
         const result = next.call(this, node)
         that.plugin.app.workspace.trigger('advanced-canvas:node-interaction', this.canvas, node)
@@ -294,22 +288,6 @@ export default class CanvasPatcher extends Patcher {
 
       that.plugin.app.workspace.trigger('advanced-canvas:node-text-content-changed', node.canvas, node, update)
     })])
-
-    // Canvas is now patched - update all open canvas views
-    this.plugin.app.workspace.iterateAllLeaves((leaf: WorkspaceLeaf) => {
-      if (leaf.view.getViewType() !== 'canvas') return
-
-      const canvasView = leaf.view as any as Omit<CanvasView, 'onClose'> & { onClose: () => void }
-      const hasChangesToSave = canvasView.lastSavedData !== canvasView.data
-
-      // Skip saving the canvas data if there are no changes to save (Remote sync compatibility)
-      const originalOnClose = canvasView.onClose
-      if (!hasChangesToSave) canvasView.onClose = () => canvasView.canvas?.unload()
-
-      canvasView.leaf.rebuildView()
-
-      if (!hasChangesToSave) canvasView.onClose = originalOnClose
-    })
   }
 
   private patchNode(node: CanvasNode) {
