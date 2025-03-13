@@ -6,14 +6,20 @@
     transition: none !important;
   }
 
-  & > .canvas-node {
-    --variable-breakpoint: -999999999;
+  // Hide group collapse button
+  #group-collapse-button {
+    display: none;
   }
 
   #watermark-ac {
     z-index: 9999999;
     position: absolute;
   }
+}
+  
+// Hide group collapse button
+.canvas-wrapper[data-collapsible-groups-feature-enabled="true"] .canvas.is-exporting .canvas-node .canvas-group-label {
+  left: 0;
 }
 
 .progress-bar-modal-ac {

@@ -11,6 +11,13 @@ export default class ExportCanvasExtension extends CanvasExtension {
   isEnabled() { return 'betterExportFeatureEnabled' as const }
 
   init() {
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      'advanced-canvas:node-breakpoint-changed',
+      (canvas: Canvas, node: CanvasNode, breakpointRef: { value: boolean }) => {
+        if (canvas.screenshotting) breakpointRef.value = true
+      }
+    ))
+    
     this.plugin.addCommand({
       id: 'export-all-as-image',
       name: 'Export canvas as image',
