@@ -1,0 +1,15 @@
+- [ ] Migration to new format
+  - [ ] Nodes
+    - [ ] Metadata text node
+    - [ ] `autoResizeHeight` to `dynamicHeight`
+    - [ ] `sideRatio` to `ratio`
+    - [ ] `isStartNode` to metadata `startNode`
+    - [ ] `isCollapsed` to `collapsed`
+    - [ ] `portalToFile` to `portal`
+    - [ ] `edgesToNodeFromPortal` to `interdimensionalEdges` saved in the file node
+    - [ ] No unnecessary attributes for portal nodes
+    - [ ] Unknown style attributes to defaults
+  - [ ] Edges
+    - [ ] Style Attributes
+      - [ ] `path` to `line`
+    - [ ] Unknown style attributes to defaults
