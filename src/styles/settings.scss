@@ -49,6 +49,7 @@ body.is-mobile .kofi-button.sticky {
 
 .kofi-button {
   height: 30px;
+  max-height: 30px;
 
   &.sticky {
     z-index: 10;
