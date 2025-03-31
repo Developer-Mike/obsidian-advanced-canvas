@@ -86,8 +86,11 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
     const collapseElBBox = node.collapseEl?.getBoundingClientRect()
     if (!collapseElBBox) return
 
+    const labelElBBox = node.labelEl?.getBoundingClientRect()
+    if (!labelElBBox) return
+
     const minPos = canvas.posFromClient({ x: collapseElBBox.left, y: collapseElBBox.top })
-    const maxPos = canvas.posFromClient({ x: collapseElBBox.right, y: collapseElBBox.bottom })
+    const maxPos = canvas.posFromClient({ x: labelElBBox.right, y: collapseElBBox.bottom })
 
     bbox.minX = minPos.x
     bbox.minY = minPos.y

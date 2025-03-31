@@ -8,7 +8,7 @@ export function getExposedNodeData(settings: SettingsManager): (keyof CanvasNode
 
   if (settings.getSetting('nodeStylingFeatureEnabled')) exposedData.push('styleAttributes')
   if (settings.getSetting('collapsibleGroupsFeatureEnabled')) exposedData.push('collapsed' satisfies keyof CanvasGroupNodeData as keyof CanvasNodeData)
-  if (settings.getSetting('portalsFeatureEnabled')) exposedData.push('portal' satisfies keyof CanvasFileNodeData as keyof CanvasNodeData, 'portalId') // TODO
+  if (settings.getSetting('portalsFeatureEnabled')) exposedData.push('portal' satisfies keyof CanvasFileNodeData as keyof CanvasNodeData) // TODO: , 'portalId')
 
   return exposedData
 }

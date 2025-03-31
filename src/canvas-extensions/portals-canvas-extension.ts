@@ -17,9 +17,9 @@ export default class PortalsCanvasExtension extends CanvasExtension {
       for (const canvas of canvases) {
         if (canvas === undefined) continue
         
-        const hasPortalsToFile = canvas.getData().nodes.filter((nodeData: CanvasFileNodeData) => 
-          nodeData.type === 'file' && 
-          nodeData.currentLoadedFile === file.path
+        const hasPortalsToFile = Object.values(canvas.nodes).filter((nodeData: CanvasNode) => 
+          nodeData.getData().type === 'file' && 
+          nodeData.currentPortalFile === file.path
         ).length > 0
 
         // Update whole canvas data
@@ -115,7 +115,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     const portalNodeData = portalNode.getData() as CanvasFileNodeData
 
     // If file changed
-    if (portalNodeData.portal && portalNodeData.file !== portalNodeData.currentLoadedFile)
+    if (portalNodeData.portal && portalNodeData.file !== portalNode.currentPortalFile)
       this.setPortalOpen(canvas, portalNode, true)
 
     CanvasHelper.addPopupMenuOption(
@@ -136,9 +136,10 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     const portalNodeData = portalNode.getData() as CanvasFileNodeData
     portalNode.setData({
       ...portalNodeData,
-      portal: open,
-      currentLoadedFile: open ? portalNodeData.file : undefined
+      portal: open
     })
+
+    portalNode.currentPortalFile = open ? portalNodeData.file : undefined
 
     // Update whole canvas data
     canvas.setData(canvas.getData())
@@ -149,47 +150,27 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     if (nodeData.type !== 'file' || !nodeData.portal) return
 
     // Remove nested nodes and edges
-    Object.keys(nodeData.portalIdMaps?.nodeIdMap ?? {}).map(refNodeId => canvas.nodes.get(refNodeId))
+    Object.keys(node.portalIdMaps?.nodeIdMap ?? {}).map(refNodeId => canvas.nodes.get(refNodeId))
       .filter(node => node !== undefined)
       .forEach(node => canvas.removeNode(node!))
 
-    Object.keys(nodeData.portalIdMaps?.edgeIdMap ?? {}).map(refEdgeId => canvas.edges.get(refEdgeId))
+    Object.keys(node.portalIdMaps?.edgeIdMap ?? {}).map(refEdgeId => canvas.edges.get(refEdgeId))
       .filter(edge => edge !== undefined)
       .forEach(edge => canvas.removeEdge(edge!))
   }
 
   private onContainingNodesRequested(_canvas: Canvas, _bbox: BBox, nodes: CanvasNode[]) {
     // Remove nodes from portals from the list
-    nodes.splice(0, nodes.length, ...nodes.filter(node => node.getData().portalId === undefined))
+    nodes.splice(0, nodes.length, ...nodes.filter(node => this.getNestedIds(node.id).length === 1))
   }
 
   private onSelectionChanged(canvas: Canvas, oldSelection: Set<CanvasElement>, updateSelection: (update: () => void) => void) {
     // Unselect nodes from portals
     updateSelection(() => {
       const updatedSelection = Array.from(canvas.selection)
-        .filter(node => (node.getData() as CanvasNodeData).portalId === undefined)
+        .filter(node => this.getNestedIds(node.getData().id).length === 1)
       canvas.selection = new Set(updatedSelection)
     })
-
-    // Move previously selected portals to the back
-    const previouslySelectedPortalNodesIds = Array.from(oldSelection)
-      .filter(node => (node.getData() as any).portal !== undefined)
-      .flatMap(node => {
-        const portalNodeData = node.getData()
-        const nestedPortalsIds = this.getNestedPortalsIds(canvas, portalNodeData.id)
-
-        return [portalNodeData.id, ...nestedPortalsIds]
-      })
-
-    for (const node of canvas.nodes.values()) {
-      const nodeData = node.getData()
-
-      // Not from unselected portal
-      if (nodeData.portalId === undefined || !previouslySelectedPortalNodesIds.includes(nodeData.portalId)) continue
-
-      // Move to front
-      node.updateZIndex()
-    }
   }
 
   private getNestedPortalsIds(canvas: Canvas, portalId: string): string[] {
@@ -198,7 +179,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     for (const node of canvas.nodes.values()) {
       const nodeData = node.getData()
 
-      if (nodeData.portalId === portalId) {
+      if (this.getNestedIds(nodeData.id).includes(portalId)) {
         nestedPortalsIds.push(nodeData.id)
         nestedPortalsIds.push(...this.getNestedPortalsIds(canvas, nodeData.id))
       }
@@ -221,8 +202,8 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     } else this.restoreObjectSnappingState?.()
   }
 
-  private getContainingNodes(canvas: Canvas, portalNodeData: CanvasFileNodeData): CanvasNode[] {
-    const nestedNodesIdMap = portalNodeData.portalIdMaps?.nodeIdMap
+  private getContainingNodes(canvas: Canvas, portalNode: CanvasNode): CanvasNode[] {
+    const nestedNodesIdMap = portalNode.portalIdMaps?.nodeIdMap
     if (!nestedNodesIdMap) return []
 
     return Object.keys(nestedNodesIdMap).map(refNodeId => canvas.nodes.get(refNodeId))
@@ -239,7 +220,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
   private onOpenPortalMoved(canvas: Canvas, portalNode: CanvasNode) {
     let portalNodeData = portalNode.getData() as CanvasFileNodeData
 
-    const nestedNodes = this.getContainingNodes(canvas, portalNodeData)
+    const nestedNodes = this.getContainingNodes(canvas, portalNode)
     const containingNodesBBox = CanvasHelper.getBBox(nestedNodes)
 
     // Move nested nodes
@@ -269,7 +250,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
   private onOpenPortalResized(canvas: Canvas, portalNode: CanvasNode) {
     let portalNodeData = portalNode.getData() as CanvasFileNodeData
 
-    const nestedNodes = this.getContainingNodes(canvas, portalNodeData)
+    const nestedNodes = this.getContainingNodes(canvas, portalNode)
     const containingNodesBBox = CanvasHelper.getBBox(nestedNodes)
     const targetSize = this.getPortalSize(containingNodesBBox)
 
@@ -290,7 +271,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     const nodesIdMap: Map<string, CanvasNodeData> = new Map(data.nodes.map(nodeData => [nodeData.id, nodeData]))
 
     data.edges = data.edges.filter(edgeData => {
-      if (edgeData.portalId !== undefined) return false
+      if (this.getNestedIds(edgeData.fromNode).length > 1) return false
 
       const fromNodeData = nodesIdMap.get(edgeData.fromNode)
       const toNodeData = nodesIdMap.get(edgeData.toNode)
@@ -315,10 +296,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
 
     data.nodes = data.nodes.filter(nodeData => {
       // Remove nodes if they are from a portal
-      if (nodeData.portalId !== undefined) return false
-
-      // Remove references to portal nodes and edges
-      if (nodeData.type === 'file') delete nodeData.portalIdMaps
+      if (this.getNestedIds(nodeData.id).length > 1) return false
       return true
     })
   }
@@ -502,5 +480,9 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     if (!Number.isFinite(targetSize.height)) targetSize.height = MIN_OPEN_PORTAL_SIZE.height
 
     return targetSize
-  }*/
+  }
+
+  private getNestedIds(id: string): string[] {
+    return id.split("-")
+  } */
 }
