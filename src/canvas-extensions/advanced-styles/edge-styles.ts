@@ -1,4 +1,4 @@
-import { BBox, Canvas, CanvasEdge, CanvasNode, Position, Side } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasEdge, CanvasNode, Position } from "src/@types/Canvas"
 import BBoxHelper from "src/utils/bbox-helper"
 import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "../canvas-extension"
@@ -141,7 +141,7 @@ export default class EdgeStylesExtension extends CanvasExtension {
 
     // Set pathfinding method
     const pathfindingMethod = edgeData.styleAttributes?.pathfindingMethod
-    if (pathfindingMethod) {
+    if (pathfindingMethod && pathfindingMethod in EDGE_PATHFINDING_METHODS) {
       const fromNodeBBox = edge.from.node.getBBox()
       const fromBBoxSidePos = BBoxHelper.getCenterOfBBoxSide(fromNodeBBox, edge.from.side)
       const fromPos = edge.from.end === 'none' ? 
@@ -174,11 +174,6 @@ export default class EdgeStylesExtension extends CanvasExtension {
     const arrowPolygonPoints = this.getArrowPolygonPoints(edgeData.styleAttributes?.arrow)
     if (edge.fromLineEnd?.el) edge.fromLineEnd.el.querySelector('polygon')?.setAttribute('points', arrowPolygonPoints)
     if (edge.toLineEnd?.el) edge.toLineEnd.el.querySelector('polygon')?.setAttribute('points', arrowPolygonPoints)
-
-    // Rotate arrows accordingly
-    if (this.plugin.settings.getSetting('edgeStyleDirectRotateArrow')) {
-      this.rotateArrows(edge, pathfindingMethod)
-    }
   }
 
   private onEdgeCenterRequested(_canvas: Canvas, edge: CanvasEdge, center: Position) {
@@ -199,29 +194,5 @@ export default class EdgeStylesExtension extends CanvasExtension {
       return `-10,8 10,8 10,6 -10,6`
     else // Default triangle
       return `0,0 6.5,10.4 -6.5,10.4`
-  }
-
-  private rotateArrows(edge: CanvasEdge, pathRouteType?: string | null) {
-    // Reset arrow rotation
-    if (pathRouteType !== 'direct') {
-      if (edge.fromLineEnd?.el) edge.fromLineEnd.el.style.translate = ""
-      if (edge.toLineEnd?.el) edge.toLineEnd.el.style.translate = ""
-
-      return
-    }
-    
-    const setArrowRotation = (element: HTMLElement, side: Side, rotation: number) => {
-      //element.style.transform = element.style.transform.replace(/rotate\([-\d]+(\.[\d]*)?(deg|rad)\)/g, "") // Reset rotation
-
-      const clientBBox = element.getBoundingClientRect()
-      // element.style.transformOrigin = `${0}px ${-clientBBox.height}px`
-
-      // element.style.transform += `rotate(${rotation}rad)`
-    }
-
-    const edgeRotation = Math.atan2(edge.bezier.to.y - edge.bezier.from.y, edge.bezier.to.x - edge.bezier.from.x) - (Math.PI / 2)
-
-    if (edge.fromLineEnd?.el) setArrowRotation(edge.fromLineEnd.el, edge.from.side, edgeRotation)
-    if (edge.toLineEnd?.el) setArrowRotation(edge.toLineEnd.el, edge.to.side, edgeRotation - Math.PI)
   }
 }

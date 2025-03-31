@@ -1,14 +1,15 @@
-import { Canvas, CanvasNode, CanvasNodeData } from "src/@types/Canvas"
+import { Canvas, CanvasNode } from "src/@types/Canvas"
 import SettingsManager from "src/settings"
 import CanvasExtension from "../canvas-extension"
+import { CanvasFileNodeData, CanvasGroupNodeData, CanvasNodeData } from "src/@types/AdvancedJsonCanvas"
 
 export function getExposedNodeData(settings: SettingsManager): (keyof CanvasNodeData)[] {
   const exposedData: (keyof CanvasNodeData)[] = []
 
   if (settings.getSetting('nodeStylingFeatureEnabled')) exposedData.push('styleAttributes')
-  if (settings.getSetting('collapsibleGroupsFeatureEnabled')) exposedData.push('isCollapsed')
-  if (settings.getSetting('presentationFeatureEnabled')) exposedData.push('isStartNode')
-  if (settings.getSetting('portalsFeatureEnabled')) exposedData.push('portalToFile', 'portalId')
+  if (settings.getSetting('collapsibleGroupsFeatureEnabled')) exposedData.push('collapsed' satisfies keyof CanvasGroupNodeData as keyof CanvasNodeData)
+  // if (settings.getSetting('presentationFeatureEnabled')) exposedData.push('isStartNode') // TODO
+  if (settings.getSetting('portalsFeatureEnabled')) exposedData.push('portal' satisfies keyof CanvasFileNodeData as keyof CanvasNodeData, 'portalId' as any) // TODO: PortalId is an intermediate value
 
   return exposedData
 }

@@ -41,7 +41,6 @@ export interface AdvancedCanvasPluginSettingsValues {
   defaultEdgeStyleAttributes: { [key: string]: string }
   edgeStyleUpdateWhileDragging: boolean
   edgeStyleSquarePathRounded: boolean
-  edgeStyleDirectRotateArrow: boolean
   edgeStylePathfinderAllowDiagonal: boolean
   edgeStylePathfinderPathRounded: boolean
 
@@ -125,7 +124,6 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   defaultEdgeStyleAttributes: {},
   edgeStyleUpdateWhileDragging: false,
   edgeStyleSquarePathRounded: true,
-  edgeStyleDirectRotateArrow: false,
   edgeStylePathfinderAllowDiagonal: false,
   edgeStylePathfinderPathRounded: true,
 
@@ -320,11 +318,6 @@ export const SETTINGS = {
       edgeStyleSquarePathRounded: {
         label: 'Square path rounded',
         description: 'When enabled, the square path\'s corners will be rounded.',
-        type: 'boolean'
-      },
-      edgeStyleDirectRotateArrow: {
-        label: 'Rotate arrow if pathfinding method is "Direct"',
-        description: 'When enabled, the arrow will be rotated to the direction of the edge if the pathfinding method is set to "Direct".',
         type: 'boolean'
       },
       edgeStylePathfinderAllowDiagonal: {

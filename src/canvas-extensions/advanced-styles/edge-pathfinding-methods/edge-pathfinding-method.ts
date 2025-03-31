@@ -1,4 +1,5 @@
-import { BBox, Canvas, Position, Side } from "src/@types/Canvas"
+import { Side } from "src/@types/AdvancedJsonCanvas"
+import { BBox, Canvas, Position } from "src/@types/Canvas"
 import AdvancedCanvasPlugin from "src/main"
 
 export default abstract class EdgePathfindingMethod {

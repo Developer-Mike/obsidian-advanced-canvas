@@ -3,6 +3,7 @@ import BBoxHelper from "src/utils/bbox-helper"
 import SvgPathHelper from "src/utils/svg-path-helper"
 import EdgePathfindingMethod, { EdgePath } from "./edge-pathfinding-method"
 import CanvasHelper from "src/utils/canvas-helper"
+import { CanvasFileNodeData, CanvasGroupNodeData } from "src/@types/AdvancedJsonCanvas"
 
 const MAX_MS_CALCULATION = 100
 const BASIC_DIRECTIONS = [
@@ -53,7 +54,7 @@ export default class EdgePathfindingAStar extends EdgePathfindingMethod {
       .filter(node => {
         const nodeData = node.getData()
 
-        if (nodeData.portalToFile !== undefined) return false // Exclude open portals
+        if ((nodeData as CanvasFileNodeData).portal === true) return false // Exclude open portals
 
         // Exclude (group) nodes that contain either the start or end position
         const nodeBBox = node.getBBox()

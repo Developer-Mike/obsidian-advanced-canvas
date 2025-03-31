@@ -1,7 +1,8 @@
 import { ViewUpdate } from "@codemirror/view"
-import { Canvas, CanvasNode, CanvasNodeData } from "src/@types/Canvas"
+import { Canvas, CanvasNode } from "src/@types/Canvas"
 import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "./canvas-extension"
+import { CanvasFileNodeData, CanvasNodeData } from "src/@types/AdvancedJsonCanvas"
 
 export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
   isEnabled() { return 'autoResizeNodeFeatureEnabled' as const }
@@ -29,7 +30,7 @@ export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
   }
 
   private isValidNodeType(nodeData: CanvasNodeData) {
-    return nodeData.type === 'text' || (nodeData.type === 'file' && nodeData.file?.endsWith('.md'))
+    return nodeData.type === 'text' || (nodeData.type === 'file' && (nodeData as CanvasFileNodeData).file.endsWith('.md'))
   }
 
   private onNodeCreated(_canvas: Canvas, node: CanvasNode) {
@@ -41,7 +42,7 @@ export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
 
     node.setData({
       ...node.getData(),
-      autoResizeHeight: true
+      dynamicHeight: true
     })
   }
 
@@ -54,7 +55,7 @@ export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
       .filter(node => node !== undefined) as CanvasNode[]
     if (selectedNodes.length === 0) return
 
-    const autoResizeHeightEnabled = selectedNodes.some(node => node.getData().autoResizeHeight)
+    const autoResizeHeightEnabled = selectedNodes.some(node => node.getData().dynamicHeight)
     
     CanvasHelper.addPopupMenuOption(
       canvas,
@@ -70,7 +71,7 @@ export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
   private toggleAutoResizeHeightEnabled(canvas: Canvas, nodes: CanvasNode[], autoResizeHeight: boolean) {
     nodes.forEach(node => node.setData({
       ...node.getData(),
-      autoResizeHeight: !autoResizeHeight
+      dynamicHeight: !autoResizeHeight
     }))
 
     this.onPopupMenuCreated(canvas)
@@ -78,7 +79,7 @@ export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
 
   private canBeResized(node: CanvasNode) {
     const nodeData = node.getData()
-    return nodeData.autoResizeHeight
+    return nodeData.dynamicHeight
   }
 
   private async onNodeEditingStateChanged(_canvas: Canvas, node: CanvasNode, editing: boolean) {

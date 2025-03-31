@@ -1,6 +1,7 @@
-import { BBox, Canvas, CanvasEdge, CanvasNode, Position, Side } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasEdge, CanvasNode, Position } from "src/@types/Canvas"
 import CanvasExtension from "./canvas-extension"
 import BBoxHelper from "src/utils/bbox-helper"
+import { Side } from "src/@types/AdvancedJsonCanvas"
 
 export default class FloatingEdgeCanvasExtension  extends CanvasExtension {
   isEnabled() { return 'floatingEdgeFeatureEnabled' as const }

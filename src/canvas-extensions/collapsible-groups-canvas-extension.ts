@@ -3,6 +3,7 @@ import { BBox, Canvas, CanvasData, CanvasNode, CanvasNodeData, SelectionData } f
 import BBoxHelper from "src/utils/bbox-helper"
 import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "./canvas-extension"
+import { CanvasGroupNodeData } from "src/@types/AdvancedJsonCanvas"
 
 const COLLAPSE_BUTTON_ID = 'group-collapse-button'
 
@@ -37,7 +38,7 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
   }
 
   private onNodeChanged(canvas: Canvas, groupNode: CanvasNode) {
-    const groupNodeData = groupNode.getData()
+    const groupNodeData = groupNode.getData() as CanvasGroupNodeData
     if (groupNodeData.type !== 'group') return
 
     // Remove the collapse/expand button
@@ -46,10 +47,11 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
     // Add collapse/expand button next to the label
     const collapseButton = document.createElement('span')
     collapseButton.id = COLLAPSE_BUTTON_ID
-    setIcon(collapseButton, groupNodeData.isCollapsed ? 'plus-circle' : 'minus-circle')
+    setIcon(collapseButton, groupNodeData.collapsed ? 'plus-circle' : 'minus-circle')
 
-    collapseButton.onclick = () => { 
-      this.setCollapsed(canvas, groupNode, groupNode.getData().isCollapsed ? undefined : true)
+    collapseButton.onclick = () => {
+      const groupNodeData = groupNode.getData() as CanvasGroupNodeData
+      this.setCollapsed(canvas, groupNode, groupNodeData.collapsed ? undefined : true)
       canvas.markMoved(groupNode)
     }
 

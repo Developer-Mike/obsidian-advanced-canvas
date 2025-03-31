@@ -1,8 +1,9 @@
-import { Position, Side } from "src/@types/Canvas"
+import { Position } from "src/@types/Canvas"
 import BBoxHelper from "src/utils/bbox-helper"
 import CanvasHelper from "src/utils/canvas-helper"
 import SvgPathHelper from "src/utils/svg-path-helper"
 import EdgePathfindingMethod, { EdgePath } from "./edge-pathfinding-method"
+import { Side } from "src/@types/AdvancedJsonCanvas"
 
 const ROUNDED_EDGE_RADIUS = 5
 

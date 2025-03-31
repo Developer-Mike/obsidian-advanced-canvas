@@ -1,15 +1,13 @@
 - [ ] Migration to new format
-  - [ ] Nodes
-    - [ ] Metadata text node
-    - [ ] `autoResizeHeight` to `dynamicHeight`
-    - [ ] `sideRatio` to `ratio`
-    - [ ] `isStartNode` to metadata `startNode`
-    - [ ] `isCollapsed` to `collapsed`
-    - [ ] `portalToFile` to `portal`
-    - [ ] `edgesToNodeFromPortal` to `interdimensionalEdges` saved in the file node
-    - [ ] No unnecessary attributes for portal nodes
-    - [ ] Unknown style attributes to defaults
-  - [ ] Edges
-    - [ ] Style Attributes
-      - [ ] `path` to `line`
-    - [ ] Unknown style attributes to defaults
+- [ ] Nodes
+  - [ ] Metadata text node
+  - [x] `autoResizeHeight` to `dynamicHeight`
+  - [x] `sideRatio` to `ratio`
+  - [ ] `isStartNode` to metadata `startNode`
+  - [x] `isCollapsed` to `collapsed`
+  - [ ] `portalToFile` to `portal`
+  - [ ] `edgesToNodeFromPortal` to `interdimensionalEdges` saved in the file node
+  - [x] No unnecessary attributes for portal nodes
+  - [x] Unknown style attributes to defaults
+- [x] Edges
+  - [x] Unknown style attributes to defaults

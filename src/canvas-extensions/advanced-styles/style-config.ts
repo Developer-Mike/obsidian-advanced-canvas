@@ -1,4 +1,4 @@
-import { CanvasNodeType } from "src/@types/Canvas"
+import { CanvasNodeType } from "src/@types/AdvancedJsonCanvas"
 import TextHelper from "src/utils/text-helper"
 
 export interface StyleAttributeOption {

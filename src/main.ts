@@ -4,7 +4,6 @@ import { Canvas, CanvasView } from './@types/Canvas'
 // Utils
 import IconsHelper from './utils/icons-helper'
 import DebugHelper from './utils/debug-helper'
-import MigrationHelper from './utils/migration-helper'
 
 // Managers
 import SettingsManager from './settings'
@@ -19,6 +18,8 @@ import OutgoingLinksPatcher from './patchers/outgoing-links-patcher'
 
 // Canvas Extensions
 import CanvasExtension from './canvas-extensions/canvas-extension'
+import MetadataCanvasExtension from './canvas-extensions/metadata-canvas-extension'
+import NodeRatioCanvasExtension from './canvas-extensions/node-ratio-canvas-extension'
 import VariableBreakpointCanvasExtension from './canvas-extensions/variable-breakpoint-canvas-extension'
 import GroupCanvasExtension from './canvas-extensions/group-canvas-extension'
 import PresentationCanvasExtension from './canvas-extensions/presentation-canvas-extension'
@@ -54,39 +55,37 @@ const PATCHERS = [
 ]
 
 const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
-  // Dataset Exposers
+  // Advanced JSON Canvas Extensions
+  MetadataCanvasExtension,
+  NodeStylesExtension,
+  EdgeStylesExtension,
+  NodeRatioCanvasExtension,
+  FloatingEdgeCanvasExtension,
+  AutoResizeNodeCanvasExtension,
+  CollapsibleGroupsCanvasExtension,
+  ColorPaletteCanvasExtension,
+  PresentationCanvasExtension,
+  PortalsCanvasExtension,
+  
+  // UI Extensions (Non-savable data)
   CanvasWrapperExposerExtension,
   NodeExposerExtension,
   EdgeExposerExtension,
   NodeInteractionExposerExtension,
 
-  // Advanced Styles
-  NodeStylesExtension,
-  EdgeStylesExtension,
-
-  // Basic Extensions
-  VariableBreakpointCanvasExtension,
   BetterDefaultSettingsCanvasExtension,
   CommandsCanvasExtension,
-  FloatingEdgeCanvasExtension,
+  BetterReadonlyCanvasExtension,
+  GroupCanvasExtension,
+  VariableBreakpointCanvasExtension,
   FlipEdgeCanvasExtension,
   ZOrderingCanvasExtension,
-  BetterReadonlyCanvasExtension,
-  AutoResizeNodeCanvasExtension,
   ExportCanvasExtension,
-  GroupCanvasExtension,
-
-  // More Advanced Extensions
-  CollapsibleGroupsCanvasExtension,
   FocusModeCanvasExtension,
   EncapsulateCanvasExtension,
-  ColorPaletteCanvasExtension,
-  PresentationCanvasExtension,
-  PortalsCanvasExtension
 ]
 
 export default class AdvancedCanvasPlugin extends Plugin {
-  migrationHelper: MigrationHelper
   debugHelper: DebugHelper
 
   settings: SettingsManager
@@ -96,9 +95,6 @@ export default class AdvancedCanvasPlugin extends Plugin {
   canvasExtensions: CanvasExtension[]
 
 	async onload() {
-    this.migrationHelper = new MigrationHelper(this)
-    await this.migrationHelper.migrate()
-
     IconsHelper.addIcons()
     
     this.settings = new SettingsManager(this)
@@ -109,9 +105,8 @@ export default class AdvancedCanvasPlugin extends Plugin {
 
     this.patchers = PATCHERS.map((Patcher: any) => new Patcher(this))
     this.canvasExtensions = CANVAS_EXTENSIONS.map((Extension: any) => {
-      try { 
-        return new Extension(this)
-      } catch (e) {
+      try { return new Extension(this) } 
+      catch (e) {
         console.error(`Error initializing ${Extension.name}:`, e)
       }
     })

@@ -1,8 +1,9 @@
-import { Canvas, CanvasEdgeData, CanvasNode } from "src/@types/Canvas"
+import { Canvas, CanvasNode } from "src/@types/Canvas"
 import BBoxHelper from "src/utils/bbox-helper"
 import CanvasHelper from "src/utils/canvas-helper"
 import { FileSelectModal } from "src/utils/modal-helper"
 import CanvasExtension from "./canvas-extension"
+import { CanvasEdgeData } from "src/@types/AdvancedJsonCanvas"
 
 type Direction = 'up' | 'down' | 'left' | 'right'
 const DIRECTIONS = ['up', 'down', 'left', 'right'] as Direction[]
@@ -220,7 +221,7 @@ export default class CommandsCanvasExtension extends CanvasExtension {
 
     // Flip edges
     for (const edge of canvas.edges.values()) {
-      const edgeData = edge.getData() as CanvasEdgeData
+      const edgeData = edge.getData()
 
       let newFromSide = edgeData.fromSide
       if (nodeIds.has(edgeData.fromNode) && BBoxHelper.isHorizontal(edgeData.fromSide) === horizontally)

@@ -2,10 +2,11 @@ import { EditorView, ViewUpdate } from "@codemirror/view"
 import JSONSS from "json-stable-stringify"
 import { around } from "monkey-around"
 import { editorInfoField, requireApiVersion, Side, WorkspaceLeaf } from "obsidian"
-import { BBox, Canvas, CanvasData, CanvasEdge, CanvasEdgeData, CanvasElement, CanvasNode, CanvasNodeData, CanvasPopupMenu, CanvasView, CanvasWorkspaceLeaf, NodeInteractionLayer, Position, SelectionData } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasEdge, CanvasElement, CanvasNode, CanvasPopupMenu, CanvasView, NodeInteractionLayer, Position, SelectionData } from "src/@types/Canvas"
 import JSONC from "tiny-jsonc"
 import Patcher from "./patcher"
 import BBoxHelper from "src/utils/bbox-helper"
+import { CanvasData, CanvasEdgeData, CanvasNodeData } from "src/@types/AdvancedJsonCanvas"
 
 export default class CanvasPatcher extends Patcher {
   protected async patch() {
@@ -33,25 +34,6 @@ export default class CanvasPatcher extends Patcher {
 
     // Patch canvas view
     Patcher.patchPrototype<CanvasView>(this.plugin, view, {
-      getViewData: Patcher.OverrideExisting(next => function (...args: any): string {
-        const canvasData = this.canvas.getData()
-
-        try {
-          const stringified = JSONSS(canvasData, { space: 2 })
-          if (stringified === undefined) throw new Error('Failed to stringify canvas data using json-stable-stringify')
-            
-          return stringified
-        } catch (e) {
-          console.error('Failed to stringify canvas data using json-stable-stringify:', e)
-
-          try {
-            return JSON.stringify(canvasData, null, 2)
-          } catch (e) {
-            console.error('Failed to stringify canvas data using JSON.stringify:', e)
-            return next.call(this, ...args)
-          }
-        }
-      }),
       setViewData: Patcher.OverrideExisting(next => function (json: string, ...args: any): void {
         json = json !== '' ? json : '{}'
 
@@ -71,6 +53,25 @@ export default class CanvasPatcher extends Patcher {
 
         that.plugin.app.workspace.trigger('advanced-canvas:canvas-changed', this.canvas)
         return result
+      }),
+      getViewData: Patcher.OverrideExisting(next => function (...args: any): string {
+        const canvasData = this.canvas.getData()
+
+        try {
+          const stringified = JSONSS(canvasData, { space: 2 })
+          if (stringified === undefined) throw new Error('Failed to stringify canvas data using json-stable-stringify')
+            
+          return stringified
+        } catch (e) {
+          console.error('Failed to stringify canvas data using json-stable-stringify:', e)
+
+          try {
+            return JSON.stringify(canvasData, null, 2)
+          } catch (e) {
+            console.error('Failed to stringify canvas data using JSON.stringify:', e)
+            return next.call(this, ...args)
+          }
+        }
       })
     })
 

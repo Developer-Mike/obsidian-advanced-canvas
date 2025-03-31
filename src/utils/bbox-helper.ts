@@ -1,4 +1,5 @@
-import { BBox, Position, Side } from "src/@types/Canvas"
+import { Side } from "src/@types/AdvancedJsonCanvas"
+import { BBox, Position } from "src/@types/Canvas"
 
 export default class BBoxHelper {
   static combineBBoxes(bboxes: BBox[]): BBox {

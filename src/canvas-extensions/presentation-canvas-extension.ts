@@ -113,11 +113,6 @@ export default class PresentationCanvasExtension extends CanvasExtension {
       'advanced-canvas:popup-menu-created',
       (canvas: Canvas) => this.onPopupMenuCreated(canvas)
     ))
-
-    this.plugin.registerEvent(this.plugin.app.workspace.on(
-      'advanced-canvas:node-resized',
-      (canvas: Canvas, node: CanvasNode) => this.onNodeResized(canvas, node)
-    ))
   }
 
   onCanvasChanged(canvas: Canvas): void {
@@ -155,28 +150,6 @@ export default class PresentationCanvasExtension extends CanvasExtension {
         callback: () => this.setStartNode(canvas, selectedNode)
       })
     )
-  }
-
-  private onNodeResized(_canvas: Canvas, node: CanvasNode) {
-    const nodeData = node.getData()
-    if (!nodeData.sideRatio) return
-
-    const nodeBBox = node.getBBox()
-    const nodeSize = {
-      width: nodeBBox.maxX - nodeBBox.minX,
-      height: nodeBBox.maxY - nodeBBox.minY
-    }
-    const nodeAspectRatio = nodeSize.width / nodeSize.height
-
-    if (nodeAspectRatio < nodeData.sideRatio)
-      nodeSize.width = nodeSize.height * nodeData.sideRatio
-    else nodeSize.height = nodeSize.width / nodeData.sideRatio
-
-    node.setData({
-      ...nodeData,
-      width: nodeSize.width,
-      height: nodeSize.height
-    })
   }
   
   private getStartNode(canvas: Canvas): CanvasNode|undefined {

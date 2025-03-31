@@ -1,4 +1,5 @@
 import { ItemView, TFile, WorkspaceLeaf } from "obsidian"
+import { AnyNodeData, CanvasData, CanvasEdgeData, CanvasMetadata, CanvasNodeData, EndType, Side } from "./AdvancedJsonCanvas"
 
 export interface Size {
   width: number
@@ -22,10 +23,6 @@ export interface CanvasOptions {
   snapToGrid: boolean
 }
 
-export interface CanvasMetadata {
-  properties: { [key: string]: any }
-}
-
 export interface CanvasHistory {
   data: CanvasData[]
   current: number
@@ -33,9 +30,9 @@ export interface CanvasHistory {
 
   applyHistory: (data: CanvasData) => void
   canUndo: () => boolean
-  undo: () => CanvasData|null
+  undo: () => CanvasData | null
   canRedo: () => boolean
-  redo: () => CanvasData|null
+  redo: () => CanvasData | null
 }
 
 export interface SelectionData extends CanvasData {
@@ -67,13 +64,6 @@ export interface CanvasWorkspaceLeaf extends WorkspaceLeaf {
   rebuildView(): void
 }
 
-export interface CanvasData {
-  nodes: CanvasNodeData[]
-  edges: CanvasEdgeData[]
-}
-
-export type CanvasNodeType = 'text' | 'group' | 'file' | 'link'
-
 export interface CanvasElement {
   canvas: Canvas
   initialized: boolean
@@ -98,45 +88,6 @@ export interface CanvasElement {
   setData(data: CanvasNodeData | CanvasEdgeData): void
 }
 
-export interface CanvasNodeData {
-  id: string
-  x: number
-  y: number
-  width: number
-  height: number
-  color: string
-
-  type: CanvasNodeType
-  text?: string
-  label?: string
-  file?: string
-
-  // Node styling
-  styleAttributes?: { [key: string]: string | null }
-
-  // Auto node resizing
-  autoResizeHeight?: boolean
-
-  // Collapsible Groups
-  isCollapsed?: boolean
-  collapsedData?: CanvasData
-
-  // Presentation
-  isStartNode?: boolean
-  sideRatio?: number
-
-  // Portals
-  edgesToNodeFromPortal?: { [key: string]: CanvasEdgeData[] }
-  portalToFile?: string
-  portalIdMaps?: {
-    nodeIdMap: { [key: string]: string }
-    edgeIdMap: { [key: string]: string }
-  }
-
-  // Node from portal
-  portalId?: string
-}
-
 export interface CanvasNode extends CanvasElement {
   isEditing: boolean
 
@@ -159,7 +110,7 @@ export interface CanvasNode extends CanvasElement {
 
   color: string
 
-  setData(data: CanvasNodeData, addHistory?: boolean): void
+  setData(data: AnyNodeData, addHistory?: boolean): void
   getData(): CanvasNodeData
 
   onConnectionPointerdown(e: PointerEvent, side: Side): void
@@ -170,30 +121,6 @@ export interface CanvasNode extends CanvasElement {
   prevY: number
   prevWidth: number
   prevHeight: number
-}
-
-type Side = 'top' | 'right' | 'bottom' | 'left'
-type EndType = 'none' | 'arrow'
-
-export interface CanvasEdgeData {
-  id: string
-
-  fromNode: string
-  toNode: string
-
-  fromSide: Side
-  toSide: Side
-
-  fromEnd?: EndType
-  toEnd?: EndType
-
-  styleAttributes?: { [key: string]: string | null }
-
-  // Custom
-  portalId?: string
-
-  fromFloating: boolean
-  toFloating: boolean
 }
 
 export interface CanvasEdge extends CanvasElement {
@@ -256,26 +183,6 @@ export interface CanvasEdge extends CanvasElement {
   center?: Position
 }
 
-export interface NodeOptions {
-  pos: Position
-  size: Size
-  save?: boolean
-  focus?: boolean
-}
-
-export interface TextNodeOptions extends NodeOptions {
-  text?: string
-}
-
-export interface GroupNodeOptions extends NodeOptions {
-  label?: string
-}
-
-export interface FileNodeOptions extends NodeOptions {
-  file: TFile
-  subpath?: string
-}
-
 export interface NodeInteractionLayer {
   canvas: Canvas
   interactionEl: HTMLElement
@@ -292,7 +199,10 @@ export interface Canvas {
   view: CanvasView
   config: CanvasConfig
   options: CanvasOptions
+
   metadata: CanvasMetadata
+  metadataNode: CanvasNode
+  setMetadata(key: string, value: any): void
 
   unload(): void
   /**
