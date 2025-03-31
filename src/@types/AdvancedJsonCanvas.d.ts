@@ -1,10 +1,14 @@
 export * from "assets/formats/advanced-json-canvas/spec/1.0-1.0"
 
-import { CanvasData, CanvasNodeData as OriginalCanvasNodeData } from "assets/formats/advanced-json-canvas/spec/1.0-1.0"
+import { CanvasData as OriginalCanvasData, AnyCanvasNodeData as OriginalAnyCanvasNodeData, CanvasNodeData, CanvasGroupNodeData as OriginalCanvasGroupNodeData, CanvasFileNodeData, CanvasEdgeData } from "assets/formats/advanced-json-canvas/spec/1.0-1.0"
 
-export interface CanvasNodeData extends OriginalCanvasNodeData {
+export type AnyCanvasNodeData = CanvasNodeData | CanvasGroupNodeData | CanvasFileNodeData | OriginalAnyCanvasNodeData
+export interface CanvasData extends OriginalCanvasData {
+  nodes: AnyCanvasNodeData[]
+  edges: CanvasEdgeData[]
+}
+
+export interface CanvasGroupNodeData extends OriginalCanvasGroupNodeData {
   // Intermediate values that are not saved in the canvas
   collapsedData?: CanvasData
-
-  portalId?: string
 }

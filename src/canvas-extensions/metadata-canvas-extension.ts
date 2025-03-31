@@ -1,8 +1,8 @@
 import { Canvas, CanvasNode } from "src/@types/Canvas"
 import CanvasExtension from "./canvas-extension"
-import { CanvasMetadataNodeData, CanvasNodeData } from "src/@types/AdvancedJsonCanvas"
+import { CanvasMetadataNodeData } from "src/@types/AdvancedJsonCanvas"
 import { CURRENT_SPEC_VERSION } from "src/utils/migration-helper"
-import { MetadataCache, Notice } from "obsidian"
+import { Notice } from "obsidian"
 
 export default class MetadataCanvasExtension extends CanvasExtension {
   isEnabled() { return true }

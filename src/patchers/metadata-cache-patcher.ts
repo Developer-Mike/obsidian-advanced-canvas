@@ -1,5 +1,5 @@
 import { ExtendedMetadataCache, TFile } from "obsidian"
-import { CanvasData, CanvasNodeData } from "src/@types/Canvas"
+import { CanvasData, CanvasFileNodeData, CanvasNodeData, CanvasTextNodeData } from "src/@types/AdvancedJsonCanvas"
 import { ExtendedCachedMetadata, MetadataCacheMap } from "src/@types/Obsidian"
 import HashHelper from "src/utils/hash-helper"
 import FilepathHelper from "src/utils/filepath-helper"
@@ -42,8 +42,8 @@ export default class MetadataCachePatcher extends Patcher {
 
         // Extract canvas file node embeds
         const fileNodesEmbeds = content.nodes
-          .filter((node: CanvasNodeData) => node.type === 'file' && node.file)
-          .map((node: CanvasNodeData) => [node.id, node.file] as [string, string])
+          .filter((node: CanvasFileNodeData) => node.type === 'file' && node.file)
+          .map((node: CanvasFileNodeData) => [node.id, node.file] as [string, string])
           .map(([nodeId, file]) => ({
             link: file,
             original: file,
@@ -58,13 +58,13 @@ export default class MetadataCachePatcher extends Patcher {
         // Extract canvas text node links/embeds
         const textEncoder = new TextEncoder()
         const textNodes = content.nodes
-          .filter((node: CanvasNodeData) => node.type === 'text' && node.text)
+          .filter((node: CanvasTextNodeData) => node.type === 'text' && node.text)
 
         const textNodesIds = textNodes
           .map((node: CanvasNodeData) => node.id)
 
         const textNodesMetadataPromises = textNodes
-          .map((node: CanvasNodeData) => textEncoder.encode(node.text).buffer)
+          .map((node: CanvasTextNodeData) => textEncoder.encode(node.text).buffer)
           .map((buffer: ArrayBuffer) => this.computeMetadataAsync(buffer) as Promise<ExtendedCachedMetadata>)
         const textNodesMetadata = await Promise.all(textNodesMetadataPromises) // Wait for all text nodes to be resolved
 
@@ -149,14 +149,17 @@ export default class MetadataCachePatcher extends Patcher {
             if (!from || !to) continue
 
             // Check if both nodes are file nodes
-            if (from.type !== 'file' || to.type !== 'file' || !from.file || !to.file) continue
+            if (from.type !== 'file' || to.type !== 'file' || !(from as CanvasFileNodeData).file || !(from as CanvasFileNodeData).file) continue
+
+            const fromFile = (from as CanvasFileNodeData).file
+            const toFile = (to as CanvasFileNodeData).file
 
             // Register the link for the "from" node to the "to" node
-            this.registerInternalLinkAC(file.name, from.file, to.file)
+            this.registerInternalLinkAC(file.name, fromFile, toFile)
 
             // Check if the edge is bidirectional or unidirectional - if yes, register the link for the "to" node to the "from" node as well
             if (!(edge.toEnd !== 'none' || edge.fromEnd === 'arrow'))
-              this.registerInternalLinkAC(file.name, to.file, from.file)
+              this.registerInternalLinkAC(file.name, toFile, fromFile)
           }
         }
 

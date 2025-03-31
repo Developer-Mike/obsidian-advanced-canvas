@@ -3,7 +3,6 @@ import CanvasExtension from "./canvas-extension"
 
 export const VARIABLE_BREAKPOINT_CSS_VAR = '--variable-breakpoint'
 
-// FIXME: Improve performance
 export default class VariableBreakpointCanvasExtension extends CanvasExtension {
   isEnabled() { return 'variableBreakpointFeatureEnabled' as const }
 

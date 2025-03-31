@@ -1,7 +1,8 @@
 import { TFile } from "obsidian"
-import { BBox, Canvas, CanvasData, CanvasElement, CanvasNode, CanvasNodeData, CanvasView } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasElement, CanvasNode, CanvasView } from "src/@types/Canvas"
 import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "./canvas-extension"
+import { CanvasData, CanvasFileNodeData, CanvasNodeData } from "src/@types/AdvancedJsonCanvas"
 
 const PORTAL_PADDING = 50
 const MIN_OPEN_PORTAL_SIZE = { width: 200, height: 200 }
@@ -9,16 +10,16 @@ const MIN_OPEN_PORTAL_SIZE = { width: 200, height: 200 }
 export default class PortalsCanvasExtension extends CanvasExtension {
   isEnabled() { return 'portalsFeatureEnabled' as const }
 
-  init() {
+  init() { } /*
     this.plugin.registerEvent(this.plugin.app.vault.on('modify', (file: TFile) => {
       const canvases = this.plugin.app.workspace.getLeavesOfType('canvas').map(leaf => (leaf.view as CanvasView).canvas)
 
       for (const canvas of canvases) {
         if (canvas === undefined) continue
         
-        const hasPortalsToFile = canvas.getData().nodes.filter(nodeData => 
+        const hasPortalsToFile = canvas.getData().nodes.filter((nodeData: CanvasFileNodeData) => 
           nodeData.type === 'file' && 
-          nodeData.portalToFile === file.path
+          nodeData.currentLoadedFile === file.path
         ).length > 0
 
         // Update whole canvas data
@@ -82,8 +83,8 @@ export default class PortalsCanvasExtension extends CanvasExtension {
             setData(newData)
 
             // Resize open portals
-            for (const nodeData of [...newData.nodes, ...newData.nodes.slice().reverse()]) {
-              if (nodeData.type !== 'file' || !nodeData.portalToFile) continue
+            for (const nodeData of [...newData.nodes, ...newData.nodes.slice().reverse()] as CanvasFileNodeData[]) {
+              if (nodeData.type !== 'file' || !nodeData.portal) continue
               this.onOpenPortalResized(canvas, canvas.nodes.get(nodeData.id)!)
             }
           })
@@ -95,7 +96,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     if (canvas.readonly) return
 
     // Only search for valid nodes
-    const selectedFileNodes = canvas.getSelectionData().nodes.map(nodeData => {
+    const selectedFileNodes = canvas.getSelectionData().nodes.map((nodeData: CanvasFileNodeData) => {
       const node = canvas.nodes.get(nodeData.id)
       if (!node) return null
 
@@ -103,7 +104,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
       if (node.file?.extension === 'canvas') return node
       
       // Close portal of non-canvas file
-      if (nodeData.portalToFile) this.setPortalOpen(canvas, node, false)
+      if (nodeData.portal) this.setPortalOpen(canvas, node, false)
 
       return null
     }).filter(node => node !== null) as CanvasNode[]
@@ -111,21 +112,20 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     if (selectedFileNodes.length !== 1) return
 
     const portalNode = selectedFileNodes[0]
-    const portalNodeData = portalNode.getData()
+    const portalNodeData = portalNode.getData() as CanvasFileNodeData
 
     // If file changed
-    if (portalNodeData.portalToFile && portalNodeData.file !== portalNodeData.portalToFile) {
+    if (portalNodeData.portal && portalNodeData.file !== portalNodeData.currentLoadedFile)
       this.setPortalOpen(canvas, portalNode, true)
-    }
 
     CanvasHelper.addPopupMenuOption(
       canvas,
       CanvasHelper.createPopupMenuOption({
         id: 'toggle-portal',
-        label: portalNodeData.portalToFile ? 'Close portal' : 'Open portal',
-        icon: portalNodeData.portalToFile ? 'door-open' : 'door-closed',
+        label: portalNodeData.portal ? 'Close portal' : 'Open portal',
+        icon: portalNodeData.portal ? 'door-open' : 'door-closed',
         callback: () => {
-          this.setPortalOpen(canvas, portalNode, portalNodeData.portalToFile === undefined)
+          this.setPortalOpen(canvas, portalNode, !portalNodeData.portal)
           this.updatePopupMenu(canvas)
         }
       })
@@ -133,10 +133,11 @@ export default class PortalsCanvasExtension extends CanvasExtension {
   }
 
   private setPortalOpen(canvas: Canvas, portalNode: CanvasNode, open: boolean) {
-    const portalNodeData = portalNode.getData()
+    const portalNodeData = portalNode.getData() as CanvasFileNodeData
     portalNode.setData({
       ...portalNodeData,
-      portalToFile: open ? portalNodeData.file : undefined
+      portal: open,
+      currentLoadedFile: open ? portalNodeData.file : undefined
     })
 
     // Update whole canvas data
@@ -144,8 +145,8 @@ export default class PortalsCanvasExtension extends CanvasExtension {
   }
 
   private onNodeRemoved(canvas: Canvas, node: CanvasNode) {
-    const nodeData = node.getData()
-    if (nodeData.type !== 'file' || !nodeData.portalToFile) return
+    const nodeData = node.getData() as CanvasFileNodeData
+    if (nodeData.type !== 'file' || !nodeData.portal) return
 
     // Remove nested nodes and edges
     Object.keys(nodeData.portalIdMaps?.nodeIdMap ?? {}).map(refNodeId => canvas.nodes.get(refNodeId))
@@ -172,7 +173,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
 
     // Move previously selected portals to the back
     const previouslySelectedPortalNodesIds = Array.from(oldSelection)
-      .filter(node => (node.getData() as any).portalToFile !== undefined)
+      .filter(node => (node.getData() as any).portal !== undefined)
       .flatMap(node => {
         const portalNodeData = node.getData()
         const nestedPortalsIds = this.getNestedPortalsIds(canvas, portalNodeData.id)
@@ -209,7 +210,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
   restoreObjectSnappingState: () => void
   private onDraggingStateChanged(canvas: Canvas, startedDragging: boolean) {
     // If no open portal gets dragged, return
-    if (!canvas.getSelectionData().nodes.some(node => node.type === 'file' && node.portalToFile)) return
+    if (!canvas.getSelectionData().nodes.some((node: CanvasFileNodeData) => node.type === 'file' && node.portal)) return
 
     // Disable object snapping to fix self-aligning
     if (startedDragging) {
@@ -220,7 +221,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     } else this.restoreObjectSnappingState?.()
   }
 
-  private getContainingNodes(canvas: Canvas, portalNodeData: CanvasNodeData): CanvasNode[] {
+  private getContainingNodes(canvas: Canvas, portalNodeData: CanvasFileNodeData): CanvasNode[] {
     const nestedNodesIdMap = portalNodeData.portalIdMaps?.nodeIdMap
     if (!nestedNodesIdMap) return []
 
@@ -229,14 +230,14 @@ export default class PortalsCanvasExtension extends CanvasExtension {
   }
 
   private onNodeMoved(canvas: Canvas, node: CanvasNode) {
-    const nodeData = node.getData()
-    if (nodeData.type !== 'file' || !nodeData.portalToFile) return
+    const nodeData = node.getData() as CanvasFileNodeData
+    if (nodeData.type !== 'file' || !nodeData.portal) return
 
     this.onOpenPortalMoved(canvas, node)
   }
 
   private onOpenPortalMoved(canvas: Canvas, portalNode: CanvasNode) {
-    let portalNodeData = portalNode.getData()
+    let portalNodeData = portalNode.getData() as CanvasFileNodeData
 
     const nestedNodes = this.getContainingNodes(canvas, portalNodeData)
     const containingNodesBBox = CanvasHelper.getBBox(nestedNodes)
@@ -259,14 +260,14 @@ export default class PortalsCanvasExtension extends CanvasExtension {
   }
 
   private onNodeResized(canvas: Canvas, node: CanvasNode) {
-    const nodeData = node.getData()
-    if (nodeData.type !== 'file' || !nodeData.portalToFile) return
+    const nodeData = node.getData() as CanvasFileNodeData
+    if (nodeData.type !== 'file' || !nodeData.portal) return
 
     this.onOpenPortalResized(canvas, node)
   }
 
   private onOpenPortalResized(canvas: Canvas, portalNode: CanvasNode) {
-    let portalNodeData = portalNode.getData()
+    let portalNodeData = portalNode.getData() as CanvasFileNodeData
 
     const nestedNodes = this.getContainingNodes(canvas, portalNodeData)
     const containingNodesBBox = CanvasHelper.getBBox(nestedNodes)
@@ -351,7 +352,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
         }
 
         // If portal is open, add edges
-        if (targetPortalData.portalToFile) {
+        if (targetPortalData.portal) {
           // Push edges with updated from and to ids
           data.edges.push(...edges.map(edge => ({
             ...edge,
@@ -392,31 +393,31 @@ export default class PortalsCanvasExtension extends CanvasExtension {
   private nestedPortals: { [portalId: string]: string[] } = {}
   private async tryOpenPortal(canvas: Canvas, portalNodeData: CanvasNodeData, parentPortalId?: string): Promise<CanvasData> {
     const addedData: CanvasData = { nodes: [], edges: [] }
-    if (portalNodeData.type !== 'file' || !portalNodeData.portalToFile) return addedData
+    if (portalNodeData.type !== 'file' || !portalNodeData.portal) return addedData
 
     // Update portal file
-    portalNodeData.portalToFile = portalNodeData.file
+    portalNodeData.portal = portalNodeData.file
 
     // Fix direct recursion
-    if (portalNodeData.portalToFile === canvas.view.file.path) {
-      portalNodeData.portalToFile = undefined
+    if (portalNodeData.portal === canvas.view.file.path) {
+      portalNodeData.portal = undefined
       return addedData
     }
 
     // Fix indirect recursion
     if (parentPortalId) {
-      if (this.nestedPortals[parentPortalId]?.includes(portalNodeData.portalToFile!)) {
-        portalNodeData.portalToFile = undefined
+      if (this.nestedPortals[parentPortalId]?.includes(portalNodeData.portal!)) {
+        portalNodeData.portal = undefined
         return addedData
       }
       
       this.nestedPortals[parentPortalId] = this.nestedPortals[parentPortalId] ?? []
-      this.nestedPortals[parentPortalId].push(portalNodeData.portalToFile!)
+      this.nestedPortals[parentPortalId].push(portalNodeData.portal!)
     }
 
     const portalFile = this.plugin.app.vault.getAbstractFileByPath(portalNodeData.file!)
     if (!(portalFile instanceof TFile) || portalFile.extension !== 'canvas') {
-      portalNodeData.portalToFile = undefined
+      portalNodeData.portal = undefined
       return addedData
     }
 
@@ -425,7 +426,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
 
     const portalFileData = JSON.parse(portalFileDataString) as CanvasData
     if (!portalFileData) {
-      portalNodeData.portalToFile = undefined
+      portalNodeData.portal = undefined
       return addedData
     }
 
@@ -501,5 +502,5 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     if (!Number.isFinite(targetSize.height)) targetSize.height = MIN_OPEN_PORTAL_SIZE.height
 
     return targetSize
-  }
+  }*/
 }

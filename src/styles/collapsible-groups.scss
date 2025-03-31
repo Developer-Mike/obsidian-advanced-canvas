@@ -1,4 +1,4 @@
-#group-collapse-button {
+.collapse-button {
   position: absolute;
   left: 0;
   top: calc(-1 * var(--size-4-1) * var(--zoom-multiplier));
@@ -25,7 +25,7 @@
   left: calc(40px * var(--zoom-multiplier));
 }
 
-.canvas-node[data-is-collapsed] {
+.canvas-node[data-collapsed] {
   .canvas-node-container {
     display: none;
   }
@@ -35,7 +35,7 @@
   }
 }
 
-.canvas-wrapper[data-collapsed-group-preview-on-drag="true"][data-is-dragging] .canvas-node[data-is-collapsed] .canvas-node-container {
+.canvas-wrapper[data-collapsed-group-preview-on-drag="true"][data-is-dragging] .canvas-node[data-collapsed] .canvas-node-container {
   display: block;
   opacity: 0.5;
 
@@ -46,7 +46,7 @@
   }
 }
 
-.canvas-node-interaction-layer[data-target-is-collapsed] {
+.canvas-node-interaction-layer[data-target-collapsed] {
   .canvas-node-resizer {
     pointer-events: none;
     cursor: inherit;

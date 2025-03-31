@@ -1,5 +1,5 @@
 import { ItemView, TFile, WorkspaceLeaf } from "obsidian"
-import { AnyNodeData, CanvasData, CanvasEdgeData, CanvasMetadata, CanvasNodeData, EndType, Side } from "./AdvancedJsonCanvas"
+import { AnyCanvasNodeData, CanvasData, CanvasEdgeData, CanvasMetadata, CanvasNodeData, EndType, Side } from "./AdvancedJsonCanvas"
 
 export interface Size {
   width: number
@@ -110,17 +110,25 @@ export interface CanvasNode extends CanvasElement {
 
   color: string
 
-  setData(data: AnyNodeData, addHistory?: boolean): void
+  setData(data: AnyCanvasNodeData, addHistory?: boolean): void
   getData(): CanvasNodeData
 
   onConnectionPointerdown(e: PointerEvent, side: Side): void
 
   // Custom
+  collapseEl?: HTMLElement
+
   breakpoint?: number | null
   prevX: number
   prevY: number
   prevWidth: number
   prevHeight: number
+
+  currentPortalFile?: string
+  portalIdMaps?: {
+    nodeIdMap: { [key: string]: string }
+    edgeIdMap: { [key: string]: string }
+  }
 }
 
 export interface CanvasEdge extends CanvasElement {
@@ -266,6 +274,8 @@ export interface Canvas {
   zoomToFit(): void
   zoomToSelection(): void
   zoomToBbox(bbox: BBox): void
+
+  posFromClient(clientPos: Position): Position
 
   readonly: boolean
   setReadonly(readonly: boolean): void
