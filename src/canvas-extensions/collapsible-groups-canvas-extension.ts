@@ -1,9 +1,9 @@
 import { setIcon } from "obsidian"
-import { BBox, Canvas, CanvasData, CanvasNode, CanvasNodeData, SelectionData } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasNode, SelectionData } from "src/@types/Canvas"
 import BBoxHelper from "src/utils/bbox-helper"
 import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "./canvas-extension"
-import { CanvasGroupNodeData } from "src/@types/AdvancedJsonCanvas"
+import { CanvasData, CanvasGroupNodeData, CanvasNodeData } from "src/@types/AdvancedJsonCanvas"
 
 const COLLAPSE_BUTTON_ID = 'group-collapse-button'
 
@@ -59,8 +59,8 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
   }
 
   private onCopy(_canvas: Canvas, selectionData: SelectionData) {
-    for (const collapsedGroupData of selectionData.nodes) {
-      if (collapsedGroupData.type !== 'group' || !collapsedGroupData.isCollapsed || !collapsedGroupData.collapsedData) continue
+    for (const collapsedGroupData of selectionData.nodes as CanvasNodeData[]) {
+      if (collapsedGroupData.type !== 'group' || !(collapsedGroupData as CanvasGroupNodeData).collapsed || !collapsedGroupData.collapsedData) continue
 
       selectionData.nodes.push(...collapsedGroupData.collapsedData.nodes.map(nodeData => ({ 
         ...nodeData,
@@ -73,7 +73,7 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
   }
 
   private setCollapsed(canvas: Canvas, groupNode: CanvasNode, collapsed: boolean | undefined) {
-    groupNode.setData({ ...groupNode.getData(), isCollapsed: collapsed })
+    groupNode.setData({ ...groupNode.getData(), collapsed: collapsed })
     canvas.setData(canvas.getData())
 
     canvas.history.current--
@@ -81,8 +81,8 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
   }
 
   onNodeBBoxRequested(_canvas: Canvas, node: CanvasNode, bbox: BBox) {
-    const nodeData = node.getData()
-    if (nodeData.type !== 'group' || !nodeData.isCollapsed) return
+    const nodeData = node.getData() as CanvasGroupNodeData
+    if (nodeData.type !== 'group' || !nodeData.collapsed) return
 
     // Set width to label width
     bbox.maxX = bbox.minX + (node.nodeEl?.getBoundingClientRect().width ?? 0)
@@ -92,7 +92,7 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
   }
 
   private expandAllCollapsedNodes(data: CanvasData) {
-    data.nodes = data.nodes.flatMap((groupNodeData) => {
+    data.nodes = data.nodes.flatMap((groupNodeData: CanvasNodeData) => {
       const collapsedData = groupNodeData.collapsedData
       if (collapsedData === undefined) return [groupNodeData]
 
@@ -112,7 +112,7 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
 
   /*
   private expandAllCollapsedNodes(data: CanvasData) {
-    const groupNodesData = data.nodes.filter(nodeData => nodeData.type === 'group' && nodeData.isCollapsed)
+    const groupNodesData = data.nodes.filter(nodeData => nodeData.type === 'group' && nodeData.collapsed)
 
     for (const groupNodeData of groupNodesData) {
       this.expandCollapsedNode({ data, groupNodeData })
@@ -122,7 +122,7 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
   }
 
   private expandCollapsedNode(ref: { data: CanvasData, groupNodeData: CanvasNodeData }) {
-    ref.groupNodeData.isCollapsed = false
+    ref.groupNodeData.collapsed = false
 
     const collapsedData = ref.groupNodeData.collapsedData
     if (collapsedData === undefined) return
@@ -139,8 +139,8 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
   }*/
 
   private collapseNodes(data: CanvasData) {
-    data.nodes.forEach((groupNodeData) => {
-      if (!groupNodeData.isCollapsed) return
+    data.nodes.forEach((groupNodeData: CanvasNodeData) => {
+      if (!(groupNodeData as CanvasGroupNodeData).collapsed) return
 
       const groupNodeBBox = CanvasHelper.getBBox([groupNodeData])
       const containedNodesData = data.nodes.filter((nodeData) =>

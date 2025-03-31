@@ -166,7 +166,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     // Unselect nodes from portals
     updateSelection(() => {
       const updatedSelection = Array.from(canvas.selection)
-        .filter(node => node.getData().portalId === undefined)
+        .filter(node => (node.getData() as CanvasNodeData).portalId === undefined)
       canvas.selection = new Set(updatedSelection)
     })
 

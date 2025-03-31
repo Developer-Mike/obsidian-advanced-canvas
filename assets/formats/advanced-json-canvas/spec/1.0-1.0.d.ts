@@ -2,16 +2,13 @@ export type CanvasColor = `${number}` | `#${string}`
 
 export interface CanvasData {
   nodes: AnyNodeData[]
-  edges: AnyNodeData[]
+  edges: CanvasEdgeData[]
 }
 
 export interface CanvasMetadata {
   version: '1.0-1.0'
   frontmatter: { [key: string]: unknown }
   startNode?: string
-
-  // Support for arbitrary metadata
-  [key: string]: unknown
 }
 
 export type CanvasNodeType = 'text' | 'group' | 'file' | 'link'

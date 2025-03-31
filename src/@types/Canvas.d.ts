@@ -200,9 +200,11 @@ export interface Canvas {
   config: CanvasConfig
   options: CanvasOptions
 
+  /** @deprecated Only edit it manually if you know what you're doing. */
   metadata: CanvasMetadata
   metadataNode: CanvasNode
-  setMetadata(key: string, value: any): void
+  getMetadata(key: keyof CanvasMetadata): any
+  setMetadata(key: keyof CanvasMetadata, value: any): void
 
   unload(): void
   /**

@@ -3,7 +3,7 @@
   - [x] Metadata text node
   - [x] `autoResizeHeight` to `dynamicHeight`
   - [x] `sideRatio` to `ratio`
-  - [ ] `isStartNode` to metadata `startNode`
+  - [x] `isStartNode` to metadata `startNode`
   - [x] `isCollapsed` to `collapsed`
   - [ ] `portalToFile` to `portal`
   - [ ] `edgesToNodeFromPortal` to `interdimensionalEdges` saved in the file node

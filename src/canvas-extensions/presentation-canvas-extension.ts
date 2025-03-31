@@ -151,22 +151,10 @@ export default class PresentationCanvasExtension extends CanvasExtension {
       })
     )
   }
-  
-  private getStartNode(canvas: Canvas): CanvasNode|undefined {
-    for (const [_, node] of canvas.nodes) {
-      if (node.getData().isStartNode) return node
-    }
 
-    return undefined
-  }
-
-  private setStartNode(canvas: Canvas, node: CanvasNode|undefined) {
+  private setStartNode(canvas: Canvas, node: CanvasNode | undefined) {
     if (!node) return
-
-    const startNode = this.getStartNode(canvas)
-    if (startNode) startNode.setData({ ...startNode.getData(), isStartNode: false })
-
-    if (node !== startNode) node.setData({ ...node.getData(), isStartNode: true }, true)
+    canvas.setMetadata('startNode', node.getData().id)
   }
 
   private getDefaultSlideSize(): Size {
@@ -181,7 +169,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
   }
 
   private addSlide(canvas: Canvas, pos?: Position, bbox?: BBox) {
-    const isStartNode = this.getStartNode(canvas) == null
+    const isStartNode = canvas.getMetadata('startNode') === undefined
     const slideSize = this.getDefaultSlideSize()
     const slideAspectRatio = this.getSlideAspectRatio()
 
@@ -216,9 +204,10 @@ export default class PresentationCanvasExtension extends CanvasExtension {
 
     groupNode.setData({ 
       ...groupNode.getData(), 
-      sideRatio: slideAspectRatio,
-      isStartNode: isStartNode ? true : undefined,
+      ratio: slideAspectRatio
     })
+
+    if (isStartNode) canvas.setMetadata('startNode', groupNode.getData().id)
   }
 
   private async animateNodeTransition(canvas: Canvas, fromNode: CanvasNode|undefined, toNode: CanvasNode) {
@@ -255,7 +244,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
   private async startPresentation(canvas: Canvas, tryContinue: boolean = false) {
     // Only reset visited nodes if we are not trying to continue
     if (!tryContinue || this.visitedNodeIds.length === 0) {
-      const startNode = this.getStartNode(canvas)
+      const startNode = canvas.getMetadata('startNode') && canvas.nodes.get(canvas.getMetadata('startNode'))
       if (!startNode) {
         new Notice('No start node found. Please mark a node as a start node trough the popup menu.')
         return

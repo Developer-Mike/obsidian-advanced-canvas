@@ -1,5 +1,6 @@
 import { Menu } from "obsidian"
-import { BBox, Canvas, CanvasData, CanvasEdge, CanvasElement, CanvasNode, Position, SelectionData } from "./Canvas"
+import { BBox, Canvas, CanvasEdge, CanvasElement, CanvasNode, Position, SelectionData } from "./Canvas"
+import { CanvasData } from "./AdvancedJsonCanvas"
 
 export interface EventRef {
   fn: (...args: any) => any
@@ -18,6 +19,8 @@ export interface CustomWorkspaceEvents {
   // Custom canvas events
   /** Fired when a new canvas gets loaded */
   'advanced-canvas:canvas-changed': (canvas: Canvas) => void
+  /** Fired when the canvas' metadata gets changed */
+  'advanced-canvas:canvas-metadata-changed': (canvas: Canvas) => void
   /** Fired before the viewport gets changed */
   'advanced-canvas:viewport-changed:before': (canvas: Canvas) => void
   /** Fired after the viewport gets changed */
