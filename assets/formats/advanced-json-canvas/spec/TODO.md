@@ -1,6 +1,6 @@
-- [ ] Migration to new format
+- [x] Migration to new format
 - [ ] Nodes
-  - [ ] Metadata text node
+  - [x] Metadata text node
   - [x] `autoResizeHeight` to `dynamicHeight`
   - [x] `sideRatio` to `ratio`
   - [ ] `isStartNode` to metadata `startNode`

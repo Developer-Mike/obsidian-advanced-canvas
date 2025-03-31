@@ -7,6 +7,7 @@ import JSONC from "tiny-jsonc"
 import Patcher from "./patcher"
 import BBoxHelper from "src/utils/bbox-helper"
 import { CanvasData, CanvasEdgeData, CanvasNodeData } from "src/@types/AdvancedJsonCanvas"
+import MigrationHelper from "src/utils/migration-helper"
 
 export default class CanvasPatcher extends Patcher {
   protected async patch() {
@@ -36,6 +37,16 @@ export default class CanvasPatcher extends Patcher {
     Patcher.patchPrototype<CanvasView>(this.plugin, view, {
       setViewData: Patcher.OverrideExisting(next => function (json: string, ...args: any): void {
         json = json !== '' ? json : '{}'
+
+        try {
+          const canvasData = JSONC.parse(json) as CanvasData
+
+          // Check if the canvas data needs migration and migrate it
+          if (MigrationHelper.needsMigration(canvasData))
+            json = JSON.stringify(MigrationHelper.migrate(canvasData))
+        } catch (e) {
+          console.error('Failed to migrate canvas data:', e)
+        }
 
         let result
         try {

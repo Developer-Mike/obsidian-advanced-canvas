@@ -31,7 +31,7 @@ export interface CanvasNodeData {
   styleAttributes?: { [key: string]: string | null } // AdvancedJsonCanvas
 }
 
-export type AnyNodeData = CanvasTextNodeData | CanvasMetadataNodeData | CanvasFileNodeData | CanvasLinkNodeData | CanvasGroupNodeData
+export type AnyNodeData = CanvasNodeData | CanvasTextNodeData | CanvasMetadataNodeData | CanvasFileNodeData | CanvasLinkNodeData | CanvasGroupNodeData
 
 export interface CanvasTextNodeData extends CanvasNodeData {
   type: 'text'
@@ -74,12 +74,12 @@ export interface CanvasEdgeData {
   id: string
 
   fromNode: string
-  fromSide?: Side
+  fromSide: Side
   fromFloating?: boolean // AdvancedJsonCanvas
   fromEnd?: EndType
   
   toNode: string
-  toSide?: Side
+  toSide: Side
   toFloating?: boolean // AdvancedJsonCanvas
   toEnd?: EndType
 

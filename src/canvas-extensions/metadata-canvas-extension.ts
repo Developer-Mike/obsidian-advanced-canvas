@@ -1,8 +1,8 @@
 import { Canvas } from "src/@types/Canvas"
 import CanvasExtension from "./canvas-extension"
-import { CanvasMetadata, CanvasMetadataNodeData } from "src/@types/AdvancedJsonCanvas"
-
-const SPEC_VERSION = '1.0-1.0'
+import { CanvasMetadataNodeData } from "src/@types/AdvancedJsonCanvas"
+import { CURRENT_SPEC_VERSION } from "src/utils/migration-helper"
+import { Notice } from "obsidian"
 
 export default class MetadataCanvasExtension extends CanvasExtension {
   isEnabled() { return true }
@@ -19,35 +19,8 @@ export default class MetadataCanvasExtension extends CanvasExtension {
     let metadataNodeMetadata = (metadataNode?.getData() as CanvasMetadataNodeData | undefined)?.metadata
     let canvasVersion = metadataNodeMetadata?.version // Save version before adding default metadata
 
-    // Create metadata if it doesn't exist
-    metadataNodeMetadata ??= {
-      version: SPEC_VERSION,
-      frontmatter: {}
-    }
-
-    if (!metadataNode) {
-      // Create metadata node
-      canvas.importData({
-        nodes: [
-          {
-            id: 'metadata',
-            type: 'text',
-            text: '',
-            x: 0, y: 0,
-            width: 0, height: 0,
-            metadata: metadataNodeMetadata,
-          }
-        ],
-        edges: []
-      }, false, true)
-
-      metadataNode = canvas.nodes.get('metadata')
-      if (!metadataNode) return console.error('Failed to create metadata node')
-    }
-
-    if (canvasVersion !== SPEC_VERSION) {
-      // TODO: Migrate canvas to new version
-    }
+    if (!metadataNode || !metadataNodeMetadata || canvasVersion !== CURRENT_SPEC_VERSION)
+      return new Notice("Metadata node not found or version mismatch. Should have been migrated (but wasn't).")
 
     // Set canvas metadata
     canvas.metadata = metadataNodeMetadata
