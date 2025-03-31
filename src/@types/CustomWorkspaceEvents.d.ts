@@ -25,6 +25,10 @@ export interface CustomWorkspaceEvents {
   'advanced-canvas:viewport-changed:before': (canvas: Canvas) => void
   /** Fired after the viewport gets changed */
   'advanced-canvas:viewport-changed:after': (canvas: Canvas) => void
+  /** Fired before an animation frame gets requested */
+  'advanced-canvas:animation-frame-requested:before': (canvas: Canvas) => void
+  /** Fired after an animation frame gets requested */
+  'advanced-canvas:animation-frame-requested:after': (canvas: Canvas) => void
   /** Fired when a node gets moved */
   'advanced-canvas:node-moved': (canvas: Canvas, node: CanvasNode, usingKeyboard: boolean) => void
   /** Fired when a node gets resized */

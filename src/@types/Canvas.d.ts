@@ -252,6 +252,7 @@ export interface Canvas {
   getViewportBBox(): BBox
   setViewport(tx: number, ty: number, tZoom: number): void
 
+  requestFrame(frame: number): void
   viewportChanged: boolean
   markViewportChanged(): void
 

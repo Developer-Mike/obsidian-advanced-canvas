@@ -9,15 +9,16 @@
 		"@typescript-eslint/eslint-plugin": "5.29.0",
 		"@typescript-eslint/parser": "5.29.0",
 		"builtin-modules": "3.3.0",
-		"esbuild": "0.19.4",
+		"esbuild": "^0.25.2",
 		"obsidian": "latest",
 		"tslib": "2.4.0",
 		"typescript": "4.7.4"
 	},
 	"dependencies": {
-		"esbuild-sass-plugin": "^2.6.0",
+		"esbuild-sass-plugin": "^3.3.1",
 		"html-to-image": "^1.11.11",
 		"json-stable-stringify": "^1.2.1",
+		"konva": "^9.3.20",
 		"monkey-around": "^2.3.0",
 		"sass": "^1.70.0",
 		"tiny-jsonc": "^1.0.1"

@@ -88,6 +88,12 @@ export default class CanvasPatcher extends Patcher {
 
     // Patch canvas
     Patcher.patchPrototype<Canvas>(this.plugin, view.canvas, {
+      requestFrame: Patcher.OverrideExisting(next => function (...args: any): void {
+        that.plugin.app.workspace.trigger('advanced-canvas:animation-frame-requested:before', this)
+        const result = next.call(this, ...args)
+        that.plugin.app.workspace.trigger('advanced-canvas:animation-frame-requested:after', this)
+        return result
+      }),
       markViewportChanged: Patcher.OverrideExisting(next => function (...args: any): void {
         that.plugin.app.workspace.trigger('advanced-canvas:viewport-changed:before', this)
         const result = next.call(this, ...args)
