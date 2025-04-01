@@ -65,6 +65,8 @@ export interface CanvasWorkspaceLeaf extends WorkspaceLeaf {
 }
 
 export interface CanvasElement {
+  id: string
+  
   canvas: Canvas
   initialized: boolean
   isDirty?: boolean // Custom for Change event
@@ -98,7 +100,6 @@ export interface CanvasNode extends CanvasElement {
   labelEl?: HTMLElement
   file?: TFile
 
-  id: string
   x: number
   y: number
   width: number

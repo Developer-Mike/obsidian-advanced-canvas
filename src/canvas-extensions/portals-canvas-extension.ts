@@ -1,8 +1,8 @@
 import { TFile } from "obsidian"
-import { BBox, Canvas, CanvasElement, CanvasNode, CanvasView } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasEdge, CanvasElement, CanvasNode, CanvasView } from "src/@types/Canvas"
 import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "./canvas-extension"
-import { CanvasData, CanvasFileNodeData, CanvasNodeData } from "src/@types/AdvancedJsonCanvas"
+import { CanvasData, CanvasEdgeData, CanvasFileNodeData, CanvasNodeData } from "src/@types/AdvancedJsonCanvas"
 
 const PORTAL_PADDING = 50
 const MIN_OPEN_PORTAL_SIZE = { width: 200, height: 200 }
@@ -10,27 +10,10 @@ const MIN_OPEN_PORTAL_SIZE = { width: 200, height: 200 }
 export default class PortalsCanvasExtension extends CanvasExtension {
   isEnabled() { return 'portalsFeatureEnabled' as const }
 
-  init() { } /*
+  init() {
     this.plugin.registerEvent(this.plugin.app.vault.on('modify', (file: TFile) => {
-      const canvases = this.plugin.app.workspace.getLeavesOfType('canvas').map(leaf => (leaf.view as CanvasView).canvas)
-
-      for (const canvas of canvases) {
-        if (canvas === undefined) continue
-        
-        const hasPortalsToFile = Object.values(canvas.nodes).filter((nodeData: CanvasNode) => 
-          nodeData.getData().type === 'file' && 
-          nodeData.currentPortalFile === file.path
-        ).length > 0
-
-        // Update whole canvas data
-        if (hasPortalsToFile) {
-          canvas.setData(canvas.getData())
-
-          // Maintain history
-          canvas.history.current--
-          canvas.history.data.pop()
-        }
-      }
+      for (const canvasLeaf of this.plugin.app.workspace.getLeavesOfType('canvas') as any[])
+        if (canvasLeaf.view?.canvas) this.onFileModified(canvasLeaf.view.canvas, file)
     }))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
@@ -92,6 +75,21 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     ))
   }
 
+  private onFileModified(canvas: Canvas, file: TFile) {
+    const isAffected = Object.values(canvas.nodes).filter((nodeData: CanvasNode) => 
+      nodeData.getData().type === 'file' && 
+      nodeData.currentPortalFile === file.path
+    ).length > 0
+    if (!isAffected) return
+
+    // Update whole canvas data
+    canvas.setData(canvas.getData())
+
+    // Maintain history
+    canvas.history.current--
+    canvas.history.data.pop()
+  }
+
   private updatePopupMenu(canvas: Canvas) {
     if (canvas.readonly) return
 
@@ -111,10 +109,10 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     
     if (selectedFileNodes.length !== 1) return
 
-    const portalNode = selectedFileNodes[0]
+    const portalNode = selectedFileNodes.first()!
     const portalNodeData = portalNode.getData() as CanvasFileNodeData
 
-    // If file changed
+    // If file changed reopen portal
     if (portalNodeData.portal && portalNodeData.file !== portalNode.currentPortalFile)
       this.setPortalOpen(canvas, portalNode, true)
 
@@ -132,6 +130,71 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     )
   }
 
+  private onContainingNodesRequested(_canvas: Canvas, _bbox: BBox, nodes: CanvasNode[]) {
+    // Remove nodes from portals from the list
+    const filteredNodes = nodes.filter(node => !this.isPortalElement(node))
+    nodes.splice(0, nodes.length, ...filteredNodes)
+  }
+  
+  private onSelectionChanged(canvas: Canvas, _oldSelection: Set<CanvasElement>, updateSelection: (update: () => void) => void) {
+    // Unselect nodes from portals
+    updateSelection(() => {
+      const updatedSelection = Array.from(canvas.selection)
+        .filter(canvasElement => !this.isPortalElement(canvasElement))
+      canvas.selection = new Set(updatedSelection)
+    })
+  }
+
+  private onDraggingStateChanged(canvas: Canvas, startedDragging: boolean) {
+    if (!startedDragging) return
+
+    // If no open portal gets dragged, return
+    if (!canvas.getSelectionData().nodes.some((node: CanvasFileNodeData) => node.type === 'file' && node.portal)) return
+
+    const objectSnappingEnabled = canvas.options.snapToObjects
+    if (!objectSnappingEnabled) return
+
+    // Disable object snapping to fix self-aligning
+    canvas.toggleObjectSnapping(false)
+
+    const dragEndEventRef = this.plugin.app.workspace.on(
+      'advanced-canvas:dragging-state-changed',
+      (canvas: Canvas, startedDragging: boolean) => {
+        if (startedDragging) return
+
+        // Re-enable object snapping
+        canvas.toggleObjectSnapping(objectSnappingEnabled)
+
+        // Remove drag end event listener
+        this.plugin.app.workspace.offref(dragEndEventRef)
+      }
+    )
+    this.plugin.registerEvent(dragEndEventRef)
+  }
+
+  private getContainingNodes(canvas: Canvas, portalNode: CanvasNode): CanvasNode[] {
+    return Array.from(canvas.nodes.values())
+      .filter(node => this.isChildOfPortal(portalNode.getData() as CanvasFileNodeData, node.getData()))
+  }
+
+  private getContainingEdges(canvas: Canvas, portalNode: CanvasNode): CanvasEdge[] {
+    return Array.from(canvas.edges.values())
+      .filter(edge => this.isChildOfPortal(portalNode.getData() as CanvasFileNodeData, edge.getData()))
+  }
+
+  private onNodeRemoved(canvas: Canvas, portalNode: CanvasNode) {
+    const portalNodeData = portalNode.getData() as CanvasFileNodeData
+    if (portalNodeData.type !== 'file' || !portalNodeData.portal) return
+
+    for (const node of this.getContainingNodes(canvas, portalNode))
+      canvas.removeNode(node)
+
+    for (const edge of this.getContainingEdges(canvas, portalNode))
+      canvas.removeEdge(edge)
+  }
+
+  //////
+
   private setPortalOpen(canvas: Canvas, portalNode: CanvasNode, open: boolean) {
     const portalNodeData = portalNode.getData() as CanvasFileNodeData
     portalNode.setData({
@@ -145,33 +208,6 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     canvas.setData(canvas.getData())
   }
 
-  private onNodeRemoved(canvas: Canvas, node: CanvasNode) {
-    const nodeData = node.getData() as CanvasFileNodeData
-    if (nodeData.type !== 'file' || !nodeData.portal) return
-
-    // Remove nested nodes and edges
-    Object.keys(node.portalIdMaps?.nodeIdMap ?? {}).map(refNodeId => canvas.nodes.get(refNodeId))
-      .filter(node => node !== undefined)
-      .forEach(node => canvas.removeNode(node!))
-
-    Object.keys(node.portalIdMaps?.edgeIdMap ?? {}).map(refEdgeId => canvas.edges.get(refEdgeId))
-      .filter(edge => edge !== undefined)
-      .forEach(edge => canvas.removeEdge(edge!))
-  }
-
-  private onContainingNodesRequested(_canvas: Canvas, _bbox: BBox, nodes: CanvasNode[]) {
-    // Remove nodes from portals from the list
-    nodes.splice(0, nodes.length, ...nodes.filter(node => this.getNestedIds(node.id).length === 1))
-  }
-
-  private onSelectionChanged(canvas: Canvas, oldSelection: Set<CanvasElement>, updateSelection: (update: () => void) => void) {
-    // Unselect nodes from portals
-    updateSelection(() => {
-      const updatedSelection = Array.from(canvas.selection)
-        .filter(node => this.getNestedIds(node.getData().id).length === 1)
-      canvas.selection = new Set(updatedSelection)
-    })
-  }
 
   private getNestedPortalsIds(canvas: Canvas, portalId: string): string[] {
     const nestedPortalsIds: string[] = []
@@ -188,27 +224,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     return nestedPortalsIds
   }
 
-  restoreObjectSnappingState: () => void
-  private onDraggingStateChanged(canvas: Canvas, startedDragging: boolean) {
-    // If no open portal gets dragged, return
-    if (!canvas.getSelectionData().nodes.some((node: CanvasFileNodeData) => node.type === 'file' && node.portal)) return
-
-    // Disable object snapping to fix self-aligning
-    if (startedDragging) {
-      const objectSnappingEnabled = canvas.options.snapToObjects
-      this.restoreObjectSnappingState = () => canvas.toggleObjectSnapping(objectSnappingEnabled)
-
-      if (objectSnappingEnabled) canvas.toggleObjectSnapping(false)
-    } else this.restoreObjectSnappingState?.()
-  }
-
-  private getContainingNodes(canvas: Canvas, portalNode: CanvasNode): CanvasNode[] {
-    const nestedNodesIdMap = portalNode.portalIdMaps?.nodeIdMap
-    if (!nestedNodesIdMap) return []
-
-    return Object.keys(nestedNodesIdMap).map(refNodeId => canvas.nodes.get(refNodeId))
-      .filter(node => node !== undefined)
-  }
+  
 
   private onNodeMoved(canvas: Canvas, node: CanvasNode) {
     const nodeData = node.getData() as CanvasFileNodeData
@@ -482,7 +498,16 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     return targetSize
   }
 
+  // Helper functions
+  private isPortalElement(canvasElement: CanvasElement | CanvasNodeData | CanvasEdgeData): boolean {
+    return this.getNestedIds(canvasElement.id).length > 1
+  }
+
   private getNestedIds(id: string): string[] {
     return id.split("-")
-  } */
+  }
+
+  private isChildOfPortal(portal: CanvasFileNodeData, canvasElement: CanvasElement | CanvasNodeData | CanvasEdgeData): boolean {
+    return canvasElement.id !== portal.id && canvasElement.id.startsWith(portal.id)
+  }
 }
