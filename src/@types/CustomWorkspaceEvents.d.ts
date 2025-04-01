@@ -19,6 +19,8 @@ export interface CustomWorkspaceEvents {
   // Custom canvas events
   /** Fired when a new canvas gets loaded */
   'advanced-canvas:canvas-changed': (canvas: Canvas) => void
+  /** Fired when the canvas gets unloaded */
+  'advanced-canvas:file-changed': (canvas: Canvas) => void
   /** Fired when the canvas' metadata gets changed */
   'advanced-canvas:canvas-metadata-changed': (canvas: Canvas) => void
   /** Fired before the viewport gets changed */

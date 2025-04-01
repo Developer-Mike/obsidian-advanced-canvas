@@ -15,6 +15,11 @@ export default class DrawCanvasExtension extends CanvasExtension {
       'advanced-canvas:animation-frame-requested:after',
       (canvas: Canvas) => this.onFrameRequested(canvas)
     ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      'advanced-canvas:file-changed',
+      (canvas: Canvas) => this.onCanvasUnloaded(canvas)
+    ))
   }
 
   private onCanvasChanged(canvas: Canvas) {
@@ -40,12 +45,11 @@ export default class DrawCanvasExtension extends CanvasExtension {
     canvas.stage.add(layer)
 
     const rect = new Konva.Rect({
-      x: 0,
-      y: 0,
+      x: -100,
+      y: -100,
       width: 100,
       height: 100,
       fill: 'red',
-      draggable: true,
     })
     layer.add(rect)
   }
@@ -58,5 +62,11 @@ export default class DrawCanvasExtension extends CanvasExtension {
 
     canvas.stage.scaleX(canvas.scale)
     canvas.stage.scaleY(canvas.scale)
+  }
+
+  private onCanvasUnloaded(canvas: Canvas) {
+    console.log('unloading canvas', canvas)
+    canvas.stage?.destroy()
+    canvas.stageEl?.remove()
   }
 }

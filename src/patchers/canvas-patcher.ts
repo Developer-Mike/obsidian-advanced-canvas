@@ -83,6 +83,11 @@ export default class CanvasPatcher extends Patcher {
             return next.call(this, ...args)
           }
         }
+      }),
+      loadFile: Patcher.OverrideExisting(next => function (...args: any): void {
+        const result = next.call(this, ...args)
+        that.plugin.app.workspace.trigger('advanced-canvas:file-changed', this.canvas)
+        return result
       })
     })
 

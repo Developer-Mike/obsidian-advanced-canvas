@@ -1,5 +1,6 @@
 import { ItemView, TFile, WorkspaceLeaf } from "obsidian"
 import { AnyCanvasNodeData, CanvasData, CanvasEdgeData, CanvasMetadata, CanvasNodeData, EndType, Side } from "./AdvancedJsonCanvas"
+import Konva from "konva"
 
 export interface Size {
   width: number
@@ -50,6 +51,8 @@ export interface CanvasView extends ItemView {
   file: TFile
   canvas: Canvas
   leaf: CanvasWorkspaceLeaf
+  
+  loadFile(): void
 
   getViewData(): string
   setViewData(data: string): void
@@ -258,6 +261,7 @@ export interface Canvas {
 
   x: number
   y: number
+  scale: number
   zoom: number
   zoomCenter: Position | null
   zoomBreakpoint: number
@@ -319,10 +323,14 @@ export interface Canvas {
 
   // Custom
   zoomToRealBbox(bbox: BBox): void
+
   isClearing?: boolean
   isCopying?: boolean
   isPasting?: boolean
   lockedX: number
   lockedY: number
   lockedZoom: number
+
+  stageEl?: HTMLDivElement
+  stage?: Konva.Stage
 }
