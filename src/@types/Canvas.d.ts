@@ -1,6 +1,7 @@
 import { ItemView, TFile, WorkspaceLeaf } from "obsidian"
 import { AnyCanvasNodeData, CanvasData, CanvasEdgeData, CanvasMetadata, CanvasNodeData, EndType, Side } from "./AdvancedJsonCanvas"
 import Konva from "konva"
+import { Drawing } from "src/canvas-extensions/draw-canvas-extension"
 
 export interface Size {
   width: number
@@ -334,4 +335,6 @@ export interface Canvas {
 
   stageEl?: HTMLDivElement
   stage?: Konva.Stage
+  drawings?: Drawing[]
+  currentPath?: Konva.Line
 }
