@@ -172,69 +172,9 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     this.plugin.registerEvent(dragEndEventRef)
   }
 
-  private getContainingNodes(canvas: Canvas, portalNode: CanvasNode): CanvasNode[] {
-    return Array.from(canvas.nodes.values())
-      .filter(node => this.isChildOfPortal(portalNode.getData() as CanvasFileNodeData, node.getData()))
-  }
-
-  private getContainingEdges(canvas: Canvas, portalNode: CanvasNode): CanvasEdge[] {
-    return Array.from(canvas.edges.values())
-      .filter(edge => this.isChildOfPortal(portalNode.getData() as CanvasFileNodeData, edge.getData()))
-  }
-
-  private onNodeRemoved(canvas: Canvas, portalNode: CanvasNode) {
+  private onNodeMoved(canvas: Canvas, portalNode: CanvasNode) {
     const portalNodeData = portalNode.getData() as CanvasFileNodeData
     if (portalNodeData.type !== 'file' || !portalNodeData.portal) return
-
-    for (const node of this.getContainingNodes(canvas, portalNode))
-      canvas.removeNode(node)
-
-    for (const edge of this.getContainingEdges(canvas, portalNode))
-      canvas.removeEdge(edge)
-  }
-
-  //////
-
-  private setPortalOpen(canvas: Canvas, portalNode: CanvasNode, open: boolean) {
-    const portalNodeData = portalNode.getData() as CanvasFileNodeData
-    portalNode.setData({
-      ...portalNodeData,
-      portal: open
-    })
-
-    portalNode.currentPortalFile = open ? portalNodeData.file : undefined
-
-    // Update whole canvas data
-    canvas.setData(canvas.getData())
-  }
-
-
-  private getNestedPortalsIds(canvas: Canvas, portalId: string): string[] {
-    const nestedPortalsIds: string[] = []
-
-    for (const node of canvas.nodes.values()) {
-      const nodeData = node.getData()
-
-      if (this.getNestedIds(nodeData.id).includes(portalId)) {
-        nestedPortalsIds.push(nodeData.id)
-        nestedPortalsIds.push(...this.getNestedPortalsIds(canvas, nodeData.id))
-      }
-    }
-
-    return nestedPortalsIds
-  }
-
-  
-
-  private onNodeMoved(canvas: Canvas, node: CanvasNode) {
-    const nodeData = node.getData() as CanvasFileNodeData
-    if (nodeData.type !== 'file' || !nodeData.portal) return
-
-    this.onOpenPortalMoved(canvas, node)
-  }
-
-  private onOpenPortalMoved(canvas: Canvas, portalNode: CanvasNode) {
-    let portalNodeData = portalNode.getData() as CanvasFileNodeData
 
     const nestedNodes = this.getContainingNodes(canvas, portalNode)
     const containingNodesBBox = CanvasHelper.getBBox(nestedNodes)
@@ -256,17 +196,11 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     }
   }
 
-  private onNodeResized(canvas: Canvas, node: CanvasNode) {
-    const nodeData = node.getData() as CanvasFileNodeData
-    if (nodeData.type !== 'file' || !nodeData.portal) return
+  private onNodeResized(canvas: Canvas, portalNode: CanvasNode) {
+    const portalNodeData = portalNode.getData() as CanvasFileNodeData
+    if (portalNodeData.type !== 'file' || !portalNodeData.portal) return
 
-    this.onOpenPortalResized(canvas, node)
-  }
-
-  private onOpenPortalResized(canvas: Canvas, portalNode: CanvasNode) {
-    let portalNodeData = portalNode.getData() as CanvasFileNodeData
-
-    const nestedNodes = this.getContainingNodes(canvas, portalNode)
+    const nestedNodes = this.getContainingNodes(canvas, portalNode, false)
     const containingNodesBBox = CanvasHelper.getBBox(nestedNodes)
     const targetSize = this.getPortalSize(containingNodesBBox)
 
@@ -274,12 +208,40 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     if (portalNodeData.width !== targetSize.width || portalNodeData.height !== targetSize.height) {
       portalNode.setData({
         ...portalNodeData,
+        x: portalNode.prevX && portalNode.prevX !== portalNodeData.x ? portalNode.prevX : portalNodeData.x,
+        y: portalNode.prevY && portalNode.prevY !== portalNodeData.y ? portalNode.prevY : portalNodeData.y,
         width: targetSize.width,
         height: targetSize.height
       })
 
       return
     }
+  }
+
+  private onNodeRemoved(canvas: Canvas, portalNode: CanvasNode) {
+    const portalNodeData = portalNode.getData() as CanvasFileNodeData
+    if (portalNodeData.type !== 'file' || !portalNodeData.portal) return
+
+    for (const node of this.getContainingNodes(canvas, portalNode, false))
+      canvas.removeNode(node)
+
+    for (const edge of this.getContainingEdges(canvas, portalNode, false))
+      canvas.removeEdge(edge)
+  }
+
+  //////
+
+  private setPortalOpen(canvas: Canvas, portalNode: CanvasNode, open: boolean) {
+    const portalNodeData = portalNode.getData() as CanvasFileNodeData
+    portalNode.setData({
+      ...portalNodeData,
+      portal: open
+    })
+
+    portalNode.currentPortalFile = open ? portalNodeData.file : undefined
+
+    // Update whole canvas data
+    canvas.setData(canvas.getData())
   }
 
   private removePortalCanvasData(_canvas: Canvas, data: CanvasData) {
@@ -481,6 +443,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     return addedData
   }
 
+  // Helper functions
   private getPortalSize(sourceBBox: BBox) {
     const sourceSize = {
       width: sourceBBox.maxX - sourceBBox.minX,
@@ -498,16 +461,27 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     return targetSize
   }
 
-  // Helper functions
-  private isPortalElement(canvasElement: CanvasElement | CanvasNodeData | CanvasEdgeData): boolean {
-    return this.getNestedIds(canvasElement.id).length > 1
+  private getContainingNodes(canvas: Canvas, portalNode: CanvasNode, directChildren = true): CanvasNode[] {
+    return Array.from(canvas.nodes.values())
+      .filter(node => this.isChildOfPortal(portalNode.getData() as CanvasFileNodeData, node.getData(), directChildren))
+  }
+
+  private getContainingEdges(canvas: Canvas, portalNode: CanvasNode, directChildren = true): CanvasEdge[] {
+    return Array.from(canvas.edges.values())
+      .filter(edge => this.isChildOfPortal(portalNode.getData() as CanvasFileNodeData, edge.getData(), directChildren))
   }
 
   private getNestedIds(id: string): string[] {
     return id.split("-")
   }
 
-  private isChildOfPortal(portal: CanvasFileNodeData, canvasElement: CanvasElement | CanvasNodeData | CanvasEdgeData): boolean {
-    return canvasElement.id !== portal.id && canvasElement.id.startsWith(portal.id)
+  private isPortalElement(canvasElement: CanvasElement | CanvasNodeData | CanvasEdgeData): boolean {
+    return this.getNestedIds(canvasElement.id).length > 1
+  }
+
+  private isChildOfPortal(portal: CanvasFileNodeData, canvasElement: CanvasElement | CanvasNodeData | CanvasEdgeData, directChild = true): boolean {
+    return canvasElement.id !== portal.id && // Not the portal itself
+      canvasElement.id.startsWith(portal.id) && // Is a child of the portal
+      (!directChild || this.getNestedIds(canvasElement.id).length === this.getNestedIds(portal.id).length + 1) // It's a direct child
   }
 }
