@@ -43,25 +43,9 @@ export default class DrawCanvasExtension extends CanvasExtension {
     const layer = new Konva.Layer()
     canvas.stage.add(layer)
 
-    canvas.drawings = [{
-      type: 'ink',
-      points: [0, 0, 100, 100, 200, 50],
-      width: 5,
-      color: 'black',
-    }] // TODO: Debugging
-
     for (const drawing of canvas.drawings ?? []) {
       if (drawing.type !== 'ink') return
-
-      const path = new Konva.Line({
-        points: drawing.points,
-        stroke: drawing.color,
-        strokeWidth: drawing.width,
-        lineCap: 'round',
-        lineJoin: 'round',
-        tension: 0.25,
-      })
-
+      const path = this.createPath(canvas, drawing.points, drawing.color, drawing.width)
       layer.add(path)
     }
 
@@ -84,16 +68,10 @@ export default class DrawCanvasExtension extends CanvasExtension {
   private onMouseDown(canvas: Canvas, event: MouseEvent) {
     if (!canvas.stage) return
 
-    canvas.currentPath = new Konva.Line({
-      points: [],
-      stroke: 'black',
-      strokeWidth: 5,
-      lineCap: 'round',
-      lineJoin: 'round',
-      tension: 0.25,
-    })
-
+    canvas.currentPath = this.createPath(canvas, [], 'black', 5)
     canvas.stage.getLayers().first()!.add(canvas.currentPath)
+
+    this.onMouseMove(canvas, event)
   }
 
   private onMouseMove(canvas: Canvas, event: MouseEvent) {
@@ -107,7 +85,7 @@ export default class DrawCanvasExtension extends CanvasExtension {
 
     // Min distance between points
     if (points.length > 1) {
-      const MIN_DISTANCE = 5
+      const minDistance = canvas.currentPath.strokeWidth()
 
       const lastX = points[points.length - 4]
       const lastY = points[points.length - 3]
@@ -115,7 +93,7 @@ export default class DrawCanvasExtension extends CanvasExtension {
       const currentX = points[points.length - 2]
       const currentY = points[points.length - 1]
 
-      if (Math.abs(currentX - lastX) < MIN_DISTANCE && Math.abs(currentY - lastY) < MIN_DISTANCE)
+      if (Math.abs(currentX - lastX) < minDistance && Math.abs(currentY - lastY) < minDistance)
         points.splice(points.length - 2, 2)
     }
 
@@ -141,5 +119,18 @@ export default class DrawCanvasExtension extends CanvasExtension {
   private onCanvasUnloaded(canvas: Canvas) {
     canvas.stage?.destroy()
     canvas.stageEl?.remove()
+  }
+
+  private createPath(canvas: Canvas, points: number[], color: string, width: number): Konva.Line {
+    const path = new Konva.Line({
+      points,
+      stroke: color,
+      strokeWidth: width,
+      lineCap: 'round',
+      lineJoin: 'round',
+      tension: 0.25,
+    })
+
+    return path
   }
 }
