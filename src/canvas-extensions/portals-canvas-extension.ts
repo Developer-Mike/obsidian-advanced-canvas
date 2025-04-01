@@ -270,7 +270,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
   }
 
   // Add all edges and nodes from portals
-  private async onSetData(canvas: Canvas, dataRef: CanvasData): Promise<CanvasData> {
+  private async onSetData(canvas: Canvas, dataRef: CanvasData): Promise<CanvasData> { /*
     // Deep copy data - If another file gets opened in the same view, the data would get overwritten
     const data = JSON.parse(JSON.stringify(dataRef)) as CanvasData
 
@@ -432,7 +432,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     }
 
     return addedData
-  }
+  */ }
 
   // Helper functions
   private getPortalSize(sourceBBox: BBox) {
