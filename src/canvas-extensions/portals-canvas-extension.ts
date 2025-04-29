@@ -299,57 +299,15 @@ export default class PortalsCanvasExtension extends CanvasExtension {
       data.edges.push(...newData.edges)
     }
 
-    // Add cross-portal edges
-    /* for (const originNodeData of data.nodes) {
-      if (originNodeData.edgesToNodeFromPortal === undefined) continue
+    // Add interdimensional  // TODO: Only loop through open portals (can be done because of tryOpenPortal)
+    for (const nodeData of data.nodes) {
+      if (nodeData.type !== 'file' || !(nodeData as CanvasFileNodeData).isPortalLoaded) continue // Only loaded portals
 
-      for (const [relativePortalId, edges] of Object.entries(originNodeData.edgesToNodeFromPortal)) {
-        const idPrefix = originNodeData.portalId ? `${originNodeData.portalId}-` : ''
+      const interdimensionalEdges = (nodeData as CanvasFileNodeData).interdimensionalEdges
+      if (!interdimensionalEdges) continue // No interdimensional edges
 
-        const portalId = `${idPrefix}${relativePortalId}`
-        const targetPortalData = data.nodes.find(nodeData => nodeData.id === portalId)
-
-        // If target portal is deleted, remove edges
-        if (!targetPortalData) {
-          delete originNodeData.edgesToNodeFromPortal![portalId]
-          continue
-        }
-
-        // If portal is open, add edges
-        if (targetPortalData.portal) {
-          // Push edges with updated from and to ids
-          data.edges.push(...edges.map(edge => ({
-            ...edge,
-            portalId: originNodeData.portalId,
-            fromNode: `${idPrefix}${edge.fromNode}`,
-            toNode: `${idPrefix}${edge.toNode}`
-          })))
-
-          delete originNodeData.edgesToNodeFromPortal![portalId]
-        } else if (this.plugin.settings.getSetting('showEdgesIntoDisabledPortals')) {
-          // If portal is closed, add alternative edges directly to portal
-          // But don't delete the edges
-
-          data.edges.push(...edges.map(edge => {
-            // Which end is from portal?
-            const fromNodeId = `${idPrefix}${edge.fromNode}`
-            const fromNode = data.nodes.find(nodeData => nodeData.id === fromNodeId)
-            const toNodeId = `${idPrefix}${edge.toNode}`
-
-            return {
-              ...edge,
-              fromNode: fromNode ? fromNodeId : portalId,
-              toNode: fromNode ? portalId : toNodeId,
-              portalId: portalId // Mark it as temporary
-            }
-          }))
-        }
-      }
-
-      // If no more edges, delete the property
-      if (Object.keys(originNodeData.edgesToNodeFromPortal!).length === 0)
-        delete originNodeData.edgesToNodeFromPortal
-    } */
+      for (const edge of interdimensionalEdges) data.edges.push(edge)
+    }
 
     return data
   }
