@@ -1,4 +1,4 @@
-import { CanvasData, CanvasEdgeData, CanvasMetadataNodeData } from "src/@types/AdvancedJsonCanvas"
+import { CanvasData, CanvasEdgeData } from "src/@types/AdvancedJsonCanvas"
 
 export const CURRENT_SPEC_VERSION = '1.0-1.0'
 
@@ -63,32 +63,22 @@ export default class MigrationHelper {
       }
 
       // Add metadata node
-      canvas.nodes.push({
-        id: 'metadata',
-        type: 'text',
-        text: '',
-        x: 0, y: 0,
-        width: 0, height: 0,
-        metadata: {
-          version: TARGET_SPEC_VERSION,
-          frontmatter: {},
-          startNode: startNode
-        }
-      } as CanvasMetadataNodeData)
+      canvas.metadata ??= {
+        version: TARGET_SPEC_VERSION, 
+        frontmatter: {},
+        startNode: startNode
+      }
 
       return { version: TARGET_SPEC_VERSION, canvas: canvas }
     }
   }
   
   static needsMigration(canvas: CanvasData): boolean {
-    const metadataNode = canvas.nodes.find(node => node.id === 'metadata') as CanvasMetadataNodeData | undefined
-    const canvasVersion = metadataNode?.metadata?.version // Save version before adding default metadata
-    return !metadataNode || canvasVersion !== CURRENT_SPEC_VERSION
+    return canvas.metadata?.version !== CURRENT_SPEC_VERSION
   }
 
   static migrate(canvas: CanvasData): CanvasData {
-    let metadataNode = canvas.nodes.find(node => node.id === 'metadata') as CanvasMetadataNodeData | undefined
-    let version = metadataNode?.metadata?.version ?? 'undefined'
+    let version = canvas.metadata?.version ?? 'undefined'
 
     // Already migrated
     if (version === CURRENT_SPEC_VERSION) return canvas
@@ -105,12 +95,12 @@ export default class MigrationHelper {
       const { version: newVersion, canvas: migratedCanvas } = migrationFunction(canvas)
 
       // Update version and canvas
-      version = newVersion
+      version = newVersion as any
       canvas = migratedCanvas
 
       // Update metadata node
-      if (!metadataNode) metadataNode = canvas.nodes.find(node => node.id === 'metadata') as CanvasMetadataNodeData | undefined
-      if (metadataNode) metadataNode.metadata.version = version as any
+      if (!canvas.metadata) canvas.metadata = { version: version, frontmatter: {} }
+      else canvas.metadata.version = version
     }
 
     return canvas

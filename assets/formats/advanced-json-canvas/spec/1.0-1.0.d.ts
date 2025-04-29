@@ -1,6 +1,7 @@
 export type CanvasColor = `${number}` | `#${string}`
 
 export interface CanvasData {
+  metadata: CanvasMetadata
   nodes: AnyCanvasNodeData[]
   edges: CanvasEdgeData[]
 }
@@ -28,16 +29,11 @@ export interface CanvasNodeData {
   styleAttributes?: { [key: string]: string | null } // AdvancedJsonCanvas
 }
 
-export type AnyCanvasNodeData = CanvasNodeData | CanvasTextNodeData | CanvasMetadataNodeData | CanvasFileNodeData | CanvasLinkNodeData | CanvasGroupNodeData
+export type AnyCanvasNodeData = CanvasNodeData | CanvasTextNodeData | CanvasFileNodeData | CanvasLinkNodeData | CanvasGroupNodeData
 
 export interface CanvasTextNodeData extends CanvasNodeData {
   type: 'text'
   text: string
-}
-
-export interface CanvasMetadataNodeData extends CanvasTextNodeData { // AdvancedJsonCanvas
-  id: 'metadata'
-  metadata: CanvasMetadata
 }
 
 export type Subpath = `#${string}`
