@@ -1,5 +1,5 @@
-import { TFile } from "obsidian"
-import { BBox, Canvas, CanvasEdge, CanvasElement, CanvasNode, CanvasView } from "src/@types/Canvas"
+import { Notice, TFile } from "obsidian"
+import { BBox, Canvas, CanvasEdge, CanvasEdgeEnd, CanvasElement, CanvasNode, CanvasView } from "src/@types/Canvas"
 import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "./canvas-extension"
 import { CanvasData, CanvasEdgeData, CanvasFileNodeData, CanvasNodeData } from "src/@types/AdvancedJsonCanvas"
@@ -47,6 +47,16 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
+      'advanced-canvas:edge-connection-try-dragging:before',
+      (canvas: Canvas, edge: CanvasEdge, event: PointerEvent, cancelRef: { value: boolean }) => this.onEdgeConnectionTryDraggingBefore(canvas, edge, event, cancelRef)
+    ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      'advanced-canvas:edge-connection-dragging:after',
+      (canvas: Canvas, edge: CanvasEdge, event: PointerEvent, newEdge: boolean, side: 'from' | 'to', previousEnds?: { from: CanvasEdgeEnd, to: CanvasEdgeEnd }) => this.onEdgeConnectionDraggingAfter(canvas, edge, event, newEdge, side, previousEnds)
+    ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
       'advanced-canvas:selection-changed',
       (canvas: Canvas, oldSelection: Set<CanvasElement>, updateSelection: (update: () => void) => void) => this.onSelectionChanged(canvas, oldSelection, updateSelection)
     ))
@@ -63,7 +73,6 @@ export default class PortalsCanvasExtension extends CanvasExtension {
           .then((newData: CanvasData) => {
             // Skip if the data didn't change
             if (newData.nodes.length === data.nodes.length && newData.edges.length === data.edges.length) return
-
             setData(newData)
           })
       }
@@ -87,7 +96,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
 
   private onContainingNodesRequested(_canvas: Canvas, _bbox: BBox, nodes: CanvasNode[]) {
     // Remove nodes from portals from the list
-    const filteredNodes = nodes.filter(node => !this.isPortalElement(node))
+    const filteredNodes = nodes.filter(node => !PortalsCanvasExtension.isPortalElement(node))
     nodes.splice(0, nodes.length, ...filteredNodes)
   }
   
@@ -95,7 +104,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     // Unselect nodes from portals
     updateSelection(() => {
       const updatedSelection = Array.from(canvas.selection)
-        .filter(canvasElement => !this.isPortalElement(canvasElement))
+        .filter(canvasElement => !PortalsCanvasExtension.isPortalElement(canvasElement))
       canvas.selection = new Set(updatedSelection)
     })
   }
@@ -129,7 +138,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
 
   private onNodeMoved(canvas: Canvas, portalNode: CanvasNode) {
     const portalNodeData = portalNode.getData() as CanvasFileNodeData
-    if (portalNodeData.type !== 'file' || !portalNodeData.portal) return
+    if (portalNodeData.type !== 'file' || !portalNodeData.isPortalLoaded) return
 
     const nestedNodes = this.getContainingNodes(canvas, portalNode)
     const containingNodesBBox = CanvasHelper.getBBox(nestedNodes)
@@ -151,26 +160,18 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     }
   }
 
-  private onNodeResized(canvas: Canvas, portalNode: CanvasNode) {
+  private onNodeResized(_canvas: Canvas, portalNode: CanvasNode) {
     const portalNodeData = portalNode.getData() as CanvasFileNodeData
-    if (portalNodeData.type !== 'file' || !portalNodeData.portal) return
-
-    const nestedNodes = this.getContainingNodes(canvas, portalNode, false)
-    const containingNodesBBox = CanvasHelper.getBBox(nestedNodes)
-    const targetSize = this.getPortalSize(containingNodesBBox)
+    if (portalNodeData.type !== 'file' || !portalNodeData.isPortalLoaded) return
 
     // Resize portal
-    if (portalNodeData.width !== targetSize.width || portalNodeData.height !== targetSize.height) {
-      portalNode.setData({
-        ...portalNodeData,
-        x: portalNode.prevX && portalNode.prevX !== portalNodeData.x ? portalNode.prevX : portalNodeData.x,
-        y: portalNode.prevY && portalNode.prevY !== portalNodeData.y ? portalNode.prevY : portalNodeData.y,
-        width: targetSize.width,
-        height: targetSize.height
-      })
-
-      return
-    }
+    portalNode.setData({
+      ...portalNodeData,
+      x: portalNode.prevX ? portalNode.prevX : portalNodeData.x,
+      y: portalNode.prevY ? portalNode.prevY : portalNodeData.y,
+      width: portalNode.prevWidth ? portalNode.prevWidth : portalNodeData.width,
+      height: portalNode.prevHeight ? portalNode.prevHeight : portalNodeData.height
+    })
   }
 
   private onNodeRemoved(canvas: Canvas, portalNode: CanvasNode) {
@@ -182,6 +183,22 @@ export default class PortalsCanvasExtension extends CanvasExtension {
 
     for (const edge of this.getContainingEdges(canvas, portalNode, false))
       canvas.removeEdge(edge)
+  }
+
+  private onEdgeConnectionTryDraggingBefore(_canvas: Canvas, edge: CanvasEdge, _event: PointerEvent, cancelRef: { value: boolean }) {
+    // If not from a portal, return
+    if (!PortalsCanvasExtension.isPortalElement(edge)) return
+
+    cancelRef.value = true // Cancel dragging
+    new Notice('Updating edges from portals is not supported yet.')
+  }
+
+  private onEdgeConnectionDraggingAfter(canvas: Canvas, edge: CanvasEdge, _event: PointerEvent, _newEdge: boolean, _side: 'from' | 'to', _previousEnds?: { from: CanvasEdgeEnd, to: CanvasEdgeEnd }) {
+    if (PortalsCanvasExtension.isPortalElement(edge)) return // If edge is from a portal, return
+    if (!PortalsCanvasExtension.isPortalElement(edge.from.node) || !PortalsCanvasExtension.isPortalElement(edge.to.node)) return // Do not cancel if at least one end is not from a portal
+
+    canvas.removeEdge(edge)
+    new Notice('Creating edges with both ends in portals are not supported yet.')
   }
 
   private onPopupMenu(canvas: Canvas) {
@@ -237,11 +254,12 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     canvas.setData(canvas.getData())
   }
 
-  //////
-
   // Remove all edges and nodes from portals
   private onGetData(_canvas: Canvas, data: CanvasData) {
-    data.nodes = data.nodes.filter(nodeData => this.getNestedIds(nodeData.id).length === 1)
+    data.nodes = data.nodes.filter(nodeData => PortalsCanvasExtension.getNestedIds(nodeData.id).length === 1)
+
+    // Remove intermediate isPortalLoaded property from nodes
+    for (const nodeData of data.nodes) delete (nodeData as CanvasFileNodeData).isPortalLoaded
 
     const portalsIdMap = new Map(data.nodes
       .filter((nodeData: CanvasFileNodeData) => nodeData.portal)
@@ -249,10 +267,10 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     ) as Map<string, CanvasFileNodeData>
 
     data.edges = data.edges.filter(edgeData => {
-      if (this.getNestedIds(edgeData.fromNode).length > 1) return false // Came from portal
+      if (PortalsCanvasExtension.getNestedIds(edgeData.fromNode).length > 1) return false // Came from portal
 
-      const isFromNodeFromPortal = this.getNestedIds(edgeData.fromNode).length > 1
-      const isToNodeFromPortal = this.getNestedIds(edgeData.toNode).length > 1
+      const isFromNodeFromPortal = PortalsCanvasExtension.getNestedIds(edgeData.fromNode).length > 1
+      const isToNodeFromPortal = PortalsCanvasExtension.getNestedIds(edgeData.toNode).length > 1
 
       if (!isFromNodeFromPortal && !isToNodeFromPortal) return true // Normal edge
       if (isFromNodeFromPortal && isToNodeFromPortal) return false // Both from portal NOT SUPPORTED YET
@@ -270,20 +288,19 @@ export default class PortalsCanvasExtension extends CanvasExtension {
   }
 
   // Add all edges and nodes from portals
-  private async onSetData(canvas: Canvas, dataRef: CanvasData): Promise<CanvasData> { /*
+  private async onSetData(canvas: Canvas, dataRef: CanvasData): Promise<CanvasData> {
     // Deep copy data - If another file gets opened in the same view, the data would get overwritten
     const data = JSON.parse(JSON.stringify(dataRef)) as CanvasData
 
     // Open portals
-    this.nestedPortals = {}
-    const addedData = await Promise.all(data.nodes.map(nodeData => this.tryOpenPortal(canvas, nodeData)))
+    const addedData = await Promise.all(data.nodes.map(nodeData => this.tryOpenPortal(canvas, nodeData as CanvasFileNodeData)))
     for (const newData of addedData) {
       data.nodes.push(...newData.nodes)
       data.edges.push(...newData.edges)
     }
 
     // Add cross-portal edges
-    for (const originNodeData of data.nodes) {
+    /* for (const originNodeData of data.nodes) {
       if (originNodeData.edgesToNodeFromPortal === undefined) continue
 
       for (const [relativePortalId, edges] of Object.entries(originNodeData.edgesToNodeFromPortal)) {
@@ -332,56 +349,35 @@ export default class PortalsCanvasExtension extends CanvasExtension {
       // If no more edges, delete the property
       if (Object.keys(originNodeData.edgesToNodeFromPortal!).length === 0)
         delete originNodeData.edgesToNodeFromPortal
-    }
+    } */
 
     return data
   }
 
-  private nestedPortals: { [portalId: string]: string[] } = {}
-  private async tryOpenPortal(canvas: Canvas, portalNodeData: CanvasNodeData, parentPortalId?: string): Promise<CanvasData> {
+  private async tryOpenPortal(canvas: Canvas, portalNodeData: CanvasFileNodeData, nestedPortalFiles: Set<string> = new Set()): Promise<CanvasData> {
     const addedData: CanvasData = { nodes: [], edges: [] }
     if (portalNodeData.type !== 'file' || !portalNodeData.portal) return addedData
 
-    // Update portal file
-    portalNodeData.portal = portalNodeData.file
-
     // Fix direct recursion
-    if (portalNodeData.portal === canvas.view.file.path) {
-      portalNodeData.portal = undefined
-      return addedData
-    }
+    if (portalNodeData.file === canvas.view.file.path) return addedData
 
     // Fix indirect recursion
-    if (parentPortalId) {
-      if (this.nestedPortals[parentPortalId]?.includes(portalNodeData.portal!)) {
-        portalNodeData.portal = undefined
-        return addedData
-      }
-      
-      this.nestedPortals[parentPortalId] = this.nestedPortals[parentPortalId] ?? []
-      this.nestedPortals[parentPortalId].push(portalNodeData.portal!)
-    }
+    if (nestedPortalFiles.has(portalNodeData.file)) return addedData
+    nestedPortalFiles.add(portalNodeData.file)
 
-    const portalFile = this.plugin.app.vault.getAbstractFileByPath(portalNodeData.file!)
-    if (!(portalFile instanceof TFile) || portalFile.extension !== 'canvas') {
-      portalNodeData.portal = undefined
-      return addedData
-    }
+    // Check if portal file exists
+    const portalFile = this.plugin.app.vault.getAbstractFileByPath(portalNodeData.file)
+    if (!(portalFile instanceof TFile) || portalFile.extension !== 'canvas') return addedData
 
+    // Read portal file data
     const portalFileDataString = await this.plugin.app.vault.cachedRead(portalFile)
     if (portalFileDataString === '') return addedData
 
     const portalFileData = JSON.parse(portalFileDataString) as CanvasData
-    if (!portalFileData) {
-      portalNodeData.portal = undefined
-      return addedData
-    }
+    if (!portalFileData) return addedData
 
-    // Add portal nodes and edges id map
-    portalNodeData.portalIdMaps = {
-      nodeIdMap: {},
-      edgeIdMap: {}
-    }
+    // Set portal to loaded
+    portalNodeData.isPortalLoaded = true
 
     // Calculate nested node offset
     const sourceMinCoordinates = CanvasHelper.getBBox(portalFileData.nodes)
@@ -392,47 +388,43 @@ export default class PortalsCanvasExtension extends CanvasExtension {
 
     // Add nodes from portal
     for (const nodeDataFromPortal of portalFileData.nodes) {
-      const refNodeId = `${portalNodeData.id}-${nodeDataFromPortal.id}`
-      portalNodeData.portalIdMaps.nodeIdMap[refNodeId] = nodeDataFromPortal.id
-      
+      const newNodeId = `${portalNodeData.id}-${nodeDataFromPortal.id}`
       const addedNode = {
         ...nodeDataFromPortal,
-        id: refNodeId,
+        id: newNodeId,
         x: nodeDataFromPortal.x + portalOffset.x,
-        y: nodeDataFromPortal.y + portalOffset.y,
-        portalId: portalNodeData.id
+        y: nodeDataFromPortal.y + portalOffset.y
       }
-
       addedData.nodes.push(addedNode)
 
-      const nestedNodes = await this.tryOpenPortal(canvas, addedNode, parentPortalId ?? portalNodeData.id)
+      // Try to open nested portals
+      const nestedNodes = await this.tryOpenPortal(canvas, addedNode as CanvasFileNodeData, nestedPortalFiles)
       addedData.nodes.push(...nestedNodes.nodes)
       addedData.edges.push(...nestedNodes.edges)
     }
 
     // Add edges from portal
     for (const edgeDataFromPortal of portalFileData.edges) {
-      const refEdgeId = `${portalNodeData.id}-${edgeDataFromPortal.id}`
-      portalNodeData.portalIdMaps.edgeIdMap[refEdgeId] = edgeDataFromPortal.id
+      const newEdgeId = `${portalNodeData.id}-${edgeDataFromPortal.id}`
 
-      const fromRefNode = Object.entries(portalNodeData.portalIdMaps.nodeIdMap)
-        .find(([_refNodeId, nodeId]) => nodeId === edgeDataFromPortal.fromNode)?.[0]
-      const toRefNode = Object.entries(portalNodeData.portalIdMaps.nodeIdMap)
-        .find(([_refNodeId, nodeId]) => nodeId === edgeDataFromPortal.toNode)?.[0]
-
-      if (!fromRefNode || !toRefNode) continue
+      const fromNodeId = `${portalNodeData.id}-${edgeDataFromPortal.fromNode}`
+      const toNodeId = `${portalNodeData.id}-${edgeDataFromPortal.toNode}`
 
       addedData.edges.push({
         ...edgeDataFromPortal,
-        id: refEdgeId,
-        fromNode: fromRefNode,
-        toNode: toRefNode,
-        portalId: portalNodeData.id
+        id: newEdgeId,
+        fromNode: fromNodeId,
+        toNode: toNodeId
       })
     }
 
+    // Resize portal node
+    const targetSize = this.getPortalSize(CanvasHelper.getBBox(addedData.nodes))
+    portalNodeData.width = targetSize.width
+    portalNodeData.height = targetSize.height
+
     return addedData
-  */ }
+  }
 
   // Helper functions
   private getPortalSize(sourceBBox: BBox) {
@@ -463,22 +455,22 @@ export default class PortalsCanvasExtension extends CanvasExtension {
   }
 
   private getParentPortalId(elementId: string): string | undefined {
-    const nestedIds = this.getNestedIds(elementId)
+    const nestedIds = PortalsCanvasExtension.getNestedIds(elementId)
     if (nestedIds.length < 2) return undefined
     return nestedIds.slice(0, -1).join("-")
   }
 
-  private getNestedIds(id: string): string[] {
+  static getNestedIds(id: string): string[] {
     return id.split("-")
   }
 
-  private isPortalElement(canvasElement: CanvasElement | CanvasNodeData | CanvasEdgeData): boolean {
+  static isPortalElement(canvasElement: CanvasElement | CanvasNodeData | CanvasEdgeData): boolean {
     return this.getNestedIds(canvasElement.id).length > 1
   }
 
   private isChildOfPortal(portal: CanvasFileNodeData, canvasElement: CanvasElement | CanvasNodeData | CanvasEdgeData, directChild = true): boolean {
     return canvasElement.id !== portal.id && // Not the portal itself
       canvasElement.id.startsWith(portal.id) && // Is a child of the portal
-      (!directChild || this.getNestedIds(canvasElement.id).length === this.getNestedIds(portal.id).length + 1) // It's a direct child
+      (!directChild || PortalsCanvasExtension.getNestedIds(canvasElement.id).length === PortalsCanvasExtension.getNestedIds(portal.id).length + 1) // It's a direct child
   }
 }

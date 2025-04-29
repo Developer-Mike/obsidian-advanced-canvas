@@ -404,6 +404,13 @@ export default class CanvasPatcher extends Patcher {
         return result
       }),
       onConnectionPointerdown: Patcher.OverrideExisting(next => function (e: PointerEvent): void {
+        const cancelRef = { value: false }
+        that.plugin.app.workspace.trigger('advanced-canvas:edge-connection-try-dragging:before', this.canvas, this, e, cancelRef)
+        if (cancelRef.value) return
+
+        // Save the previous ends
+        const previousEnds = { from: this.from, to: this.to }
+
         const result = next.call(this, e)
 
         // a = i.posFromEvt(e)
@@ -415,9 +422,9 @@ export default class CanvasPatcher extends Patcher {
         const toPos = BBoxHelper.getCenterOfBBoxSide(this.to.node.getBBox(), this.to.side)
         const draggingSide = Math.hypot(eventPos.x - fromPos.x, eventPos.y - fromPos.y) > Math.hypot(eventPos.x - toPos.x, eventPos.y - toPos.y) ? "to" : "from"
 
-        that.plugin.app.workspace.trigger('advanced-canvas:edge-connection-dragging:before', this.canvas, this, e, false, draggingSide)
+        that.plugin.app.workspace.trigger('advanced-canvas:edge-connection-dragging:before', this.canvas, this, e, false, draggingSide, previousEnds)
         document.addEventListener('pointerup', (e: PointerEvent) => {
-          that.plugin.app.workspace.trigger('advanced-canvas:edge-connection-dragging:after', this.canvas, this, e, false, draggingSide)
+          that.plugin.app.workspace.trigger('advanced-canvas:edge-connection-dragging:after', this.canvas, this, e, false, draggingSide, previousEnds)
         }, { once: true })
 
         return result

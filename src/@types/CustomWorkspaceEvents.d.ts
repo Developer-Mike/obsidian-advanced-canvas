@@ -1,5 +1,5 @@
 import { Menu } from "obsidian"
-import { BBox, Canvas, CanvasEdge, CanvasElement, CanvasNode, Position, SelectionData } from "./Canvas"
+import { BBox, Canvas, CanvasEdge, CanvasEdgeEnd, CanvasElement, CanvasNode, Position, SelectionData } from "./Canvas"
 import { CanvasData } from "./AdvancedJsonCanvas"
 
 export interface EventRef {
@@ -47,10 +47,12 @@ export interface CustomWorkspaceEvents {
   'advanced-canvas:edge-changed': (canvas: Canvas, edge: CanvasEdge) => void
   /** Fired when the text content of a node gets changed (While typing) */
   'advanced-canvas:node-text-content-changed': (canvas: Canvas, node: CanvasNode, viewUpdate: any) => void
+  /** Fired before an existing edge tries to get dragged */
+  'advanced-canvas:edge-connection-try-dragging:before': (canvas: Canvas, edge: CanvasEdge, event: PointerEvent, cancelRef: { value: boolean }) => void
   /** Fired before an edge gets dragged */
-  'advanced-canvas:edge-connection-dragging:before': (canvas: Canvas, edge: CanvasEdge, event: PointerEvent, newEdge: boolean, side: 'from' | 'to') => void
+  'advanced-canvas:edge-connection-dragging:before': (canvas: Canvas, edge: CanvasEdge, event: PointerEvent, newEdge: boolean, side: 'from' | 'to', previousEnds?: { from: CanvasEdgeEnd, to: CanvasEdgeEnd }) => void
   /** Fired after an edge gets dragged */
-  'advanced-canvas:edge-connection-dragging:after': (canvas: Canvas, edge: CanvasEdge, event: PointerEvent, newEdge: boolean, side: 'from' | 'to') => void
+  'advanced-canvas:edge-connection-dragging:after': (canvas: Canvas, edge: CanvasEdge, event: PointerEvent, newEdge: boolean, side: 'from' | 'to', previousEnds?: { from: CanvasEdgeEnd, to: CanvasEdgeEnd }) => void
   /** Fired when a node gets deleted */
   'advanced-canvas:node-removed': (canvas: Canvas, node: CanvasNode) => void
   /** Fired when an edge gets deleted */

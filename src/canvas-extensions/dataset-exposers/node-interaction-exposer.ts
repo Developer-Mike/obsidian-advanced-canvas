@@ -1,6 +1,7 @@
 import { Canvas, CanvasNode } from "src/@types/Canvas"
 import CanvasExtension from "../canvas-extension"
 import { getExposedNodeData } from "./node-exposer"
+import PortalsCanvasExtension from "../portals-canvas-extension"
 
 export const TARGET_NODE_DATASET_PREFIX = "target"
 
@@ -29,6 +30,10 @@ export default class NodeInteractionExposerExtension extends CanvasExtension {
             else interactionEl.dataset[modifiedKey] = value
           }
         }
+
+        // Custom treatment for portal nodes
+        if (PortalsCanvasExtension.isPortalElement(node)) interactionEl.dataset.isFromPortal = 'true'
+        else delete interactionEl.dataset.isFromPortal
       }
     ))
   }

@@ -132,24 +132,22 @@ export interface CanvasNode extends CanvasElement {
   }
 }
 
+export interface CanvasEdgeEnd {
+  node: CanvasNode
+  side: Side
+  end: EndType
+}
+
 export interface CanvasEdge extends CanvasElement {
   label: string
 
-  from: {
-    node: CanvasNode
-    side: Side
-    end: EndType
-  }
+  from: CanvasEdgeEnd
   fromLineEnd: {
     el: HTMLElement
     type: 'arrow'
   }
 
-  to: {
-    node: CanvasNode
-    side: Side
-    end: EndType
-  }
+  to: CanvasEdgeEnd
   toLineEnd: {
     el: HTMLElement
     type: 'arrow'

@@ -1,4 +1,4 @@
-.canvas-node[data-portal-to-file] {
+.canvas-node[data-is-portal-loaded="true"] {
   pointer-events: all;
 
   &:not(.is-focused) {
@@ -19,7 +19,7 @@
   }
 }
 
-.canvas-node-interaction-layer[data-target-portal-id] {
+.canvas-node-interaction-layer[data-is-from-portal="true"] {
   .canvas-node-resizer {
     pointer-events: none;
     cursor: inherit;
