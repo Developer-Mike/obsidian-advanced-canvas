@@ -398,7 +398,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
 
     if (!Number.isFinite(targetSize.width)) targetSize.width = MIN_OPEN_PORTAL_SIZE.width
     if (!Number.isFinite(targetSize.height)) targetSize.height = MIN_OPEN_PORTAL_SIZE.height
-
+    
     return targetSize
   }
 
