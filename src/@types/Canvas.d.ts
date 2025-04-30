@@ -1,4 +1,4 @@
-import { ItemView, TFile, WorkspaceLeaf } from "obsidian"
+import { App, ItemView, TFile, WorkspaceLeaf } from "obsidian"
 import { AnyCanvasNodeData, CanvasData, CanvasEdgeData, CanvasMetadata, CanvasNodeData, EndType, Side } from "./AdvancedJsonCanvas"
 
 export interface Size {
@@ -203,13 +203,14 @@ export interface CanvasPopupMenu {
 }
 
 export interface Canvas {
+  app: App
+
   view: CanvasView
   config: CanvasConfig
   options: CanvasOptions
 
   /** @deprecated Only edit it manually if you know what you're doing. */
   metadata: CanvasMetadata
-  metadataNode: CanvasNode
   getMetadata(key: keyof CanvasMetadata): any
   setMetadata(key: keyof CanvasMetadata, value: any): void
 
