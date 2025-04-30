@@ -13,7 +13,7 @@ export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      'advanced-canvas:canvas-changed',
+      'advanced-canvas:popup-menu-created',
       (canvas: Canvas) => this.onPopupMenuCreated(canvas)
     ))
 
