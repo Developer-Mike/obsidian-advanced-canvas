@@ -23,19 +23,24 @@ export interface CanvasOptions {
   snapToGrid: boolean
 }
 
+export interface CanvasElementsData {
+  nodes: CanvasNodeData[]
+  edges: CanvasEdgeData[]
+}
+
 export interface CanvasHistory {
-  data: CanvasData[]
+  data: CanvasElementsData[]
   current: number
   max: number
 
-  applyHistory: (data: CanvasData) => void
+  applyHistory: (data: CanvasElementsData) => void
   canUndo: () => boolean
-  undo: () => CanvasData | null
+  undo: () => CanvasElementsData | null
   canRedo: () => boolean
-  redo: () => CanvasData | null
+  redo: () => CanvasElementsData | null
 }
 
-export interface SelectionData extends CanvasData {
+export interface SelectionData extends CanvasElementsData {
   center: Position
 }
 
@@ -222,7 +227,7 @@ export interface Canvas {
   getData(): CanvasData
   setData(data: CanvasData): void
   /** Basically setData (if clearCanvas == true), but without modifying the history */
-  importData(data: CanvasData, clearCanvas?: boolean, /* custom */ silent?: boolean): void
+  importData(data: CanvasElementsData, clearCanvas?: boolean, /* custom */ silent?: boolean): void
   clear(): void
 
   nodes: Map<string, CanvasNode>
@@ -303,7 +308,7 @@ export interface Canvas {
   getViewportNodes(): CanvasNode[]
 
   history: CanvasHistory
-  pushHistory(data: CanvasData): void
+  pushHistory(data: CanvasElementsData): void
   undo(): void
   redo(): void
 

@@ -1,5 +1,5 @@
 import { Notice, TFile } from "obsidian"
-import { BBox, Canvas, CanvasEdge, CanvasEdgeEnd, CanvasElement, CanvasNode, CanvasView } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasEdge, CanvasEdgeEnd, CanvasElement, CanvasElementsData, CanvasNode, CanvasView } from "src/@types/Canvas"
 import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "./canvas-extension"
 import { CanvasData, CanvasEdgeData, CanvasFileNodeData, CanvasNodeData } from "src/@types/AdvancedJsonCanvas"
@@ -312,8 +312,8 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     return data
   }
 
-  private async tryOpenPortal(canvas: Canvas, portalNodeData: CanvasFileNodeData, nestedPortalFiles: Set<string> = new Set()): Promise<CanvasData> {
-    const addedData: CanvasData = { nodes: [], edges: [] }
+  private async tryOpenPortal(canvas: Canvas, portalNodeData: CanvasFileNodeData, nestedPortalFiles: Set<string> = new Set()): Promise<CanvasElementsData> {
+    const addedData: CanvasElementsData = { nodes: [], edges: [] }
     if (portalNodeData.type !== 'file' || !portalNodeData.portal) return addedData
 
     // Fix direct recursion
