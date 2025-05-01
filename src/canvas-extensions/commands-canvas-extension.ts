@@ -125,6 +125,31 @@ export default class CommandsCanvasExtension extends CanvasExtension {
         (canvas: Canvas) => this.flipSelection(canvas, false)
       )
     })
+
+    this.plugin.addCommand({
+      id: 'swap-nodes',
+      name: 'Swap nodes',
+      checkCallback: CanvasHelper.canvasCommand(
+        this.plugin,
+        (canvas: Canvas) => !canvas.readonly && canvas.getSelectionData().nodes.length === 2,
+        (canvas: Canvas) => {
+          const selectedNodes = canvas.getSelectionData().nodes
+            .map(nodeData => canvas.nodes.get(nodeData.id))
+            .filter(node => node !== undefined) as CanvasNode[]
+          if (selectedNodes.length !== 2) return
+
+          const [nodeA, nodeB] = selectedNodes
+          const nodeAData = nodeA.getData()
+          const nodeBData = nodeB.getData()
+
+          nodeA.setData({ ...nodeAData, x: nodeBData.x, y: nodeBData.y, width: nodeBData.width, height: nodeBData.height })
+          nodeB.setData({ ...nodeBData, x: nodeAData.x, y: nodeAData.y, width: nodeAData.width, height: nodeAData.height })
+
+          canvas.pushHistory(canvas.getData())
+        }
+      )
+    })
+
   }
 
   private createTextNode(canvas: Canvas) {
