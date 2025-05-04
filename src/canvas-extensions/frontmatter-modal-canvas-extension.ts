@@ -3,7 +3,7 @@ import CanvasExtension from "./canvas-extension"
 import CanvasHelper from "src/utils/canvas-helper"
 
 export default class FrontmatterModalCanvasExtension extends CanvasExtension {
-  isEnabled() { return true }
+  isEnabled() { return 'canvasMetadataCompatibilityEnabled' as const }
 
   init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(

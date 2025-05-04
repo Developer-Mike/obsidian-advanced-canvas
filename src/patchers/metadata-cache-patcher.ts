@@ -51,7 +51,6 @@ export default class MetadataCachePatcher extends Patcher {
 
           frontmatterData.frontmatter = frontmatter
 
-          console.log('Frontmatter:', frontmatter)
           frontmatterData.frontmatterLinks = Object.entries(frontmatter).flatMap(([key, value]) => {
             const getLinks = (value: string[]) => value.map((v) => {
               if (!v.startsWith('[[') || !v.endsWith(']]')) return null // Frontmatter only supports wikilinks
@@ -145,6 +144,7 @@ export default class MetadataCachePatcher extends Patcher {
 
         // Trigger metadata cache change event
         this.trigger('changed', file, "", this.metadataCache[fileHash])
+        this.trigger('finished', file, "", this.metadataCache[fileHash], true) // TODO: How to fix this? (needed for metadataTypeManager)
 
         // Resolve links (This wouldn't get called in the original function too)
         this.resolveLinks(file.path, content)

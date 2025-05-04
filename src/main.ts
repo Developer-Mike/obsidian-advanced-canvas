@@ -15,6 +15,7 @@ import CanvasPatcher from './patchers/canvas-patcher'
 import MetadataCachePatcher from './patchers/metadata-cache-patcher'
 import BacklinksPatcher from './patchers/backlinks-patcher'
 import OutgoingLinksPatcher from './patchers/outgoing-links-patcher'
+import PropertiesPatcher from './patchers/properties-patcher'
 
 // Canvas Extensions
 import CanvasExtension from './canvas-extensions/canvas-extension'
@@ -52,7 +53,8 @@ const PATCHERS = [
   CanvasPatcher,
   MetadataCachePatcher,
   BacklinksPatcher,
-  OutgoingLinksPatcher
+  OutgoingLinksPatcher,
+  PropertiesPatcher
 ]
 
 const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
