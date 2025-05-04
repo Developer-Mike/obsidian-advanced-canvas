@@ -1,6 +1,7 @@
 import { Canvas } from "src/@types/Canvas"
 import CanvasExtension from "./canvas-extension"
 import CanvasHelper from "src/utils/canvas-helper"
+import { Notice } from "obsidian"
 
 export default class FrontmatterModalCanvasExtension extends CanvasExtension {
   isEnabled() { return 'canvasMetadataCompatibilityEnabled' as const }
@@ -25,7 +26,21 @@ export default class FrontmatterModalCanvasExtension extends CanvasExtension {
         icon: 'archive',
         label: 'Properties',
         callback: () => {
-          console.log('Properties button clicked')
+          const propertiesPlugin = this.plugin.app.internalPlugins.plugins['properties']
+          if (!propertiesPlugin?._loaded) {
+            new Notice('Core plugin "Properties" was not found or isn\'t enabled.')
+            return
+          }
+
+          // Get or create the properties view
+          let propertiesLeaf = this.plugin.app.workspace.getLeavesOfType('file-properties').first() ?? null
+          if (!propertiesLeaf) {
+            propertiesLeaf = this.plugin.app.workspace.getRightLeaf(false)
+            propertiesLeaf?.setViewState({ type: 'file-properties' })
+          }
+
+          // Reveal the properties view
+          if (propertiesLeaf) this.plugin.app.workspace.revealLeaf(propertiesLeaf)
         }
       })
     )
