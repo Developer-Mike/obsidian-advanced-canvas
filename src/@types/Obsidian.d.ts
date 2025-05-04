@@ -1,4 +1,4 @@
-import { CachedMetadata, EmbedCache, LinkCache, Pos } from "obsidian"
+import { CachedMetadata, EmbedCache, FrontMatterCache, FrontmatterLinkCache, LinkCache, Pos, TagCache } from "obsidian"
 import { CustomWorkspaceEvents } from "./CustomWorkspaceEvents"
 
 export * from "obsidian"

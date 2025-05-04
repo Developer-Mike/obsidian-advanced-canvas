@@ -29,6 +29,7 @@ import EncapsulateCanvasExtension from './canvas-extensions/encapsulate-canvas-e
 import CommandsCanvasExtension from './canvas-extensions/commands-canvas-extension'
 import AutoResizeNodeCanvasExtension from './canvas-extensions/auto-resize-node-canvas-extension'
 import PortalsCanvasExtension from './canvas-extensions/portals-canvas-extension'
+import FrontmatterModalCanvasExtension from './canvas-extensions/frontmatter-modal-canvas-extension'
 import BetterDefaultSettingsCanvasExtension from './canvas-extensions/better-default-settings-canvas-extension'
 import ColorPaletteCanvasExtension from './canvas-extensions/color-palette-canvas-extension'
 import CollapsibleGroupsCanvasExtension from './canvas-extensions/collapsible-groups-canvas-extension'
@@ -73,6 +74,7 @@ const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   EdgeExposerExtension,
   NodeInteractionExposerExtension,
 
+  FrontmatterModalCanvasExtension,
   BetterDefaultSettingsCanvasExtension,
   CommandsCanvasExtension,
   BetterReadonlyCanvasExtension,

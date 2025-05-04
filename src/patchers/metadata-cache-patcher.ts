@@ -35,10 +35,44 @@ export default class MetadataCachePatcher extends Patcher {
           size: file.stat.size
         })
 
-        // TODO: Use workQueue like in the original function
+        // Don't use workQueue like in the original function bc it's impossible
         // Read canvas data
         const content = JSON.parse(await this.vault.cachedRead(file) ?? '{}') as CanvasData
         if (!content?.nodes) return
+
+        // Extract frontmatter
+        const frontmatter = content.metadata?.frontmatter
+        const frontmatterData = {} as Partial<ExtendedCachedMetadata>
+        if (frontmatter) {
+          frontmatterData.frontmatterPosition = {
+            start: { line: 0, col: 0, offset: 0 },
+            end: { line: 0, col: 0, offset: 0 }
+          }
+
+          frontmatterData.frontmatter = frontmatter
+
+          console.log('Frontmatter:', frontmatter)
+          frontmatterData.frontmatterLinks = Object.entries(frontmatter).flatMap(([key, value]) => {
+            const getLinks = (value: string[]) => value.map((v) => {
+              if (!v.startsWith('[[') || !v.endsWith(']]')) return null // Frontmatter only supports wikilinks
+              const [link, ...aliases] = v.slice(2, -2).split('|')
+              
+              return {
+                key: key,
+                displayText: aliases.length > 0 ? aliases.join('|') : link,
+                link: link,
+                original: v,
+                position: { start: { line: 0, col: 0, offset: 0 }, end: { line: 0, col: 0, offset: 0 } }
+              }
+            }).filter((v) => v !== null)
+
+            if (typeof value === 'string') return getLinks([value])
+            else if (Array.isArray(value)) return getLinks(value)
+
+            console.warn(`Unsupported frontmatter value type: ${typeof value}`)
+            return []
+          })
+        }
 
         // Extract canvas file node embeds
         const fileNodesEmbeds = content.nodes
@@ -93,6 +127,7 @@ export default class MetadataCachePatcher extends Patcher {
         // Update metadata cache
         ;(this.metadataCache as MetadataCacheMap)[fileHash] = {
           v: 1,
+          ...frontmatterData,
           embeds: [
             ...fileNodesEmbeds,
             ...textNodesEmbeds
