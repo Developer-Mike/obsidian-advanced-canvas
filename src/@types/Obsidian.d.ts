@@ -59,6 +59,10 @@ declare module "obsidian" {
   export interface ExtendedMetadataCache extends MetadataCache {
     vault: ExtendedVault
 
+    workQueue: {
+      promise: Promise<void>
+    }
+
     fileCache: FileCache
     metadataCache: MetadataCacheMap
     resolvedLinks: ResolvedLinks

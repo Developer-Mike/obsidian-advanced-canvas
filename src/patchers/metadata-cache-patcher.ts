@@ -68,7 +68,7 @@ export default class MetadataCachePatcher extends Patcher {
             if (typeof value === 'string') return getLinks([value])
             else if (Array.isArray(value)) return getLinks(value)
 
-            console.warn(`Unsupported frontmatter value type: ${typeof value}`)
+            if (value) console.warn(`Unsupported frontmatter value type: ${typeof value}`)
             return []
           })
         }
@@ -144,7 +144,10 @@ export default class MetadataCachePatcher extends Patcher {
 
         // Trigger metadata cache change event
         this.trigger('changed', file, "", this.metadataCache[fileHash])
-        this.trigger('finished', file, "", this.metadataCache[fileHash], true) // TODO: How to fix this? (needed for metadataTypeManager)
+
+        // If workQueue is not empty, don't trigger the "finished" event yet
+        if (await Promise.race([this.workQueue.promise.then(() => false), new Promise(resolve => setTimeout(() => resolve(true), 0))]))
+          this.trigger('finished', file, "", this.metadataCache[fileHash], true) // (needed for metadataTypeManager)
 
         // Resolve links (This wouldn't get called in the original function too)
         this.resolveLinks(file.path, content)
