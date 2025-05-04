@@ -44,8 +44,12 @@ export default class NodeRatioCanvasExtension extends CanvasExtension {
           if (width && height) {
             node.setData({
               ...nodeData,
-              width: nodeData.height * (width / height),
               ratio: width / height
+            })
+
+            node.setData({
+              ...node.getData(),
+              width: nodeData.height * (width / height),
             })
           }
         })
