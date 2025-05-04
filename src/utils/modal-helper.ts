@@ -1,5 +1,35 @@
-import App, { SuggestModal, TFile } from 'obsidian'
+import App, { FuzzySuggestModal, SuggestModal, TFile } from 'obsidian'
 import FilepathHelper from 'src/utils/filepath-helper'
+
+export class AbstractSelectionModal extends FuzzySuggestModal<string> {
+  suggestions: string[]
+
+  constructor(app: App, placeholder: string, suggestions: string[]) {
+    super(app)
+    
+    this.suggestions = suggestions
+
+    this.setPlaceholder(placeholder)
+    this.setInstructions([{
+        command: '↑↓',
+        purpose: 'to navigate'
+    }, {
+        command: 'esc',
+        purpose: 'to dismiss'
+    }])
+  }
+
+  getItems(): string[] { return this.suggestions }
+  getItemText(item: string): string { return item }
+
+  onChooseItem(item: string, evt: MouseEvent | KeyboardEvent): void { }
+  awaitInput(): Promise<string> {
+    return new Promise((resolve, _reject) => {
+      this.onChooseItem = (item: string) => { resolve(item) }
+      this.open()
+    })
+  }
+}
 
 export class FileNameModal extends SuggestModal<string> {
   parentPath: string
