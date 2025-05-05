@@ -321,6 +321,7 @@ export interface Canvas {
   onResize(): void
 
   // Custom
+  searchEl?: HTMLElement
   zoomToRealBbox(bbox: BBox): void
   isClearing?: boolean
   isCopying?: boolean

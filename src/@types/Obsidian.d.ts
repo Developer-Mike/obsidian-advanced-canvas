@@ -19,6 +19,7 @@ declare module "obsidian" {
      */
     lastEvent: UserEvent | null
 
+    commands: any
     internalPlugins: any
     viewRegistry: any
 

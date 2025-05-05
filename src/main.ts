@@ -17,6 +17,7 @@ import BacklinksPatcher from './patchers/backlinks-patcher'
 import OutgoingLinksPatcher from './patchers/outgoing-links-patcher'
 import PropertiesPatcher from './patchers/properties-patcher'
 import SearchPatcher from './patchers/search-patcher'
+import SearchCommandPatcher from './patchers/search-command-patcher'
 
 // Canvas Extensions
 import CanvasExtension from './canvas-extensions/canvas-extension'
@@ -57,6 +58,7 @@ const PATCHERS = [
   OutgoingLinksPatcher,
   PropertiesPatcher,
   SearchPatcher,
+  SearchCommandPatcher,
 ]
 
 const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
