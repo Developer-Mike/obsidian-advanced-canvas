@@ -9,18 +9,18 @@ export default class BacklinksPatcher extends Patcher {
     if (!this.plugin.settings.getSetting('canvasMetadataCompatibilityEnabled')) return
 
     const that = this
-    const backlinkPatch = Patcher.tryPatchWorkspacePrototype<Backlink>(this.plugin, () => (
-      (this.plugin.app.workspace.getLeavesOfType('backlink').first()?.view as any)?.backlink
-    ), {
-      recomputeBacklink: Patcher.OverrideExisting(next => function (file: TFile, ...args: any[]): void {
-        that.isRecomputingBacklinks = true
-        const result = next.call(this, file, ...args)
-        that.isRecomputingBacklinks = false
-        return result
+    await Patcher.waitForViewRequest<any>(this.plugin, "backlink", view => {
+      Patcher.patchPrototype<Backlink>(this.plugin, view.backlink, {
+        recomputeBacklink: Patcher.OverrideExisting(next => function (file: TFile, ...args: any[]): void {
+          that.isRecomputingBacklinks = true
+          const result = next.call(this, file, ...args)
+          that.isRecomputingBacklinks = false
+          return result
+        })
       })
     })
 
-    const vaultPatch = Patcher.patchPrototype<ExtendedVault>(this.plugin, this.plugin.app.vault, {
+    Patcher.patchPrototype<ExtendedVault>(this.plugin, this.plugin.app.vault, {
       recurseChildrenAC: _next => function (origin: TAbstractFile, traverse: (file: TAbstractFile) => void) {
         for (var stack = [origin]; stack.length > 0;) {
           var current = stack.pop()
@@ -48,10 +48,5 @@ export default class BacklinksPatcher extends Patcher {
         return files
       })
     })
-
-    const [backlink] = await Promise.all([backlinkPatch, vaultPatch])
-
-    // Patch successful - recompute backlinks
-    backlink.recomputeBacklink(this.plugin.app.workspace.getActiveFile())
   }
 }

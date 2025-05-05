@@ -25,7 +25,7 @@ export default class CanvasPatcher extends Patcher {
       for (const leaf of loadedCanvasViewLeafs) (leaf as any).rebuildView()
     } else {
       // Patch the canvas view as soon it gets requested
-      await Patcher.patchViewOnRequest<CanvasView>(this.plugin, "canvas", view => this.patchCanvas(view))
+      await Patcher.waitForViewRequest<CanvasView>(this.plugin, "canvas", view => this.patchCanvas(view))
       console.debug(`Patched canvas view on first request`)
     }
   }

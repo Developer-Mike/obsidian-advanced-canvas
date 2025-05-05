@@ -1,6 +1,6 @@
 import { App, CachedMetadata } from "./Obsidian"
 
-export default interface Search {
+export default interface SearchView {
   searchQuery: SearchQuery
   startSearch: () => void
 }
@@ -8,8 +8,6 @@ export default interface Search {
 export interface SearchQuery {
   app: App
   _match: (data: MatchData) => any
-
-  isPatched?: boolean
 }
 
 export interface MatchData {

@@ -1,4 +1,4 @@
-import Properties from "src/@types/PropertiesPlugin"
+import PropertiesView from "src/@types/PropertiesPlugin"
 import Patcher from "./patcher"
 import { TFile } from "obsidian"
 
@@ -7,8 +7,8 @@ export default class PropertiesPatcher extends Patcher {
     if (!this.plugin.settings.getSetting('canvasMetadataCompatibilityEnabled')) return
 
     const that = this
-    await Patcher.patchViewOnRequest<Properties>(this.plugin, "file-properties", view => {
-      Patcher.patchPrototype<Properties>(this.plugin, view, {
+    await Patcher.waitForViewRequest<PropertiesView>(this.plugin, "file-properties", view => {
+      Patcher.patchPrototype<PropertiesView>(this.plugin, view, {
         isSupportedFile: Patcher.OverrideExisting(next => function (file?: TFile): boolean {
           // Check if the file is a canvas file
           if (file?.extension === 'canvas') return true

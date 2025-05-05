@@ -40,7 +40,7 @@ export default abstract class Patcher {
 
   protected abstract patch(): Promise<void>
 
-  protected static async patchViewOnRequest<T>(plugin: AdvancedCanvasPlugin, viewType: string, patch: (view: T) => void): Promise<T> {
+  protected static async waitForViewRequest<T>(plugin: AdvancedCanvasPlugin, viewType: string, patch: (view: T) => void): Promise<T> {
     return new Promise(resolve => {
       const uninstaller = around(plugin.app.viewRegistry.viewByType, {
         [viewType]: (next: any) => function (...args: any): any {
@@ -62,6 +62,15 @@ export default abstract class Patcher {
   static OverrideExisting<T, K extends FunctionKeys<T>, R extends ReturnType<KeyFunction<T, K>>>(
     fn: PatchFunctionWrapper<T, K, R> & { __overrideExisting?: boolean }
   ) { return Object.assign(fn, { __overrideExisting: true }) }
+
+  static patchThisAndPrototype<T>(
+    plugin: Plugin,
+    object: T | undefined,
+    patches: FunctionPatchObject<T>,
+  ): T | null {
+    Patcher.patch(plugin, object, patches)
+    return Patcher.patchPrototype(plugin, object, patches)
+  }
 
   static patchPrototype<T>(
     plugin: Plugin,

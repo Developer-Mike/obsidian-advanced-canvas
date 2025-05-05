@@ -1,6 +1,6 @@
 import { App, TFile } from "obsidian"
 
-export default interface Properties {
+export default interface PropertiesView {
   app: App
   file: TFile
   modifyingFile: TFile
