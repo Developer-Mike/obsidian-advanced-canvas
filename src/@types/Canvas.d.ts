@@ -287,6 +287,7 @@ export interface Canvas {
   selection: Set<CanvasElement>
   getSelectionData(): SelectionData
   updateSelection(update: () => void): void
+  selectOnly(element: CanvasElement): void
   deselectAll(): void
 
   toggleObjectSnapping(enabled: boolean): void

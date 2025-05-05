@@ -35,6 +35,19 @@ export default class CanvasPatcher extends Patcher {
 
     // Patch canvas view
     Patcher.patchPrototype<CanvasView>(this.plugin, view, {
+      setEphemeralState: Patcher.OverrideExisting(next => function (state: any): void {
+        // Select and zoom to the node if it exists
+        if (state?.subpath) {
+          const nodeId = (state.subpath as string).replace(/^#/, '')
+          const node = this.canvas.nodes.get(nodeId)
+          if (!node) return next.call(this, state)
+
+          this.canvas.selectOnly(node)
+          this.canvas.zoomToSelection()
+        }
+
+        return next.call(this, state)
+      }),
       setViewData: Patcher.OverrideExisting(next => function (json: string, ...args: any): void {
         json = json !== '' ? json : '{}'
 
