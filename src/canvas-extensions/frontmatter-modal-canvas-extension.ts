@@ -28,7 +28,7 @@ export default class FrontmatterModalCanvasExtension extends CanvasExtension {
         callback: () => {
           const propertiesPlugin = this.plugin.app.internalPlugins.plugins['properties']
           if (!propertiesPlugin?._loaded) {
-            new Notice('Core plugin "Properties" was not found or isn\'t enabled.')
+            new Notice(`Core plugin "Properties" was not found or isn't enabled.`)
             return
           }
 

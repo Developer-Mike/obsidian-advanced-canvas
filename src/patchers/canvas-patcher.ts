@@ -83,7 +83,11 @@ export default class CanvasPatcher extends Patcher {
             return next.call(this, ...args)
           }
         }
-      })
+      }),
+      close: Patcher.OverrideExisting(next => function (...args: any): void {
+        that.plugin.app.workspace.trigger('advanced-canvas:canvas-view-unloaded:before', this)
+        return next.call(this, ...args)
+      }),
     })
 
     // Patch canvas

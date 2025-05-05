@@ -59,6 +59,8 @@ export interface CanvasView extends ItemView {
   getViewData(): string
   setViewData(data: string): void
 
+  close(): void
+
   data: string
   lastSavedData: string
   requestSave(): void
@@ -214,10 +216,7 @@ export interface Canvas {
   config: CanvasConfig
   options: CanvasOptions
 
-  /** @deprecated Only edit it manually if you know what you're doing. */
   metadata: CanvasMetadata
-  getMetadata(key: keyof CanvasMetadata): any
-  setMetadata(key: keyof CanvasMetadata, value: any): void
 
   unload(): void
   /**
