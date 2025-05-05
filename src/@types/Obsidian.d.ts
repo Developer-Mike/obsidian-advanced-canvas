@@ -21,7 +21,9 @@ declare module "obsidian" {
 
     commands: any
     internalPlugins: any
+
     viewRegistry: any
+    embedRegistry: EmbedRegistry
 
     /** @public */
     metadataCache: ExtendedMetadataCache
@@ -55,6 +57,22 @@ declare module "obsidian" {
 
     // Custom
     recurseChildrenAC: (origin: TAbstractFile, traverse: (file: TAbstractFile) => void) => void
+  }
+
+  export interface EmbedRegistry {
+    embedByExtension: { [extension: string]: (context: EmbedContext, file: TFile, subpath?: string) => Component }
+  }
+
+  export interface EmbedContext {
+    app: App
+    
+    containerEl: HTMLElement
+    sourcePath?: string
+    linktext?: string
+    
+    displayMode?: boolean
+    showInline?: boolean
+    depth?: number
   }
 
   export interface ExtendedMetadataCache extends MetadataCache {

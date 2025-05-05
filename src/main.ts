@@ -12,6 +12,7 @@ import WindowsManager from './managers/windows-manager'
 // Patchers
 import Patcher from './patchers/patcher'
 import CanvasPatcher from './patchers/canvas-patcher'
+import EmbedPatcher from './patchers/embed-patcher'
 import MetadataCachePatcher from './patchers/metadata-cache-patcher'
 import BacklinksPatcher from './patchers/backlinks-patcher'
 import OutgoingLinksPatcher from './patchers/outgoing-links-patcher'
@@ -53,6 +54,7 @@ import CanvasWrapperExposerExtension from './canvas-extensions/dataset-exposers/
 
 const PATCHERS = [
   CanvasPatcher,
+  EmbedPatcher,
   MetadataCachePatcher,
   BacklinksPatcher,
   OutgoingLinksPatcher,
