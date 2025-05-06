@@ -1,4 +1,4 @@
-import { Component, EmbedContext, MarkdownPreviewView, MarkdownRenderer, TFile } from "obsidian"
+import { Component, EmbedContext, MarkdownRenderer, TFile } from "obsidian"
 import { CanvasData, CanvasFileNodeData, CanvasGroupNodeData, CanvasTextNodeData } from "./@types/AdvancedJsonCanvas"
 
 export default class AdvancedCanvasEmbed extends Component {

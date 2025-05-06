@@ -1,7 +1,7 @@
 import { CanvasNode, CanvasView } from "src/@types/Canvas"
 import Patcher from "./patcher"
 import { EditorRange, Keymap, setIcon } from "obsidian"
-import { CanvasTextNodeData } from "src/@types/AdvancedJsonCanvas"
+import { CanvasGroupNodeData, CanvasTextNodeData } from "src/@types/AdvancedJsonCanvas"
 
 export default class SearchCommandPatcher extends Patcher {
   protected async patch() {
@@ -121,18 +121,23 @@ class CanvasSearchView {
     if (!hasQuery) this.searchMatches = []
     else {
       this.searchMatches = Array.from(this.view.canvas.nodes.values()).map(node => {
-        const nodeData = node.getData() as CanvasTextNodeData
-        const text = nodeData.text
-        if (!text) return null
+        const nodeData = node.getData()
+
+        let content: string | undefined = undefined
+        if (nodeData.type === "text") content = (nodeData as CanvasTextNodeData).text
+        else if (nodeData.type === "group") content = (nodeData as CanvasGroupNodeData).label
+        else if (nodeData.type === "file") content = node.child.data
+        
+        if (!content) return null
 
         const matches: number[][] = []
         const regex = new RegExp(this.searchInput.value, "gi")
         let match: RegExpExecArray | null
-        while ((match = regex.exec(text)) !== null) {
+        while ((match = regex.exec(content)) !== null) {
           matches.push([match.index, match.index + match[0].length])
         }
 
-        return { nodeId: node.id, content: text, matches: matches }
+        return { nodeId: node.id, content: content, matches: matches }
       }).filter(match => match && match.matches.length > 0) as SearchMatch[]
     }
 

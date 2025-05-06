@@ -1,5 +1,6 @@
 import { CachedMetadata, EmbedCache, FrontMatterCache, FrontmatterLinkCache, LinkCache, Pos, TagCache } from "obsidian"
 import { CustomWorkspaceEvents } from "./CustomWorkspaceEvents"
+import SuggestManager from "./SuggestManager"
 
 export * from "obsidian"
 
@@ -28,7 +29,7 @@ declare module "obsidian" {
     /** @public */
     metadataCache: ExtendedMetadataCache
     /** @public */ // exclude only the on method that takes a string and not a specific event name
-    workspace: Omit<Omit<Workspace, 'on'>, 'trigger'> & {
+    workspace: Omit<Omit<ExtendedWorkspace, 'on'>, 'trigger'> & {
       on<K extends keyof CustomWorkspaceEvents>(name: K, callback: (...args: Parameters<CustomWorkspaceEvents[K]>) => void): EventRef
       trigger<K extends keyof CustomWorkspaceEvents>(name: K, ...args: Parameters<CustomWorkspaceEvents[K]>): void
 
@@ -49,6 +50,12 @@ declare module "obsidian" {
       on(name: 'editor-paste', callback: (evt: ClipboardEvent, editor: Editor, info: MarkdownView | MarkdownFileInfo) => any, ctx?: any): EventRef
       on(name: 'editor-drop', callback: (evt: DragEvent, editor: Editor, info: MarkdownView | MarkdownFileInfo) => any, ctx?: any): EventRef
       on(name: 'quit', callback: (tasks: Tasks) => any, ctx?: any): EventRef
+    }
+  }
+
+  export interface ExtendedWorkspace extends Workspace {
+    editorSuggest: {
+      suggests: { suggestManager?: SuggestManager }[]
     }
   }
 

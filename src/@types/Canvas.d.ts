@@ -79,6 +79,8 @@ export interface CanvasElement {
   isDirty?: boolean // Custom for Change event
 
   child: {
+    data: string
+
     editMode: {
       cm: {
         dom: HTMLElement
