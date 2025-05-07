@@ -73,6 +73,9 @@ Please consider supporting the plugin. There are many hours of work and effort b
 
 <img src="https://img.shields.io/endpoint?url=https://wakapi.by-mika.dev/api/compat/shields/v1/mika.dev/interval:any/project:obsidian-advanced-canvas&label=Time%20Spent&style=flat&colorA=f4efe7&colorB=ff5e5b" alt="Time Spent" width="200"/>
 
+## Standardized Format
+Compatible with the [JSON Canvas](https://github.com/obsidianmd/jsoncanvas) format, the [Advanced JSON Canvas](https://github.com/Developer-Mike/obsidian-advanced-canvas/blob/main/assets/formats/advanced-json-canvas/README.md) format takes it a step further by adding more features and flexibility. The Advanced JSON Canvas format was introduced to provide longevity, readability, interoperability, and extensibility for canvases created with Advanced Canvas.
+
 ## Full Metadata Cache Support
 Advanced Canvas enables `.canvas` files to be indexed by the metadata cache. This means that there is now full compatibility with the graph view, outgoing links and backlinks. You can even enable (optional) the creation of an outgoing link if two embeds in a canvas are connected by an edge. This feature brings the full power of Obsidian's linking system to the canvas file format.
 
