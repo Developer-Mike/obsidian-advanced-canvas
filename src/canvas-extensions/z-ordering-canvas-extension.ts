@@ -58,6 +58,14 @@ export default class ZOrderingCanvasExtension  extends CanvasExtension {
       item.setIcon('send-to-back')
       item.onClick(() => this.moveMaxLayers(canvas, nodes, false))
     })
+    
+    if (nodes.some(node => node.getData().zIndex !== undefined)) {
+      menu.addItem(item => {
+        item.setTitle('Remove persistent z-index')
+        item.setIcon('pin-off')
+        item.onClick(() => this.removePersistentZIndexes(canvas, nodes))
+      })
+    }
 
     menu.addSeparator()
   }
@@ -91,6 +99,10 @@ export default class ZOrderingCanvasExtension  extends CanvasExtension {
     this.setNodesZIndex(selectedNodes, targetZIndex)
   }
 
+  private removePersistentZIndexes(_canvas: Canvas, nodes: CanvasNode[]) {
+    for (const node of nodes) node.setZIndex(undefined)
+  }
+
   private setNodesZIndex(nodes: CanvasNode[], zIndex: number) {
     const sortedNodes = nodes.sort((a, b) => a.zIndex - b.zIndex)
 
@@ -98,8 +110,7 @@ export default class ZOrderingCanvasExtension  extends CanvasExtension {
       const node = sortedNodes[i]
       const finalZIndex = zIndex + i
 
-      node.zIndex = finalZIndex
-      node.nodeEl.style.zIndex = finalZIndex.toString()
+      node.setZIndex(finalZIndex)
     }
   }
 

@@ -115,11 +115,17 @@ export default class AdvancedCanvasPlugin extends Plugin {
 
     this.windowsManager = new WindowsManager(this)
 
-    this.patchers = PATCHERS.map((Patcher: any) => new Patcher(this))
+    this.patchers = PATCHERS.map((Patcher: any) => {
+      try { return new Patcher(this) }
+      catch (e) {
+        console.error(`Error initializing patcher ${Patcher.name}:`, e)
+      }
+    })
+
     this.canvasExtensions = CANVAS_EXTENSIONS.map((Extension: any) => {
       try { return new Extension(this) } 
       catch (e) {
-        console.error(`Error initializing ${Extension.name}:`, e)
+        console.error(`Error initializing ac-extension ${Extension.name}:`, e)
       }
     })
 	}

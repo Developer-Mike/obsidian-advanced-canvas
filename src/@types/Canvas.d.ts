@@ -117,6 +117,7 @@ export interface CanvasNode extends CanvasElement {
   zIndex: number
   /** Move node to the front. */
   updateZIndex(): void
+  renderZIndex(): void
 
   color: string
 
@@ -139,6 +140,9 @@ export interface CanvasNode extends CanvasElement {
     nodeIdMap: { [key: string]: string }
     edgeIdMap: { [key: string]: string }
   }
+
+  // Custom
+  setZIndex(value?: number): void
 }
 
 export interface CanvasEdgeEnd {
@@ -274,6 +278,8 @@ export interface Canvas {
 
   isDragging: boolean
   setDragging(dragging: boolean): void
+
+  zIndexCounter: number
 
   pointer: Position
 

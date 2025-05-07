@@ -348,6 +348,42 @@ export default class CanvasPatcher extends Patcher {
 
         return result
       }),
+      setZIndex: _next => function (value?: number): void {
+        this.setData({
+          ...this.getData(),
+          zIndex: value,
+        }, true)
+
+        // Render the node to update the zIndex
+        this.updateZIndex()
+      },
+      updateZIndex: Patcher.OverrideExisting(next => function (): void {
+        const persistentZIndex = this.getData().zIndex
+
+        // If no persistent zIndex is set, use the dynamic zIndex
+        if (persistentZIndex === undefined) return next.call(this)
+
+        // Update the min zIndex of dynamic zIndex -> so everything is above the current persistent zIndex
+        this.canvas.zIndexCounter = Math.max(this.canvas.zIndexCounter, persistentZIndex)
+
+        // Set the zIndex to the persistent zIndex and render it
+        this.renderZIndex()
+      }),
+      renderZIndex: Patcher.OverrideExisting(next => function (): void {
+        const persistentZIndex = this.getData().zIndex
+
+        // If no persistent zIndex is set, use the dynamic zIndex
+        if (persistentZIndex === undefined) return next.call(this)
+
+        // Use the persistent zIndex
+        this.zIndex = persistentZIndex
+
+        // If selected, always set the zIndex to the max
+        if (this.canvas.selection.size === 1 && this.canvas.selection.has(this))
+          this.zIndex = this.canvas.zIndexCounter + 1
+
+        this.nodeEl.style.zIndex = this.zIndex.toString()
+      }),
       setIsEditing: Patcher.OverrideExisting(next => function (editing: boolean, ...args: any): void {
         const result = next.call(this, editing, ...args)
         that.plugin.app.workspace.trigger('advanced-canvas:node-editing-state-changed', this.canvas, node, editing)

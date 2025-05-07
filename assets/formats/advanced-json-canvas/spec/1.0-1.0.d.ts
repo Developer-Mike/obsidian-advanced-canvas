@@ -23,6 +23,7 @@ export interface CanvasNodeData {
   height: number
   dynamicHeight?: boolean // AdvancedJsonCanvas
   ratio?: number
+  zIndex?: number // AdvancedJsonCanvas
 
   color?: CanvasColor
 
