@@ -19,6 +19,8 @@ export default class NodeRatioCanvasExtension extends CanvasExtension {
   }
 
   private onNodeMenu(menu: Menu, node: CanvasNode) {
+    if (!this.plugin.settings.getSetting('aspectRatioControlFeatureEnabled')) return
+
     menu.addItem((item) => {
       item.setTitle('Set Aspect Ratio')
         .setIcon('aspect-ratio')

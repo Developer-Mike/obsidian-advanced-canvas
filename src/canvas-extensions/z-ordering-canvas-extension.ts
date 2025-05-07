@@ -4,7 +4,7 @@ import BBoxHelper from "src/utils/bbox-helper"
 import CanvasExtension from "./canvas-extension"
 
 export default class ZOrderingCanvasExtension  extends CanvasExtension {
-  isEnabled() { return 'zOrderingFeatureEnabled' as const }
+  isEnabled() { return 'zOrderingControlFeatureEnabled' as const }
 
   init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
@@ -33,7 +33,7 @@ export default class ZOrderingCanvasExtension  extends CanvasExtension {
   private addZOrderingContextMenuItems(canvas: Canvas, nodes: CanvasNode[], menu: Menu) {
     menu.addSeparator()
 
-    if (this.plugin.settings.getSetting('zOrderingShowOneLayerShiftOptions') && nodes.length === 1) {
+    if (this.plugin.settings.getSetting('zOrderingControlShowOneLayerShiftOptions') && nodes.length === 1) {
       menu.addItem(item => {
         item.setTitle('Move one layer forward')
         item.setIcon('arrow-up')

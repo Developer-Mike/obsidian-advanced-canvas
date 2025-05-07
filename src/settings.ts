@@ -28,6 +28,7 @@ export interface AdvancedCanvasPluginSettingsValues {
 
   canvasMetadataCompatibilityEnabled: boolean
   treatFileNodeEdgesAsLinks: boolean
+  enableSingleNodeLinks: boolean
 
   combineCustomStylesInDropdown: boolean
 
@@ -46,13 +47,17 @@ export interface AdvancedCanvasPluginSettingsValues {
 
   variableBreakpointFeatureEnabled: boolean
 
-  zOrderingFeatureEnabled: boolean
-  zOrderingShowOneLayerShiftOptions: boolean
+  zOrderingControlFeatureEnabled: boolean
+  zOrderingControlShowOneLayerShiftOptions: boolean
+
+  aspectRatioControlFeatureEnabled: boolean
 
   commandsFeatureEnabled: boolean
   zoomToClonedNode: boolean
   cloneNodeMargin: number
   expandNodeStepSize: number
+
+  enableNativeFileSearch: boolean
 
   floatingEdgeFeatureEnabled: boolean
   newEdgeFromSideFloating: boolean
@@ -111,6 +116,7 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
 
   canvasMetadataCompatibilityEnabled: true,
   treatFileNodeEdgesAsLinks: true,
+  enableSingleNodeLinks: true,
 
   combineCustomStylesInDropdown: false,
 
@@ -129,13 +135,17 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
 
   variableBreakpointFeatureEnabled: false,
 
-  zOrderingFeatureEnabled: true,
-  zOrderingShowOneLayerShiftOptions: false,
+  zOrderingControlFeatureEnabled: true,
+  zOrderingControlShowOneLayerShiftOptions: false,
+
+  aspectRatioControlFeatureEnabled: true,
 
   commandsFeatureEnabled: true,
   zoomToClonedNode: true,
   cloneNodeMargin: 20,
   expandNodeStepSize: 20,
+
+  enableNativeFileSearch: true,
 
   floatingEdgeFeatureEnabled: false,
   newEdgeFromSideFloating: false,
@@ -183,7 +193,6 @@ export const SETTINGS = {
   general: {
     label: 'General',
     description: 'General settings of the Advanced Canvas plugin.',
-    infoSection: 'better-default-settings',
     disableToggle: true,
     children: {
       nodeTypeOnDoubleClick: {
@@ -252,13 +261,17 @@ export const SETTINGS = {
         label: 'Treat edges between file nodes as links',
         description: 'When enabled, edges between file nodes will be treated as links. This means that if file node A.md has an edge to file node B.md in the canvas, file A.md will have a link to file B.md in the outgoing links section and show a connection in the graph view.',
         type: 'boolean'
+      },
+      enableSingleNodeLinks: {
+        label: 'Enable support for linking to a node using a [[wikilink]]',
+        description: 'When enabled, you can link and embed a node using [[canvas-file#node-id]].',
+        type: 'boolean'
       }
     }
   },
   combineCustomStylesInDropdown: {
     label: 'Combine custom styles',
     description: 'Combine all style attributes of Advanced Canvas in a single dropdown.',
-    infoSection: null,
     children: { }
   },
   nodeStylingFeatureEnabled: {
@@ -338,17 +351,21 @@ export const SETTINGS = {
     infoSection: 'variable-breakpoints',
     children: { }
   },
-  zOrderingFeatureEnabled: {
+  zOrderingControlFeatureEnabled: {
     label: 'Z ordering controls',
-    description: 'Change the z-index of nodes using the context menu.',
-    infoSection: 'z-ordering-control',
+    description: 'Change the persistent z-index of nodes using the context menu.',
     children: {
-      zOrderingShowOneLayerShiftOptions: {
+      zOrderingControlShowOneLayerShiftOptions: {
         label: 'Show one layer shift options',
         description: 'When enabled, you can move nodes one layer forward or backward.',
         type: 'boolean'
       }
     }
+  },
+  aspectRatioControlFeatureEnabled: {
+    label: 'Aspect ratio control',
+    description: 'Change the aspect ratio of nodes using the context menu.',
+    children: { }
   },
   commandsFeatureEnabled: {
     label: 'Extended commands',
@@ -374,10 +391,16 @@ export const SETTINGS = {
       }
     }
   },
+  enableNativeFileSearch: {
+    label: 'Add native-like file search',
+    description: 'When enabled, the file search will be done using the native Obsidian file search.',
+    infoSection: 'native-like-file-search',
+    children: { }
+  },
   floatingEdgeFeatureEnabled: {
     label: 'Floating edges (auto edge side)',
     description: 'Create edges that are automatically placed on the most suitable side of the node by dragging the edge over the target node without placing it over a specific side connection point.',
-    infoSection: 'auto-edge-side',
+    infoSection: 'floating-edges-automatic-edge-side',
     children: {
       newEdgeFromSideFloating: {
         label: 'New edge from side floating',
@@ -628,14 +651,14 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
     }
   }
 
-  private createFeatureHeading(containerEl: HTMLElement, label: string, description: string, infoSection: string | null, settingsKey: keyof AdvancedCanvasPluginSettingsValues | null): SettingEl {
+  private createFeatureHeading(containerEl: HTMLElement, label: string, description: string, infoSection: string | undefined, settingsKey: keyof AdvancedCanvasPluginSettingsValues | null): SettingEl {
     const setting = new SettingEl(containerEl)
       .setHeading()
       .setClass('ac-settings-heading')
       .setName(label)
       .setDesc(description)
 
-    if (infoSection !== null) {
+    if (infoSection !== undefined) {
       setting.addExtraButton(button => button
         .setTooltip("Open github documentation")
         .setIcon('info')

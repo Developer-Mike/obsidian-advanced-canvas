@@ -4,7 +4,7 @@ import SettingsManager from "src/settings"
 export interface SettingsHeading {
   label: string
   description: string
-  infoSection: string | null
+  infoSection?: string
   disableToggle?: boolean
 
   children: { [id: string]: Setting }

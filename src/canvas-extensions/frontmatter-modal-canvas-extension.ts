@@ -23,7 +23,7 @@ export default class FrontmatterModalCanvasExtension extends CanvasExtension {
       settingsContainer,
       CanvasHelper.createControlMenuButton({
         id: 'properties-button',
-        icon: 'archive',
+        icon: 'info',
         label: 'Properties',
         callback: () => {
           const propertiesPlugin = this.plugin.app.internalPlugins.plugins['properties']

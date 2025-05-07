@@ -1,10 +1,12 @@
-import { CanvasNode, CanvasView } from "src/@types/Canvas"
+import { CanvasView } from "src/@types/Canvas"
 import Patcher from "./patcher"
-import { EditorRange, Keymap, setIcon } from "obsidian"
+import { setIcon } from "obsidian"
 import { CanvasGroupNodeData, CanvasTextNodeData } from "src/@types/AdvancedJsonCanvas"
 
 export default class SearchCommandPatcher extends Patcher {
   protected async patch() {
+    if (!this.plugin.settings.getSetting('enableNativeFileSearch')) return
+
     const that = this
     Patcher.patch(this.plugin, this.plugin.app.commands.commands["editor:open-search"], {
       checkCallback: Patcher.OverrideExisting(next => function (this: any, checking: boolean) {

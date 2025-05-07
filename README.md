@@ -21,6 +21,8 @@ This plugin enhances the Obsidian canvas with a wide array of features:
 
 *   **Core Enhancements:**
     *   [Full Metadata Cache Support](#full-metadata-cache-support): Integrate canvases with Obsidian's graph view, outgoing links, and backlinks.
+    *   [Frontmatter Support](#frontmatter-support): Add custom properties to canvas files.
+    *   [Single Node Links & Embeds](#single-node-links--embeds): Link or embed a single node from a canvas into markdown files.
     *   [Better Default Settings](#better-default-settings): Customize default node sizes, grid alignment, and more.
     *   [Enhanced Readonly Mode](#better-readonly): Finer control over canvas interaction in readonly mode.
     *   [Improved Image Export](#image-export): Export to PNG/SVG with transparency and other options.
@@ -36,6 +38,7 @@ This plugin enhances the Obsidian canvas with a wide array of features:
     *   [Flip Edge](#flip-edge): Quickly reverse edge direction.
 *   **Interaction & Workflow:**
     *   [Canvas Commands](#canvas-commands): A suite of commands for efficient canvas manipulation.
+    *   [Native-Like File Search](#native-like-file-search): Search for text within the whole canvas using a native-like interface.
     *   [Presentation Mode](#presentation-mode): Create and navigate slide-like presentations.
     *   [Portals](#portals): Embed other canvases within your current canvas.
     *   [Collapsible Groups](#collapsible-groups): Organize your canvas with expandable/collapsible groups.
@@ -96,6 +99,30 @@ Advanced Canvas enables `.canvas` files to be indexed by the metadata cache. Thi
     *   The `app.metadataCache.resolvedLinks` object values for `.canvas` files are implemented in the exact same way as for markdown files.
 </details>
 
+### Frontmatter Support
+Additionally, Advanced Canvas introduces full frontmatter support for `.canvas` files. You can now view and edit the frontmatter directly within the canvas view:
+
+*   **Accessing Frontmatter:** Click the "info" icon located in the top right corner of the canvas view.
+*   **Functionality:** This allows you to add custom properties (metadata) to your canvas files.
+*   **Use Cases:**
+    *   **Categorization & Tagging:** Add `tags` or custom keys for organization.
+    *   **Aliases:** Use `aliases` to create alternative names for your canvas files.
+    *   **Styling:** Use `cssclasses` to apply custom CSS styles to the entire canvas view.
+    *   **Custom Metadata:** Define any other properties relevant to your workflow.
+*   **Searchability:** Properties defined in the frontmatter of your `.canvas` files are searchable using Obsidian's global search pane, further integrating canvases into your knowledge management system.
+
+This significantly enhances the ability to manage, organize, and customize your canvases alongside your other notes in Obsidian.
+
+### Single Node Links & Embeds
+Advanced Canvas now allows you to link or embed the content of a *single node* from a `.canvas` file directly into your markdown files. This provides a granular way to reference specific pieces of information within your canvases.
+
+*   **Syntax:**
+    *   **Linking:** Use the standard wikilink format with the node ID appended after a `#`:
+        `[[canvas-file-name#node-id]]`
+    *   **Embedding:** Use the standard embed wikilink format, also with the node ID:
+        `![[canvas-file-name#node-id]]`
+*   **Functionality:** When you link or embed a node this way, the actual content of that specific node from the canvas will be displayed or linked within your markdown file. This is incredibly useful for creating direct references to diagrams, text snippets, or any other content held within individual canvas nodes.
+
 ## Better Default Settings
 *   Enforce all new nodes to be aligned to the grid
 *   Customize default text node size
@@ -103,12 +130,22 @@ Advanced Canvas enables `.canvas` files to be indexed by the metadata cache. Thi
 *   Modify the minimum node size
 *   Disable the font scaling relative to the zoom level
 
+## Native-Like File Search
+Quickly locate text within your canvas using a familiar search experience. Advanced Canvas integrates a native-like file search specifically for canvas content.
+
+*   **Activation:** Use the `Search current file` command, which is commonly bound to the `Ctrl+F` (or `Cmd+F` on macOS) keyboard shortcut.
+*   **Functionality:** This opens a search interface that allows you to search for text across all nodes within the currently active canvas.
+*   **Benefits:** Easily find specific information, navigate to relevant nodes, and streamline your workflow when dealing with text-heavy canvases.
+
+<details>
+    <summary>Search Example</summary>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/sample-search.gif" alt="Search Example"/>
+</details>
+
 ## Canvas Commands
 <details>
     <summary>View available commands</summary>
 
-*   `Advanced Canvas: Open Quicksettings`
-    *   Open the quicksettings menu
 *   `Advanced Canvas: Toggle readonly`
     *   Toggle the readonly state of the canvas
 *   `Advanced Canvas: Create text node`
@@ -130,6 +167,8 @@ Advanced Canvas enables `.canvas` files to be indexed by the metadata cache. Thi
     *   Expand the selected node in the direction of the arrow keys
 *   `Advanced Canvas: Flip selection horizontally/vertically`
     *   Flip the selected nodes and the respective edges horizontally or vertically
+*   `Advanced Canvas: Swap nodes`
+    *   Swap two selected nodes with each other (x, y and width, height will be swapped)
 </details>
 
 ## Node Styles

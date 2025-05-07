@@ -5,6 +5,8 @@ import { ExtendedCachedMetadata } from "src/@types/Obsidian"
 
 export default class LinkSuggestionsPatcher extends Patcher {
   async patch() {
+    if (!this.plugin.settings.getSetting('enableSingleNodeLinks')) return
+    
     const suggestManager = this.plugin.app.workspace.editorSuggest.suggests
       .find(s => s.suggestManager)?.suggestManager
     if (!suggestManager) return console.warn("LinkSuggestionsPatcher: No suggest manager found.")
