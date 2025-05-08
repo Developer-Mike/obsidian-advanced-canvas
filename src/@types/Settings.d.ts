@@ -13,7 +13,7 @@ export interface SettingsHeading {
 export interface Setting {
   label: string
   description: string
-  type: null | 'text' | 'number' | 'boolean' | 'dropdown' | 'button' | 'styles'
+  type: null | 'text' | 'number' | 'dimension' | 'boolean' | 'dropdown' | 'button' | 'styles'
 
   parse?: (value: any) => any
 }
@@ -31,6 +31,11 @@ export interface TextSetting extends Setting {
 export interface NumberSetting extends Setting {
   type: 'number'
   parse: (value: string) => number
+}
+
+export interface DimensionSetting extends Setting {
+  type: 'dimension'
+  parse: (value: [string, string]) => [number, number]
 }
 
 export interface BooleanSetting extends Setting {

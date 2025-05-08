@@ -158,9 +158,8 @@ export default class PresentationCanvasExtension extends CanvasExtension {
   }
 
   private getDefaultSlideSize(): Size {
-    const slideSizeString = this.plugin.settings.getSetting('defaultSlideSize')
-    const slideSizeArray = slideSizeString.split('x').map((value: string) => parseInt(value))
-    return { width: slideSizeArray[0], height: slideSizeArray[1] }
+    const slideSize = this.plugin.settings.getSetting('defaultSlideDimensions')
+    return { width: slideSize[0], height: slideSize[1] }
   }
 
   private getSlideAspectRatio(): number {

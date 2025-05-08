@@ -22,6 +22,10 @@
     margin-top: var(--size-4-10) !important;
   }
 
+  &:has(.checkbox-container:not(.is-enabled)) {
+    border-bottom-color: var(--background-modifier-border-hover);
+  }
+
   .setting-item-description {
     margin-inline-end: 20px;
   }

@@ -47,14 +47,16 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
   private modifyCanvasSettings(canvas: Canvas | null) {
     if (!canvas) return
 
+    const defaultTextNodeDimensionsArray = this.plugin.settings.getSetting('defaultTextNodeDimensions')
     canvas.config.defaultTextNodeDimensions = {
-      width: this.plugin.settings.getSetting('defaultTextNodeWidth'),
-      height: this.plugin.settings.getSetting('defaultTextNodeHeight')
+      width: defaultTextNodeDimensionsArray[0],
+      height: defaultTextNodeDimensionsArray[1]
     }
 
+    const defaultFileNodeDimensionsArray = this.plugin.settings.getSetting('defaultFileNodeDimensions')
     canvas.config.defaultFileNodeDimensions = {
-      width: this.plugin.settings.getSetting('defaultFileNodeWidth'),
-      height: this.plugin.settings.getSetting('defaultFileNodeHeight')
+      width: defaultFileNodeDimensionsArray[0],
+      height: defaultFileNodeDimensionsArray[1]
     }
 
     canvas.config.minContainerDimension = this.plugin.settings.getSetting('minNodeSize')

@@ -1,5 +1,5 @@
-import { Notice, PluginSettingTab, Setting as SettingEl } from "obsidian"
-import { BooleanSetting, ButtonSetting, DropdownSetting, NumberSetting, Setting, SettingsHeading, StyleAttributesSetting, TextSetting } from "./@types/Settings"
+import { Notice, PluginSettingTab, Setting as SettingEl, TextComponent } from "obsidian"
+import { BooleanSetting, ButtonSetting, DimensionSetting, DropdownSetting, NumberSetting, Setting, SettingsHeading, StyleAttributesSetting, TextSetting } from "./@types/Settings"
 import { BUILTIN_EDGE_STYLE_ATTRIBUTES, BUILTIN_NODE_STYLE_ATTRIBUTES, StyleAttribute } from "./canvas-extensions/advanced-styles/style-config"
 import { VARIABLE_BREAKPOINT_CSS_VAR } from "./canvas-extensions/variable-breakpoint-canvas-extension"
 import AdvancedCanvasPlugin from "./main"
@@ -18,10 +18,8 @@ export interface AdvancedCanvasPluginSettingsValues {
 
   nodeTypeOnDoubleClick: keyof typeof SETTINGS.general.children.nodeTypeOnDoubleClick.options
   alignNewNodesToGrid: boolean
-  defaultTextNodeWidth: number
-  defaultTextNodeHeight: number
-  defaultFileNodeWidth: number
-  defaultFileNodeHeight: number
+  defaultTextNodeDimensions: [number, number]
+  defaultFileNodeDimensions: [number, number]
   minNodeSize: number
   maxNodeWidth: number
   disableFontSizeRelativeToZoom: boolean
@@ -84,7 +82,7 @@ export interface AdvancedCanvasPluginSettingsValues {
 
   presentationFeatureEnabled: boolean
   showSetStartNodeInPopup: boolean
-  defaultSlideSize: string
+  defaultSlideDimensions: [number, number]
   wrapInSlidePadding: number
   resetViewportOnPresentationEnd: boolean
   useArrowKeysToChangeSlides: boolean
@@ -106,10 +104,8 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
 
   nodeTypeOnDoubleClick: 'text',
   alignNewNodesToGrid: true,
-  defaultTextNodeWidth: 260,
-  defaultTextNodeHeight: 60,
-  defaultFileNodeWidth: 400,
-  defaultFileNodeHeight: 400,
+  defaultTextNodeDimensions: [260, 60],
+  defaultFileNodeDimensions: [400, 400],
   minNodeSize: 60,
   maxNodeWidth: -1,
   disableFontSizeRelativeToZoom: false,
@@ -172,7 +168,7 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
 
   presentationFeatureEnabled: true,
   showSetStartNodeInPopup: false,
-  defaultSlideSize: '1200x675',
+  defaultSlideDimensions: [1200, 675],
   wrapInSlidePadding: 20,
   resetViewportOnPresentationEnd: true,
   useArrowKeysToChangeSlides: true,
@@ -209,33 +205,29 @@ export const SETTINGS = {
         description: 'When enabled, new nodes will be aligned to the grid.',
         type: 'boolean'
       },
-      defaultTextNodeWidth: {
-        label: 'Default text node width',
-        description: 'The default width of a text node.',
-        type: 'number',
-        parse: (value: string) => Math.max(1, parseInt(value) || 0)
+      defaultTextNodeDimensions: {
+        label: 'Default text node dimensions',
+        description: 'The default dimensions of a text node.',
+        type: 'dimension',
+        parse: (value: [string, string]) => {
+          const width = Math.max(1, parseInt(value[0]) || 0)
+          const height = Math.max(1, parseInt(value[1]) || 0)
+          return [width, height]
+        }
       },
-      defaultTextNodeHeight: {
-        label: 'Default text node height',
-        description: 'The default height of a text node.',
-        type: 'number',
-        parse: (value: string) => Math.max(1, parseInt(value) || 0)
-      },
-      defaultFileNodeWidth: {
-        label: 'Default file node width',
-        description: 'The default width of a file node.',
-        type: 'number',
-        parse: (value: string) => Math.max(1, parseInt(value) || 0)
-      },
-      defaultFileNodeHeight: {
-        label: 'Default file node height',
-        description: 'The default height of a file node.',
-        type: 'number',
-        parse: (value: string) => Math.max(1, parseInt(value) || 0)
+      defaultFileNodeDimensions: {
+        label: 'Default file node dimensions',
+        description: 'The default dimensions of a file node.',
+        type: 'dimension',
+        parse: (value: [string, string]) => {
+          const width = Math.max(1, parseInt(value[0]) || 0)
+          const height = Math.max(1, parseInt(value[1]) || 0)
+          return [width, height]
+        }
       },
       minNodeSize: {
         label: 'Minimum node size',
-        description: 'The minimum size of a node.',
+        description: 'The minimum size (either width or height) of a node.',
         type: 'number',
         parse: (value: string) => Math.max(1, parseInt(value) || 0)
       },
@@ -427,10 +419,15 @@ export const SETTINGS = {
         description: 'If turned off, you can still set the start node using the corresponding command.',
         type: 'boolean'
       },
-      defaultSlideSize: {
-        label: 'Default slide ratio',
-        description: 'The default ratio of the slide. For example, 16:9 is 1200x675 and 3:2 is 1350x900.',
-        type: 'text'
+      defaultSlideDimensions: {
+        label: 'Default slide dimensions',
+        description: 'The default dimensions of a slide.',
+        type: 'dimension',
+        parse: (value: [string, string]) => {
+          const width = Math.max(1, parseInt(value[0]) || 0)
+          const height = Math.max(1, parseInt(value[1]) || 0)
+          return [width, height]
+        }
       },
       wrapInSlidePadding: {
         label: 'Wrap in slide padding',
@@ -625,6 +622,9 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           case 'number':
             this.createNumberSetting(settingsHeaderChildrenContainerEl, settingId, setting as NumberSetting)
             break
+          case 'dimension':
+            this.createDimensionSetting(settingsHeaderChildrenContainerEl, settingId, setting as DimensionSetting)
+            break
           case 'boolean':
             this.createBooleanSetting(settingsHeaderChildrenContainerEl, settingId, setting as BooleanSetting)
             break
@@ -705,6 +705,23 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           await this.settingsManager.setSetting({ [settingId]: setting.parse(value) })
         })
       )
+  }
+
+  private createDimensionSetting(containerEl: HTMLElement, settingId: keyof AdvancedCanvasPluginSettingsValues, setting: DimensionSetting) {
+    let text1: TextComponent
+    let text2: TextComponent
+
+    new SettingEl(containerEl)
+      .setName(setting.label)
+      .setDesc(setting.description)
+      .addText(text => {
+        text1 = text.setValue((this.settingsManager.getSetting(settingId) as [number, number])[0].toString())
+          .onChange(async (value) => await this.settingsManager.setSetting({ [settingId]: setting.parse([value, text2.getValue()]) }))
+      })
+      .addText(text => {
+        text2 = text.setValue((this.settingsManager.getSetting(settingId) as [number, number])[1].toString())
+          .onChange(async (value) => await this.settingsManager.setSetting({ [settingId]: setting.parse([text1.getValue(), value]) }))
+      })
   }
 
   private createBooleanSetting(containerEl: HTMLElement, settingId: keyof AdvancedCanvasPluginSettingsValues, setting: BooleanSetting) {
