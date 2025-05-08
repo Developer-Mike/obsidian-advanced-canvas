@@ -34,7 +34,7 @@ import EncapsulateCanvasExtension from './canvas-extensions/encapsulate-canvas-e
 import CommandsCanvasExtension from './canvas-extensions/commands-canvas-extension'
 import AutoResizeNodeCanvasExtension from './canvas-extensions/auto-resize-node-canvas-extension'
 import PortalsCanvasExtension from './canvas-extensions/portals-canvas-extension'
-import FrontmatterModalCanvasExtension from './canvas-extensions/frontmatter-modal-canvas-extension'
+import FrontmatterControlButtonCanvasExtension from './canvas-extensions/frontmatter-control-button-canvas-extension'
 import BetterDefaultSettingsCanvasExtension from './canvas-extensions/better-default-settings-canvas-extension'
 import ColorPaletteCanvasExtension from './canvas-extensions/color-palette-canvas-extension'
 import CollapsibleGroupsCanvasExtension from './canvas-extensions/collapsible-groups-canvas-extension'
@@ -48,6 +48,7 @@ import NodeStylesExtension from './canvas-extensions/advanced-styles/node-styles
 import EdgeStylesExtension from './canvas-extensions/advanced-styles/edge-styles'
 
 // Dataset Exposers
+import CanvasMetadataExposerExtension from './canvas-extensions/dataset-exposers/canvas-metadata-exposer'
 import NodeInteractionExposerExtension from './canvas-extensions/dataset-exposers/node-interaction-exposer'
 import NodeExposerExtension from './canvas-extensions/dataset-exposers/node-exposer'
 import EdgeExposerExtension from './canvas-extensions/dataset-exposers/edge-exposer'
@@ -79,12 +80,13 @@ const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   PortalsCanvasExtension,
   
   // UI Extensions (Non-savable data)
+  CanvasMetadataExposerExtension,
   CanvasWrapperExposerExtension,
   NodeExposerExtension,
   EdgeExposerExtension,
   NodeInteractionExposerExtension,
 
-  FrontmatterModalCanvasExtension,
+  FrontmatterControlButtonCanvasExtension,
   BetterDefaultSettingsCanvasExtension,
   CommandsCanvasExtension,
   BetterReadonlyCanvasExtension,

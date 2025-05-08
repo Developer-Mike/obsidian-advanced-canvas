@@ -154,7 +154,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
 
   private setStartNode(canvas: Canvas, node: CanvasNode | undefined) {
     if (!node) return
-    canvas.setMetadata('startNode', node.getData().id)
+    canvas.metadata['startNode'] = node.getData().id
   }
 
   private getDefaultSlideSize(): Size {
@@ -169,7 +169,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
   }
 
   private addSlide(canvas: Canvas, pos?: Position, bbox?: BBox) {
-    const isStartNode = canvas.getMetadata('startNode') === undefined
+    const isStartNode = canvas.metadata['startNode'] === undefined
     const slideSize = this.getDefaultSlideSize()
     const slideAspectRatio = this.getSlideAspectRatio()
 
@@ -207,7 +207,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
       ratio: slideAspectRatio
     })
 
-    if (isStartNode) canvas.setMetadata('startNode', groupNode.getData().id)
+    if (isStartNode) canvas.metadata['startNode'] = groupNode.getData().id
   }
 
   private async animateNodeTransition(canvas: Canvas, fromNode: CanvasNode|undefined, toNode: CanvasNode) {
@@ -244,7 +244,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
   private async startPresentation(canvas: Canvas, tryContinue: boolean = false) {
     // Only reset visited nodes if we are not trying to continue
     if (!tryContinue || this.visitedNodeIds.length === 0) {
-      const startNode = canvas.getMetadata('startNode') && canvas.nodes.get(canvas.getMetadata('startNode'))
+      const startNode = canvas.metadata['startNode'] && canvas.nodes.get(canvas.metadata['startNode'])
       if (!startNode) {
         new Notice('No start node found. Please mark a node as a start node trough the popup menu.')
         return

@@ -3,7 +3,7 @@ import CanvasExtension from "./canvas-extension"
 import CanvasHelper from "src/utils/canvas-helper"
 import { Notice } from "obsidian"
 
-export default class FrontmatterModalCanvasExtension extends CanvasExtension {
+export default class FrontmatterControlButtonCanvasExtension extends CanvasExtension {
   isEnabled() { return 'canvasMetadataCompatibilityEnabled' as const }
 
   init() {

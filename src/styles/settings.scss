@@ -27,9 +27,19 @@
   }
 }
 
+.settings-header-children {
+  transform-origin: top center;
+
+  transform: scaleY(1);
+  transition: transform 0.2s ease-in-out;
+}
+
 .ac-settings-heading:has(.checkbox-container:not(.is-enabled)) + .settings-header-children {
   opacity: 0.5;
   pointer-events: none;
+
+  height: 0;
+  transform: scaleY(0);
 }
 
 details.setting-item {
@@ -129,19 +139,5 @@ body.is-mobile .kofi-button.sticky {
 
   .no-button {
     cursor: pointer;
-  }
-}
-
-// Quicksettings
-.quicksettings-suggestion {
-  display: flex;
-  flex-direction: column;
-
-  .quicksettings-suggestion-label {
-    font-weight: 500;
-  }
-  
-  .quicksettings-suggestion-description {
-    color: var(--text-muted);
   }
 }

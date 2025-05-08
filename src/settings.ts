@@ -135,10 +135,10 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
 
   variableBreakpointFeatureEnabled: false,
 
-  zOrderingControlFeatureEnabled: true,
+  zOrderingControlFeatureEnabled: false,
   zOrderingControlShowOneLayerShiftOptions: false,
 
-  aspectRatioControlFeatureEnabled: true,
+  aspectRatioControlFeatureEnabled: false,
 
   commandsFeatureEnabled: true,
   zoomToClonedNode: true,
@@ -154,7 +154,7 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
 
   betterExportFeatureEnabled: true,
 
-  betterReadonlyEnabled: true,
+  betterReadonlyEnabled: false,
   hideBackgroundGridWhenInReadonly: true,
   disableNodePopup: false,
   disableZoom: false,
@@ -168,7 +168,7 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   collapsibleGroupsFeatureEnabled: true,
   collapsedGroupPreviewOnDrag: true,
 
-  focusModeFeatureEnabled: true,
+  focusModeFeatureEnabled: false,
 
   presentationFeatureEnabled: true,
   showSetStartNodeInPopup: false,
@@ -182,7 +182,7 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   slideTransitionAnimationDuration: 0.5,
   slideTransitionAnimationIntensity: 1.25,
 
-  canvasEncapsulationEnabled: true,
+  canvasEncapsulationEnabled: false,
 
   portalsFeatureEnabled: true,
   showEdgesIntoDisabledPortals: true
