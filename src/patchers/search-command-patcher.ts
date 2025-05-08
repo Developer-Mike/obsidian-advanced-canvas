@@ -5,7 +5,7 @@ import { CanvasGroupNodeData, CanvasTextNodeData } from "src/@types/AdvancedJson
 
 export default class SearchCommandPatcher extends Patcher {
   protected async patch() {
-    if (!this.plugin.settings.getSetting('enableNativeFileSearch')) return
+    if (!this.plugin.settings.getSetting('nativeFileSearchEnabled')) return
 
     const that = this
     Patcher.patch(this.plugin, this.plugin.app.commands.commands["editor:open-search"], {
