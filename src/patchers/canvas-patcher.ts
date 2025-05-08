@@ -55,8 +55,10 @@ export default class CanvasPatcher extends Patcher {
           const canvasData = JSONC.parse(json) as CanvasData
 
           // Check if the canvas data needs migration and migrate it
-          if (MigrationHelper.needsMigration(canvasData))
+          if (MigrationHelper.needsMigration(canvasData)) {
+            if (this.file) that.plugin.createFileSnapshot(this.file.path, json)
             json = JSON.stringify(MigrationHelper.migrate(canvasData))
+          }
         } catch (e) {
           console.error('Failed to migrate canvas data:', e)
         }
