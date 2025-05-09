@@ -1,4 +1,4 @@
-# An open, more advanced file format compatible with [JSON Canvas](https://github.com/obsidianmd/jsoncanvas) for infinite canvas data.
+# An open, more advanced file format compatible with Advanced JSON Canvas for infinite canvas data.
 
 The Advanced JSON Canvas format is a structured way to represent a canvas with nodes and edges. It is designed to be extensible and flexible, allowing for various types of nodes and connections between them. It's completely compatible with the standard JSON Canvas format, but adds more features and flexibility.
 
