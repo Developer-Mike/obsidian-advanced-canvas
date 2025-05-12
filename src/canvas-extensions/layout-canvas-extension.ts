@@ -3,6 +3,7 @@ import CanvasExtension from "./canvas-extension"
 import ElkHelper, { ElkLayout } from "src/utils/elk-helper"
 import { ELK, ElkNode } from "elkjs"
 import { Notice } from "obsidian"
+import CanvasHelper from "src/utils/canvas-helper"
 
 export default class LayoutCanvasExtension extends CanvasExtension {
   isEnabled() { return true }
@@ -11,6 +12,40 @@ export default class LayoutCanvasExtension extends CanvasExtension {
   private running = new WeakMap<ELK, Promise<ElkNode>>()
 
   init() {
+    // Add commands
+    this.plugin.addCommand({
+      id: 'add-child-node',
+      name: 'Add Child Node',
+      checkCallback: CanvasHelper.canvasCommand(
+        this.plugin,
+        (canvas: Canvas) => ElkHelper.LAYOUTS.includes(canvas.metadata.frontmatter?.layout as ElkLayout) && canvas.selection.size === 1 && canvas.selection.values().next().value.getData().type,
+        (canvas: Canvas) => {
+          const currentNode = canvas.selection.values().next().value
+
+          const newNode = canvas.createTextNode({
+            pos: { x: 0, y: 0 },
+            size: { 
+              width: canvas.config.defaultTextNodeDimensions.width, 
+              height: canvas.config.defaultTextNodeDimensions.height 
+            }
+          })
+
+          canvas.importData({
+            nodes: [],
+            edges: [{
+              id: `edge-${currentNode.id}-${newNode.id}`,
+              fromNode: currentNode.id,
+              toNode: newNode.id,
+              fromSide: 'bottom', fromFloating: true,
+              toSide: 'top', toFloating: true,
+            }],
+          }, false, true)
+
+          canvas.selectOnly(newNode)
+        }
+      )
+    })
+
     // Canvas events
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       'advanced-canvas:canvas-unloaded:before',
@@ -25,7 +60,7 @@ export default class LayoutCanvasExtension extends CanvasExtension {
 
     // Node events
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      'advanced-canvas:node-created',
+      'advanced-canvas:node-added',
       (canvas: Canvas, node: CanvasNode) => this.onLayoutChanged(canvas)
     ))
 
