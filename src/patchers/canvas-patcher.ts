@@ -51,6 +51,7 @@ export default class CanvasPatcher extends Patcher {
       setViewData: Patcher.OverrideExisting(next => function (json: string, ...args: any): void {
         json = json !== '' ? json : '{}'
 
+        // Pre-parse and migrate the JSON data
         try {
           const canvasData = JSONC.parse(json) as CanvasData
 
@@ -59,10 +60,9 @@ export default class CanvasPatcher extends Patcher {
             if (this.file) that.plugin.createFileSnapshot(this.file.path, json)
             json = JSON.stringify(MigrationHelper.migrate(canvasData))
           }
-        } catch (e) {
-          console.error('Failed to migrate canvas data:', e)
-        }
+        } catch (e) { console.error('Failed to migrate canvas data:', e) }
 
+        // Actual parsing
         let result
         try {
           result = next.call(this, json, ...args)
@@ -77,7 +77,32 @@ export default class CanvasPatcher extends Patcher {
           result = next.call(this, json, ...args)
         }
 
+        // Add metadata object to the canvas object
+        try {
+          // Add proxy to metadata to listen for changes
+          const validator = {
+            get(target: any, key: string) {
+              if (typeof target[key] === 'object' && target[key] !== null)
+                return new Proxy(target[key], validator)
+              else return target[key]
+            },
+            set(target: any, key: string, value: any) {
+              target[key] = value
+
+              that.plugin.app.workspace.trigger('advanced-canvas:canvas-metadata-changed', this.canvas)
+              this.canvas.requestSave()
+
+              return true
+            }
+          }
+
+          // Set canvas metadata
+          this.canvas.metadata = new Proxy(this.canvas.data.metadata, validator)
+        } catch (e) { console.error('Failed to add metadata object to canvas:', e) }
+
         that.plugin.app.workspace.trigger('advanced-canvas:canvas-changed', this.canvas)
+        that.plugin.app.workspace.trigger('advanced-canvas:canvas-metadata-changed', this.canvas)
+
         return result
       }),
       getViewData: Patcher.OverrideExisting(next => function (...args: any): string {
@@ -107,6 +132,10 @@ export default class CanvasPatcher extends Patcher {
 
     // Patch canvas
     Patcher.patchPrototype<Canvas>(this.plugin, view.canvas, {
+      unload: Patcher.OverrideExisting(next => function (...args: any): void {
+        that.plugin.app.workspace.trigger('advanced-canvas:canvas-unloaded:before', this)
+        return next.call(this, ...args)
+      }),
       markViewportChanged: Patcher.OverrideExisting(next => function (...args: any): void {
         that.plugin.app.workspace.trigger('advanced-canvas:viewport-changed:before', this)
         const result = next.call(this, ...args)

@@ -1,15 +1,29 @@
-import { Canvas, CanvasNode } from "src/@types/Canvas"
+import { Canvas, CanvasEdge, CanvasNode } from "src/@types/Canvas"
 import CanvasExtension from "./canvas-extension"
+import ElkHelper, { ElkLayout } from "src/utils/elk-helper"
+import { ELK, ElkNode } from "elkjs"
+import { Notice } from "obsidian"
 
 export default class LayoutCanvasExtension extends CanvasExtension {
   isEnabled() { return true }
 
+  private engines = new WeakMap<Canvas, ELK>()
+  private running = new WeakMap<ELK, Promise<ElkNode>>()
+
   init() {
+    // Canvas events
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      'advanced-canvas:canvas-unloaded:before',
+      (canvas: Canvas) => this.engines.delete(canvas)
+    ))
+
+    // Metadata events
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       'advanced-canvas:canvas-metadata-changed',
       (canvas: Canvas) => this.onLayoutChanged(canvas)
     ))
 
+    // Node events
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       'advanced-canvas:node-created',
       (canvas: Canvas, node: CanvasNode) => this.onLayoutChanged(canvas)
@@ -22,19 +36,64 @@ export default class LayoutCanvasExtension extends CanvasExtension {
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       'advanced-canvas:node-moved',
-      (canvas: Canvas, node: CanvasNode) => this.onLayoutChanged(canvas)
+      (canvas: Canvas, node: CanvasNode) => node.initialized ? this.onLayoutChanged(canvas) : void 0
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       'advanced-canvas:node-resized',
-      (canvas: Canvas, node: CanvasNode) => this.onLayoutChanged(canvas)
+      (canvas: Canvas, node: CanvasNode) => node.initialized ? this.onLayoutChanged(canvas) : void 0
+    ))
+
+    // Edge events
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      'advanced-canvas:edge-added',
+      (canvas: Canvas, edge: CanvasEdge) => this.onLayoutChanged(canvas)
+    ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      'advanced-canvas:edge-removed',
+      (canvas: Canvas, edge: CanvasEdge) => this.onLayoutChanged(canvas)
+    ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      'advanced-canvas:edge-connection-dragging:after',
+      (canvas: Canvas, edge: CanvasEdge) => this.onLayoutChanged(canvas)
     ))
   }
 
   private onLayoutChanged(canvas: Canvas) {
-    const layout = canvas.metadata.frontmatter?.layout
-    if (!layout) return
+    const layout = canvas.metadata.frontmatter?.layout as ElkLayout
+    if (!layout || typeof layout !== 'string') return
 
-    console.log('Layout changed:', layout)
+    if (!ElkHelper.LAYOUTS.includes(layout))
+      return new Notice(`Layout "${layout}" is not supported. Supported layouts: ${ElkHelper.LAYOUTS.join(', ')}`)
+
+    // Create engine if it doesn't exist
+    if (!this.engines.has(canvas))
+      this.engines.set(canvas, ElkHelper.getEngine())
+
+    // Run layout
+    this.calculateLayout(canvas, layout)
+  }
+
+  private async calculateLayout(canvas: Canvas, layout: ElkLayout) {
+    const engine = this.engines.get(canvas)
+    if (!engine) return
+
+    // Check if the engine is already running
+    if (this.running.has(engine)) return
+
+    // Run the layout calculation
+    const promise = engine.layout({
+      layoutOptions: { 'elk.algorithm': layout },
+      ...ElkHelper.toElk(canvas.getData()),
+    })
+
+    this.running.set(engine, promise)
+    const result = await promise
+    this.running.delete(engine)
+
+    // Apply the layout to the canvas
+    ElkHelper.applyElk(canvas, result)
   }
 }

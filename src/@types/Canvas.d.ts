@@ -329,6 +329,9 @@ export interface Canvas {
 
   onResize(): void
 
+  load(): void
+  unload(): void
+
   // Custom
   searchEl?: HTMLElement
   zoomToRealBbox(bbox: BBox): void

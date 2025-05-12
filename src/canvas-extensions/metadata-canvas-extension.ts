@@ -27,32 +27,9 @@ export default class MetadataCanvasExtension extends CanvasExtension {
 
   private onCanvasChanged(canvas: Canvas) {
     let metadata = canvas.data?.metadata
-    if (!metadata || metadata.version !== CURRENT_SPEC_VERSION)
-      return new Notice("Metadata node not found or version mismatch. Should have been migrated (but wasn't).")
-
-    // Add proxy to metadata to listen for changes
-    const that = this
-    const validator = {
-      get(target: any, key: string) {
-        if (typeof target[key] === 'object' && target[key] !== null)
-          return new Proxy(target[key], validator)
-        else return target[key]
-      },
-      set(target: any, key: string, value: any) {
-        target[key] = value
-
-        that.plugin.app.workspace.trigger('advanced-canvas:canvas-metadata-changed', canvas)
-        canvas.requestSave()
-
-        return true
-      }
-    }
-
-    // Set canvas metadata
-    canvas.metadata = new Proxy(metadata, validator)
-
-    // Trigger metadata change event
-    this.plugin.app.workspace.trigger('advanced-canvas:canvas-metadata-changed', canvas)
+    if (metadata && metadata.version === CURRENT_SPEC_VERSION) return
+    
+    new Notice("Metadata node not found or version mismatch. Should have been migrated (but wasn't).")
   }
 
   private onMetadataChanged(canvas: Canvas) {
