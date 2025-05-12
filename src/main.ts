@@ -42,6 +42,7 @@ import FocusModeCanvasExtension from './canvas-extensions/focus-mode-canvas-exte
 import FlipEdgeCanvasExtension from './canvas-extensions/flip-edge-canvas-extension'
 import ExportCanvasExtension from './canvas-extensions/export-canvas-extension'
 import FloatingEdgeCanvasExtension from './canvas-extensions/floating-edge-canvas-extension'
+import LayoutCanvasExtension from './canvas-extensions/layout-canvas-extension'
 
 // Advanced Styles
 import NodeStylesExtension from './canvas-extensions/advanced-styles/node-styles'
@@ -97,6 +98,7 @@ const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   ExportCanvasExtension,
   FocusModeCanvasExtension,
   EncapsulateCanvasExtension,
+  LayoutCanvasExtension,
 ]
 
 export default class AdvancedCanvasPlugin extends Plugin {
