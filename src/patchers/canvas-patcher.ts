@@ -49,7 +49,7 @@ export default class CanvasPatcher extends Patcher {
         return next.call(this, state)
       }),
       setViewData: Patcher.OverrideExisting(next => function (json: string, ...args: any): void {
-        json = json !== '' ? json : '{}'
+        json = json !== '' ? json : '{"nodes": [], "edges": []}'
 
         try {
           const canvasData = JSONC.parse(json) as CanvasData
