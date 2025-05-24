@@ -27,14 +27,14 @@ jobs:
         run: npm run build
 
       - name: Verify Files Exist
-        run: ls -la main.js styles.css manifest.json
+        run: ls -la dist/main.js dist/styles.css dist/manifest.json
 
       - name: Upload Release Assets (Original Names)
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            main.js
-            styles.css
-            manifest.json
+            dist/main.js
+            dist/styles.css
+            dist/manifest.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
