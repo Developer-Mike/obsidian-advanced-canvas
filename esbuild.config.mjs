@@ -2,6 +2,7 @@ import esbuild from "esbuild";
 import process from "process";
 import builtins from "builtin-modules";
 import { sassPlugin } from 'esbuild-sass-plugin';
+import { copy } from "esbuild-plugin-copy";
 
 const banner =
 `/*
@@ -32,15 +33,21 @@ const context = await esbuild.context({
 		"@lezer/common",
 		"@lezer/highlight",
 		"@lezer/lr",
-		...builtins],
+		...builtins
+  ],
 	format: "cjs",
 	target: "es2018",
 	logLevel: "info",
 	sourcemap: prod ? false : "inline",
 	treeShaking: true,
-  outdir: ".",
+  outdir: "dist",
 	plugins: [
 		sassPlugin({}),
+    copy({
+      resolveFrom: "cwd",
+      watch: !prod,
+      assets: [ { from: "manifest.json", to: "dist/manifest.json" } ],
+    }),
 	],
 });
 
