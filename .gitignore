@@ -10,6 +10,7 @@ node_modules
 
 # Don't include the compiled main.js/styles.css file in the repo.
 # They should be uploaded to GitHub releases instead.
+dist/
 main.js
 styles.css
 
