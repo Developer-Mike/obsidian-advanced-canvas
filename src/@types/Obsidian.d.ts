@@ -101,7 +101,7 @@ declare module "obsidian" {
     resolveLinks: (filepath: string, /* custom */ cachedContent: any) => void
 
     // Custom
-    registerInternalLinkAC: (canvasName: string, from: string, to: string) => void
+    registerInternalLinkAC: (canvasName: string, edgeId: string, from: string, to: string) => void
   }
 }
 
@@ -113,10 +113,6 @@ export interface FileCacheEntry {
   hash: string
   mtime: number
   size: number
-}
-
-export interface CanvasPos extends Pos {
-  nodeId: string
 }
 
 export interface MetadataCacheMap {
@@ -131,11 +127,11 @@ export interface ExtendedCachedMetadata extends CachedMetadata {
 }
 
 export interface ExtendedEmbedCache extends EmbedCache {
-  position: Pos | CanvasPos
+  key?: string | `nodes.${string}${'' | `.${number}.${number}`}` /* nodes.node-id.offset-start.offset-end */ | `edges.${string}` /* edges.edge-id */
 }
 
 export interface ExtendedLinkCache extends LinkCache {
-  position: Pos | CanvasPos
+  key?: string | `nodes.${string}${'' | `.${number}.${number}`}` /* nodes.node-id.offset-start.offset-end */ | `edges.${string}` /* edges.edge-id */
 }
 
 export interface NodesCache {

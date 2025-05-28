@@ -78,14 +78,15 @@ export default class MetadataCachePatcher extends Patcher {
           .filter((node: CanvasFileNodeData) => node.type === 'file' && node.file)
           .map((node: CanvasFileNodeData) => [node.id, node.file] as [string, string])
           .map(([nodeId, linkedFile]) => ({
+            key: `nodes.${nodeId}`,
             link: linkedFile,
             original: linkedFile,
             displayText: linkedFile,
-            position: {
-              nodeId: nodeId,
+            // TODO: Remove
+            /* position: {
               start: { line: 0, col: 0, offset: 0 },
               end: { line: 0, col: 0, offset: 0 }
-            }
+            } */
           }))
 
         // Extract canvas text node links/embeds
@@ -105,10 +106,8 @@ export default class MetadataCachePatcher extends Patcher {
           .map((metadata: ExtendedCachedMetadata, index: number) => (
             (metadata.embeds || []).map(embed => ({
               ...embed,
-              position: {
-                nodeId: textNodesIds[index],
-                ...embed.position
-              }
+              key: `nodes.${textNodesIds[index]}.${embed.position.start.offset}.${embed.position.end.offset}`,
+              position: undefined
             }))
           )).flat()
 
@@ -116,10 +115,8 @@ export default class MetadataCachePatcher extends Patcher {
           .map((metadata: ExtendedCachedMetadata, index: number) => (
             (metadata.links || []).map(link => ({
               ...link,
-              position: {
-                nodeId: textNodesIds[index],
-                ...link.position
-              }
+              key: `nodes.${textNodesIds[index]}.${link.position.start.offset}.${link.position.end.offset}`,
+              position: undefined
             }))
           )).flat()
 
@@ -193,11 +190,11 @@ export default class MetadataCachePatcher extends Patcher {
             const toFile = (to as CanvasFileNodeData).file
 
             // Register the link for the "from" node to the "to" node
-            this.registerInternalLinkAC(file.name, fromFile, toFile)
+            this.registerInternalLinkAC(file.name, edge.id, fromFile, toFile)
 
             // Check if the edge is bidirectional or unidirectional - if yes, register the link for the "to" node to the "from" node as well
             if (!(edge.toEnd !== 'none' || edge.fromEnd === 'arrow'))
-              this.registerInternalLinkAC(file.name, toFile, fromFile)
+              this.registerInternalLinkAC(file.name, edge.id, toFile, fromFile)
           }
         }
 
@@ -205,7 +202,7 @@ export default class MetadataCachePatcher extends Patcher {
         this.trigger('resolve', file)
         this.trigger('resolved') // TODO: Use workQueue like in the original function
       }),
-      registerInternalLinkAC: _next => async function (canvasName: string, from: string, to: string) {
+      registerInternalLinkAC: _next => async function (canvasName: string, edgeId: string, from: string, to: string) {
         // If the "from" node is the same as the "to" node, don't register the link
         if (from === to) return
 
@@ -224,6 +221,7 @@ export default class MetadataCachePatcher extends Patcher {
           links: [
             ...(fromFileMetadataCache.links || []),
             {
+              key: `edges.${edgeId}`,
               link: to,
               original: to,
               displayText: `${canvasName} → ${to}`,

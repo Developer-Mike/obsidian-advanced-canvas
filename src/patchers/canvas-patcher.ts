@@ -6,7 +6,7 @@ import { BBox, Canvas, CanvasEdge, CanvasElement, CanvasNode, CanvasPopupMenu, C
 import JSONC from "tiny-jsonc"
 import Patcher from "./patcher"
 import BBoxHelper from "src/utils/bbox-helper"
-import { CanvasData, CanvasEdgeData, CanvasNodeData } from "src/@types/AdvancedJsonCanvas"
+import { CanvasData, CanvasEdgeData, CanvasNodeData, CanvasTextNodeData } from "src/@types/AdvancedJsonCanvas"
 import MigrationHelper from "src/utils/migration-helper"
 
 export default class CanvasPatcher extends Patcher {
@@ -36,14 +36,48 @@ export default class CanvasPatcher extends Patcher {
     // Patch canvas view
     Patcher.patchPrototype<CanvasView>(this.plugin, view, {
       setEphemeralState: Patcher.OverrideExisting(next => function (state: any): void {
-        // Select and zoom to the node if it exists
+        // Select and zoom to the node if it exists (Link subpath)
         if (state?.subpath) {
           const nodeId = (state.subpath as string).replace(/^#/, '')
           const node = this.canvas.nodes.get(nodeId)
-          if (!node) return next.call(this, state)
 
-          this.canvas.selectOnly(node)
-          this.canvas.zoomToSelection()
+          if (node) {
+            this.canvas.selectOnly(node)
+            this.canvas.zoomToSelection()
+            return
+          }
+        }
+
+        // Select and zoom to the node if propertyMatches exists (backlink)
+        const propertyMatch = state?.propertyMatches?.[0]
+        if (propertyMatch) {
+          const elementType = (propertyMatch.key ?? "nodes") as 'nodes' | 'edges'
+          const elementId = (propertyMatch.subkey?.[0] ?? "") as string
+
+          const element = elementType === "nodes" ?
+            this.canvas.nodes.get(elementId) :
+            this.canvas.edges.get(elementId)
+
+          if (element) {
+            const matchPos = [propertyMatch.subkey?.[1], propertyMatch.subkey?.[2]]
+              .map(pos => parseInt(pos)).filter(pos => pos && !isNaN(pos))
+            
+            // If range match is available, do it the native way
+            if (matchPos.length === 2) {
+              return this.setEphemeralState({
+                match: {
+                  nodeId: elementId,
+                  content: (element.getData() as CanvasTextNodeData)?.text ?? "",
+                  matches: [matchPos]
+                }
+              })
+            }
+
+            // Else, just zoom to the element
+            this.canvas.selectOnly(element)
+            this.canvas.zoomToSelection()
+            return
+          }
         }
 
         return next.call(this, state)
