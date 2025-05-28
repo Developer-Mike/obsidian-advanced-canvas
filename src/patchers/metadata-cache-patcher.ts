@@ -77,10 +77,10 @@ export default class MetadataCachePatcher extends Patcher {
         const fileNodesEmbeds = content.nodes
           .filter((node: CanvasFileNodeData) => node.type === 'file' && node.file)
           .map((node: CanvasFileNodeData) => [node.id, node.file] as [string, string])
-          .map(([nodeId, file]) => ({
-            link: file,
-            original: file,
-            displayText: file,
+          .map(([nodeId, linkedFile]) => ({
+            link: linkedFile,
+            original: linkedFile,
+            displayText: linkedFile,
             position: {
               nodeId: nodeId,
               start: { line: 0, col: 0, offset: 0 },
