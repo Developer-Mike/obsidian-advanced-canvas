@@ -37,7 +37,7 @@ export default class MetadataCachePatcher extends Patcher {
 
         // Don't use workQueue like in the original function bc it's impossible
         // Read canvas data
-        const content = JSON.parse(await this.vault.cachedRead(file) ?? '{}') as CanvasData
+        const content = JSON.parse(await this.vault.cachedRead(file) || '{}') as CanvasData
         if (!content?.nodes) return
 
         // Extract frontmatter
