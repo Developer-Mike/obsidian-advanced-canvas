@@ -96,6 +96,9 @@ export interface AdvancedCanvasPluginSettingsValues {
 
   portalsFeatureEnabled: boolean
   showEdgesIntoDisabledPortals: boolean
+
+  autoFileNodeEdgesFeatureEnabled: boolean
+  autoFileNodeEdgesFrontmatterKey: string
 }
 
 export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
@@ -181,7 +184,10 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   canvasEncapsulationEnabled: false,
 
   portalsFeatureEnabled: true,
-  showEdgesIntoDisabledPortals: true
+  showEdgesIntoDisabledPortals: true,
+
+  autoFileNodeEdgesFeatureEnabled: false,
+  autoFileNodeEdgesFrontmatterKey: 'canvas-edges'
 }
 
 export const SETTINGS = {
@@ -542,7 +548,20 @@ export const SETTINGS = {
     description: 'Focus on a single node and blur all other nodes.',
     infoSection: 'focus-mode',
     children: { }
-  }
+  },
+  autoFileNodeEdgesFeatureEnabled: {
+    label: 'Auto file node edges',
+    description: 'Automatically create edges between file nodes based their frontmatter links.',
+    infoSection: '', // TODO: Add info section
+    children: {
+      autoFileNodeEdgesFrontmatterKey: {
+        label: 'Frontmatter key',
+        description: 'The frontmatter key to fetch the outgoing edges from.',
+        type: 'text',
+        parse: (value: string) => value.trim() || 'canvas-edges'
+      }
+    }
+  },
 } as const satisfies {
   [key in keyof AdvancedCanvasPluginSettingsValues]: SettingsHeading & { 
     children: { 

@@ -126,6 +126,10 @@ export interface CanvasNode extends CanvasElement {
 
   onConnectionPointerdown(e: PointerEvent, side: Side): void
 
+  // File node only
+  setFile(file: TFile, subpath?: string, force?: boolean): void
+  setFilePath(filepath: string, subpath: string): void
+
   // Custom
   collapseEl?: HTMLElement
 

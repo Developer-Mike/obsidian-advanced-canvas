@@ -415,6 +415,17 @@ export default class CanvasPatcher extends Patcher {
         const result = next.call(this, e, side)
         return result
       }),
+      // File nodes
+      setFile: next => function (...args: any): void {
+        const result = next.call(this, ...args)
+        that.plugin.app.workspace.trigger('advanced-canvas:node-changed', this.canvas, this)
+        return result
+      },
+      setFilePath: next => function (...args: any): void {
+        const result = next.call(this, ...args)
+        that.plugin.app.workspace.trigger('advanced-canvas:node-changed', this.canvas, this)
+        return result
+      }
     })
     
     this.runAfterInitialized(node, () => {
