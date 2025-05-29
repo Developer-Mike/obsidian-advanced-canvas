@@ -38,7 +38,6 @@ export default class MetadataCachePatcher extends Patcher {
         // Don't use workQueue like in the original function bc it's impossible
         // Read canvas data
         const content = JSON.parse(await this.vault.cachedRead(file) || '{}') as CanvasData
-        if (!content?.nodes) return
 
         // Extract frontmatter
         const frontmatter = content.metadata?.frontmatter
@@ -75,9 +74,9 @@ export default class MetadataCachePatcher extends Patcher {
 
         // Extract canvas file node embeds
         const fileNodesEmbeds = content.nodes
-          .filter((node: CanvasFileNodeData) => node.type === 'file' && node.file)
-          .map((node: CanvasFileNodeData) => [node.id, node.file] as [string, string])
-          .map(([nodeId, linkedFile]) => ({
+          ?.filter((node: CanvasFileNodeData) => node.type === 'file' && node.file)
+          ?.map((node: CanvasFileNodeData) => [node.id, node.file] as [string, string])
+          ?.map(([nodeId, linkedFile]) => ({
             link: linkedFile,
             original: linkedFile,
             displayText: linkedFile,
@@ -86,12 +85,12 @@ export default class MetadataCachePatcher extends Patcher {
               start: { line: 0, col: 0, offset: 0 },
               end: { line: 0, col: 0, offset: 0 }
             }
-          }))
+          })) ?? []
 
         // Extract canvas text node links/embeds
         const textEncoder = new TextEncoder()
         const textNodes = content.nodes
-          .filter((node: CanvasTextNodeData) => node.type === 'text' && node.text)
+          ?.filter((node: CanvasTextNodeData) => node.type === 'text' && node.text) ?? []
 
         const textNodesIds = textNodes
           .map((node: CanvasNodeData) => node.id)
