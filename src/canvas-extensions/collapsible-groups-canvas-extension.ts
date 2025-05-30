@@ -30,7 +30,7 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      'advanced-canvas:load-data',
+      'advanced-canvas:data-loaded:before',
       (_canvas: Canvas, data: CanvasData, _setData: (data: CanvasData) => void) => this.collapseNodes(data)
     ))
   }

@@ -284,8 +284,9 @@ export default class CanvasPatcher extends Patcher {
           this.importData(data, true, true)
         }
 
-        if (!silent) that.plugin.app.workspace.trigger('advanced-canvas:load-data', this, data, setData)
+        if (!silent) that.plugin.app.workspace.trigger('advanced-canvas:data-loaded:before', this, data, setData)
         const result = next.call(this, data, clearCanvas)
+        if (!silent) that.plugin.app.workspace.trigger('advanced-canvas:data-loaded:after', this, data, setData)
 
         return result
       }),

@@ -107,7 +107,6 @@ export interface CanvasNode extends CanvasElement {
   isContentMounted?: boolean
 
   labelEl?: HTMLElement
-  file?: TFile
 
   x: number
   y: number
@@ -127,6 +126,7 @@ export interface CanvasNode extends CanvasElement {
   onConnectionPointerdown(e: PointerEvent, side: Side): void
 
   // File node only
+  file?: TFile
   setFile(file: TFile, subpath?: string, force?: boolean): void
   setFilePath(filepath: string, subpath: string): void
 
@@ -252,7 +252,7 @@ export interface Canvas {
 
   dirty: Set<CanvasElement>
   markDirty(element: CanvasElement): void
-  markMoved(element: CanvasNode): void
+  markMoved(element: CanvasElement): void
 
   wrapperEl: HTMLElement
   canvasEl: HTMLElement

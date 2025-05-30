@@ -3,7 +3,7 @@ import { BBox, Canvas, CanvasEdge, CanvasNode, Position, Size } from "src/@types
 import { StyleAttribute } from "src/canvas-extensions/advanced-styles/style-config"
 import AdvancedCanvasPlugin from "src/main"
 import BBoxHelper from "./bbox-helper"
-import { CanvasNodeData } from "src/@types/AdvancedJsonCanvas"
+import { CanvasNodeData, Side } from "src/@types/AdvancedJsonCanvas"
 
 export interface MenuOption {
   id?: string
@@ -414,5 +414,25 @@ export default class CanvasHelper {
 
   static alignToGrid(value: number, gridSize: number = this.GRID_SIZE): number {
     return Math.round(value / gridSize) * gridSize
+  }
+
+  static getBestSideForFloatingEdge(sourcePos: Position, target: CanvasNode): Side {
+    const targetBBox = target.getBBox()
+
+    const possibleSides = ['top', 'right', 'bottom', 'left'] as const
+    const possibleTargetPos = possibleSides.map(side => [side, BBoxHelper.getCenterOfBBoxSide(targetBBox, side)]) as [Side, Position][]
+
+    let bestSide: Side | null = null
+    let bestDistance = Infinity
+    for (const [side, pos] of possibleTargetPos) {
+      const distance = Math.sqrt(Math.pow(sourcePos.x - pos.x, 2) + Math.pow(sourcePos.y - pos.y, 2))
+
+      if (distance < bestDistance) {
+        bestDistance = distance
+        bestSide = side
+      }
+    }
+
+    return bestSide!
   }
 }

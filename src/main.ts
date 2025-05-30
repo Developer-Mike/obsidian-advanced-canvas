@@ -136,6 +136,12 @@ export default class AdvancedCanvasPlugin extends Plugin {
 
   onunload() {}
 
+  getCanvases(): Canvas[] {
+    return this.app.workspace.getLeavesOfType('canvas')
+      .map(leaf => (leaf.view as CanvasView)?.canvas)
+      .filter(canvas => canvas)
+  }
+
   getCurrentCanvasView(): CanvasView | null {
     const canvasView = this.app.workspace.getActiveViewOfType(ItemView)
     if (canvasView?.getViewType() !== 'canvas') return null
