@@ -1,4 +1,4 @@
-.canvas-wrapper[data-floating-edge-feature-enabled="true"] .canvas.is-connecting {
+.canvas-wrapper[data-allow-floating-edge-creation="true"] .canvas.is-connecting {
   .canvas-node:not(.canvas-node-group) {
     &::after {
       all: unset;

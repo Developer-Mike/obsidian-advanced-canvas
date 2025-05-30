@@ -47,21 +47,23 @@ export default class AutoFileNodeEdgesCanvasExtension extends CanvasExtension {
   }
 
   private updateFileNodeEdges(canvas: Canvas, node: CanvasNode) {
-    const newEdges = this.getNewEdges(canvas, node)
+    const edges = this.getFileNodeEdges(canvas, node)
+
+    // Filter out existing edges
+    const newEdges = Array.from(edges.values())
+      .filter(edge => !canvas.edges.has(edge.id))
     
     // Add new edges
-    canvas.importData({ nodes: [], edges: Array.from(newEdges.values()) }, false, false)
+    canvas.importData({ nodes: [], edges: newEdges }, false, false)
 
     // Remove old edges
     for (const edge of canvas.edges.values()) {
-      if (!edge.id.startsWith(`${AUTO_EDGE_ID_PREFIX}${node.id}`)) continue
-
-      if (!newEdges.has(edge.id))
+      if (edge.id.startsWith(`${AUTO_EDGE_ID_PREFIX}${node.id}`) && !edges.has(edge.id)) 
         canvas.removeEdge(edge)
     }
   }
 
-  private getNewEdges(canvas: Canvas, node: CanvasNode): Map<string, CanvasEdgeData> {
+  private getFileNodeEdges(canvas: Canvas, node: CanvasNode): Map<string, CanvasEdgeData> {
     const canvasFile = canvas.view.file
     if (!canvasFile || !node.file) return new Map()
 

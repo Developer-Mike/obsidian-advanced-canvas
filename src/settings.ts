@@ -58,6 +58,7 @@ export interface AdvancedCanvasPluginSettingsValues {
   nativeFileSearchEnabled: boolean
 
   floatingEdgeFeatureEnabled: boolean
+  allowFloatingEdgeCreation: boolean
   newEdgeFromSideFloating: boolean
 
   flipEdgeFeatureEnabled: boolean
@@ -146,7 +147,8 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
 
   nativeFileSearchEnabled: true,
 
-  floatingEdgeFeatureEnabled: false,
+  floatingEdgeFeatureEnabled: true,
+  allowFloatingEdgeCreation: false,
   newEdgeFromSideFloating: false,
 
   flipEdgeFeatureEnabled: true,
@@ -399,9 +401,14 @@ export const SETTINGS = {
   },
   floatingEdgeFeatureEnabled: {
     label: 'Floating edges (auto edge side)',
-    description: 'Create edges that are automatically placed on the most suitable side of the node by dragging the edge over the target node without placing it over a specific side connection point.',
+    description: 'Floating edges are automatically placed on the most suitable side of the node.',
     infoSection: 'floating-edges-automatic-edge-side',
     children: {
+      allowFloatingEdgeCreation: {
+        label: 'Allow floating edges creation',
+        description: 'Allow floating edges creation by dragging the edge over the target node without placing it over a specific side connection point. (If disabled, floating edges can only be created and used by other Advanced Canvas features.)',
+        type: 'boolean'
+      },
       newEdgeFromSideFloating: {
         label: 'New edge from side floating',
         description: 'When enabled, the "from" side of the edge will always be floating.',

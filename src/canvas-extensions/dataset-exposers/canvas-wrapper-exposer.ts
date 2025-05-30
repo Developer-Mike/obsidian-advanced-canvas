@@ -7,7 +7,7 @@ const EXPOSED_SETTINGS: (keyof AdvancedCanvasPluginSettingsValues)[] = [
   'hideBackgroundGridWhenInReadonly',
   'collapsibleGroupsFeatureEnabled',
   'collapsedGroupPreviewOnDrag',
-  'floatingEdgeFeatureEnabled',
+  'allowFloatingEdgeCreation',
 ]
 
 export default class CanvasWrapperExposerExtension extends CanvasExtension {

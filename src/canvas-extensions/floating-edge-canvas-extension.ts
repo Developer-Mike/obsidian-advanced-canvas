@@ -20,10 +20,12 @@ export default class FloatingEdgeCanvasExtension  extends CanvasExtension {
       (canvas: Canvas, node: CanvasNode) => this.onNodeMoved(canvas, node)
     ))
 
-    this.plugin.registerEvent(this.plugin.app.workspace.on(
-      'advanced-canvas:edge-connection-dragging:before',
-      (canvas: Canvas, edge: CanvasEdge, event: PointerEvent, newEdge: boolean, side: 'from' | 'to') => this.onEdgeStartedDragging(canvas, edge, event, newEdge, side)
-    ))
+    if (this.plugin.settings.getSetting('allowFloatingEdgeCreation')) {
+      this.plugin.registerEvent(this.plugin.app.workspace.on(
+        'advanced-canvas:edge-connection-dragging:before',
+        (canvas: Canvas, edge: CanvasEdge, event: PointerEvent, newEdge: boolean, side: 'from' | 'to') => this.onEdgeStartedDragging(canvas, edge, event, newEdge, side)
+      ))
+    }
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       'advanced-canvas:edge-connection-dragging:after',
@@ -34,7 +36,7 @@ export default class FloatingEdgeCanvasExtension  extends CanvasExtension {
   private onLoadData(canvas: Canvas, data: CanvasData) {
     for (const edgeData of data.edges) {
       const edge = canvas.edges.get(edgeData.id)
-      if (!edge) return console.warn("Imported edge is not loaded :(")
+      if (!edge) return console.warn("Imported edge is not yet loaded :(")
 
       this.updateEdgeConnectionSide(edge)
     }
@@ -110,7 +112,9 @@ export default class FloatingEdgeCanvasExtension  extends CanvasExtension {
 
     const dropZoneNode = side === 'from' ? edge.from.node : edge.to.node
     const floatingEdgeDropZone = this.getFloatingEdgeDropZoneForNode(dropZoneNode)
-    const wasDroppedInFloatingEdgeDropZone = BBoxHelper.insideBBox({ x: event.clientX, y: event.clientY }, floatingEdgeDropZone, true)
+    const wasDroppedInFloatingEdgeDropZone = this.plugin.settings.getSetting('allowFloatingEdgeCreation') ? 
+      BBoxHelper.insideBBox({ x: event.clientX, y: event.clientY }, floatingEdgeDropZone, true) :
+      false
 
     const edgeData = edge.getData()
     if (side === 'from' && wasDroppedInFloatingEdgeDropZone == edgeData.fromFloating) return
