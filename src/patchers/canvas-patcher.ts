@@ -304,8 +304,9 @@ export default class CanvasPatcher extends Patcher {
           this.importData(data, true, true)
         }
 
-        if (!silent) that.plugin.app.workspace.trigger('advanced-canvas:load-data', this, data, setData)
+        if (!silent) that.plugin.app.workspace.trigger('advanced-canvas:data-loaded:before', this, data, setData)
         const result = next.call(this, data, clearCanvas)
+        if (!silent) that.plugin.app.workspace.trigger('advanced-canvas:data-loaded:after', this, data, setData)
 
         return result
       }),
@@ -435,6 +436,17 @@ export default class CanvasPatcher extends Patcher {
         const result = next.call(this, e, side)
         return result
       }),
+      // File nodes
+      setFile: next => function (...args: any): void {
+        const result = next.call(this, ...args)
+        that.plugin.app.workspace.trigger('advanced-canvas:node-changed', this.canvas, this)
+        return result
+      },
+      setFilePath: next => function (...args: any): void {
+        const result = next.call(this, ...args)
+        that.plugin.app.workspace.trigger('advanced-canvas:node-changed', this.canvas, this)
+        return result
+      }
     })
     
     this.runAfterInitialized(node, () => {

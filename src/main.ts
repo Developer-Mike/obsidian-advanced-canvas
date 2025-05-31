@@ -39,6 +39,7 @@ import BetterDefaultSettingsCanvasExtension from './canvas-extensions/better-def
 import ColorPaletteCanvasExtension from './canvas-extensions/color-palette-canvas-extension'
 import CollapsibleGroupsCanvasExtension from './canvas-extensions/collapsible-groups-canvas-extension'
 import FocusModeCanvasExtension from './canvas-extensions/focus-mode-canvas-extension'
+import AutoFileNodeEdgesCanvasExtension from './canvas-extensions/auto-file-node-edges-canvas-extension'
 import FlipEdgeCanvasExtension from './canvas-extensions/flip-edge-canvas-extension'
 import ExportCanvasExtension from './canvas-extensions/export-canvas-extension'
 import FloatingEdgeCanvasExtension from './canvas-extensions/floating-edge-canvas-extension'
@@ -92,6 +93,7 @@ const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   BetterReadonlyCanvasExtension,
   GroupCanvasExtension,
   VariableBreakpointCanvasExtension,
+  AutoFileNodeEdgesCanvasExtension,
   FlipEdgeCanvasExtension,
   ZOrderingCanvasExtension,
   ExportCanvasExtension,
@@ -133,6 +135,12 @@ export default class AdvancedCanvasPlugin extends Plugin {
 	}
 
   onunload() {}
+
+  getCanvases(): Canvas[] {
+    return this.app.workspace.getLeavesOfType('canvas')
+      .map(leaf => (leaf.view as CanvasView)?.canvas)
+      .filter(canvas => canvas)
+  }
 
   getCurrentCanvasView(): CanvasView | null {
     const canvasView = this.app.workspace.getActiveViewOfType(ItemView)

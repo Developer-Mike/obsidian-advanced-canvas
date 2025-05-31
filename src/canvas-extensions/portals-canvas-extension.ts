@@ -12,8 +12,8 @@ export default class PortalsCanvasExtension extends CanvasExtension {
 
   init() {
     this.plugin.registerEvent(this.plugin.app.vault.on('modify', (file: TFile) => {
-      for (const canvasLeaf of this.plugin.app.workspace.getLeavesOfType('canvas') as any[])
-        if (canvasLeaf.view?.canvas) this.onFileModified(canvasLeaf.view.canvas, file)
+      for (const canvas of this.plugin.getCanvases()) 
+        this.onFileModified(canvas, file)
     }))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
@@ -67,7 +67,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      'advanced-canvas:load-data',
+      'advanced-canvas:data-loaded:before',
       (canvas: Canvas, data: CanvasData, setData: (data: CanvasData) => void) => {
         this.onSetData(canvas, data)
           .then((newData: CanvasData) => {

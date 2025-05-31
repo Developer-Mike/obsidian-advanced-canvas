@@ -89,8 +89,10 @@ export interface CustomWorkspaceEvents {
   'advanced-canvas:readonly-changed': (canvas: Canvas, readonly: boolean) => void
   /** Fired when the canvas data gets requested */
   'advanced-canvas:data-requested': (canvas: Canvas, data: CanvasData) => void
-  /** Fired when the canvas data gets set */
-  'advanced-canvas:load-data': (canvas: Canvas, data: CanvasData, setData: (data: CanvasData) => void) => void
+  /** Fired before the canvas data gets set */
+  'advanced-canvas:data-loaded:before': (canvas: Canvas, data: CanvasData, setData: (data: CanvasData) => void) => void
+  /** Fired after the canvas data gets set */
+  'advanced-canvas:data-loaded:after': (canvas: Canvas, data: CanvasData, setData: (data: CanvasData) => void) => void
   /** Fired before the canvas gets saved */
   'advanced-canvas:canvas-saved:before': (canvas: Canvas) => void
   /** Fired after the canvas gets saved */
