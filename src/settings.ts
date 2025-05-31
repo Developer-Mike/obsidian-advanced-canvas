@@ -100,6 +100,9 @@ export interface AdvancedCanvasPluginSettingsValues {
 
   autoFileNodeEdgesFeatureEnabled: boolean
   autoFileNodeEdgesFrontmatterKey: string
+
+  edgeHighlightEnabled: boolean
+  highlightIncomingEdges: boolean
 }
 
 export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
@@ -189,7 +192,10 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   showEdgesIntoDisabledPortals: true,
 
   autoFileNodeEdgesFeatureEnabled: false,
-  autoFileNodeEdgesFrontmatterKey: 'canvas-edges'
+  autoFileNodeEdgesFrontmatterKey: 'canvas-edges',
+
+  edgeHighlightEnabled: false,
+  highlightIncomingEdges: false,
 }
 
 export const SETTINGS = {
@@ -548,6 +554,17 @@ export const SETTINGS = {
         description: 'When enabled, the background grid will be hidden when in readonly mode.',
         type: 'boolean'
       },
+    }
+  },
+  edgeHighlightEnabled: {
+    label: 'Edge highlight',
+    description: 'Highlight outgoing (and optionally incoming) edges of a selected node.',
+    children: {
+      highlightIncomingEdges: {
+        label: 'Highlight incoming edges',
+        description: 'When enabled, incoming edges will also be highlighted.',
+        type: 'boolean'
+      }
     }
   },
   focusModeFeatureEnabled: {

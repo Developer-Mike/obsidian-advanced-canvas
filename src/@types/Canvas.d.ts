@@ -246,9 +246,13 @@ export interface Canvas {
   edgeFrom: {
     data: Map<CanvasNode, Set<CanvasEdge>>
     add: (node: CanvasNode, edge: CanvasEdge) => void
-    get: (node: CanvasNode) => Set<CanvasEdge>
+    get: (node: CanvasNode) => Set<CanvasEdge> | undefined
   }
-  edgeTo: { data: Map<string, CanvasEdge> }
+  edgeTo: {
+    data: Map<CanvasNode, Set<CanvasEdge>>
+    add: (node: CanvasNode, edge: CanvasEdge) => void
+    get: (node: CanvasNode) => Set<CanvasEdge> | undefined
+  }
 
   dirty: Set<CanvasElement>
   markDirty(element: CanvasElement): void
