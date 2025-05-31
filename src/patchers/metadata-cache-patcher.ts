@@ -96,6 +96,7 @@ export default class MetadataCachePatcher extends Patcher {
             (metadata?.embeds ?? []).map(embed => ({
               ...embed,
               position: {
+                nodeId: content.nodes?.[index]?.id,
                 start: { line: 0, col: 1, offset: 0 }, // 0 for node 
                 end: { line: 0, col: 1, offset: index } // index of node
               }
@@ -107,6 +108,7 @@ export default class MetadataCachePatcher extends Patcher {
             (metadata?.links ?? []).map(link => ({
               ...link,
               position: {
+                nodeId: content.nodes?.[index]?.id,
                 start: { line: 0, col: 1, offset: 0 }, // 0 for node 
                 end: { line: 0, col: 1, offset: index } // index of node
               }

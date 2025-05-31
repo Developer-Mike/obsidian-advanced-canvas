@@ -120,18 +120,10 @@ export interface MetadataCacheMap {
 }
 
 export interface ExtendedCachedMetadata extends CachedMetadata {
-  links?: ExtendedLinkCache[]
-  embeds?: ExtendedEmbedCache[]
+  links?: LinkCache[]
+  embeds?: EmbedCache[]
   nodes?: NodesCache
   v: number
-}
-
-export interface ExtendedEmbedCache extends EmbedCache {
-  key?: string | `nodes.${string}${'' | `.${number}.${number}`}` /* nodes.node-id.offset-start.offset-end */ | `edges.${string}` /* edges.edge-id */
-}
-
-export interface ExtendedLinkCache extends LinkCache {
-  key?: string | `nodes.${string}${'' | `.${number}.${number}`}` /* nodes.node-id.offset-start.offset-end */ | `edges.${string}` /* edges.edge-id */
 }
 
 export interface NodesCache {
