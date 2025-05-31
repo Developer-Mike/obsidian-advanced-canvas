@@ -300,10 +300,23 @@ export const SETTINGS = {
     }
   },
   nativeFileSearchEnabled: {
-    label: 'Add native-like file search',
+    label: 'Native-like file search',
     description: 'When enabled, the file search will be done using the native Obsidian file search.',
     infoSection: 'native-like-file-search',
     children: { }
+  },
+  autoFileNodeEdgesFeatureEnabled: {
+    label: 'Auto file node edges',
+    description: 'Automatically create edges between file nodes based their frontmatter links.',
+    infoSection: 'auto-file-node-edges',
+    children: {
+      autoFileNodeEdgesFrontmatterKey: {
+        label: 'Frontmatter key name',
+        description: 'The frontmatter key to fetch the outgoing edges from. (Keep the default to ensure best compatibility.)',
+        type: 'text',
+        parse: (value: string) => value.trim() || 'canvas-edges'
+      }
+    }
   },
   portalsFeatureEnabled: {
     label: 'Portals',
@@ -559,6 +572,7 @@ export const SETTINGS = {
   edgeHighlightEnabled: {
     label: 'Edge highlight',
     description: 'Highlight outgoing (and optionally incoming) edges of a selected node.',
+    infoSection: 'edge-highlight',
     children: {
       highlightIncomingEdges: {
         label: 'Highlight incoming edges',
@@ -572,19 +586,6 @@ export const SETTINGS = {
     description: 'Focus on a single node and blur all other nodes.',
     infoSection: 'focus-mode',
     children: { }
-  },
-  autoFileNodeEdgesFeatureEnabled: {
-    label: 'Auto file node edges',
-    description: 'Automatically create edges between file nodes based their frontmatter links.',
-    infoSection: '', // TODO: Add info section
-    children: {
-      autoFileNodeEdgesFrontmatterKey: {
-        label: 'Frontmatter key',
-        description: 'The frontmatter key to fetch the outgoing edges from.',
-        type: 'text',
-        parse: (value: string) => value.trim() || 'canvas-edges'
-      }
-    }
   },
 } as const satisfies {
   [key in keyof AdvancedCanvasPluginSettingsValues]: SettingsHeading & { 

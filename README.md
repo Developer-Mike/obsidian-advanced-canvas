@@ -20,8 +20,10 @@
 This plugin enhances the Obsidian canvas with a wide array of features:
 
 *   **Core Enhancements:**
+    *   [Standardized Format](#standardized-format): Compatible with the JSON Canvas format, introducing the Advanced JSON Canvas format for enhanced features.
     *   [Full Metadata Cache Support](#full-metadata-cache-support): Integrate canvases with Obsidian's graph view, outgoing links, and backlinks.
     *   [Frontmatter Support](#frontmatter-support): Add custom properties to canvas files.
+    *   [Auto File Node Edges](#auto-file-node-edges): Automatically create edges between file nodes based on their frontmatter properties.
     *   [Single Node Links & Embeds](#single-node-links--embeds): Link or embed a single node from a canvas into markdown files.
     *   [Better Default Settings](#better-default-settings): Customize default node sizes, grid alignment, and more.
     *   [Enhanced Readonly Mode](#better-readonly): Finer control over canvas interaction in readonly mode.
@@ -42,6 +44,7 @@ This plugin enhances the Obsidian canvas with a wide array of features:
     *   [Presentation Mode](#presentation-mode): Create and navigate slide-like presentations.
     *   [Portals](#portals): Embed other canvases within your current canvas.
     *   [Collapsible Groups](#collapsible-groups): Organize your canvas with expandable/collapsible groups.
+    *   [Edge Highlight](#edge-highlight): Highlight edges when a connected node is selected.
     *   [Focus Mode](#focus-mode): Highlight a single node by blurring others.
     *   [Encapsulate Selection](#encapsulate-selection): Move selected nodes to a new canvas, linking back to it.
     *   Create groups independently of the nodes.
@@ -72,6 +75,21 @@ Please consider supporting the plugin. There are many hours of work and effort b
 </a>
 
 <img src="https://img.shields.io/endpoint?url=https://wakapi.by-mika.dev/api/compat/shields/v1/mika.dev/interval:any/project:obsidian-advanced-canvas&label=Time%20Spent&style=flat&colorA=f4efe7&colorB=ff5e5b" alt="Time Spent" width="200"/>
+
+## Terminology
+- **Canvas**: The canvas view is the view in which nodes and edges are displayed.
+- **Node**: A node is a single element in a canvas that can contain text, files, or links. (Some people also call it *card* or *element* - but please always use **node**.)
+  - **Text Node**: A text node is a node that contains text.
+  - **File Node**: A file node is a node that contains a link to another file.
+  - **Group Node**: A group node is a node that contains other nodes.
+  - **Link Node**: A link node is a node that displays a website.
+- **Edge**: An edge is a connection between two nodes in a canvas. It can be used to represent relationships or connections between different elements. (Please always use **edge** instead of *arrow* to avoid confusion with the edge arrow.)
+  - **Edge Path**: The edge path is just the line that connects two nodes in a canvas.
+  - **Edge Arrow**: The edge arrow is the arrow at the end (or start) of an edge that indicates the direction of the connection.
+- **Popup Menu**: The popup menu is the horizontal menu that is visible if one or more canvas elements (nodes or edges) are selected.
+- **Context Menu**: The context menu is menu that is visible if you right-click in a canvas view.
+- **Control Menu**: The control menu is the vertical menu that is visible in the top right corner of a canvas view.
+- **Card Menu**: The card menu is the horizontal menu at the bottom of the canvas view where you can find options to create new nodes.
 
 ## Standardized Format
 Compatible with the [JSON Canvas](https://github.com/obsidianmd/jsoncanvas) format, the [Advanced JSON Canvas](https://github.com/Developer-Mike/obsidian-advanced-canvas/blob/main/assets/formats/advanced-json-canvas/README.md) format takes it a step further by adding more features and flexibility. The Advanced JSON Canvas format was introduced to provide longevity, readability, interoperability, and extensibility for canvases created with Advanced Canvas.
@@ -115,6 +133,9 @@ Additionally, Advanced Canvas introduces full frontmatter support for `.canvas` 
 *   **Searchability:** Properties defined in the frontmatter of your `.canvas` files are searchable using Obsidian's global search pane, further integrating canvases into your knowledge management system.
 
 This significantly enhances the ability to manage, organize, and customize your canvases alongside your other notes in Obsidian.
+
+## Auto File Node Edges
+Advanced Canvas can automatically create edges between file nodes based on their frontmatter properties. By default (if enabled), it will create edges to files linked in the `canvas-edges` frontmatter property. This allows you to create fixed relationships between file nodes in your canvas, making it easier to visualize fixed structures or connections between different files.
 
 ### Single Node Links & Embeds
 Advanced Canvas now allows you to link or embed the content of a *single node* from a `.canvas` file directly into your markdown files. This provides a granular way to reference specific pieces of information within your canvases.
@@ -440,6 +461,9 @@ Resize nodes automatically when their text content changes. Toggle this feature 
     <summary>Auto Node Resizing Example</summary>
     <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/docs/auto-node-resizing.gif" alt="Auto Node Resizing Example"/>
 </details>
+
+## Edge Highlight
+TODO
 
 ## Focus Mode
 Focus on a single node by blurring all other nodes.
