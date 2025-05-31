@@ -42,6 +42,7 @@ import FocusModeCanvasExtension from './canvas-extensions/focus-mode-canvas-exte
 import FlipEdgeCanvasExtension from './canvas-extensions/flip-edge-canvas-extension'
 import ExportCanvasExtension from './canvas-extensions/export-canvas-extension'
 import FloatingEdgeCanvasExtension from './canvas-extensions/floating-edge-canvas-extension'
+import EdgeHighlightCanvasExtension from './canvas-extensions/edge-highlight-canvas-extension'
 
 // Advanced Styles
 import NodeStylesExtension from './canvas-extensions/advanced-styles/node-styles'
@@ -92,6 +93,7 @@ const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   BetterReadonlyCanvasExtension,
   GroupCanvasExtension,
   VariableBreakpointCanvasExtension,
+  EdgeHighlightCanvasExtension,
   FlipEdgeCanvasExtension,
   ZOrderingCanvasExtension,
   ExportCanvasExtension,
