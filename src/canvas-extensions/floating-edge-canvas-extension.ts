@@ -1,7 +1,8 @@
 import { BBox, Canvas, CanvasEdge, CanvasNode, Position } from "src/@types/Canvas"
 import CanvasExtension from "./canvas-extension"
 import BBoxHelper from "src/utils/bbox-helper"
-import { Side } from "src/@types/AdvancedJsonCanvas"
+import { CanvasData, Side } from "src/@types/AdvancedJsonCanvas"
+import CanvasHelper from "src/utils/canvas-helper"
 
 export default class FloatingEdgeCanvasExtension  extends CanvasExtension {
   isEnabled() { return 'floatingEdgeFeatureEnabled' as const }
@@ -10,20 +11,35 @@ export default class FloatingEdgeCanvasExtension  extends CanvasExtension {
 
   init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
+      'advanced-canvas:data-loaded:after',
+      (canvas: Canvas, data: CanvasData, setData: (data: CanvasData) => void) => this.onLoadData(canvas, data)
+    ))
+    
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
       'advanced-canvas:node-moved',
       (canvas: Canvas, node: CanvasNode) => this.onNodeMoved(canvas, node)
     ))
 
-
-    this.plugin.registerEvent(this.plugin.app.workspace.on(
-      'advanced-canvas:edge-connection-dragging:before',
-      (canvas: Canvas, edge: CanvasEdge, event: PointerEvent, newEdge: boolean, side: 'from' | 'to') => this.onEdgeStartedDragging(canvas, edge, event, newEdge, side)
-    ))
+    if (this.plugin.settings.getSetting('allowFloatingEdgeCreation')) {
+      this.plugin.registerEvent(this.plugin.app.workspace.on(
+        'advanced-canvas:edge-connection-dragging:before',
+        (canvas: Canvas, edge: CanvasEdge, event: PointerEvent, newEdge: boolean, side: 'from' | 'to') => this.onEdgeStartedDragging(canvas, edge, event, newEdge, side)
+      ))
+    }
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       'advanced-canvas:edge-connection-dragging:after',
       (canvas: Canvas, edge: CanvasEdge, event: PointerEvent, newEdge: boolean, side: 'from' | 'to') => this.onEdgeStoppedDragging(canvas, edge, event, newEdge, side)
     ))
+  }
+
+  private onLoadData(canvas: Canvas, data: CanvasData) {
+    for (const edgeData of data.edges) {
+      const edge = canvas.edges.get(edgeData.id)
+      if (!edge) return console.warn("Imported edge is not yet loaded :(")
+
+      this.updateEdgeConnectionSide(edge)
+    }
   }
 
   private onNodeMoved(canvas: Canvas, node: CanvasNode) {
@@ -38,7 +54,7 @@ export default class FloatingEdgeCanvasExtension  extends CanvasExtension {
 
     if (edgeData.fromFloating) {
       const fixedNodeConnectionPoint = BBoxHelper.getCenterOfBBoxSide(edge.to.node.getBBox(), edge.to.side)
-      const bestSide = this.getBestSideForFloatingEdge(fixedNodeConnectionPoint, edge.from.node)
+      const bestSide = CanvasHelper.getBestSideForFloatingEdge(fixedNodeConnectionPoint, edge.from.node)
 
       if (bestSide !== edge.from.side) {
         edge.setData({
@@ -50,7 +66,7 @@ export default class FloatingEdgeCanvasExtension  extends CanvasExtension {
     
     if (edgeData.toFloating) {
       const fixedNodeConnectionPoint = BBoxHelper.getCenterOfBBoxSide(edge.from.node.getBBox(), edge.from.side)
-      const bestSide = this.getBestSideForFloatingEdge(fixedNodeConnectionPoint, edge.to.node)
+      const bestSide = CanvasHelper.getBestSideForFloatingEdge(fixedNodeConnectionPoint, edge.to.node)
       
       if (bestSide !== edge.to.side) {
         edge.setData({
@@ -59,26 +75,6 @@ export default class FloatingEdgeCanvasExtension  extends CanvasExtension {
         })
       }
     }
-  }
-
-  private getBestSideForFloatingEdge(sourcePos: Position, target: CanvasNode): Side {
-    const targetBBox = target.getBBox()
-
-    const possibleSides = ['top', 'right', 'bottom', 'left'] as const
-    const possibleTargetPos = possibleSides.map(side => [side, BBoxHelper.getCenterOfBBoxSide(targetBBox, side)]) as [Side, Position][]
-
-    let bestSide: Side | null = null
-    let bestDistance = Infinity
-    for (const [side, pos] of possibleTargetPos) {
-      const distance = Math.sqrt(Math.pow(sourcePos.x - pos.x, 2) + Math.pow(sourcePos.y - pos.y, 2))
-
-      if (distance < bestDistance) {
-        bestDistance = distance
-        bestSide = side
-      }
-    }
-
-    return bestSide!
   }
 
   private onEdgeStartedDragging(canvas: Canvas, edge: CanvasEdge, _event: PointerEvent, newEdge: boolean, _side: 'from' | 'to') {
@@ -116,7 +112,9 @@ export default class FloatingEdgeCanvasExtension  extends CanvasExtension {
 
     const dropZoneNode = side === 'from' ? edge.from.node : edge.to.node
     const floatingEdgeDropZone = this.getFloatingEdgeDropZoneForNode(dropZoneNode)
-    const wasDroppedInFloatingEdgeDropZone = BBoxHelper.insideBBox({ x: event.clientX, y: event.clientY }, floatingEdgeDropZone, true)
+    const wasDroppedInFloatingEdgeDropZone = this.plugin.settings.getSetting('allowFloatingEdgeCreation') ? 
+      BBoxHelper.insideBBox({ x: event.clientX, y: event.clientY }, floatingEdgeDropZone, true) :
+      false
 
     const edgeData = edge.getData()
     if (side === 'from' && wasDroppedInFloatingEdgeDropZone == edgeData.fromFloating) return

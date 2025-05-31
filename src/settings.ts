@@ -58,6 +58,7 @@ export interface AdvancedCanvasPluginSettingsValues {
   nativeFileSearchEnabled: boolean
 
   floatingEdgeFeatureEnabled: boolean
+  allowFloatingEdgeCreation: boolean
   newEdgeFromSideFloating: boolean
 
   flipEdgeFeatureEnabled: boolean
@@ -96,6 +97,9 @@ export interface AdvancedCanvasPluginSettingsValues {
 
   portalsFeatureEnabled: boolean
   showEdgesIntoDisabledPortals: boolean
+
+  autoFileNodeEdgesFeatureEnabled: boolean
+  autoFileNodeEdgesFrontmatterKey: string
 }
 
 export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
@@ -143,7 +147,8 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
 
   nativeFileSearchEnabled: true,
 
-  floatingEdgeFeatureEnabled: false,
+  floatingEdgeFeatureEnabled: true,
+  allowFloatingEdgeCreation: false,
   newEdgeFromSideFloating: false,
 
   flipEdgeFeatureEnabled: true,
@@ -181,7 +186,10 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   canvasEncapsulationEnabled: false,
 
   portalsFeatureEnabled: true,
-  showEdgesIntoDisabledPortals: true
+  showEdgesIntoDisabledPortals: true,
+
+  autoFileNodeEdgesFeatureEnabled: false,
+  autoFileNodeEdgesFrontmatterKey: 'canvas-edges'
 }
 
 export const SETTINGS = {
@@ -393,9 +401,14 @@ export const SETTINGS = {
   },
   floatingEdgeFeatureEnabled: {
     label: 'Floating edges (auto edge side)',
-    description: 'Create edges that are automatically placed on the most suitable side of the node by dragging the edge over the target node without placing it over a specific side connection point.',
+    description: 'Floating edges are automatically placed on the most suitable side of the node.',
     infoSection: 'floating-edges-automatic-edge-side',
     children: {
+      allowFloatingEdgeCreation: {
+        label: 'Allow floating edges creation',
+        description: 'Allow floating edges creation by dragging the edge over the target node without placing it over a specific side connection point. (If disabled, floating edges can only be created and used by other Advanced Canvas features.)',
+        type: 'boolean'
+      },
       newEdgeFromSideFloating: {
         label: 'New edge from side floating',
         description: 'When enabled, the "from" side of the edge will always be floating.',
@@ -542,7 +555,20 @@ export const SETTINGS = {
     description: 'Focus on a single node and blur all other nodes.',
     infoSection: 'focus-mode',
     children: { }
-  }
+  },
+  autoFileNodeEdgesFeatureEnabled: {
+    label: 'Auto file node edges',
+    description: 'Automatically create edges between file nodes based their frontmatter links.',
+    infoSection: '', // TODO: Add info section
+    children: {
+      autoFileNodeEdgesFrontmatterKey: {
+        label: 'Frontmatter key',
+        description: 'The frontmatter key to fetch the outgoing edges from.',
+        type: 'text',
+        parse: (value: string) => value.trim() || 'canvas-edges'
+      }
+    }
+  },
 } as const satisfies {
   [key in keyof AdvancedCanvasPluginSettingsValues]: SettingsHeading & { 
     children: { 
