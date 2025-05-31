@@ -59,8 +59,7 @@ export default class MetadataCachePatcher extends Patcher {
                 key: key,
                 displayText: aliases.length > 0 ? aliases.join('|') : link,
                 link: link,
-                original: v,
-                position: { start: { line: 0, col: 0, offset: 0 }, end: { line: 0, col: 0, offset: 0 } }
+                original: v
               }
             }).filter((v) => v !== null)
 
@@ -74,46 +73,43 @@ export default class MetadataCachePatcher extends Patcher {
 
         // Extract canvas file node embeds
         const fileNodesEmbeds = content.nodes
-          ?.filter((node: CanvasFileNodeData) => node.type === 'file' && node.file)
-          ?.map((node: CanvasFileNodeData) => [node.id, node.file] as [string, string])
-          ?.map(([nodeId, linkedFile]) => ({
-            key: `nodes.${nodeId}`,
-            link: linkedFile,
-            original: linkedFile,
-            displayText: linkedFile,
-            // TODO: Remove
+          ?.map((nodeData: CanvasFileNodeData, index) => nodeData.type === 'file' && nodeData.file ? {
+            link: nodeData.file,
+            original: nodeData.file,
+            displayText: nodeData.file,
             position: {
-              start: { line: 0, col: 0, offset: 0 },
-              end: { line: 0, col: 0, offset: 0 }
+              start: { line: 0, col: 1, offset: 0 }, // 0 for nodes
+              end: { line: 0, col: 1, offset: index } // index of node
             }
-          })) ?? []
+          } : null)
+          ?.filter(entry => entry !== null) ?? []
 
         // Extract canvas text node links/embeds
         const textEncoder = new TextEncoder()
-        const textNodes = content.nodes
-          ?.filter((node: CanvasTextNodeData) => node.type === 'text' && node.text) ?? []
+        const nodesMetadataPromises = content.nodes
+          ?.map((node: CanvasTextNodeData) => node.type === "text" ? textEncoder.encode(node.text).buffer : null)
+          ?.map((buffer: ArrayBuffer | null) => buffer ? this.computeMetadataAsync(buffer) as Promise<ExtendedCachedMetadata> : Promise.resolve(null))
+        const nodesMetadata = await Promise.all(nodesMetadataPromises) // Wait for all text nodes to be resolved
 
-        const textNodesIds = textNodes
-          .map((node: CanvasNodeData) => node.id)
-
-        const textNodesMetadataPromises = textNodes
-          .map((node: CanvasTextNodeData) => textEncoder.encode(node.text).buffer)
-          .map((buffer: ArrayBuffer) => this.computeMetadataAsync(buffer) as Promise<ExtendedCachedMetadata>)
-        const textNodesMetadata = await Promise.all(textNodesMetadataPromises) // Wait for all text nodes to be resolved
-
-        const textNodesEmbeds = textNodesMetadata
-          .map((metadata: ExtendedCachedMetadata, index: number) => (
-            (metadata.embeds || []).map(embed => ({
+        const textNodesEmbeds = nodesMetadata
+          .map((metadata: ExtendedCachedMetadata | null, index: number) => (
+            (metadata?.embeds ?? []).map(embed => ({
               ...embed,
-              key: `nodes.${textNodesIds[index]}.${embed.position.start.offset}.${embed.position.end.offset}`
+              position: {
+                start: { line: 0, col: 1, offset: 0 }, // 0 for node 
+                end: { line: 0, col: 1, offset: index } // index of node
+              }
             }))
           )).flat()
 
-        const textNodesLinks = textNodesMetadata
-          .map((metadata: ExtendedCachedMetadata, index: number) => (
-            (metadata.links || []).map(link => ({
+        const textNodesLinks = nodesMetadata
+          .map((metadata: ExtendedCachedMetadata | null, index: number) => (
+            (metadata?.links ?? []).map(link => ({
               ...link,
-              key: `nodes.${textNodesIds[index]}.${link.position.start.offset}.${link.position.end.offset}`
+              position: {
+                start: { line: 0, col: 1, offset: 0 }, // 0 for node 
+                end: { line: 0, col: 1, offset: index } // index of node
+              }
             }))
           )).flat()
 
@@ -129,8 +125,12 @@ export default class MetadataCachePatcher extends Patcher {
             ...textNodesLinks
           ],
           nodes: {
-            ...textNodesMetadata.reduce((acc, metadata, index) => {
-              acc[textNodesIds[index]] = metadata
+            ...nodesMetadata.reduce((acc, metadata, index) => {
+              const nodeId = content.nodes?.[index]?.id
+
+              if (nodeId && metadata)
+                acc[nodeId] = metadata
+
               return acc
             }, {} as Record<string, ExtendedCachedMetadata>)
           }
@@ -175,31 +175,31 @@ export default class MetadataCachePatcher extends Patcher {
         // Show links between files with edges
         if (that.plugin.settings.getSetting('treatFileNodeEdgesAsLinks')) {
           // Extract canvas file edges
-          for (const edge of cachedContent.edges || []) {
+          ;(cachedContent.edges ?? []).forEach(edge => {
             const from = cachedContent.nodes?.find((node: CanvasNodeData) => node.id === edge.fromNode)
             const to = cachedContent.nodes?.find((node: CanvasNodeData) => node.id === edge.toNode)
-            if (!from || !to) continue
+            if (!from || !to) return
 
             // Check if both nodes are file nodes
-            if (from.type !== 'file' || to.type !== 'file' || !(from as CanvasFileNodeData).file || !(from as CanvasFileNodeData).file) continue
+            if (from.type !== 'file' || to.type !== 'file' || !(from as CanvasFileNodeData).file || !(from as CanvasFileNodeData).file) return
 
             const fromFile = (from as CanvasFileNodeData).file
             const toFile = (to as CanvasFileNodeData).file
 
             // Register the link for the "from" node to the "to" node
-            this.registerInternalLinkAC(file.name, edge.id, fromFile, toFile)
+            this.registerInternalLinkAC(file.name, fromFile, toFile)
 
             // Check if the edge is bidirectional or unidirectional - if yes, register the link for the "to" node to the "from" node as well
             if (!(edge.toEnd !== 'none' || edge.fromEnd === 'arrow'))
-              this.registerInternalLinkAC(file.name, edge.id, toFile, fromFile)
-          }
+              this.registerInternalLinkAC(file.name, toFile, fromFile)
+          })
         }
 
         // Trigger metadata cache change event
         this.trigger('resolve', file)
         this.trigger('resolved') // TODO: Use workQueue like in the original function
       }),
-      registerInternalLinkAC: _next => async function (canvasName: string, edgeId: string, from: string, to: string) {
+      registerInternalLinkAC: _next => async function (canvasName: string, from: string, to: string) {
         // If the "from" node is the same as the "to" node, don't register the link
         if (from === to) return
 
@@ -218,11 +218,13 @@ export default class MetadataCachePatcher extends Patcher {
           links: [
             ...(fromFileMetadataCache.links || []),
             {
-              key: `edges.${edgeId}`,
               link: to,
               original: to,
               displayText: `${canvasName} → ${to}`,
-              position: { start: { line: 0, col: 0, offset: 0 }, end: { line: 0, col: 0, offset: 0 } }
+              position: {
+                start: { line: 0, col: 0, offset: 0 },
+                end: { line: 0, col: 0, offset: 0 }
+              }
             }
           ]
         }

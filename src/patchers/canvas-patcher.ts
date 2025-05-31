@@ -48,32 +48,18 @@ export default class CanvasPatcher extends Patcher {
           }
         }
 
-        // Select and zoom to the node if propertyMatches exists (backlink)
-        const propertyMatch = state?.propertyMatches?.[0]
-        if (propertyMatch) {
-          const elementType = (propertyMatch.key ?? "nodes") as 'nodes' | 'edges'
-          const elementId = (propertyMatch.subkey?.[0] ?? "") as string
+        // Select and zoom to the node if match exists (backlink) but no nodeId is specified (metadataCache limitation) - if nodeId exists, it comes from search
+        if (state.match?.matches?.[0] && !state?.nodeId) {
+          const match = state.match.matches[0]
 
-          const element = elementType === "nodes" ?
-            this.canvas.nodes.get(elementId) :
-            this.canvas.edges.get(elementId)
+          const elementType = match[0] === 0 ? 'nodes' : 'edges' // Misuse start offset as element type indicator
+          const elementIndex = match[1] // Misuse end offset as element index
+
+          const element = elementType === 'nodes' ?
+            Array.from(this.canvas.nodes.values())[elementIndex] :
+            Array.from(this.canvas.edges.values())[elementIndex]
 
           if (element) {
-            const matchPos = [propertyMatch.subkey?.[1], propertyMatch.subkey?.[2]]
-              .map(pos => parseInt(pos)).filter(pos => pos && !isNaN(pos))
-            
-            // If range match is available, do it the native way
-            if (matchPos.length === 2) {
-              return this.setEphemeralState({
-                match: {
-                  nodeId: elementId,
-                  content: (element.getData() as CanvasTextNodeData)?.text ?? "",
-                  matches: [matchPos]
-                }
-              })
-            }
-
-            // Else, just zoom to the element
             this.canvas.selectOnly(element)
             this.canvas.zoomToSelection()
             return

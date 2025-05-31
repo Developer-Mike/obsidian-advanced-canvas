@@ -101,7 +101,7 @@ declare module "obsidian" {
     resolveLinks: (filepath: string, /* custom */ cachedContent: any) => void
 
     // Custom
-    registerInternalLinkAC: (canvasName: string, edgeId: string, from: string, to: string) => void
+    registerInternalLinkAC: (canvasName: string, from: string, to: string) => void
   }
 }
 
