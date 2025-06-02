@@ -3,6 +3,8 @@ import BBoxHelper from "src/utils/bbox-helper"
 import CanvasHelper from "src/utils/canvas-helper"
 import { FileSelectModal } from "src/utils/modal-helper"
 import CanvasExtension from "./canvas-extension"
+import { Notice } from "obsidian"
+import TextHelper from "src/utils/text-helper"
 
 type Direction = 'up' | 'down' | 'left' | 'right'
 const DIRECTIONS = ['up', 'down', 'left', 'right'] as Direction[]
@@ -149,6 +151,26 @@ export default class CommandsCanvasExtension extends CanvasExtension {
       )
     })
 
+    this.plugin.addCommand({
+      id: 'copy-wikilink-to-node',
+      name: 'Copy wikilink to node',
+      checkCallback: CanvasHelper.canvasCommand(
+        this.plugin,
+        (canvas: Canvas) => !canvas.readonly && canvas.selection.size === 1,
+        (canvas: Canvas) => {
+          const file = canvas.view.file
+          if (!file) return
+
+          const nodeData = canvas.getSelectionData().nodes[0]
+          if (!nodeData) return
+
+          const wikilink = `[[${file.path}#${nodeData.id}|${file.name} (${TextHelper.toTitleCase(nodeData.type)} node)]]`
+          navigator.clipboard.writeText(wikilink)
+
+          new Notice("Copied wikilink to node to clipboard.", 2000)
+        }
+      )
+    })
   }
 
   private createTextNode(canvas: Canvas) {
