@@ -193,6 +193,8 @@ Quickly locate text within your canvas using a familiar search experience. Advan
     *   Flip the selected nodes and the respective edges horizontally or vertically
 *   `Advanced Canvas: Swap nodes`
     *   Swap two selected nodes with each other (x, y and width, height will be swapped)
+*   `Advanced Canvas: Copy wikilink to node`
+    *   Copy the wikilink to the selected node to the clipboard
 </details>
 
 ## Node Styles
