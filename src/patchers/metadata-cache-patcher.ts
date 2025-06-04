@@ -88,7 +88,7 @@ export default class MetadataCachePatcher extends Patcher {
         const textEncoder = new TextEncoder()
         const nodesMetadataPromises = content.nodes
           ?.map((node: CanvasTextNodeData) => node.type === "text" ? textEncoder.encode(node.text).buffer : null)
-          ?.map((buffer: ArrayBuffer | null) => buffer ? this.computeMetadataAsync(buffer) as Promise<ExtendedCachedMetadata> : Promise.resolve(null))
+          ?.map((buffer: ArrayBuffer | null) => buffer ? this.computeMetadataAsync(buffer) as Promise<ExtendedCachedMetadata> : Promise.resolve(null)) ?? []
         const nodesMetadata = await Promise.all(nodesMetadataPromises) // Wait for all text nodes to be resolved
 
         const textNodesEmbeds = nodesMetadata
