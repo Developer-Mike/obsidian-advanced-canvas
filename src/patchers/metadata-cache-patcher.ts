@@ -66,7 +66,6 @@ export default class MetadataCachePatcher extends Patcher {
             if (typeof value === 'string') return getLinks([value])
             else if (Array.isArray(value)) return getLinks(value)
 
-            if (value) console.warn(`Unsupported frontmatter value type: ${typeof value}`)
             return []
           })
         }
