@@ -27,6 +27,9 @@ export default class MetadataCachePatcher extends Patcher {
         if (FilepathHelper.extension(file.path) !== 'canvas')
           return next.call(this, file, ...args)
 
+        // Add file to uniqueFileLookup
+        this.uniqueFileLookup.add(file.name.toLowerCase(), file)
+
         // Update the cache
         const fileHash = await HashHelper.getFileHash(that.plugin, file)
         this.saveFileCache(file.path, {

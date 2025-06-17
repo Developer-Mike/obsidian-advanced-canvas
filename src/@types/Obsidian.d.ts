@@ -92,6 +92,10 @@ declare module "obsidian" {
     fileCache: FileCache
     metadataCache: MetadataCacheMap
     resolvedLinks: ResolvedLinks
+    uniqueFileLookup: {
+      get: (name: string) => TFile[]
+      add: (name: string, file: TFile) => void
+    }
 
     computeMetadataAsync: (buffer: ArrayBuffer) => Promise<ExtendedCachedMetadata>
 
