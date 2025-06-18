@@ -299,7 +299,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
       data.edges.push(...newData.edges)
     }
 
-    // Add interdimensional  // TODO: Only loop through open portals (can be done because of tryOpenPortal)
+    // Add interdimensional edges // TODO: Only loop through open portals (can be done because of tryOpenPortal)
     for (const nodeData of data.nodes) {
       if (nodeData.type !== 'file' || !(nodeData as CanvasFileNodeData).isPortalLoaded) continue // Only loaded portals
 
@@ -307,6 +307,9 @@ export default class PortalsCanvasExtension extends CanvasExtension {
       if (!interdimensionalEdges) continue // No interdimensional edges
 
       for (const edge of interdimensionalEdges) data.edges.push(edge)
+
+      // Remove interdimensional edges from portal node (to avoid duplication on re-save)
+      delete (nodeData as CanvasFileNodeData).interdimensionalEdges
     }
 
     return data
