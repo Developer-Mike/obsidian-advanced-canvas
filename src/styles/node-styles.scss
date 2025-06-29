@@ -48,7 +48,7 @@
   }
   //#endregion
 
-  //#region Shape  
+  //#region Shape
   @mixin masked($mask) {
     mask-image: $mask;
     -webkit-mask-image: $mask;
@@ -56,6 +56,11 @@
     -webkit-mask-repeat: no-repeat;
     mask-size: 100%;
     -webkit-mask-size: 100%;
+  }
+
+  // Fix blurry text - Thank you @Graywaren (#42)
+  &[data-shape] .canvas-node-container .markdown-preview-view.markdown-rendered {
+    transform: unset;
   }
   
   &[data-shape='pill'] .canvas-node-container {
