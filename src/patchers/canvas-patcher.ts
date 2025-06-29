@@ -48,7 +48,7 @@ export default class CanvasPatcher extends Patcher {
         }
 
         // Select and zoom to the node if match exists (backlink) but no nodeId is specified (metadataCache limitation) - if nodeId exists, it comes from search
-        if (state.match?.matches?.[0] && !state?.nodeId) {
+        if (state.match?.matches?.[0] && !state.match?.nodeId) {
           const match = state.match.matches[0]
 
           const elementType = match[0] === 0 ? 'nodes' : 'edges' // Misuse start offset as element type indicator
