@@ -26,7 +26,7 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       'advanced-canvas:data-requested',
-      (_canvas: Canvas, data: CanvasData) => this.expandAllCollapsedNodes(data)
+      (_canvas: Canvas, data: CanvasData) => this.expandNodes(data)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
@@ -98,13 +98,13 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
     bbox.maxY = maxPos.y
   }
 
-  private expandAllCollapsedNodes(data: CanvasData) {
+  private expandNodes(data: CanvasData) {
     data.nodes = data.nodes.flatMap((groupNodeData: CanvasGroupNodeData) => {
       const collapsedData = groupNodeData.collapsedData
       if (collapsedData === undefined) return [groupNodeData]
-
+      
       delete groupNodeData.collapsedData // Remove the intermediate value
-
+      
       data.edges.push(...collapsedData.edges)
       return [groupNodeData, ...collapsedData.nodes.map(nodeData => (
         {
