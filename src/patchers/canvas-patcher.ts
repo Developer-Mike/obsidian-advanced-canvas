@@ -277,7 +277,6 @@ export default class CanvasPatcher extends Patcher {
       getData: Patcher.OverrideExisting(next => function (...args: any): CanvasData {
         const result = next.call(this, ...args)
         that.plugin.app.workspace.trigger('advanced-canvas:data-requested', this, result)
-        console.log("returning canvas data", this.view.file.path)
         return result
       }),
       importData: Patcher.OverrideExisting(next => function (data: CanvasData, clearCanvas?: boolean, silent?: boolean): void {
