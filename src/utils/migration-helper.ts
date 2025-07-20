@@ -14,7 +14,7 @@ export default class MigrationHelper {
       const globalInterdimensionalEdges: { [portalId: string]: CanvasEdgeData[] } = {}
 
       // Rename node properties
-      for (const node of canvas.nodes as any[]) {
+      for (const node of (canvas.nodes ?? []) as any[]) {
         node.dynamicHeight = node.autoResizeHeight
         delete node.autoResizeHeight
 
@@ -57,7 +57,7 @@ export default class MigrationHelper {
       }
 
       // Distribute global interdimensional edges to portals
-      for (const node of canvas.nodes as any[]) {
+      for (const node of (canvas.nodes ?? []) as any[]) {
         if (!(node.id in globalInterdimensionalEdges)) continue
         node.interdimensionalEdges = globalInterdimensionalEdges[node.id]
       }
