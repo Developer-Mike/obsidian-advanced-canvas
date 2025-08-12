@@ -25,6 +25,7 @@ import SearchCommandPatcher from './patchers/search-command-patcher'
 import CanvasExtension from './canvas-extensions/canvas-extension'
 import MetadataCanvasExtension from './canvas-extensions/metadata-canvas-extension'
 import NodeRatioCanvasExtension from './canvas-extensions/node-ratio-canvas-extension'
+import SplitCardCanvasExtension from './canvas-extensions/split-card-canvas-extension'
 import VariableBreakpointCanvasExtension from './canvas-extensions/variable-breakpoint-canvas-extension'
 import GroupCanvasExtension from './canvas-extensions/group-canvas-extension'
 import PresentationCanvasExtension from './canvas-extensions/presentation-canvas-extension'
@@ -74,6 +75,7 @@ const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   NodeStylesExtension,
   EdgeStylesExtension,
   NodeRatioCanvasExtension,
+  SplitCardCanvasExtension,
   FloatingEdgeCanvasExtension,
   AutoResizeNodeCanvasExtension,
   CollapsibleGroupsCanvasExtension,
