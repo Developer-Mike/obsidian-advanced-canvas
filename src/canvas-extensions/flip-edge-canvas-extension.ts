@@ -47,15 +47,14 @@ export default class FlipEdgeCanvasExtension extends CanvasExtension {
     if (selectedEdges.length === 0) return
 
     for (const edge of selectedEdges) {
-      const edgeData = edge.getData()
-
-      edge.setData({
-        ...edgeData,
-        fromNode: edgeData.toNode,
-        fromSide: edgeData.toSide,
-
-        toNode: edgeData.fromNode,
-        toSide: edgeData.fromSide
+      edge.update({
+        ...edge.from,
+        node: edge.to.node,
+        side: edge.to.side
+      }, {
+        ...edge.to,
+        node: edge.from.node,
+        side: edge.from.side
       })
     }
 

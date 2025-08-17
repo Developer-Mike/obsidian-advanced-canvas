@@ -200,6 +200,8 @@ export interface CanvasEdge extends CanvasElement {
   updatePath(): void
   onConnectionPointerdown(e: PointerEvent): void
 
+  update(from: CanvasEdgeEnd, to: CanvasEdgeEnd): void
+
   setData(data: CanvasEdgeData, addHistory?: boolean): void
   getData(): CanvasEdgeData
 
