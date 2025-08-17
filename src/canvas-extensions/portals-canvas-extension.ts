@@ -267,7 +267,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     ) as Map<string, CanvasFileNodeData>
 
     data.edges = data.edges.filter(edgeData => {
-      if (PortalsCanvasExtension.getNestedIds(edgeData.fromNode).length > 1) return false // Came from portal
+      if (PortalsCanvasExtension.getNestedIds(edgeData.id).length > 1) return false // Came from portal
 
       const isFromNodeFromPortal = PortalsCanvasExtension.getNestedIds(edgeData.fromNode).length > 1
       const isToNodeFromPortal = PortalsCanvasExtension.getNestedIds(edgeData.toNode).length > 1
