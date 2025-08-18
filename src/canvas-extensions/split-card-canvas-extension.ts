@@ -3,6 +3,8 @@ import CanvasExtension from './canvas-extension'
 import { Menu } from 'obsidian'
 import { CanvasTextNodeData, CanvasEdgeData } from 'src/@types/AdvancedJsonCanvas'
 
+const SPLIT_CARD_EDGE_ID_PREFIX = "spl"
+
 export default class SplitCardCanvasExtension extends CanvasExtension {
   isEnabled() { return true }
   
@@ -22,9 +24,7 @@ export default class SplitCardCanvasExtension extends CanvasExtension {
     menu.addItem((item) => {
       item.setTitle('Split Card by new line')
         .setIcon('split-horizontal')
-        .onClick(async () => {
-          await this.splitCardByNewline(node)
-        })
+        .onClick(() => this.splitCardByNewline(node))
     })
   }
 
@@ -78,48 +78,35 @@ export default class SplitCardCanvasExtension extends CanvasExtension {
       const edgeData = edge.getData()
       
       for (const newNode of newNodes) {
+        // Determine source and target nodes
+        const fromNode = edge.from.node === node ? newNode.id : edge.from.node.id
+        const toNode = edge.to.node === node ? newNode.id : edge.to.node.id
+        
         // Create new edge connecting to each split node
-        if (edge.from.node === node) {
-          // Original node was the source, make new node the source
-          newEdges.push({
-            id: `edge-${newNode.id}-${edge.to.node.id}-${Date.now()}-${Math.random()}`,
-            fromNode: newNode.id,
-            fromSide: edge.from.side,
-            toNode: edge.to.node.id,
-            toSide: edge.to.side,
-            label: edgeData.label || '',
-            color: edgeData.color,
-            styleAttributes: edgeData.styleAttributes
-          })
-        } else if (edge.to.node === node) {
-          // Original node was the target, make new node the target
-          newEdges.push({
-            id: `edge-${edge.from.node.id}-${newNode.id}-${Date.now()}-${Math.random()}`,
-            fromNode: edge.from.node.id,
-            fromSide: edge.from.side,
-            toNode: newNode.id,
-            toSide: edge.to.side,
-            label: edgeData.label || '',
-            color: edgeData.color,
-            styleAttributes: edgeData.styleAttributes
-          })
-        }
+        newEdges.push({
+          id: `${SPLIT_CARD_EDGE_ID_PREFIX}${edgeData.id}${newNode.id}`,
+          fromNode,
+          fromSide: edge.from.side,
+          toNode,
+          toSide: edge.to.side,
+          label: edgeData.label || '',
+          color: edgeData.color,
+          styleAttributes: edgeData.styleAttributes
+        })
       }
     }
     
     // Add new edges
-    if (newEdges.length > 0) {
+    if (newEdges.length > 0)
       canvas.importData({ nodes: [], edges: newEdges }, false, false)
-    }
     
     // Remove original edges
-    for (const edge of connectedEdges) {
+    for (const edge of connectedEdges)
       canvas.removeEdge(edge)
-    }
     
     // Remove original node
     canvas.removeNode(node)
-    
+        
     // Select all new nodes for user feedback
     canvas.updateSelection(() => {
       canvas.selection = new Set(newNodes)
