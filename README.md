@@ -74,8 +74,6 @@ Please consider supporting the plugin. There are many hours of work and effort b
     <img src="https://storage.ko-fi.com/cdn/brandasset/v2/support_me_on_kofi_beige.png" alt="Support me on Ko-fi" width="200"/>
 </a>
 
-<img src="https://img.shields.io/endpoint?url=https://wakapi.by-mika.dev/api/compat/shields/v1/mika.dev/interval:any/project:obsidian-advanced-canvas&label=Time%20Spent&style=flat&colorA=f4efe7&colorB=ff5e5b" alt="Time Spent" width="200"/>
-
 ## Terminology
 - **Canvas**: The canvas view is the view in which nodes and edges are displayed.
 - **Node**: A node is a single element in a canvas that can contain text, files, or links. (Some people also call it *card* or *element* - but please always use **node**.)
@@ -212,42 +210,42 @@ You can customize the default node styles using the settings. This includes vari
 #### Shapes
 <details>
     <summary>Terminal Shape</summary>
-    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/docs/flowchart-nodes/terminal.png" alt="Terminal Shape"/>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flowchart-nodes/terminal.png" alt="Terminal Shape"/>
 </details>
 
 <details>
     <summary>Process/Center Shape</summary>
-    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/docs/flowchart-nodes/process.png" alt="Process/Center Shape"/>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flowchart-nodes/process.png" alt="Process/Center Shape"/>
 </details>
 
 <details>
     <summary>Decision Shape</summary>
-    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/docs/flowchart-nodes/decision.png" alt="Decision Shape"/>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flowchart-nodes/decision.png" alt="Decision Shape"/>
 </details>
 
 <details>
     <summary>Input/Output Shape</summary>
-    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/docs/flowchart-nodes/input-output.png" alt="Input/Output Shape"/>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flowchart-nodes/input-output.png" alt="Input/Output Shape"/>
 </details>
 
 <details>
     <summary>On-page Reference Shape</summary>
-    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/docs/flowchart-nodes/reference.png" alt="On-page Reference Shape"/>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flowchart-nodes/reference.png" alt="On-page Reference Shape"/>
 </details>
 
 <details>
     <summary>Predefined Process Shape</summary>
-    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/docs/flowchart-nodes/predefined-process.png" alt="Predefined Process Shape"/>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flowchart-nodes/predefined-process.png" alt="Predefined Process Shape"/>
 </details>
 
 <details>
     <summary>Document Shape</summary>
-    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/docs/flowchart-nodes/document.png" alt="Document Shape"/>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flowchart-nodes/document.png" alt="Document Shape"/>
 </details>
 
 <details>
     <summary>Database Shape</summary>
-    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/docs/flowchart-nodes/database.png" alt="Database Shape"/>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/flowchart-nodes/database.png" alt="Database Shape"/>
 </details>
 
 ### Border Styles
