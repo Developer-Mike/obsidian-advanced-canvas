@@ -5,6 +5,7 @@ import { TFile } from "obsidian"
 export default class PropertiesPatcher extends Patcher {
   protected async patch() {
     if (!this.plugin.settings.getSetting('canvasMetadataCompatibilityEnabled')) return
+    if (!this.plugin.app.viewRegistry.viewByType["file-properties"]) return // Core plugin not enabled
 
     const that = this
     await Patcher.waitForViewRequest<PropertiesView>(this.plugin, "file-properties", view => {
