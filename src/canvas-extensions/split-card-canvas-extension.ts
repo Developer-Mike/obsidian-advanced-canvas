@@ -6,7 +6,7 @@ import { CanvasTextNodeData, CanvasEdgeData } from 'src/@types/AdvancedJsonCanva
 const SPLIT_CARD_EDGE_ID_PREFIX = "spl"
 
 export default class SplitCardCanvasExtension extends CanvasExtension {
-  isEnabled() { return true }
+  isEnabled() { return this.plugin.settings.getSetting('splitCardEnabled') }
   
   init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
@@ -23,7 +23,7 @@ export default class SplitCardCanvasExtension extends CanvasExtension {
 
     menu.addItem((item) => {
       item.setTitle('Split Card by new line')
-        .setIcon('split-horizontal')
+        .setIcon('split')
         .onClick(() => this.splitCardByNewline(node))
     })
   }
@@ -55,7 +55,7 @@ export default class SplitCardCanvasExtension extends CanvasExtension {
           x: node.x + (node.width - defaultSize.width) / 2,
           y: node.y + (i * (defaultSize.height + nodeMargin))
         },
-        size: defaultSize
+        size: { width: node.width, height: defaultSize.height }
       })
       
       // Set the text content for this line
@@ -111,5 +111,8 @@ export default class SplitCardCanvasExtension extends CanvasExtension {
     canvas.updateSelection(() => {
       canvas.selection = new Set(newNodes)
     })
+    
+    // Maintain undo/redo history stack
+    canvas.requestSave()
   }
 }

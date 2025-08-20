@@ -545,6 +545,11 @@ export const SETTINGS = {
       }
     }
   },
+  splitCardEnabled: {
+    label: 'Split card by new line',
+    description: 'Split text nodes by new lines using the context menu.',
+    children: { }
+  },
   canvasEncapsulationEnabled: {
     label: 'Canvas encapsulation',
     description: 'Encapsulate a selection of nodes and edges into a new canvas using the context menu.',
