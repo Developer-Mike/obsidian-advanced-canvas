@@ -38,6 +38,36 @@ const CUSTOM_ICONS = {
 
   'pathfinding-method-bezier': `<path stroke="currentColor" fill="none" stroke-width="8.5" d="M37.5 79.1667h35.4167a14.5833 14.5833 90 000-29.1667h-45.8333a14.5833 14.5833 90 010-29.1667H62.5"/>`,
   'pathfinding-method-square': `<path stroke="currentColor" fill="none" stroke-width="8.5" d="M72.9167 79.1667 72.9167 50 27.0833 50 27.0833 20.8333"/>`,
+
+  'arrows-selected': `
+    <g stroke-width="2" stroke="currentColor" fill="none">
+      <defs>
+        <marker id="arrow-right" markerWidth="10" markerHeight="7" refX="2" refY="3.5" orient="auto"> <polygon points="2 2, 5 3.5, 2 5" /> </marker>
+        <marker id="arrow-left" markerWidth="10" markerHeight="7" refX="4" refY="3.5" orient="auto"> <polygon points="1 3.5, 4 2, 4 5" /> </marker>
+      </defs>
+      <rect height="100" width="100" stroke-width="15" stroke="currentColor" stroke-dasharray="8,8" fill="transparent"/>
+      <line x1="20" y1="30" x2="60" y2="30" stroke-width="5" marker-end="url(#arrow-right)"/>
+      <line x1="40" y1="70" x2="80" y2="70" stroke-width="5" marker-start="url(#arrow-left)"/>
+    </g>
+  `,
+  'arrow-right-selected': `
+    <g stroke-width="2" stroke="currentColor" fill="none">
+      <defs>
+          <marker id="arrow-right" markerWidth="10" markerHeight="7" refX="2" refY="3.5" orient="auto"> <polygon points="2 2, 5 3.5, 2 5" /> </marker>
+      </defs>
+      <rect height="100" width="100" stroke-width="15" stroke="currentColor" stroke-dasharray="8,8" fill="transparent"/>
+      <line x1="20" y1="50" x2="60" y2="50" stroke-width="5" marker-end="url(#arrow-right)"/>
+    </g>
+  `,
+  'arrow-left-selected': `
+    <g stroke-width="2" stroke="currentColor" fill="none">
+      <defs>
+          <marker id="arrow-left" markerWidth="10" markerHeight="7" refX="4" refY="3.5" orient="auto"> <polygon points="1 3.5, 4 2, 4 5" /> </marker>
+      </defs>
+      <rect height="100" width="100" stroke-width="15" stroke="currentColor" stroke-dasharray="8,8" fill="transparent"/>
+      <line x1="40" y1="50" x2="80" y2="50" stroke-width="5" marker-start="url(#arrow-left)"/>
+    </g>
+  `,
 }
 
 export default class IconsHelper {
