@@ -45,6 +45,7 @@ This plugin enhances the Obsidian canvas with a wide array of features:
     *   [Portals](#portals): Embed other canvases within your current canvas.
     *   [Collapsible Groups](#collapsible-groups): Organize your canvas with expandable/collapsible groups.
     *   [Edge Highlight](#edge-highlight): Highlight edges when a connected node is selected.
+    *   [Edge Selection](#edge-selection): Select edges connected to the selected node(s).
     *   [Focus Mode](#focus-mode): Highlight a single node by blurring others.
     *   [Encapsulate Selection](#encapsulate-selection): Move selected nodes to a new canvas, linking back to it.
     *   Create groups independently of the nodes.
@@ -507,6 +508,28 @@ Flip the direction of an edge with one click.
 <details>
     <summary>Flip Edge Example</summary>
     <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/docs/flip-edge.gif" alt="Flip Edge Example"/>
+</details>
+
+## Edge Selection
+Select edges connected to the selected node(s).
+
+<details>
+    <summary>Select Connected Edges Example</summary>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/docs/select-connected-edges.gif" alt="Select Connected Edges Example"/>
+</details>
+
+### Select By Direction
+Select incoming or outgoing edges of the selected node(s).
+Note: this requires the setting `Edge Selection > Select Edge By Direction` to be enabled.
+
+<details>
+    <summary>Select Outgoing Edges Example</summary>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/docs/select-outgoing-edges.gif" alt="Select Outgoing Edges Example"/>
+</details>
+
+<details>
+    <summary>Select Incoming Edges Example</summary>
+    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/docs/select-incoming-edges.gif" alt="Select Incoming Edges Example"/>
 </details>
 
 ## Canvas Events
