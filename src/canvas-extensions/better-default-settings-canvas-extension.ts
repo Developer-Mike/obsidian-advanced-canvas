@@ -119,8 +119,12 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
   private async applyDefaultEdgeStyles(canvas: Canvas, edge: CanvasEdge) {
     const edgeData = edge.getData()
 
+    let color: CanvasColor | undefined = this.plugin.settings.getSetting('defaultEdgeColor').toString() as CanvasColor
+    if (color === "0") color = undefined
+
     edge.setData({
       ...edgeData,
+      color: color,
       styleAttributes: {
         ...edgeData.styleAttributes,
         ...this.plugin.settings.getSetting('defaultEdgeStyleAttributes')
