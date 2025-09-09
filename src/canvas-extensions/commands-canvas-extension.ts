@@ -132,7 +132,7 @@ export default class CommandsCanvasExtension extends CanvasExtension {
       name: 'Select connected edges',
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
-        (canvas: Canvas) => !canvas.readonly && canvas.selection.size > 0,
+        (canvas: Canvas) => canvas.selection.size > 0,
         (canvas: Canvas) => CanvasHelper.selectEdgesForNodes(canvas, 'connected')
       )
     })
@@ -142,7 +142,7 @@ export default class CommandsCanvasExtension extends CanvasExtension {
       name: 'Select incoming edges',
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
-        (canvas: Canvas) => !canvas.readonly && canvas.selection.size > 0,
+        (canvas: Canvas) => canvas.selection.size > 0,
         (canvas: Canvas) => CanvasHelper.selectEdgesForNodes(canvas, 'incoming')
       )
     })
@@ -152,7 +152,7 @@ export default class CommandsCanvasExtension extends CanvasExtension {
       name: 'Select outgoing edges',
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
-        (canvas: Canvas) => !canvas.readonly && canvas.selection.size > 0,
+        (canvas: Canvas) => canvas.selection.size > 0,
         (canvas: Canvas) => CanvasHelper.selectEdgesForNodes(canvas, 'outgoing')
       )
     })

@@ -439,7 +439,7 @@ export default class CanvasHelper {
   }
 
   static selectEdgesForNodes(canvas: Canvas, direction: ConnectionDirection) {
-    const selection = canvas.getSelectionData();
+    const selection = canvas.getSelectionData()
     if (selection.nodes.length === 0) return
 
     const edges: Set<CanvasEdge> = new Set()
