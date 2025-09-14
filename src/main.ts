@@ -41,6 +41,7 @@ import CollapsibleGroupsCanvasExtension from './canvas-extensions/collapsible-gr
 import FocusModeCanvasExtension from './canvas-extensions/focus-mode-canvas-extension'
 import AutoFileNodeEdgesCanvasExtension from './canvas-extensions/auto-file-node-edges-canvas-extension'
 import FlipEdgeCanvasExtension from './canvas-extensions/flip-edge-canvas-extension'
+import EdgeSelectionCanvasExtension from './canvas-extensions/edge-selection-canvas-extension'
 import ExportCanvasExtension from './canvas-extensions/export-canvas-extension'
 import FloatingEdgeCanvasExtension from './canvas-extensions/floating-edge-canvas-extension'
 import EdgeHighlightCanvasExtension from './canvas-extensions/edge-highlight-canvas-extension'
@@ -101,6 +102,7 @@ const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   ExportCanvasExtension,
   FocusModeCanvasExtension,
   EncapsulateCanvasExtension,
+  EdgeSelectionCanvasExtension,
 ]
 
 export default class AdvancedCanvasPlugin extends Plugin {

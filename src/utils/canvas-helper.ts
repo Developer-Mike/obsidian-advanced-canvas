@@ -12,6 +12,8 @@ export interface MenuOption {
   callback?: () => void
 }
 
+export type ConnectionDirection = 'connected' | 'outgoing' | 'incoming'
+
 export default class CanvasHelper {
   static readonly GRID_SIZE = 20
 
@@ -434,5 +436,35 @@ export default class CanvasHelper {
     }
 
     return bestSide!
+  }
+
+  static selectEdgesForNodes(canvas: Canvas, direction: ConnectionDirection) {
+    const selection = canvas.getSelectionData()
+    if (selection.nodes.length === 0) return
+
+    const edges: Set<CanvasEdge> = new Set()
+
+    for (const nodeData of selection.nodes) {
+      const node = canvas.nodes.get(nodeData.id)
+      if (!node) continue
+
+      for (const edge of canvas.getEdgesForNode(node)) {
+        switch (direction) {
+          case 'connected':
+            edges.add(edge)
+            break
+          case 'incoming':
+            if (edge.to.node === node) edges.add(edge)
+            break
+          case 'outgoing':
+            if (edge.from.node === node) edges.add(edge)
+            break
+        }
+      }
+    }
+
+    canvas.updateSelection(() => {
+      canvas.selection = edges
+    })
   }
 }

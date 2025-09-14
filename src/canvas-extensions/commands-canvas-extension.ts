@@ -1,4 +1,4 @@
-import { Canvas, CanvasNode } from "src/@types/Canvas"
+import { Canvas, CanvasEdge, CanvasNode } from "src/@types/Canvas"
 import BBoxHelper from "src/utils/bbox-helper"
 import CanvasHelper from "src/utils/canvas-helper"
 import { FileSelectModal } from "src/utils/modal-helper"
@@ -126,6 +126,36 @@ export default class CommandsCanvasExtension extends CanvasExtension {
         this.plugin,
         (canvas: Canvas) => !canvas.readonly && canvas.selection.size > 0,
         (canvas: Canvas) => this.flipSelection(canvas, false)
+      )
+    })
+
+    this.plugin.addCommand({
+      id: 'select-connected-edges',
+      name: 'Select connected edges',
+      checkCallback: CanvasHelper.canvasCommand(
+        this.plugin,
+        (canvas: Canvas) => canvas.selection.size > 0,
+        (canvas: Canvas) => CanvasHelper.selectEdgesForNodes(canvas, 'connected')
+      )
+    })
+
+    this.plugin.addCommand({
+      id: 'select-incoming-edges',
+      name: 'Select incoming edges',
+      checkCallback: CanvasHelper.canvasCommand(
+        this.plugin,
+        (canvas: Canvas) => canvas.selection.size > 0,
+        (canvas: Canvas) => CanvasHelper.selectEdgesForNodes(canvas, 'incoming')
+      )
+    })
+
+    this.plugin.addCommand({
+      id: 'select-outgoing-edges',
+      name: 'Select outgoing edges',
+      checkCallback: CanvasHelper.canvasCommand(
+        this.plugin,
+        (canvas: Canvas) => canvas.selection.size > 0,
+        (canvas: Canvas) => CanvasHelper.selectEdgesForNodes(canvas, 'outgoing')
       )
     })
 

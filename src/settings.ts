@@ -102,6 +102,9 @@ export interface AdvancedCanvasPluginSettingsValues {
 
   edgeHighlightEnabled: boolean
   highlightIncomingEdges: boolean
+
+  edgeSelectionEnabled: boolean
+  selectEdgeByDirection: boolean
 }
 
 export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
@@ -194,6 +197,9 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
 
   edgeHighlightEnabled: false,
   highlightIncomingEdges: false,
+
+  edgeSelectionEnabled: false,
+  selectEdgeByDirection: false,
 }
 
 export const SETTINGS = {
@@ -587,6 +593,18 @@ export const SETTINGS = {
       highlightIncomingEdges: {
         label: 'Highlight incoming edges',
         description: 'When enabled, incoming edges will also be highlighted.',
+        type: 'boolean'
+      }
+    }
+  },
+  edgeSelectionEnabled: {
+    label: 'Edge selection',
+    description: 'Select edges connected to the selected node(s) using the popup menu.',
+    infoSection: 'edge-selection',
+    children: {
+      selectEdgeByDirection: {
+        label: 'Select edge by direction',
+        description: 'Select incoming or outgoing edges using separate popup menu items.',
         type: 'boolean'
       }
     }
