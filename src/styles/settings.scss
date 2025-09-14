@@ -36,6 +36,11 @@
 
   transform: scaleY(1);
   transition: transform 0.2s ease-in-out;
+
+  details {
+    flex-direction: column;
+    align-items: initial;
+  }
 }
 
 .ac-settings-heading:has(.checkbox-container:not(.is-enabled)) + .settings-header-children {
@@ -55,10 +60,6 @@ details.setting-item {
     padding-left: 1em;
     border-left: 1px solid var(--color-accent);
   }
-}
-
-body.is-mobile .kofi-button.sticky {
-  display: none; // TODO: Fix this
 }
 
 .kofi-banner {
