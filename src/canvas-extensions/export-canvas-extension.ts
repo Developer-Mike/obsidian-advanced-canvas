@@ -100,6 +100,19 @@ export default class ExportCanvasExtension extends CanvasExtension {
         .onChange(value => noFontExport = value)
       )
 
+    let theme: 'light' | 'dark' = document.body.classList.contains('theme-dark') ? 'dark' : 'light'
+    new Setting(modal.contentEl)
+      .setName('Theme')
+      .setDesc('The theme used for the export.')
+      .addDropdown(dropdown => dropdown
+        .addOptions({
+          light: 'Light',
+          dark: 'Dark'
+        } as Record<'light' | 'dark', string>)
+        .setValue(theme)
+        .onChange(value => theme = value as 'light' | 'dark')
+      )
+
     let watermark = false
     new Setting(modal.contentEl)
       .setName('Show logo')
@@ -140,6 +153,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
             svg, 
             svg ? 1 : pixelRatioFactor, 
             svg ? noFontExport : false,
+            theme,
             watermark,
             garbledText,
             svg ? true : transparentBackground
@@ -151,7 +165,14 @@ export default class ExportCanvasExtension extends CanvasExtension {
     modal.open()
   }
 
-  private async exportImage(canvas: Canvas, nodesToExport: CanvasNode[] | null, svg: boolean, pixelRatioFactor: number, noFontExport: boolean, watermark: boolean, garbledText: boolean, transparentBackground: boolean) {
+  private async exportImage(canvas: Canvas, nodesToExport: CanvasNode[] | null, svg: boolean, pixelRatioFactor: number, noFontExport: boolean, theme: 'light' | 'dark', watermark: boolean, garbledText: boolean, transparentBackground: boolean) {
+    // Set theme
+    const cachedTheme = document.body.classList.contains('theme-dark') ? 'dark' : 'light'
+    if (theme !== cachedTheme) {
+      document.body.classList.toggle('theme-dark', theme === 'dark')
+      document.body.classList.toggle('theme-light', theme === 'light')
+    }
+
     const isWholeCanvas = nodesToExport === null
     if (!nodesToExport) nodesToExport = [...canvas.nodes.values()]
     
@@ -325,6 +346,12 @@ export default class ExportCanvasExtension extends CanvasExtension {
 
       // Remove the loading overlay
       interactionBlocker.remove()
+
+      // Restore theme
+      if (theme !== cachedTheme) {
+        document.body.classList.toggle('theme-dark', cachedTheme === 'dark')
+        document.body.classList.toggle('theme-light', cachedTheme === 'light')
+      }
     }
   }
 

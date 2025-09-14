@@ -2,7 +2,7 @@ import { Canvas, CanvasEdge, CanvasNode } from "src/@types/Canvas"
 import CanvasHelper from "src/utils/canvas-helper"
 import { FileSelectModal } from "src/utils/modal-helper"
 import CanvasExtension from "./canvas-extension"
-import { CanvasFileNodeData } from "src/@types/AdvancedJsonCanvas"
+import { CanvasColor, CanvasFileNodeData } from "src/@types/AdvancedJsonCanvas"
 
 export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtension {
   isEnabled() { return true }
@@ -103,8 +103,12 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
     const nodeData = node.getData()
     if (nodeData.type !== 'text') return
 
+    let color: CanvasColor | undefined = this.plugin.settings.getSetting('defaultTextNodeColor').toString() as CanvasColor
+    if (color === "0") color = undefined
+
     node.setData({
       ...nodeData,
+      color: color,
       styleAttributes: {
         ...nodeData.styleAttributes,
         ...this.plugin.settings.getSetting('defaultTextNodeStyleAttributes')
@@ -115,8 +119,12 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
   private async applyDefaultEdgeStyles(canvas: Canvas, edge: CanvasEdge) {
     const edgeData = edge.getData()
 
+    let color: CanvasColor | undefined = this.plugin.settings.getSetting('defaultEdgeColor').toString() as CanvasColor
+    if (color === "0") color = undefined
+
     edge.setData({
       ...edgeData,
+      color: color,
       styleAttributes: {
         ...edgeData.styleAttributes,
         ...this.plugin.settings.getSetting('defaultEdgeStyleAttributes')

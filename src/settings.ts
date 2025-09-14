@@ -29,10 +29,12 @@ export interface AdvancedCanvasPluginSettingsValues {
 
   nodeStylingFeatureEnabled: boolean
   customNodeStyleAttributes: StyleAttribute[]
+  defaultTextNodeColor: number
   defaultTextNodeStyleAttributes: { [key: string]: string }
 
   edgesStylingFeatureEnabled: boolean
   customEdgeStyleAttributes: StyleAttribute[]
+  defaultEdgeColor: number
   defaultEdgeLineDirection: keyof typeof SETTINGS.edgesStylingFeatureEnabled.children.defaultEdgeLineDirection.options
   defaultEdgeStyleAttributes: { [key: string]: string }
   edgeStyleUpdateWhileDragging: boolean
@@ -119,10 +121,12 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
 
   nodeStylingFeatureEnabled: true,
   customNodeStyleAttributes: [],
+  defaultTextNodeColor: 0,
   defaultTextNodeStyleAttributes: {},
 
   edgesStylingFeatureEnabled: true,
   customEdgeStyleAttributes: [],
+  defaultEdgeColor: 0,
   defaultEdgeLineDirection: 'unidirectional',
   defaultEdgeStyleAttributes: {},
   edgeStyleUpdateWhileDragging: false,
@@ -352,6 +356,12 @@ export const SETTINGS = {
         type: 'button',
         onClick: () => window.open("https://github.com/Developer-Mike/obsidian-advanced-canvas/blob/main/README.md#custom-styles")
       } as ButtonSetting,
+      defaultTextNodeColor: {
+        label: 'Default text node color',
+        description: 'The default color of a text node. The default range is from 0 to 6, where 0 is no color. The range can be extended by using the Custom Colors feature of Advanced Canvas.',
+        type: 'number',
+        parse: (value: string) => Math.max(0, parseInt(value) || 0)
+      },
       defaultTextNodeStyleAttributes: {
         label: 'Default text node style attributes',
         type: 'styles',
@@ -373,6 +383,12 @@ export const SETTINGS = {
         type: 'button',
         onClick: () => window.open("https://github.com/Developer-Mike/obsidian-advanced-canvas/blob/main/README.md#custom-styles")
       } as ButtonSetting,
+      defaultEdgeColor: {
+        label: 'Default edge color',
+        description: 'The default color of an edge. The default range is from 0 to 6, where 0 is no color. The range can be extended by using the Custom Colors feature of Advanced Canvas.',
+        type: 'number',
+        parse: (value: string) => Math.max(0, parseInt(value) || 0)
+      },
       defaultEdgeLineDirection: {
         label: 'Default edge line direction',
         description: 'The default line direction of an edge.',

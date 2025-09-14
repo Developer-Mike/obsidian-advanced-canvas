@@ -3,8 +3,10 @@ import BBoxHelper from "src/utils/bbox-helper"
 import CanvasHelper from "src/utils/canvas-helper"
 import { FileSelectModal } from "src/utils/modal-helper"
 import CanvasExtension from "./canvas-extension"
-import { Notice } from "obsidian"
+import { Notice, TFile } from "obsidian"
 import TextHelper from "src/utils/text-helper"
+import { CanvasFileNodeData } from "src/@types/AdvancedJsonCanvas"
+import { ExtendedCachedMetadata } from "src/@types/Obsidian"
 
 type Direction = 'up' | 'down' | 'left' | 'right'
 const DIRECTIONS = ['up', 'down', 'left', 'right'] as Direction[]
@@ -171,6 +173,120 @@ export default class CommandsCanvasExtension extends CanvasExtension {
         }
       )
     })
+
+    this.plugin.addCommand({
+      id: 'pull-outgoing-links-to-canvas',
+      name: 'Pull outgoing links to canvas',
+      checkCallback: CanvasHelper.canvasCommand(
+        this.plugin,
+        (canvas: Canvas) => !canvas.readonly,
+        (canvas: Canvas) => {
+          const canvasFile = canvas.view.file
+          if (!canvasFile) return
+
+          let selectedNodeIds = canvas.getSelectionData().nodes.map(node => node.id)
+          if (selectedNodeIds.length === 0) selectedNodeIds = [...canvas.nodes.keys()]
+
+          const metadata = this.plugin.app.metadataCache.getFileCache(canvasFile) as ExtendedCachedMetadata
+          if (!metadata) return
+
+          // Get outgoing links for all selected nodes
+          const outgoingLinks: Set<TFile> = new Set()
+          for (const nodeId of selectedNodeIds) {
+            let relativeFile = canvasFile
+
+            let nodeOutgoingLinks = metadata.nodes?.[nodeId]?.links
+            if (!nodeOutgoingLinks) {
+              const file = canvas.nodes.get(nodeId)?.file
+              if (!file) continue
+
+              const fileMetadata = this.plugin.app.metadataCache.getFileCache(file)
+              nodeOutgoingLinks = fileMetadata?.links
+              relativeFile = file
+            }
+            if (!nodeOutgoingLinks) continue
+
+            for (const nodeOutgoingLink of nodeOutgoingLinks) {
+              const resolvedLink = this.plugin.app.metadataCache.getFirstLinkpathDest(nodeOutgoingLink.link, relativeFile.path)
+              if (!(resolvedLink instanceof TFile)) continue
+
+              outgoingLinks.add(resolvedLink)
+            }
+          }
+
+          // Create outgoing links filter for those that are already on the canvas
+          const existingFileNodes: Set<TFile> = new Set([canvas.view.file])
+          for (const node of canvas.nodes.values()) {
+            if (node.getData().type !== 'file' || !node.file) continue
+            existingFileNodes.add(node.file)
+          }
+
+          for (const outgoingLink of outgoingLinks) {
+            if (existingFileNodes.has(outgoingLink)) continue
+            this.createFileNode(canvas, outgoingLink)
+          }
+        }
+      )
+    })
+
+    this.plugin.addCommand({
+      id: 'pull-backlinks-to-canvas',
+      name: 'Pull backlinks to canvas',
+      checkCallback: CanvasHelper.canvasCommand(
+        this.plugin,
+        (canvas: Canvas) => !canvas.readonly,
+        (canvas: Canvas) => {
+          const canvasFile = canvas.view.file
+          if (!canvasFile) return
+
+          let selectedNodesData = canvas.getSelectionData().nodes.map(node => node)
+          const backlinks: Set<TFile> = new Set()
+          
+          if (selectedNodesData.length > 0) {
+            // Get backlinks for all selected nodes
+            for (const nodeData of selectedNodesData) {
+              if (nodeData.type !== 'file' || !(nodeData as CanvasFileNodeData).file) continue
+
+              const file = this.plugin.app.vault.getFileByPath((nodeData as CanvasFileNodeData).file)
+              if (!file) continue
+
+              const nodeBacklinks = this.plugin.app.metadataCache.getBacklinksForFile(file)
+              if (!nodeBacklinks) continue
+
+              for (const nodeBacklink of nodeBacklinks.data.keys()) {
+                const resolvedLink = this.plugin.app.metadataCache.getFirstLinkpathDest(nodeBacklink, file.path)
+                if (!(resolvedLink instanceof TFile)) continue
+
+                backlinks.add(resolvedLink)
+              }
+            }
+          } else {
+            // Get all backlinks for the canvas file
+            const canvasBacklinks = this.plugin.app.metadataCache.getBacklinksForFile(canvasFile)
+            if (!canvasBacklinks) return
+
+            for (const canvasBacklink of canvasBacklinks.data.keys()) {
+              const resolvedLink = this.plugin.app.metadataCache.getFirstLinkpathDest(canvasBacklink, canvasFile.path)
+              if (!(resolvedLink instanceof TFile)) continue
+
+              backlinks.add(resolvedLink)
+            }
+          }
+
+          // Create backlinks filter for those that are already on the canvas
+          const existingFileNodes: Set<TFile> = new Set([canvas.view.file])
+          for (const node of canvas.nodes.values()) {
+            if (node.getData().type !== 'file' || !node.file) continue
+            existingFileNodes.add(node.file)
+          }
+
+          for (const backlink of backlinks) {
+            if (existingFileNodes.has(backlink)) continue
+            this.createFileNode(canvas, backlink)
+          }
+        }
+      )
+    })
   }
 
   private createTextNode(canvas: Canvas) {
@@ -180,12 +296,12 @@ export default class CommandsCanvasExtension extends CanvasExtension {
     canvas.createTextNode({ pos: pos, size: size })
   }
 
-  private async createFileNode(canvas: Canvas) {
+  private async createFileNode(canvas: Canvas, file?: TFile) {
     const size = canvas.config.defaultFileNodeDimensions
     const pos = CanvasHelper.getCenterCoordinates(canvas, size)
-    const file = await new FileSelectModal(this.plugin.app, undefined, true).awaitInput()
+    file ??= await new FileSelectModal(this.plugin.app, undefined, true).awaitInput()
 
-    canvas.createFileNode({ pos: pos, size: size, file: file })
+    canvas.createFileNode({ pos: pos, size: size, file })
   }
 
   private cloneNode(canvas: Canvas, cloneDirection: Direction) {

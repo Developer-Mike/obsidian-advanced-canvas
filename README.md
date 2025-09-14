@@ -193,6 +193,10 @@ Quickly locate text within your canvas using a familiar search experience. Advan
     *   Swap two selected nodes with each other (x, y and width, height will be swapped)
 *   `Advanced Canvas: Copy wikilink to node`
     *   Copy the wikilink to the selected node to the clipboard
+*   `Advanced Canvas: Pull outgoing links to canvas`
+    *   Create file nodes for all outgoing links of the selected nodes / the whole canvas if no node is selected
+*   `Advanced Canvas: Pull backlinks to canvas`
+    *   Create file nodes for all backlinks of the selected nodes / the whole canvas if no node is selected
 </details>
 
 ## Node Styles
