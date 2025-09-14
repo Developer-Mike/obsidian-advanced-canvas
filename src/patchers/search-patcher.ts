@@ -9,22 +9,20 @@ export default class SearchPatcher extends Patcher {
     const that = this
     await Patcher.waitForViewRequest<SearchView>(this.plugin, "search", view => {
       // Patch the search view until the searchQuery is set or the plugin is unloaded
-      const uninstaller = around(view, {
+      const uninstallers: Array<() => void> = []
+      Patcher.patchThisAndPrototype(this.plugin, view, {
         startSearch: (next: any) => function (...args: any): any {
           const result = next.call(this, ...args)
 
           // Patch the searchQuery and revert the search view patch
           if (this.searchQuery) {
             that.patchSearchQuery(this.searchQuery)
-            uninstaller()
+            uninstallers.forEach(uninstall => uninstall())
           }
 
           return result
         }
-      })
-
-      // Uninstall the patcher when the plugin is unloaded
-      that.plugin.register(uninstaller)
+      }, uninstallers)
     })
   }
 

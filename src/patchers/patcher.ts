@@ -67,24 +67,27 @@ export default abstract class Patcher {
     plugin: Plugin,
     object: T | undefined,
     patches: FunctionPatchObject<T>,
+    uninstallers?: Array<() => void>
   ): T | null {
-    Patcher.patch(plugin, object, patches)
-    return Patcher.patchPrototype(plugin, object, patches)
+    Patcher.patch(plugin, object, patches, false, uninstallers)
+    return Patcher.patchPrototype(plugin, object, patches, uninstallers)
   }
 
   static patchPrototype<T>(
     plugin: Plugin,
     target: T | undefined,
-    patches: FunctionPatchObject<T>
+    patches: FunctionPatchObject<T>,
+    uninstallers?: Array<() => void>
   ): T | null {
-    return Patcher.patch(plugin, target, patches, true)
+    return Patcher.patch(plugin, target, patches, true, uninstallers)
   }
 
   static patch<T>(
     plugin: Plugin,
     object: T | undefined,
     patches: FunctionPatchObject<T>,
-    prototype: boolean = false
+    prototype: boolean = false,
+    uninstallers?: Array<() => void>
   ): T | null {
     if (!object) return null
     const target = prototype ? object.constructor.prototype : object
@@ -99,6 +102,7 @@ export default abstract class Patcher {
     }
 
     const uninstaller = around(target as any, patches)
+    if (uninstallers) uninstallers.push(uninstaller)
     plugin.register(uninstaller)
 
     return object
@@ -107,17 +111,18 @@ export default abstract class Patcher {
   static tryPatchWorkspacePrototype<T>(
     plugin: Plugin, 
     getTarget: () => T | undefined, 
-    patches: FunctionPatchObject<T>
+    patches: FunctionPatchObject<T>,
+    uninstallers?: Array<() => void>
   ): Promise<T> {
     return new Promise((resolve) => {
-      const result = Patcher.patchPrototype(plugin, getTarget(), patches)
+      const result = Patcher.patchPrototype(plugin, getTarget(), patches, uninstallers)
       if (result) {
         resolve(result)
         return
       }
 
       const listener = plugin.app.workspace.on('layout-change', () => {
-        const result = Patcher.patchPrototype(plugin, getTarget(), patches)
+        const result = Patcher.patchPrototype(plugin, getTarget(), patches, uninstallers)
 
         if (result) {
           plugin.app.workspace.offref(listener)
