@@ -283,7 +283,14 @@ export default class PresentationCanvasExtension extends CanvasExtension {
       canvas.screenshotting = true
 
     // Register event handler for keyboard navigation
-    canvas.wrapperEl.onkeydown = (e: any) => {
+    canvas.wrapperEl.onkeydown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        e.stopPropagation()
+        this.endPresentation(canvas)
+        return
+      }
+
       if (this.plugin.settings.getSetting('useArrowKeysToChangeSlides')) {
         if (e.key === 'ArrowRight') this.nextNode(canvas)
         else if (e.key === 'ArrowLeft') this.previousNode(canvas)
@@ -337,6 +344,8 @@ export default class PresentationCanvasExtension extends CanvasExtension {
   }
 
   private endPresentation(canvas: Canvas) {
+    if (!this.isPresentationMode) return
+
     // Unregister event handlers
     if (this.presentationUsesFullscreen) {
       this.fullscreenModalObserver?.disconnect()
