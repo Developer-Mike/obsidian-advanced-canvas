@@ -89,6 +89,7 @@ export interface AdvancedCanvasPluginSettingsValues {
   usePgUpPgDownKeysToChangeSlides: boolean
   zoomToSlideWithoutPadding: boolean
   useUnclampedZoomWhilePresenting: boolean
+  fullscreenPresentationEnabled: boolean
   slideTransitionAnimationDuration: number
   slideTransitionAnimationIntensity: number
 
@@ -184,6 +185,7 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   usePgUpPgDownKeysToChangeSlides: true,
   zoomToSlideWithoutPadding: true,
   useUnclampedZoomWhilePresenting: false,
+  fullscreenPresentationEnabled: true,
   slideTransitionAnimationDuration: 0.5,
   slideTransitionAnimationIntensity: 1.25,
 
@@ -508,6 +510,11 @@ export const SETTINGS = {
         description: 'When enabled, the zoom will not be clamped while presenting.',
         type: 'boolean'
       },
+      fullscreenPresentationEnabled: {
+        label: 'Enter fullscreen while presenting',
+        description: 'When enabled, presentations automatically request fullscreen. Disable to keep Obsidian windowed during presentations.',
+        type: 'boolean'
+      },
       slideTransitionAnimationDuration: {
         label: 'Slide transition animation duration',
         description: 'The duration of the slide transition animation in seconds. Set to 0 to disable the animation.',
@@ -616,9 +623,9 @@ export const SETTINGS = {
     children: { }
   },
 } as const satisfies {
-  [key in keyof AdvancedCanvasPluginSettingsValues]: SettingsHeading & { 
-    children: { 
-      [key in keyof AdvancedCanvasPluginSettingsValues]?: Setting 
+  [key in keyof AdvancedCanvasPluginSettingsValues]: SettingsHeading & {
+    children: {
+      [key in keyof AdvancedCanvasPluginSettingsValues]?: Setting
     }
   }
 }
@@ -674,9 +681,9 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
     // Generate settings from SETTINGS object
     for (const [headingId, heading] of Object.entries(SETTINGS) as [string, SettingsHeading][]) {
       this.createFeatureHeading(
-        containerEl, 
-        heading.label, 
-        heading.description, 
+        containerEl,
+        heading.label,
+        heading.description,
         heading.infoSection,
         heading.disableToggle ? null : headingId as keyof AdvancedCanvasPluginSettingsValues
       )
