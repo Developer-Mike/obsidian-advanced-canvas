@@ -348,8 +348,6 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     if (this.presentationUsesFullscreen) {
       this.fullscreenModalObserver?.disconnect()
       this.fullscreenModalObserver = null
-    } else {
-      this.fullscreenModalObserver = null
     }
     canvas.wrapperEl.onkeydown = null
     if (this.presentationUsesFullscreen) canvas.wrapperEl.onfullscreenchange = null
