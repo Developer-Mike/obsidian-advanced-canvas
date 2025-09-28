@@ -81,7 +81,7 @@ const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   ColorPaletteCanvasExtension,
   PresentationCanvasExtension,
   PortalsCanvasExtension,
-  
+
   // UI Extensions (Non-savable data)
   CanvasMetadataExposerExtension,
   CanvasWrapperExposerExtension,
@@ -114,9 +114,9 @@ export default class AdvancedCanvasPlugin extends Plugin {
   patchers: Patcher[]
   canvasExtensions: CanvasExtension[]
 
-	async onload() {
+  async onload() {
     IconsHelper.addIcons()
-    
+
     this.settings = new SettingsManager(this)
     await this.settings.loadSettings()
     this.settings.addSettingsTab()
@@ -131,12 +131,12 @@ export default class AdvancedCanvasPlugin extends Plugin {
     })
 
     this.canvasExtensions = CANVAS_EXTENSIONS.map((Extension: any) => {
-      try { return new Extension(this) } 
+      try { return new Extension(this) }
       catch (e) {
         console.error(`Error initializing ac-extension ${Extension.name}:`, e)
       }
     })
-	}
+  }
 
   onunload() {}
 

@@ -35,9 +35,9 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     ))
 
     this.plugin.addCommand({
-			id: 'create-new-slide',
-			name: 'Create new slide',
-			checkCallback: CanvasHelper.canvasCommand(
+      id: 'create-new-slide',
+      name: 'Create new slide',
+      checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (canvas: Canvas) => !canvas.readonly && !this.isPresentationMode,
         (canvas: Canvas) => this.addSlide(canvas)
@@ -45,9 +45,9 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     })
 
     this.plugin.addCommand({
-			id: 'set-start-node',
-			name: 'Set start node',
-			checkCallback: CanvasHelper.canvasCommand(
+      id: 'set-start-node',
+      name: 'Set start node',
+      checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (canvas: Canvas) => !canvas.readonly && !this.isPresentationMode && canvas.getSelectionData().nodes.length === 1,
         (canvas: Canvas) => this.setStartNode(canvas, canvas.nodes.get(canvas.getSelectionData().nodes[0].id))
@@ -55,7 +55,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     })
 
     this.plugin.addCommand({
-			id: 'start-presentation',
+      id: 'start-presentation',
       name: 'Start presentation',
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
@@ -65,7 +65,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     })
 
     this.plugin.addCommand({
-			id: 'continue-presentation',
+      id: 'continue-presentation',
       name: 'Continue presentation',
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
@@ -95,7 +95,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     })
 
     this.plugin.addCommand({
-			id: 'next-node',
+      id: 'next-node',
       name: 'Next node',
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,

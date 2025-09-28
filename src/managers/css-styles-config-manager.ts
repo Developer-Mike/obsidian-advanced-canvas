@@ -23,13 +23,13 @@ export default class CssStylesConfigManager<T> {
     if (this.cachedConfig) return this.cachedConfig
 
     this.cachedConfig = []
-    
+
     // Parse config from CSS
     const styleSheets = document.styleSheets
     for (let i = 0; i < styleSheets.length; i++) {
       const sheet = styleSheets.item(i)
       if (!sheet) continue
-      
+
       const styleSheetConfigs = this.parseStyleConfigsFromCSS(sheet)
       for (const config of styleSheetConfigs) {
         const validConfig = this.validate(config)
@@ -43,8 +43,8 @@ export default class CssStylesConfigManager<T> {
   }
 
   private parseStyleConfigsFromCSS(sheet: CSSStyleSheet): Record<string, any>[] {
-		const textContent = sheet?.ownerNode?.textContent?.trim()
-		if (!textContent) return []
+    const textContent = sheet?.ownerNode?.textContent?.trim()
+    if (!textContent) return []
 
     const configs = []
 
