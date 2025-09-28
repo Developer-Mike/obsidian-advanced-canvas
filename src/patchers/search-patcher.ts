@@ -29,7 +29,7 @@ export default class SearchPatcher extends Patcher {
   private patchSearchQuery(searchQuery: SearchQuery) {
     Patcher.patchThisAndPrototype(this.plugin, searchQuery, {
       _match: Patcher.OverrideExisting(next => function (data: MatchData): any {
-        const isCanvas = data.strings.filepath.endsWith(".canvas")
+        const isCanvas = data.strings.filepath?.endsWith(".canvas") ?? false
 
         if (isCanvas && !data.cache)
           data.cache = this.app.metadataCache.getCache(data.strings.filepath)
