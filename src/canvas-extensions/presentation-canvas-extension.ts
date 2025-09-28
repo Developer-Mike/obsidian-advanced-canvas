@@ -15,7 +15,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
   presentationUsesFullscreen: boolean = false
 
   isEnabled() { return 'presentationFeatureEnabled' as const }
-  
+
   init() {
     /* Add wrap in slide option to context menu */
     this.plugin.registerEvent(this.plugin.app.workspace.on(
@@ -25,7 +25,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
           item
             .setTitle('Wrap in slide')
             .setIcon('gallery-vertical')
-            .onClick(() => this.addSlide(canvas, undefined, 
+            .onClick(() => this.addSlide(canvas, undefined,
               BBoxHelper.enlargeBBox(BBoxHelper.combineBBoxes(
                 [...canvas.selection.values()].map((element: CanvasElement) => element.getBBox())
               ), this.plugin.settings.getSetting('wrapInSlidePadding'))
@@ -138,16 +138,16 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     // If the canvas is readonly or there are multiple/no nodes selected, return
     const selectedNodesData = canvas.getSelectionData().nodes
     if (canvas.readonly || selectedNodesData.length !== 1 || canvas.selection.size > 1) return
-    
+
     const selectedNode = canvas.nodes.get(selectedNodesData[0].id)
     if (!selectedNode) return
-    
+
     CanvasHelper.addPopupMenuOption(
       canvas,
       CanvasHelper.createPopupMenuOption({
-        id: 'start-node', 
-        label: 'Set as start slide', 
-        icon: 'play', 
+        id: 'start-node',
+        label: 'Set as start slide',
+        icon: 'play',
         callback: () => this.setStartNode(canvas, selectedNode)
       })
     )
@@ -185,8 +185,8 @@ export default class PresentationCanvasExtension extends CanvasExtension {
         slideSize.height = bboxHeight
         slideSize.width = bboxHeight * slideAspectRatio
       }
-      
-      pos = { 
+
+      pos = {
         x: bbox.minX,
         y: bbox.minY
       }
@@ -202,8 +202,8 @@ export default class PresentationCanvasExtension extends CanvasExtension {
       focus: false,
     })
 
-    groupNode.setData({ 
-      ...groupNode.getData(), 
+    groupNode.setData({
+      ...groupNode.getData(),
       ratio: slideAspectRatio
     })
 
@@ -215,7 +215,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     const animationDurationMs = this.plugin.settings.getSetting('slideTransitionAnimationDuration') * 1000
 
     const toNodeBBox = CanvasHelper.getSmallestAllowedZoomBBox(canvas, toNode.getBBox())
-    
+
     if (animationDurationMs > 0 && fromNode) {
       const animationIntensity = this.plugin.settings.getSetting('slideTransitionAnimationIntensity')
 
@@ -249,7 +249,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
         new Notice('No start node found. Please mark a node as a start node trough the popup menu.')
         return
       }
-      
+
       this.visitedNodeIds = [startNode.getData().id]
     }
 
@@ -322,14 +322,13 @@ export default class PresentationCanvasExtension extends CanvasExtension {
         if (document.fullscreenElement) return
         this.endPresentation(canvas)
       }
-    } else {
-      canvas.wrapperEl.onfullscreenchange = null
     }
 
     this.isPresentationMode = true
 
     // Wait for fullscreen to be enabled
-    if (this.presentationUsesFullscreen) await sleep(500)
+    if (this.presentationUsesFullscreen)
+      await sleep(500)
 
     // Zoom to first node
     const startNodeId = this.visitedNodeIds.first()
@@ -348,25 +347,27 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     if (this.presentationUsesFullscreen) {
       this.fullscreenModalObserver?.disconnect()
       this.fullscreenModalObserver = null
+      canvas.wrapperEl.onfullscreenchange = null
+
+      // Exit fullscreen mode
+      if (document.fullscreenElement) document.exitFullscreen()
     }
     canvas.wrapperEl.onkeydown = null
-    if (this.presentationUsesFullscreen) canvas.wrapperEl.onfullscreenchange = null
 
     // Unlock canvas
     canvas.setReadonly(false)
-    
+
     // Re-enable zoom clamping
     if (this.plugin.settings.getSetting('useUnclampedZoomWhilePresenting'))
       canvas.screenshotting = false
 
-    // Exit fullscreen mode
+    // Remove styles
     canvas.wrapperEl.classList.remove('presentation-mode')
-    if (this.presentationUsesFullscreen && document.fullscreenElement) document.exitFullscreen()
 
     // Reset viewport
     if (this.plugin.settings.getSetting('resetViewportOnPresentationEnd'))
       canvas.setViewport(this.savedViewport.x, this.savedViewport.y, this.savedViewport.zoom)
-    
+
     this.isPresentationMode = false
     this.presentationUsesFullscreen = false
   }
