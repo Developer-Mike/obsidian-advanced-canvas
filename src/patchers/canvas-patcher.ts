@@ -1,11 +1,11 @@
 import { EditorView, ViewUpdate } from "@codemirror/view"
 import { around } from "monkey-around"
 import { editorInfoField, requireApiVersion, Side, WorkspaceLeaf } from "obsidian"
-import { BBox, Canvas, CanvasEdge, CanvasElement, CanvasNode, CanvasPopupMenu, CanvasView, NodeInteractionLayer, Position, SelectionData } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasEdge, CanvasElement, CanvasElementsData, CanvasNode, CanvasPopupMenu, CanvasView, NodeInteractionLayer, Position, SelectionData } from "src/@types/Canvas"
 import JSONC from "tiny-jsonc"
 import Patcher from "./patcher"
 import BBoxHelper from "src/utils/bbox-helper"
-import { CanvasData, CanvasEdgeData, CanvasNodeData, CanvasTextNodeData } from "src/@types/AdvancedJsonCanvas"
+import { CanvasData, CanvasEdgeData, CanvasNodeData } from "src/@types/AdvancedJsonCanvas"
 import MigrationHelper from "src/utils/migration-helper"
 
 export default class CanvasPatcher extends Patcher {
@@ -144,6 +144,15 @@ export default class CanvasPatcher extends Patcher {
       setDragging: Patcher.OverrideExisting(next => function (dragging: boolean): void {
         const result = next.call(this, dragging)
         that.plugin.app.workspace.trigger('advanced-canvas:dragging-state-changed', this, dragging)
+        return result
+      }),
+      cloneData: Patcher.OverrideExisting(next => function (newItems: CanvasElementsData, shift: Position): CanvasElementsData {
+        for (const nodeData of newItems.nodes)
+          if (nodeData.styleAttributes)
+            // copy obj to prevent sharing the same instance
+            nodeData.styleAttributes = structuredClone(nodeData.styleAttributes)
+
+        const result = next.call(this, newItems, shift)
         return result
       }),
       getContainingNodes: Patcher.OverrideExisting(next => function (bbox: BBox): CanvasNode[] {

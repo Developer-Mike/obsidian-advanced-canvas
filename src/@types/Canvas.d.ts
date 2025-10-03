@@ -240,6 +240,7 @@ export interface Canvas {
   /** Basically setData (if clearCanvas == true), but without modifying the history */
   importData(data: CanvasElementsData, clearCanvas?: boolean, /* custom */ silent?: boolean): void
   clear(): void
+  cloneData(newItems: CanvasElementsData, shift: Position): CanvasElementsData
 
   nodes: Map<string, CanvasNode>
   edges: Map<string, CanvasEdge>
