@@ -291,7 +291,7 @@ Set the pathfinding method of the edges (arrows) to default, straight, squared o
 </details>
 
 ## Custom Styles
-Custom style attributes for nodes and edges can easily be added.
+Custom style attributes for nodes and edges can easily be added. They get exposed in the `.canvas-node` dataset (for nodes) or `.canvas-edges path` dataset (for edges) and can be styled using CSS. Node styles also get exposed in the node editor iframe in the body dataset and the class `canvas-node-iframe-body` indicating that the body is inside a canvas node iframe.
 
 1.  Create a new CSS snippet in your vault:
     *   Navigate to `Settings > Appearance > *scroll down* > CSS snippets` and click on the folder icon to open the snippets folder.

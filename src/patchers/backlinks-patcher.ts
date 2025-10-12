@@ -3,7 +3,7 @@ import Patcher from "./patcher"
 import Backlink from "src/@types/BacklinkPlugin"
 
 export default class BacklinksPatcher extends Patcher {
-  private isRecomputingBacklinks: boolean = false
+  private isRecomputingBacklinks = false
 
   protected async patch() {
     if (!this.plugin.settings.getSetting('canvasMetadataCompatibilityEnabled')) return
@@ -22,8 +22,8 @@ export default class BacklinksPatcher extends Patcher {
 
     Patcher.patchPrototype<ExtendedVault>(this.plugin, this.plugin.app.vault, {
       recurseChildrenAC: _next => function (origin: TAbstractFile, traverse: (file: TAbstractFile) => void) {
-        for (var stack = [origin]; stack.length > 0;) {
-          var current = stack.pop()
+        for (let stack = [origin]; stack.length > 0;) {
+          const current = stack.pop()
           if (current) {
             traverse(current)
 
@@ -36,8 +36,8 @@ export default class BacklinksPatcher extends Patcher {
         if (!that.isRecomputingBacklinks) return next.call(this, ...args)
 
         // If we are recomputing backlinks, we need to include markdown as well as canvas files
-        var files: TFile[] = []
-        var root = this.getRoot()
+        const files: TFile[] = []
+        const root = this.getRoot()
 
         this.recurseChildrenAC(root, (child: TAbstractFile) => {
           if (child instanceof TFile && (child.extension === "md" || child.extension === "canvas")) {
