@@ -146,13 +146,14 @@ export default class CanvasPatcher extends Patcher {
         that.plugin.app.workspace.trigger('advanced-canvas:dragging-state-changed', this, dragging)
         return result
       }),
-      cloneData: Patcher.OverrideExisting(next => function (newItems: CanvasElementsData, shift: Position): CanvasElementsData {
-        for (const nodeData of newItems.nodes)
-          if (nodeData.styleAttributes)
-            // copy obj to prevent sharing the same instance
-            nodeData.styleAttributes = structuredClone(nodeData.styleAttributes)
+      // OBSIDIAN-FIX
+      cloneData: Patcher.OverrideExisting(next => function (elements: CanvasElementsData, shift: Position): CanvasElementsData {
+        const result = next.call(this, elements, shift)
 
-        const result = next.call(this, newItems, shift)
+        // Deep clone the data to avoid modifying the original data
+        elements.nodes = elements.nodes.map(nodeData => JSON.parse(JSON.stringify(nodeData)))
+        elements.edges = elements.edges.map(edgeData => JSON.parse(JSON.stringify(edgeData)))
+
         return result
       }),
       getContainingNodes: Patcher.OverrideExisting(next => function (bbox: BBox): CanvasNode[] {
@@ -240,7 +241,7 @@ export default class CanvasPatcher extends Patcher {
         if (this.canvasRect.width === 0 || this.canvasRect.height === 0) return
 
         that.plugin.app.workspace.trigger('advanced-canvas:zoom-to-bbox:before', this, bbox)
-    
+
         const widthZoom = this.canvasRect.width / (bbox.maxX - bbox.minX)
         const heightZoom = this.canvasRect.height / (bbox.maxY - bbox.minY)
         const zoom = this.screenshotting ? Math.min(widthZoom, heightZoom) : Math.clamp(Math.min(widthZoom, heightZoom), -4, 1)
@@ -249,7 +250,7 @@ export default class CanvasPatcher extends Patcher {
 
         this.tx = (bbox.minX + bbox.maxX) / 2
         this.ty = (bbox.minY + bbox.maxY) / 2
-        
+
         this.markViewportChanged()
 
         that.plugin.app.workspace.trigger('advanced-canvas:zoom-to-bbox:after', this, bbox)
@@ -441,7 +442,7 @@ export default class CanvasPatcher extends Patcher {
         return result
       }
     })
-    
+
     this.runAfterInitialized(node, () => {
       this.plugin.app.workspace.trigger('advanced-canvas:node-added', node.canvas, node)
       this.plugin.app.workspace.trigger('advanced-canvas:node-changed', node.canvas, node)
@@ -474,7 +475,7 @@ export default class CanvasPatcher extends Patcher {
         const result = next.call(this, ...args)
         that.plugin.app.workspace.trigger('advanced-canvas:edge-changed', this.canvas, this)
 
-        // TODO: EdgeStyleExtension console.count(`Edge Rendered ${this.canvas.isClearing}`) 
+        // TODO: EdgeStyleExtension console.count(`Edge Rendered ${this.canvas.isClearing}`)
 
         return result
       }),
@@ -510,13 +511,13 @@ export default class CanvasPatcher extends Patcher {
         return result
       }),
     })
-    
+
     this.runAfterInitialized(edge, () => {
       this.plugin.app.workspace.trigger('advanced-canvas:edge-added', edge.canvas, edge)
       // this.plugin.app.workspace.trigger(CanvasEvent.EdgeChanged, edge.canvas, edge) - already fired in render function
     })
   }
-  
+
   private runAfterInitialized(canvasElement: CanvasElement, onReady: () => void) {
     if (canvasElement.initialized) {
       onReady()

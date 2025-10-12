@@ -73,7 +73,7 @@ export interface CanvasWorkspaceLeaf extends WorkspaceLeaf {
 
 export interface CanvasElement {
   id: string
-  
+
   canvas: Canvas
   initialized: boolean
   isDirty?: boolean // Custom for Change event
@@ -240,7 +240,7 @@ export interface Canvas {
   /** Basically setData (if clearCanvas == true), but without modifying the history */
   importData(data: CanvasElementsData, clearCanvas?: boolean, /* custom */ silent?: boolean): void
   clear(): void
-  cloneData(newItems: CanvasElementsData, shift: Position): CanvasElementsData
+  cloneData(elements: CanvasElementsData, shift: Position): CanvasElementsData
 
   nodes: Map<string, CanvasNode>
   edges: Map<string, CanvasEdge>
