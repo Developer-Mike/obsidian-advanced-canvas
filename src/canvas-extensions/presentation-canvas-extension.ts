@@ -210,35 +210,34 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     if (isStartNode) canvas.metadata['startNode'] = groupNode.getData().id
   }
 
-  private async animateNodeTransition(canvas: Canvas, fromNode: CanvasNode|undefined, toNode: CanvasNode) {
-    const useCustomZoomFunction = this.plugin.settings.getSetting('zoomToSlideWithoutPadding')
+  private async animateNodeTransition(canvas: Canvas, fromNode: CanvasNode | undefined, toNode: CanvasNode) {
+    const removePadding = this.plugin.settings.getSetting('zoomToSlideWithoutPadding')
     const animationDurationMs = this.plugin.settings.getSetting('slideTransitionAnimationDuration') * 1000
 
     const toNodeBBox = CanvasHelper.getSmallestAllowedZoomBBox(canvas, toNode.getBBox())
+    const toNodeBBoxPadded = removePadding ? toNodeBBox : BBoxHelper.enlargeBBox(toNodeBBox, 50)
+    console.log({ toNodeBBox, toNodeBBoxPadded })
 
     if (animationDurationMs > 0 && fromNode) {
       const animationIntensity = this.plugin.settings.getSetting('slideTransitionAnimationIntensity')
 
       const fromNodeBBox = CanvasHelper.getSmallestAllowedZoomBBox(canvas, fromNode.getBBox())
+      const fromNodeBBoxPadded = removePadding ? fromNodeBBox : BBoxHelper.enlargeBBox(fromNodeBBox, 50)
 
-      const currentNodeBBoxEnlarged = BBoxHelper.scaleBBox(fromNodeBBox, animationIntensity)
-      if (useCustomZoomFunction) canvas.zoomToRealBbox(currentNodeBBoxEnlarged)
-      else canvas.zoomToBbox(currentNodeBBoxEnlarged)
+      const currentNodeBBoxEnlarged = BBoxHelper.scaleBBox(fromNodeBBoxPadded, animationIntensity)
+      canvas.zoomToRealBbox(currentNodeBBoxEnlarged)
 
       await sleep(animationDurationMs / 2)
 
       if (fromNode.getData().id !== toNode.getData().id) {
-        // Add 0.1 to fix obsidian bug that causes the animation to skip if the bbox is the same
-        const nextNodeBBoxEnlarged = BBoxHelper.scaleBBox(toNodeBBox, animationIntensity + 0.1)
-        if (useCustomZoomFunction) canvas.zoomToRealBbox(nextNodeBBoxEnlarged)
-        else canvas.zoomToBbox(nextNodeBBoxEnlarged)
+        const nextNodeBBoxEnlarged = BBoxHelper.scaleBBox(toNodeBBoxPadded, animationIntensity)
+        canvas.zoomToRealBbox(nextNodeBBoxEnlarged)
 
         await sleep(animationDurationMs / 2)
       }
     }
 
-    if (useCustomZoomFunction) canvas.zoomToRealBbox(toNodeBBox)
-    else canvas.zoomToBbox(toNodeBBox)
+    canvas.zoomToRealBbox(toNodeBBoxPadded)
   }
 
   private async startPresentation(canvas: Canvas, tryContinue: boolean = false) {
