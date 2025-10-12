@@ -120,7 +120,7 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
     const edgeData = edge.getData()
 
     let color: CanvasColor | undefined = this.plugin.settings.getSetting('defaultEdgeColor').toString() as CanvasColor
-    if (this.plugin.settings.getSetting('inheritEdgeColorFromNode').toString() as CanvasColor)
+    if (this.plugin.settings.getSetting('inheritEdgeColorFromNode'))
       color = edge.from.node.getData().color ?? color
     if (color === "0") color = undefined
 
