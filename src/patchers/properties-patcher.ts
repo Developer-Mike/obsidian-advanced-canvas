@@ -20,7 +20,10 @@ export default class PropertiesPatcher extends Patcher {
         updateFrontmatter: Patcher.OverrideExisting(next => function (file: TFile, content: string): { [key: string]: any } | null {
           // Check if the file is a canvas file
           if (file?.extension === 'canvas') {
-            const frontmatter = JSON.parse(content)?.metadata?.frontmatter ?? {}
+            let frontmatter
+
+            try { frontmatter = JSON.parse(content)?.metadata?.frontmatter ?? {} }
+            catch (e) { frontmatter = {} }
 
             this.rawFrontmatter = JSON.stringify(frontmatter, null, 2)
             this.frontmatter = frontmatter
