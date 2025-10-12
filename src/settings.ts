@@ -34,6 +34,7 @@ export interface AdvancedCanvasPluginSettingsValues {
 
   edgesStylingFeatureEnabled: boolean
   customEdgeStyleAttributes: StyleAttribute[]
+  inheritEdgeColorFromNode: boolean
   defaultEdgeColor: number
   defaultEdgeLineDirection: keyof typeof SETTINGS.edgesStylingFeatureEnabled.children.defaultEdgeLineDirection.options
   defaultEdgeStyleAttributes: { [key: string]: string }
@@ -130,6 +131,7 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
 
   edgesStylingFeatureEnabled: true,
   customEdgeStyleAttributes: [],
+  inheritEdgeColorFromNode: false,
   defaultEdgeColor: 0,
   defaultEdgeLineDirection: 'unidirectional',
   defaultEdgeStyleAttributes: {},
@@ -391,6 +393,11 @@ export const SETTINGS = {
         type: 'button',
         onClick: () => window.open("https://github.com/Developer-Mike/obsidian-advanced-canvas/blob/main/README.md#custom-styles")
       } as ButtonSetting,
+      inheritEdgeColorFromNode: {
+        label: 'Inherit edge color from node',
+        description: 'When creating a new edge by dragging from a node, the edge will inherit the color of the node it is dragged from.',
+        type: 'boolean'
+      },
       defaultEdgeColor: {
         label: 'Default edge color',
         description: 'The default color of an edge. The default range is from 0 to 6, where 0 is no color. The range can be extended by using the Custom Colors feature of Advanced Canvas.',
