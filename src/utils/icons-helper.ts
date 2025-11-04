@@ -35,7 +35,7 @@ const CUSTOM_ICONS = {
   'arrow-diamond-outline': `<path stroke="currentColor" stroke-width="8.5" fill="none" d="M 50 0 L 100 50 L 50 100 L 0 50 Z"/>`,
   'arrow-circle': `<circle stroke="currentColor" fill="currentColor" cx="50" cy="50" r="45"/>`,
   'arrow-circle-outline': `<circle stroke="currentColor" stroke-width="8.5" fill="none" cx="50" cy="50" r="45"/>`,
-  "pin": `<path stroke="currentColor" fill="currentColor" d="M 9 0 L 15 0 L 12 3 L 12 13 L 18 19 L 11 20 L 9 32 L 7 20 L 0 19 L 6 13 L 6 3 L 3 0 Z"/>`,
+  "pin": `<path stroke="currentColor" fill="currentColor" d="M 50 0 L 68.75 0 L 59.375 9.375 L 59.375 40.625 L 78.125 59.375 L 56.25 62.5 L 50 100 L 43.75 62.5 L 21.875 59.375 L 40.625 40.625 L 40.625 9.375 L 31.25 0 Z"/>`,
 
   'pathfinding-method-bezier': `<path stroke="currentColor" fill="none" stroke-width="8.5" d="M37.5 79.1667h35.4167a14.5833 14.5833 90 000-29.1667h-45.8333a14.5833 14.5833 90 010-29.1667H62.5"/>`,
   'pathfinding-method-square': `<path stroke="currentColor" fill="none" stroke-width="8.5" d="M72.9167 79.1667 72.9167 50 27.0833 50 27.0833 20.8333"/>`,
