@@ -219,6 +219,11 @@ export const BUILTIN_EDGE_STYLE_ATTRIBUTES = [
         icon: 'tally-1',
         label: 'Blunt',
         value: 'blunt'
+      },
+      {
+        icon: "pin",
+        label: "Pin",
+        value: "pin"
       }
     ]
   },
