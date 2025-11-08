@@ -99,10 +99,6 @@ export default class CanvasPatcher extends Patcher {
         that.plugin.app.workspace.trigger('advanced-canvas:canvas-changed', this.canvas)
         return result
       }),
-      getViewData: Patcher.OverrideExisting(next => function (...args: any): string {
-        this.canvas.data = this.canvas.getData()
-        return next.call(this, ...args)
-      }),
       close: Patcher.OverrideExisting(next => function (...args: any): void {
         that.plugin.app.workspace.trigger('advanced-canvas:canvas-view-unloaded:before', this)
         return next.call(this, ...args)
