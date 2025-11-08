@@ -24,6 +24,9 @@ export default class NodeExposerExtension extends CanvasExtension {
         if (!nodeData) return
 
         this.setDataAttributes(node.nodeEl, nodeData)
+
+        const iframe = node.nodeEl.querySelector('iframe')?.contentDocument?.body
+        if (iframe) this.setDataAttributes(iframe, nodeData)
       }
     ))
 
@@ -36,14 +39,11 @@ export default class NodeExposerExtension extends CanvasExtension {
         const nodeData = node.getData()
         if (!nodeData) return
 
-        const iframe = node.nodeEl.querySelector('iframe')
+        const iframe = node.nodeEl.querySelector('iframe')?.contentDocument?.body
         if (!iframe) return
 
-        const iframeBody = iframe.contentDocument?.body
-        if (!iframeBody) return
-
-        iframeBody.classList.add('canvas-node-iframe-body')
-        this.setDataAttributes(iframeBody, nodeData)
+        iframe.classList.add('canvas-node-iframe-body')
+        this.setDataAttributes(iframe, nodeData)
       }
     ))
   }
