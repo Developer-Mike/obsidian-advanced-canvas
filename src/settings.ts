@@ -1,8 +1,11 @@
 import { Notice, PluginSettingTab, Setting as SettingEl, TextComponent } from "obsidian"
 import { BooleanSetting, ButtonSetting, DimensionSetting, DropdownSetting, NumberSetting, Setting, SettingsHeading, StyleAttributesSetting, TextSetting } from "./@types/Settings"
+import { GET_EDGE_CSS_STYLES_MANAGER } from "./canvas-extensions/advanced-styles/edge-styles"
+import { GET_NODE_CSS_STYLES_MANAGER } from "./canvas-extensions/advanced-styles/node-styles"
 import { BUILTIN_EDGE_STYLE_ATTRIBUTES, BUILTIN_NODE_STYLE_ATTRIBUTES, StyleAttribute } from "./canvas-extensions/advanced-styles/style-config"
 import { VARIABLE_BREAKPOINT_CSS_VAR } from "./canvas-extensions/variable-breakpoint-canvas-extension"
 import AdvancedCanvasPlugin from "./main"
+import CssStylesConfigManager from "./managers/css-styles-config-manager"
 
 const README_URL = 'https://github.com/Developer-Mike/obsidian-advanced-canvas?tab=readme-ov-file'
 
@@ -376,8 +379,11 @@ export const SETTINGS = {
         label: 'Default text node style attributes',
         type: 'styles',
         getParameters(settingsManager) {
-          return [ ...BUILTIN_NODE_STYLE_ATTRIBUTES, ...settingsManager.getSetting('customNodeStyleAttributes') ]
-            .filter((setting) => setting.nodeTypes === undefined || setting.nodeTypes?.includes('text'))
+          return [
+            ...BUILTIN_NODE_STYLE_ATTRIBUTES, /* BUILTINS */
+            ...settingsManager.nodeCssStylesManager.getStyles(), /* CUSTOM CSS STYLES */
+            ...settingsManager.getSetting('customNodeStyleAttributes') /* LEGACY CUSTOM STYLES */
+          ].filter((setting) => setting.nodeTypes === undefined || setting.nodeTypes?.includes('text'))
         }
       } as StyleAttributesSetting
     }
@@ -418,7 +424,11 @@ export const SETTINGS = {
         label: 'Default edge style attributes',
         type: 'styles',
         getParameters(settingsManager) {
-          return [ ...BUILTIN_EDGE_STYLE_ATTRIBUTES, ...settingsManager.getSetting('customEdgeStyleAttributes') ]
+          return [
+            ...BUILTIN_EDGE_STYLE_ATTRIBUTES, /* BUILTINS */
+            ...settingsManager.edgeCssStylesManager.getStyles(), /* CUSTOM CSS STYLES */
+            ...settingsManager.getSetting('customEdgeStyleAttributes') /* LEGACY CUSTOM STYLES */
+          ]
         }
       } as StyleAttributesSetting,
       edgeStyleUpdateWhileDragging: {
@@ -642,8 +652,14 @@ export default class SettingsManager {
   private settings: AdvancedCanvasPluginSettingsValues
   private settingsTab: AdvancedCanvasPluginSettingTab
 
+  nodeCssStylesManager: CssStylesConfigManager<StyleAttribute>
+  edgeCssStylesManager: CssStylesConfigManager<StyleAttribute>
+
   constructor(plugin: AdvancedCanvasPlugin) {
     this.plugin = plugin
+
+    this.nodeCssStylesManager = GET_NODE_CSS_STYLES_MANAGER(plugin)
+    this.edgeCssStylesManager = GET_EDGE_CSS_STYLES_MANAGER(plugin)
   }
 
   async loadSettings() {

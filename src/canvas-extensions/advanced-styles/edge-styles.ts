@@ -8,6 +8,10 @@ import EdgePathfindingDirect from "./edge-pathfinding-methods/pathfinding-direct
 import EdgePathfindingSquare from "./edge-pathfinding-methods/pathfinding-square"
 import { BUILTIN_EDGE_STYLE_ATTRIBUTES, StyleAttribute, styleAttributeValidator } from "./style-config"
 import CssStylesConfigManager from "src/managers/css-styles-config-manager"
+import AdvancedCanvasPlugin from "src/main"
+
+export const GET_EDGE_CSS_STYLES_MANAGER = (plugin: AdvancedCanvasPlugin) =>
+  new CssStylesConfigManager(plugin, 'advanced-canvas-edge-style', styleAttributeValidator)
 
 const EDGE_PATHFINDING_METHODS: { [key: string]: typeof EdgePathfindingMethod } = {
   'direct': EdgePathfindingDirect,
@@ -22,7 +26,7 @@ export default class EdgeStylesExtension extends CanvasExtension {
   isEnabled() { return 'edgesStylingFeatureEnabled' as const }
 
   init() {
-    this.cssStylesManager = new CssStylesConfigManager(this.plugin, 'advanced-canvas-edge-style', styleAttributeValidator)
+    this.cssStylesManager = GET_EDGE_CSS_STYLES_MANAGER(this.plugin)
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       'advanced-canvas:popup-menu-created',
@@ -43,7 +47,7 @@ export default class EdgeStylesExtension extends CanvasExtension {
       'advanced-canvas:node-added',
       (canvas: Canvas, node: CanvasNode) => {
         if (canvas.dirty.size > 1 && !canvas.isPasting) return // Skip if multiple nodes are added at once (e.g. on initial load)
-        
+
         this.updateAllEdgesInArea(canvas, node.getBBox())
       }
     ))
@@ -106,7 +110,7 @@ export default class EdgeStylesExtension extends CanvasExtension {
         }
       })
     }
-    
+
     canvas.pushHistory(canvas.getData())
   }
 
@@ -133,7 +137,7 @@ export default class EdgeStylesExtension extends CanvasExtension {
     }
 
     const edgeData = edge.getData()
-    
+
     // Reset path to default
     if (!edge.bezier) return
     edge.center = undefined
@@ -144,20 +148,20 @@ export default class EdgeStylesExtension extends CanvasExtension {
     if (pathfindingMethod && pathfindingMethod in EDGE_PATHFINDING_METHODS) {
       const fromNodeBBox = edge.from.node.getBBox()
       const fromBBoxSidePos = BBoxHelper.getCenterOfBBoxSide(fromNodeBBox, edge.from.side)
-      const fromPos = edge.from.end === 'none' ? 
+      const fromPos = edge.from.end === 'none' ?
         fromBBoxSidePos :
         edge.bezier.from
-      
+
       const toNodeBBox = edge.to.node.getBBox()
       const toBBoxSidePos = BBoxHelper.getCenterOfBBoxSide(toNodeBBox, edge.to.side)
-      const toPos = edge.to.end === 'none' ? 
+      const toPos = edge.to.end === 'none' ?
         toBBoxSidePos :
         edge.bezier.to
 
       const path = new (EDGE_PATHFINDING_METHODS[pathfindingMethod] as any)(
-        this.plugin, 
-        canvas, 
-        fromNodeBBox, fromPos, fromBBoxSidePos, edge.from.side, 
+        this.plugin,
+        canvas,
+        fromNodeBBox, fromPos, fromBBoxSidePos, edge.from.side,
         toNodeBBox, toPos, toBBoxSidePos, edge.to.side
       ).getPath()
       if (!path) return
