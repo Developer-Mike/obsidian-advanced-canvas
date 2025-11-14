@@ -1,7 +1,9 @@
 import { Canvas, CanvasNode } from "src/@types/Canvas"
 import SettingsManager from "src/settings"
 import CanvasExtension from "../canvas-extension"
-import { CanvasGroupNodeData, CanvasNodeData } from "src/@types/AdvancedJsonCanvas"
+import { CanvasNodeData } from "src/@types/AdvancedJsonCanvas"
+
+const CANVAS_NODE_IFRAME_BODY_CLASS = 'canvas-node-iframe-body'
 
 export function getExposedNodeData(settings: SettingsManager): (keyof CanvasNodeData)[] {
   const exposedData: (keyof CanvasNodeData)[] = []
@@ -42,7 +44,9 @@ export default class NodeExposerExtension extends CanvasExtension {
         const iframe = node.nodeEl.querySelector('iframe')?.contentDocument?.body
         if (!iframe) return
 
-        iframe.classList.add('canvas-node-iframe-body')
+        iframe.classList.add(CANVAS_NODE_IFRAME_BODY_CLASS)
+        new MutationObserver(() => iframe.classList.toggle(CANVAS_NODE_IFRAME_BODY_CLASS, true))
+          .observe(iframe, { attributes: true, attributeFilter: ['class'] })
         this.setDataAttributes(iframe, nodeData)
       }
     ))
