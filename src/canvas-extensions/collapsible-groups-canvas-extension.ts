@@ -4,6 +4,7 @@ import BBoxHelper from "src/utils/bbox-helper"
 import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "./canvas-extension"
 import { CanvasData, CanvasGroupNodeData } from "src/@types/AdvancedJsonCanvas"
+import { satisfies } from "src/settings"
 
 export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
   isEnabled() { return 'collapsibleGroupsFeatureEnabled' as const }
@@ -61,7 +62,7 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
     for (const collapsedGroupData of selectionData.nodes as CanvasGroupNodeData[]) {
       if (collapsedGroupData.type !== 'group' || !collapsedGroupData.collapsed || !collapsedGroupData.collapsedData) continue
 
-      selectionData.nodes.push(...collapsedGroupData.collapsedData.nodes.map(nodeData => ({ 
+      selectionData.nodes.push(...collapsedGroupData.collapsedData.nodes.map(nodeData => ({
         ...nodeData,
         // Restore the relative position of the node to the group
         x: nodeData.x + collapsedGroupData.x,
@@ -72,11 +73,13 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
   }
 
   private setCollapsed(canvas: Canvas, groupNode: CanvasNode, collapsed: boolean | undefined) {
-    groupNode.setData({ ...groupNode.getData(), collapsed: collapsed })
+    groupNode.setData({ ...groupNode.getData(), collapsed: collapsed } as CanvasGroupNodeData)
     canvas.setData(canvas.getData())
 
     canvas.history.current--
     canvas.pushHistory(canvas.getData())
+
+    canvas.requestSave()
   }
 
   onNodeBBoxRequested(canvas: Canvas, node: CanvasNode, bbox: BBox) {
@@ -102,9 +105,9 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
     data.nodes = data.nodes.flatMap((groupNodeData: CanvasGroupNodeData) => {
       const collapsedData = groupNodeData.collapsedData
       if (collapsedData === undefined) return [groupNodeData]
-      
+
       delete groupNodeData.collapsedData // Remove the intermediate value
-      
+
       data.edges.push(...collapsedData.edges)
       return [groupNodeData, ...collapsedData.nodes.map(nodeData => (
         {
@@ -126,23 +129,34 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
         nodeData.id !== groupNodeData.id && BBoxHelper.insideBBox(CanvasHelper.getBBox([nodeData]), groupNodeBBox, false)
       )
       const containedEdgesData = data.edges.filter(edgeData => {
-        return containedNodesData.some(nodeData => nodeData.id === edgeData.fromNode) || 
+        return containedNodesData.some(nodeData => nodeData.id === edgeData.fromNode) ||
           containedNodesData.some(nodeData => nodeData.id === edgeData.toNode)
       })
 
+      // Remove contained nodes and edges from the main data
       data.nodes = data.nodes.filter(nodeData => !containedNodesData.includes(nodeData))
       data.edges = data.edges.filter(edgeData => !containedEdgesData.includes(edgeData))
 
+      // Remove duplicate group nodes or edges
+      const newContainedNodesData = containedNodesData.filter(nodeData => !(groupNodeData.collapsedData?.nodes?.some(e => e.id === nodeData.id) ?? false))
+      const newContainedEdgesData = containedEdgesData.filter(edgeData => !(groupNodeData.collapsedData?.edges?.some(n => n.id === edgeData.id) ?? false))
+
       groupNodeData.collapsedData = {
-        nodes: containedNodesData.map(nodeData => (
-          {
-            ...nodeData,
-            // Store the relative position of the node to the group
-            x: nodeData.x - groupNodeData.x,
-            y: nodeData.y - groupNodeData.y
-          }
-        )),
-        edges: containedEdgesData
+        nodes: [
+          ...groupNodeData.collapsedData?.nodes ?? [],
+          ...newContainedNodesData.map(nodeData => (
+            {
+              ...nodeData,
+              // Store the relative position of the node to the group
+              x: nodeData.x - groupNodeData.x,
+              y: nodeData.y - groupNodeData.y
+            }
+          ))
+        ],
+        edges: [
+          ...groupNodeData.collapsedData?.edges ?? [],
+          ...newContainedEdgesData
+        ]
       }
     })
   }
