@@ -17,7 +17,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
         if (canvas.screenshotting) breakpointRef.value = true
       }
     ))
-    
+
     this.plugin.addCommand({
       id: 'export-all-as-image',
       name: 'Export canvas as image',
@@ -35,7 +35,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
         this.plugin,
         (canvas: Canvas) => canvas.selection.size > 0,
         (canvas: Canvas) => this.showExportImageSettingsModal(
-          canvas, 
+          canvas,
           canvas.getSelectionData().nodes
             .map(nodeData => canvas.nodes.get(nodeData.id))
             .filter(node => node !== undefined) as CanvasNode[]
@@ -90,7 +90,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
         .setValue(pixelRatioFactor)
         .onChange(value => pixelRatioFactor = value)
       )
-    
+
     let noFontExport = true
     noFontExportSetting = new Setting(modal.contentEl)
       .setName('Skip font export')
@@ -130,7 +130,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
         .setValue(garbledText)
         .onChange(value => garbledText = value)
       )
-    
+
     let transparentBackground = false
     transparentBackgroundSetting = new Setting(modal.contentEl)
       .setName('Transparent background')
@@ -148,10 +148,10 @@ export default class ExportCanvasExtension extends CanvasExtension {
           modal.close()
 
           this.exportImage(
-            canvas, 
-            nodesToExport, 
-            svg, 
-            svg ? 1 : pixelRatioFactor, 
+            canvas,
+            nodesToExport,
+            svg,
+            svg ? 1 : pixelRatioFactor,
             svg ? noFontExport : false,
             theme,
             watermark,
@@ -175,7 +175,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
 
     const isWholeCanvas = nodesToExport === null
     if (!nodesToExport) nodesToExport = [...canvas.nodes.values()]
-    
+
     // Filter all edges that should be exported
     const nodesToExportIds = nodesToExport.map(node => node.getData().id)
     const edgesToExport = [...canvas.edges.values()]
@@ -185,7 +185,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
       })
 
     // Set the background color
-    const backgroundColor = transparentBackground ? undefined : 
+    const backgroundColor = transparentBackground ? undefined :
       window.getComputedStyle(canvas.canvasEl).getPropertyValue('--canvas-background')
 
     // Create loading overlay
@@ -296,7 +296,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
 
         const filter = (element: HTMLElement) => {
           // Filter nodes
-          if (element.classList?.contains('canvas-node') && !nodeElements.includes(element)) 
+          if (element.classList?.contains('canvas-node') && !nodeElements.includes(element))
             return false
 
           // Filter edge paths and arrows
@@ -304,7 +304,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
             return false
 
           // Filter edge labels
-          if (element.classList?.contains('canvas-path-label-wrapper') && !edgeLabelElements.includes(element)) 
+          if (element.classList?.contains('canvas-path-label-wrapper') && !edgeLabelElements.includes(element))
             return false
 
           return true
@@ -319,13 +319,23 @@ export default class ExportCanvasExtension extends CanvasExtension {
           filter: filter
         }
         if (noFontExport) options.fontEmbedCSS = ""
-        const imageDataUri = svg ? await HtmlToImage.toSvg(canvas.canvasEl, options) : await HtmlToImage.toPng(canvas.canvasEl, options)
+        let imageDataUri = svg ? await HtmlToImage.toSvg(canvas.canvasEl, options) : await HtmlToImage.toPng(canvas.canvasEl, options)
+
+        // Prepend the XML declaration for SVG files
+        if (svg) {
+          const header = `<?xml version="1.0" encoding="UTF-8"?>`
+
+          imageDataUri = imageDataUri.replace(
+            encodeURIComponent('<svg '),
+            encodeURIComponent(`${header}<svg `)
+          )
+        }
 
         // Download the image
         let baseFilename = `${canvas.view.file?.basename || 'Untitled'}`
         if (!isWholeCanvas) baseFilename += ` - Selection of ${nodesToExport.length}`
         const filename = `${baseFilename}.${svg ? 'svg' : 'png'}`
-        
+
         const downloadEl = document.createElement('a')
         downloadEl.href = imageDataUri
         downloadEl.download = filename
