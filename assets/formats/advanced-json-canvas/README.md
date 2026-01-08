@@ -2,6 +2,8 @@
 
 The Advanced JSON Canvas format is a structured way to represent a canvas with nodes and edges. It is designed to be extensible and flexible, allowing for various types of nodes and connections between them. It's completely compatible with the standard JSON Canvas format, but adds more features and flexibility.
 
+Note (Advanced Canvas): The Portals feature reserves `-` in element IDs (e.g., `portalId-originalId`). Avoid `-` in node/edge IDs for best compatibility (portals may be disabled on canvases that contain `-`).
+
 Version name consists of two parts: the JSON Canvas version and the Advanced JSON Canvas version. It's in the following order: `<json-canvas-version>-<advanced-json-canvas-version>`. For example, `1.0-1.0` means JSON Canvas version 1.0 and Advanced JSON Canvas version 1.0.
 
 Check out the [specification](spec/1.0-1.0.md) for more details on how to use this format.

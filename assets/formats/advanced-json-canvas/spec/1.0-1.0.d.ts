@@ -14,6 +14,10 @@ export interface CanvasMetadata {
 
 export type CanvasNodeType = 'text' | 'group' | 'file' | 'link'
 export interface CanvasNodeData {
+  /**
+   * Unique ID for the node.
+   * Note (Advanced Canvas): `-` is reserved for portal-nested element IDs.
+   */
   id: string
   type: CanvasNodeType
 
@@ -65,13 +69,25 @@ export interface CanvasGroupNodeData extends CanvasNodeData {
 type Side = 'top' | 'right' | 'bottom' | 'left'
 type EndType = 'none' | 'arrow'
 export interface CanvasEdgeData {
+  /**
+   * Unique ID for the edge.
+   * Note (Advanced Canvas): `-` is reserved for portal-nested element IDs.
+   */
   id: string
 
+  /**
+   * ID of the node where the connection starts.
+   * Note (Advanced Canvas): `-` is reserved for portal-nested element IDs.
+   */
   fromNode: string
   fromSide: Side
   fromFloating?: boolean // AdvancedJsonCanvas
   fromEnd?: EndType
   
+  /**
+   * ID of the node where the connection ends.
+   * Note (Advanced Canvas): `-` is reserved for portal-nested element IDs.
+   */
   toNode: string
   toSide: Side
   toFloating?: boolean // AdvancedJsonCanvas

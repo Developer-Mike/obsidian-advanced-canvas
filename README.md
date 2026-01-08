@@ -440,6 +440,9 @@ Embed other canvases inside your current canvas and create edges (arrows) to the
 
 <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/docs/sample-portal-usage.png" alt="Portal example"/>
 
+### Notes
+*   **ID compatibility:** Portals use `-` to prefix nested element IDs (`portalId-originalId`). If Advanced Canvas detects `-` in any node/edge ID on a canvas (e.g., programmatically generated UUIDs), it disables Portals for that canvas and shows a notice to prevent data loss. To re-enable, use IDs without `-` and reload the canvas.
+
 ### Usage
 *   Embed a canvas file, then click the door icon in the popup menu to open it as a portal.
 

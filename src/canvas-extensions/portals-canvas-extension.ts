@@ -10,6 +10,8 @@ const MIN_OPEN_PORTAL_SIZE = { width: 200, height: 200 }
 export default class PortalsCanvasExtension extends CanvasExtension {
   isEnabled() { return 'portalsFeatureEnabled' as const }
 
+  private readonly portalDisabledCanvasPaths = new Set<string>()
+
   init() {
     this.plugin.registerEvent(this.plugin.app.vault.on('modify', (file: TFile) => {
       for (const canvas of this.plugin.getCanvases()) 
@@ -69,6 +71,8 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       'advanced-canvas:data-loaded:before',
       (canvas: Canvas, data: CanvasData, setData: (data: CanvasData) => void) => {
+        if (this.updatePortalDisabledState(canvas, data, false)) return
+
         this.onSetData(canvas, data)
           .then((newData: CanvasData) => {
             // Skip if the data didn't change
@@ -80,6 +84,8 @@ export default class PortalsCanvasExtension extends CanvasExtension {
   }
 
   private onFileModified(canvas: Canvas, file: TFile) {
+    if (this.isPortalDisabled(canvas)) return
+
     const isAffected = Object.values(canvas.nodes).filter((nodeData: CanvasNode) => 
       nodeData.getData().type === 'file' && 
       nodeData.currentPortalFile === file.path
@@ -94,13 +100,17 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     canvas.history.data.pop()
   }
 
-  private onContainingNodesRequested(_canvas: Canvas, _bbox: BBox, nodes: CanvasNode[]) {
+  private onContainingNodesRequested(canvas: Canvas, _bbox: BBox, nodes: CanvasNode[]) {
+    if (this.isPortalDisabled(canvas)) return
+
     // Remove nodes from portals from the list
     const filteredNodes = nodes.filter(node => !PortalsCanvasExtension.isPortalElement(node))
     nodes.splice(0, nodes.length, ...filteredNodes)
   }
   
   private onSelectionChanged(canvas: Canvas, _oldSelection: Set<CanvasElement>, updateSelection: (update: () => void) => void) {
+    if (this.isPortalDisabled(canvas)) return
+
     // Unselect nodes from portals
     updateSelection(() => {
       const updatedSelection = Array.from(canvas.selection)
@@ -110,6 +120,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
   }
 
   private onDraggingStateChanged(canvas: Canvas, startedDragging: boolean) {
+    if (this.isPortalDisabled(canvas)) return
     if (!startedDragging) return
 
     // If no open portal gets dragged, return
@@ -137,6 +148,8 @@ export default class PortalsCanvasExtension extends CanvasExtension {
   }
 
   private onNodeMoved(canvas: Canvas, portalNode: CanvasNode) {
+    if (this.isPortalDisabled(canvas)) return
+
     const portalNodeData = portalNode.getData() as CanvasFileNodeData
     if (portalNodeData.type !== 'file' || !portalNodeData.isPortalLoaded) return
 
@@ -160,7 +173,9 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     }
   }
 
-  private onNodeResized(_canvas: Canvas, portalNode: CanvasNode) {
+  private onNodeResized(canvas: Canvas, portalNode: CanvasNode) {
+    if (this.isPortalDisabled(canvas)) return
+
     const portalNodeData = portalNode.getData() as CanvasFileNodeData
     if (portalNodeData.type !== 'file' || !portalNodeData.isPortalLoaded) return
 
@@ -175,6 +190,8 @@ export default class PortalsCanvasExtension extends CanvasExtension {
   }
 
   private onNodeRemoved(canvas: Canvas, portalNode: CanvasNode) {
+    if (this.isPortalDisabled(canvas)) return
+
     const portalNodeData = portalNode.getData() as CanvasFileNodeData
     if (portalNodeData.type !== 'file' || !portalNodeData.portal) return
 
@@ -185,7 +202,9 @@ export default class PortalsCanvasExtension extends CanvasExtension {
       canvas.removeEdge(edge)
   }
 
-  private onEdgeConnectionTryDraggingBefore(_canvas: Canvas, edge: CanvasEdge, _event: PointerEvent, cancelRef: { value: boolean }) {
+  private onEdgeConnectionTryDraggingBefore(canvas: Canvas, edge: CanvasEdge, _event: PointerEvent, cancelRef: { value: boolean }) {
+    if (this.isPortalDisabled(canvas)) return
+
     // If not from a portal, return
     if (!PortalsCanvasExtension.isPortalElement(edge)) return
 
@@ -194,6 +213,8 @@ export default class PortalsCanvasExtension extends CanvasExtension {
   }
 
   private onEdgeConnectionDraggingAfter(canvas: Canvas, edge: CanvasEdge, _event: PointerEvent, _newEdge: boolean, _side: 'from' | 'to', _previousEnds?: { from: CanvasEdgeEnd, to: CanvasEdgeEnd }) {
+    if (this.isPortalDisabled(canvas)) return
+
     if (PortalsCanvasExtension.isPortalElement(edge)) return // If edge is from a portal, return
     if (!PortalsCanvasExtension.isPortalElement(edge.from.node) || !PortalsCanvasExtension.isPortalElement(edge.to.node)) return // Do not cancel if at least one end is not from a portal
 
@@ -202,6 +223,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
   }
 
   private onPopupMenu(canvas: Canvas) {
+    if (this.isPortalDisabled(canvas)) return
     if (canvas.readonly) return
 
     // Only search for valid nodes
@@ -242,6 +264,8 @@ export default class PortalsCanvasExtension extends CanvasExtension {
   }
 
   private setPortalOpen(canvas: Canvas, portalNode: CanvasNode, open: boolean) {
+    if (this.isPortalDisabled(canvas)) return
+
     const portalNodeData = portalNode.getData() as CanvasFileNodeData
     portalNode.setData({
       ...portalNodeData,
@@ -255,7 +279,9 @@ export default class PortalsCanvasExtension extends CanvasExtension {
   }
 
   // Remove all edges and nodes from portals
-  private onGetData(_canvas: Canvas, data: CanvasData) {
+  private onGetData(canvas: Canvas, data: CanvasData) {
+    if (this.updatePortalDisabledState(canvas, data, true)) return
+
     data.nodes = data.nodes.filter(nodeData => PortalsCanvasExtension.getNestedIds(nodeData.id).length === 1)
 
     // Remove intermediate isPortalLoaded property from nodes
@@ -289,6 +315,8 @@ export default class PortalsCanvasExtension extends CanvasExtension {
 
   // Add all edges and nodes from portals
   private async onSetData(canvas: Canvas, dataRef: CanvasData): Promise<CanvasData> {
+    if (this.isPortalDisabled(canvas)) return dataRef
+
     // Deep copy data - If another file gets opened in the same view, the data would get overwritten
     const data = JSON.parse(JSON.stringify(dataRef)) as CanvasData
 
@@ -388,6 +416,65 @@ export default class PortalsCanvasExtension extends CanvasExtension {
   }
 
   // Helper functions
+  private getCanvasPath(canvas: Canvas): string | undefined {
+    return canvas.view?.file?.path
+  }
+
+  private isPortalDisabled(canvas: Canvas): boolean {
+    const canvasPath = this.getCanvasPath(canvas)
+    if (!canvasPath) return false
+    return this.portalDisabledCanvasPaths.has(canvasPath)
+  }
+
+  private updatePortalDisabledState(canvas: Canvas, data: CanvasData, ignorePortalNestedIds: boolean): boolean {
+    const canvasPath = this.getCanvasPath(canvas)
+    if (!canvasPath) return false
+
+    const wasDisabled = this.portalDisabledCanvasPaths.has(canvasPath)
+    const shouldDisable = this.hasIncompatibleIds(data, ignorePortalNestedIds)
+    if (!shouldDisable) {
+      if (wasDisabled) this.portalDisabledCanvasPaths.delete(canvasPath)
+      return false
+    }
+
+    if (!wasDisabled) {
+      new Notice(
+        `Advanced Canvas: Portals disabled for this canvas because some element IDs contain "-" which conflicts with portal nesting. (${canvasPath})`
+      )
+    }
+
+    this.portalDisabledCanvasPaths.add(canvasPath)
+    return true
+  }
+
+  private hasIncompatibleIds(data: CanvasData, ignorePortalNestedIds: boolean): boolean {
+    const nodes = data.nodes ?? []
+    const edges = data.edges ?? []
+
+    const hasDash = (id: string): boolean => id.indexOf('-') !== -1
+
+    if (!ignorePortalNestedIds) {
+      return nodes.some(nodeData => hasDash(nodeData.id)) ||
+        edges.some(edgeData => hasDash(edgeData.id) || hasDash(edgeData.fromNode) || hasDash(edgeData.toNode))
+    }
+
+    const portalRootIds = new Set(nodes
+      .filter((nodeData: CanvasFileNodeData) => nodeData.type === 'file' && !!nodeData.portal && !hasDash(nodeData.id))
+      .map(nodeData => nodeData.id)
+    )
+
+    const isPortalNestedId = (id: string): boolean => {
+      const dashIndex = id.indexOf('-')
+      if (dashIndex <= 0) return false
+      return portalRootIds.has(id.slice(0, dashIndex))
+    }
+
+    const isIncompatibleId = (id: string): boolean => hasDash(id) && !isPortalNestedId(id)
+
+    return nodes.some(nodeData => isIncompatibleId(nodeData.id)) ||
+      edges.some(edgeData => isIncompatibleId(edgeData.id) || isIncompatibleId(edgeData.fromNode) || isIncompatibleId(edgeData.toNode))
+  }
+
   private getPortalSize(sourceBBox: BBox) {
     const sourceSize = {
       width: sourceBBox.maxX - sourceBBox.minX,
