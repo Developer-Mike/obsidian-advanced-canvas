@@ -12,7 +12,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
 
   init() {
     this.plugin.registerEvent(this.plugin.app.vault.on('modify', (file: TFile) => {
-      for (const canvas of this.plugin.getCanvases()) 
+      for (const canvas of this.plugin.getCanvases())
         this.onFileModified(canvas, file)
     }))
 
@@ -60,7 +60,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
       'advanced-canvas:selection-changed',
       (canvas: Canvas, oldSelection: Set<CanvasElement>, updateSelection: (update: () => void) => void) => this.onSelectionChanged(canvas, oldSelection, updateSelection)
     ))
-    
+
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       'advanced-canvas:data-requested',
       (canvas: Canvas, data: CanvasData) => this.onGetData(canvas, data)
@@ -80,8 +80,8 @@ export default class PortalsCanvasExtension extends CanvasExtension {
   }
 
   private onFileModified(canvas: Canvas, file: TFile) {
-    const isAffected = Object.values(canvas.nodes).filter((nodeData: CanvasNode) => 
-      nodeData.getData().type === 'file' && 
+    const isAffected = Object.values(canvas.nodes).filter((nodeData: CanvasNode) =>
+      nodeData.getData().type === 'file' &&
       nodeData.currentPortalFile === file.path
     ).length > 0
     if (!isAffected) return
@@ -99,7 +99,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     const filteredNodes = nodes.filter(node => !PortalsCanvasExtension.isPortalElement(node))
     nodes.splice(0, nodes.length, ...filteredNodes)
   }
-  
+
   private onSelectionChanged(canvas: Canvas, _oldSelection: Set<CanvasElement>, updateSelection: (update: () => void) => void) {
     // Unselect nodes from portals
     updateSelection(() => {
@@ -211,13 +211,13 @@ export default class PortalsCanvasExtension extends CanvasExtension {
 
       if (nodeData.type !== 'file') return null
       if (node.file?.extension === 'canvas') return node
-      
+
       // Close portal of non-canvas file
       if (nodeData.portal) this.setPortalOpen(canvas, node, false)
 
       return null
     }).filter(node => node !== null) as CanvasNode[]
-    
+
     if (selectedFileNodes.length !== 1) return
 
     const portalNode = selectedFileNodes.first()!
@@ -289,6 +289,8 @@ export default class PortalsCanvasExtension extends CanvasExtension {
 
   // Add all edges and nodes from portals
   private async onSetData(canvas: Canvas, dataRef: CanvasData): Promise<CanvasData> {
+    if (!dataRef?.nodes) return dataRef
+
     // Deep copy data - If another file gets opened in the same view, the data would get overwritten
     const data = JSON.parse(JSON.stringify(dataRef)) as CanvasData
 
@@ -401,7 +403,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
 
     if (!Number.isFinite(targetSize.width)) targetSize.width = MIN_OPEN_PORTAL_SIZE.width
     if (!Number.isFinite(targetSize.height)) targetSize.height = MIN_OPEN_PORTAL_SIZE.height
-    
+
     return targetSize
   }
 

@@ -102,7 +102,9 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
   }
 
   private expandNodes(data: CanvasData) {
-    data.nodes = data.nodes.flatMap((groupNodeData: CanvasGroupNodeData) => {
+    if (!data) return
+
+    data.nodes = data.nodes?.flatMap((groupNodeData: CanvasGroupNodeData) => {
       const collapsedData = groupNodeData.collapsedData
       if (collapsedData === undefined) return [groupNodeData]
 
@@ -121,7 +123,7 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
   }
 
   private collapseNodes(data: CanvasData) {
-    data.nodes.forEach((groupNodeData: CanvasGroupNodeData) => {
+    data?.nodes?.forEach((groupNodeData: CanvasGroupNodeData) => {
       if (!groupNodeData.collapsed) return
 
       const groupNodeBBox = CanvasHelper.getBBox([groupNodeData])

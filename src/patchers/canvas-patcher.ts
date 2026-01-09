@@ -286,7 +286,7 @@ export default class CanvasPatcher extends Patcher {
         return result
       }),
       importData: Patcher.OverrideExisting(next => function (data: CanvasData, clearCanvas?: boolean, silent?: boolean): void {
-        const targetFilePath = this.view.file.path
+        const targetFilePath = this.view.file?.path
         const setData = (data: CanvasData) => {
           // Skip if the canvas got unloaded or the file changed
           if (!this.view.file || this.view.file.path !== targetFilePath) return
