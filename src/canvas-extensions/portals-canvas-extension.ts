@@ -1,8 +1,8 @@
 import { Notice, TFile } from "obsidian"
-import { BBox, Canvas, CanvasEdge, CanvasEdgeEnd, CanvasElement, CanvasElementsData, CanvasNode, CanvasView } from "src/@types/Canvas"
+import { CanvasData, CanvasEdgeData, CanvasFileNodeData, CanvasNodeData } from "src/@types/AdvancedJsonCanvas"
+import { BBox, Canvas, CanvasEdge, CanvasEdgeEnd, CanvasElement, CanvasElementsData, CanvasNode } from "src/@types/Canvas"
 import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "./canvas-extension"
-import { CanvasData, CanvasEdgeData, CanvasFileNodeData, CanvasNodeData } from "src/@types/AdvancedJsonCanvas"
 
 const PORTAL_PADDING = 50
 const MIN_OPEN_PORTAL_SIZE = { width: 200, height: 200 }

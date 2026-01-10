@@ -1,7 +1,7 @@
 import { Canvas, CanvasNode } from "src/@types/Canvas"
 import SettingsManager from "src/settings"
 import CanvasExtension from "../canvas-extension"
-import { CanvasNodeData } from "src/@types/AdvancedJsonCanvas"
+import { CanvasGroupNodeData, CanvasNodeData } from "src/@types/AdvancedJsonCanvas"
 
 const CANVAS_NODE_IFRAME_BODY_CLASS = 'canvas-node-iframe-body'
 
@@ -54,8 +54,8 @@ export default class NodeExposerExtension extends CanvasExtension {
 
   private setDataAttributes(element: HTMLElement, nodeData: CanvasNodeData) {
     for (const exposedDataKey of getExposedNodeData(this.plugin.settings)) {
-      const datasetPairs = nodeData[exposedDataKey] instanceof Object
-        ? Object.entries(nodeData[exposedDataKey])
+      const datasetPairs = nodeData[exposedDataKey] && typeof nodeData[exposedDataKey] === 'object'
+        ? Object.entries(nodeData[exposedDataKey] as Record<string, string>)
         : [[exposedDataKey, nodeData[exposedDataKey]]]
 
       for (const [key, value] of datasetPairs as [string, string][]) {

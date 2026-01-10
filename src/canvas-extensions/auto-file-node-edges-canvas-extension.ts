@@ -1,9 +1,9 @@
 import { TFile } from "obsidian"
-import CanvasExtension from "./canvas-extension"
+import { CanvasEdgeData } from "src/@types/AdvancedJsonCanvas"
 import { Canvas, CanvasNode } from "src/@types/Canvas"
-import { CanvasEdgeData, CanvasFileNodeData } from "src/@types/AdvancedJsonCanvas"
 import BBoxHelper from "src/utils/bbox-helper"
 import CanvasHelper from "src/utils/canvas-helper"
+import CanvasExtension from "./canvas-extension"
 
 const AUTO_EDGE_ID_PREFIX = "afe"
 
@@ -12,7 +12,7 @@ export default class AutoFileNodeEdgesCanvasExtension extends CanvasExtension {
 
   init() {
     this.plugin.registerEvent(this.plugin.app.metadataCache.on('changed', (file: TFile) => {
-      for (const canvas of this.plugin.getCanvases()) 
+      for (const canvas of this.plugin.getCanvases())
         this.onMetadataChanged(canvas, file)
     }))
 
@@ -41,7 +41,7 @@ export default class AutoFileNodeEdgesCanvasExtension extends CanvasExtension {
     // Update all nodes (a node could've been added)
     for (const node of canvas.nodes.values()) {
       if (node.getData().type !== 'file') continue
-      
+
       this.updateFileNodeEdges(canvas, node)
     }
   }
@@ -52,13 +52,13 @@ export default class AutoFileNodeEdgesCanvasExtension extends CanvasExtension {
     // Filter out existing edges
     const newEdges = Array.from(edges.values())
       .filter(edge => !canvas.edges.has(edge.id))
-    
+
     // Add new edges
     canvas.importData({ nodes: [], edges: newEdges }, false, false)
 
     // Remove old edges
     for (const edge of canvas.edges.values()) {
-      if (edge.id.startsWith(`${AUTO_EDGE_ID_PREFIX}${node.id}`) && !edges.has(edge.id)) 
+      if (edge.id.startsWith(`${AUTO_EDGE_ID_PREFIX}${node.id}`) && !edges.has(edge.id))
         canvas.removeEdge(edge)
     }
   }
@@ -84,7 +84,7 @@ export default class AutoFileNodeEdgesCanvasExtension extends CanvasExtension {
     const newEdges: Map<string, CanvasEdgeData> = new Map()
     for (const otherNode of nodesToBeLinkedTo) {
       const edgeId = `${AUTO_EDGE_ID_PREFIX}${node.id}${otherNode.id}`
-      
+
       const bestFromSide = CanvasHelper.getBestSideForFloatingEdge(BBoxHelper.getCenterOfBBoxSide(otherNode.getBBox(), "right"), node)
       const bestToSide = CanvasHelper.getBestSideForFloatingEdge(BBoxHelper.getCenterOfBBoxSide(node.getBBox(), "left"), otherNode)
 

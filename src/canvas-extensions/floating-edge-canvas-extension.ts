@@ -1,8 +1,8 @@
-import { BBox, Canvas, CanvasEdge, CanvasNode, Position } from "src/@types/Canvas"
-import CanvasExtension from "./canvas-extension"
+import { CanvasData } from "src/@types/AdvancedJsonCanvas"
+import { BBox, Canvas, CanvasEdge, CanvasNode } from "src/@types/Canvas"
 import BBoxHelper from "src/utils/bbox-helper"
-import { CanvasData, Side } from "src/@types/AdvancedJsonCanvas"
 import CanvasHelper from "src/utils/canvas-helper"
+import CanvasExtension from "./canvas-extension"
 
 export default class FloatingEdgeCanvasExtension  extends CanvasExtension {
   isEnabled() { return 'floatingEdgeFeatureEnabled' as const }
@@ -14,7 +14,7 @@ export default class FloatingEdgeCanvasExtension  extends CanvasExtension {
       'advanced-canvas:data-loaded:after',
       (canvas: Canvas, data: CanvasData, setData: (data: CanvasData) => void) => this.onLoadData(canvas, data)
     ))
-    
+
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       'advanced-canvas:node-moved',
       (canvas: Canvas, node: CanvasNode) => this.onNodeMoved(canvas, node)
@@ -63,11 +63,11 @@ export default class FloatingEdgeCanvasExtension  extends CanvasExtension {
         })
       }
     }
-    
+
     if (edgeData.toFloating) {
       const fixedNodeConnectionPoint = BBoxHelper.getCenterOfBBoxSide(edge.from.node.getBBox(), edge.from.side)
       const bestSide = CanvasHelper.getBestSideForFloatingEdge(fixedNodeConnectionPoint, edge.to.node)
-      
+
       if (bestSide !== edge.to.side) {
         edge.setData({
           ...edgeData,
@@ -112,7 +112,7 @@ export default class FloatingEdgeCanvasExtension  extends CanvasExtension {
 
     const dropZoneNode = side === 'from' ? edge.from.node : edge.to.node
     const floatingEdgeDropZone = this.getFloatingEdgeDropZoneForNode(dropZoneNode)
-    const wasDroppedInFloatingEdgeDropZone = this.plugin.settings.getSetting('allowFloatingEdgeCreation') ? 
+    const wasDroppedInFloatingEdgeDropZone = this.plugin.settings.getSetting('allowFloatingEdgeCreation') ?
       BBoxHelper.insideBBox({ x: event.clientX, y: event.clientY }, floatingEdgeDropZone, true) :
       false
 

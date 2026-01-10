@@ -74,7 +74,7 @@ export default class DebugHelper {
     console.log('EdgeChanged Efficiency:', this.edgeChangedCount / canvas.edges.size)
   }
 
-  static markBBox(canvas: Canvas, bbox: BBox, duration: number = -1) {
+  static markBBox(canvas: Canvas, bbox: BBox, duration = -1) {
     const node = canvas.createTextNode({
       pos: { x: bbox.minX, y: bbox.minY },
       size: { width: bbox.maxX - bbox.minX, height: bbox.maxY - bbox.minY },

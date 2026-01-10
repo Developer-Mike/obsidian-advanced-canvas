@@ -7,7 +7,6 @@ export default class PropertiesPatcher extends Patcher {
     if (!this.plugin.settings.getSetting('canvasMetadataCompatibilityEnabled')) return
     if (!this.plugin.app.viewRegistry.viewByType["file-properties"]) return // Core plugin not enabled
 
-    const that = this
     await Patcher.waitForViewRequest<PropertiesView>(this.plugin, "file-properties", view => {
       Patcher.patchPrototype<PropertiesView>(this.plugin, view, {
         isSupportedFile: Patcher.OverrideExisting(next => function (file?: TFile): boolean {
@@ -23,7 +22,7 @@ export default class PropertiesPatcher extends Patcher {
             let frontmatter
 
             try { frontmatter = JSON.parse(content)?.metadata?.frontmatter ?? {} }
-            catch (e) { frontmatter = {} }
+            catch { frontmatter = {} }
 
             this.rawFrontmatter = JSON.stringify(frontmatter, null, 2)
             this.frontmatter = frontmatter

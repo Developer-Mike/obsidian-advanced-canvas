@@ -9,10 +9,10 @@ const DEFAULT_SLIDE_NAME = 'New Slide'
 
 export default class PresentationCanvasExtension extends CanvasExtension {
   savedViewport: any = null
-  isPresentationMode: boolean = false
+  isPresentationMode = false
   visitedNodeIds: string[] = []
   fullscreenModalObserver: MutationObserver | null = null
-  presentationUsesFullscreen: boolean = false
+  presentationUsesFullscreen = false
 
   isEnabled() { return 'presentationFeatureEnabled' as const }
 
@@ -240,7 +240,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     canvas.zoomToRealBbox(toNodeBBoxPadded)
   }
 
-  private async startPresentation(canvas: Canvas, tryContinue: boolean = false) {
+  private async startPresentation(canvas: Canvas, tryContinue = false) {
     // Only reset visited nodes if we are not trying to continue
     if (!tryContinue || this.visitedNodeIds.length === 0) {
       const startNode = canvas.metadata['startNode'] && canvas.nodes.get(canvas.metadata['startNode'])
@@ -268,7 +268,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     if (shouldEnterFullscreen) {
       try {
         await canvas.wrapperEl.requestFullscreen()
-      } catch (_err) {
+      } catch {
         // If fullscreen fails, fall back to windowed mode for this session
         this.presentationUsesFullscreen = false
       }

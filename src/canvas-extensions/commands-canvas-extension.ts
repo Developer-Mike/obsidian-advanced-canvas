@@ -1,12 +1,12 @@
-import { Canvas, CanvasEdge, CanvasNode } from "src/@types/Canvas"
+import { Notice, TFile } from "obsidian"
+import { CanvasFileNodeData } from "src/@types/AdvancedJsonCanvas"
+import { Canvas, CanvasNode } from "src/@types/Canvas"
+import { ExtendedCachedMetadata } from "src/@types/Obsidian"
 import BBoxHelper from "src/utils/bbox-helper"
 import CanvasHelper from "src/utils/canvas-helper"
 import { FileSelectModal } from "src/utils/modal-helper"
-import CanvasExtension from "./canvas-extension"
-import { Notice, TFile } from "obsidian"
 import TextHelper from "src/utils/text-helper"
-import { CanvasFileNodeData } from "src/@types/AdvancedJsonCanvas"
-import { ExtendedCachedMetadata } from "src/@types/Obsidian"
+import CanvasExtension from "./canvas-extension"
 
 type Direction = 'up' | 'down' | 'left' | 'right'
 const DIRECTIONS = ['up', 'down', 'left', 'right'] as Direction[]
@@ -51,7 +51,7 @@ export default class CommandsCanvasExtension extends CanvasExtension {
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (_canvas: Canvas) => true,
-        (canvas: Canvas) => canvas.updateSelection(() => 
+        (canvas: Canvas) => canvas.updateSelection(() =>
           canvas.selection = new Set(canvas.edges.values())
         )
       )
@@ -115,7 +115,7 @@ export default class CommandsCanvasExtension extends CanvasExtension {
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (canvas: Canvas) => !canvas.readonly && canvas.selection.size > 0,
-        (canvas: Canvas) => this.flipSelection(canvas, true 
+        (canvas: Canvas) => this.flipSelection(canvas, true
       ))
     })
 
@@ -269,9 +269,9 @@ export default class CommandsCanvasExtension extends CanvasExtension {
           const canvasFile = canvas.view.file
           if (!canvasFile) return
 
-          let selectedNodesData = canvas.getSelectionData().nodes.map(node => node)
+          const selectedNodesData = canvas.getSelectionData().nodes.map(node => node)
           const backlinks: Set<TFile> = new Set()
-          
+
           if (selectedNodesData.length > 0) {
             // Get backlinks for all selected nodes
             for (const nodeData of selectedNodesData) {
@@ -340,7 +340,7 @@ export default class CommandsCanvasExtension extends CanvasExtension {
     const sourceNodeData = sourceNode.getData()
 
     const nodeMargin = this.plugin.settings.getSetting('cloneNodeMargin')
-    const offset = { 
+    const offset = {
       x: (sourceNode.width + nodeMargin) * (cloneDirection === 'left' ? -1 : (cloneDirection === 'right' ? 1 : 0)),
       y: (sourceNode.height + nodeMargin) * (cloneDirection === 'up' ? -1 : (cloneDirection === 'down' ? 1 : 0))
     }
@@ -356,8 +356,8 @@ export default class CommandsCanvasExtension extends CanvasExtension {
       }
     })
 
-    clonedNode.setData({ 
-      ...clonedNode.getData(), 
+    clonedNode.setData({
+      ...clonedNode.getData(),
       color: sourceNodeData.color,
       styleAttributes: sourceNodeData.styleAttributes
     })
@@ -395,7 +395,7 @@ export default class CommandsCanvasExtension extends CanvasExtension {
 
       const node = canvas.nodes.get(nodeData.id)
       if (!node) continue
-      
+
       const newX = horizontally ?
         2 * selectionData.center.x - nodeData.x - nodeData.width :
         nodeData.x
@@ -458,7 +458,7 @@ export default class CommandsCanvasExtension extends CanvasExtension {
         const nodeData = node.getData()
         return nodeData.id !== selectedNodeData.id && (nodeData.type === 'text' || nodeData.type === 'file')
       })
-    
+
     const closestNode = possibleTargetNodes.reduce((closestNode, node) => {
       const nodeBBox = node.getBBox()
 

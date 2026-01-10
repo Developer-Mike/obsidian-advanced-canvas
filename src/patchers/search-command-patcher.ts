@@ -43,7 +43,7 @@ class CanvasSearchView {
   private searchCount: HTMLDivElement
 
   private searchMatches: SearchMatch[] = []
-  private matchIndex: number = 0
+  private matchIndex = 0
 
   constructor(view: CanvasView) {
     this.view = view
@@ -131,7 +131,7 @@ class CanvasSearchView {
         if (nodeData.type === "text") content = (nodeData as CanvasTextNodeData).text
         else if (nodeData.type === "group") content = (nodeData as CanvasGroupNodeData).label
         else if (nodeData.type === "file") content = node.child.data
-        
+
         if (!content) return null
 
         const matches: number[][] = []

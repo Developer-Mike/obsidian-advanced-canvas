@@ -58,7 +58,7 @@ export default class ZOrderingCanvasExtension  extends CanvasExtension {
       item.setIcon('send-to-back')
       item.onClick(() => this.moveMaxLayers(canvas, nodes, false))
     })
-    
+
     if (nodes.some(node => node.getData().zIndex !== undefined)) {
       menu.addItem(item => {
         item.setTitle('Remove persistent z-index')
@@ -92,8 +92,8 @@ export default class ZOrderingCanvasExtension  extends CanvasExtension {
   }
 
   private moveMaxLayers(canvas: Canvas, selectedNodes: CanvasNode[], forward: boolean) {
-    let targetZIndex = forward ? 
-      Math.max(...this.getAllZIndexes(canvas)) + 1 : 
+    const targetZIndex = forward ?
+      Math.max(...this.getAllZIndexes(canvas)) + 1 :
       Math.min(...this.getAllZIndexes(canvas)) - selectedNodes.length
 
     this.setNodesZIndex(selectedNodes, targetZIndex)

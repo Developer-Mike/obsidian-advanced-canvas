@@ -100,7 +100,7 @@ export default class CanvasHelper {
         const submenu = document.createElement('div')
         submenu.id = submenuId
         submenu.classList.add('canvas-submenu')
-      
+
         // Add nested options
         for (const subMenuOption of subMenuOptions) {
           const subMenuOptionElement = this.createPopupMenuOption(subMenuOption)
@@ -114,7 +114,7 @@ export default class CanvasHelper {
     return menuOptionElement
   }
 
-  static addPopupMenuOption(canvas: Canvas, element: HTMLElement, index: number = -1) {
+  static addPopupMenuOption(canvas: Canvas, element: HTMLElement, index = -1) {
     const popupMenuEl = canvas?.menu?.menuEl
     if (!popupMenuEl) return
 
@@ -131,7 +131,7 @@ export default class CanvasHelper {
   static getCenterCoordinates(canvas: Canvas, nodeSize: Size): Position {
     const viewBounds = canvas.getViewportBBox()
 
-    return { 
+    return {
       x: (viewBounds.minX + viewBounds.maxX) / 2 - nodeSize.width / 2,
       y: (viewBounds.minY + viewBounds.maxY) / 2 - nodeSize.height / 2,
     }
@@ -140,7 +140,7 @@ export default class CanvasHelper {
   static getBBox(canvasElements: (CanvasNode | CanvasNodeData | CanvasEdge)[]) {
     const bBoxes = canvasElements.map(element => {
       if ((element as any).getBBox) return (element as CanvasNode).getBBox()
-      
+
       const nodeData = (element as CanvasNodeData)
       if (nodeData.x !== undefined && nodeData.y !== undefined && nodeData.width !== undefined && nodeData.height !== undefined)
         return { minX: nodeData.x, minY: nodeData.y, maxX: nodeData.x + nodeData.width, maxY: nodeData.y + nodeData.height }
@@ -170,7 +170,7 @@ export default class CanvasHelper {
   }
 
   static addStyleAttributesToPopup(plugin: AdvancedCanvasPlugin, canvas: Canvas, styleAttributes: StyleAttribute[], currentStyleAttributes: { [key: string]: string | null }, setStyleAttribute: (attribute: StyleAttribute, value: string | null) => void) {
-    if (!plugin.settings.getSetting('combineCustomStylesInDropdown')) 
+    if (!plugin.settings.getSetting('combineCustomStylesInDropdown'))
       this.addStyleAttributesButtons(canvas, styleAttributes, currentStyleAttributes, setStyleAttribute)
     else this.addStyleAttributesDropdownMenu(canvas, styleAttributes, currentStyleAttributes, setStyleAttribute)
   }
@@ -179,7 +179,12 @@ export default class CanvasHelper {
     for (const stylableAttribute of stylableAttributes) {
       const selectedStyle = stylableAttribute.options
         .find(option => currentStyleAttributes[stylableAttribute.key] === option.value) ??
-        stylableAttribute.options.find(value => value.value === null)!!
+        stylableAttribute.options.find(value => value.value === null)
+
+      if (!selectedStyle) {
+        console.warn(`No "null" style option found for stylable attribute "${stylableAttribute.key}"`)
+        continue
+      }
 
       const menuOption = CanvasHelper.createExpandablePopupMenuOption({
         id: `menu-option-${stylableAttribute.key}`,
@@ -216,7 +221,7 @@ export default class CanvasHelper {
     // Check if popup menu exists
     const popupMenuElement = canvas?.menu?.menuEl
     if (!popupMenuElement) return
-    
+
     // Remove previous style menu
     popupMenuElement.querySelector(`#${STYLE_MENU_ID}`)?.remove()
 
@@ -226,7 +231,7 @@ export default class CanvasHelper {
 
     setIcon(styleMenuButtonElement, 'paintbrush')
     setTooltip(styleMenuButtonElement, 'Style', { placement: 'top' })
-    
+
     // Add style menu to popup menu
     popupMenuElement.appendChild(styleMenuButtonElement)
 
@@ -236,7 +241,7 @@ export default class CanvasHelper {
       if (!isOpen) {
         popupMenuElement.querySelector(`#${STYLE_MENU_DROPDOWN_ID}`)?.remove()
         popupMenuElement.querySelector(`#${STYLE_MENU_DROPDOWN_SUBMENU_ID}`)?.remove()
-        
+
         return
       }
 
@@ -272,7 +277,9 @@ export default class CanvasHelper {
 
         let selectedStyle = stylableAttribute.options
           .find(option => currentStyleAttributes[stylableAttribute.key] === option.value) ??
-          stylableAttribute.options.find(value => value.value === null)!!
+          stylableAttribute.options.find(value => value.value === null)
+        if (!selectedStyle) continue
+
         setIcon(iconElement, selectedStyle.icon)
 
         stylableAttributeElement.appendChild(iconElement)
@@ -309,7 +316,7 @@ export default class CanvasHelper {
           const styleMenuDropdownSubmenuElement = document.createElement('div')
           styleMenuDropdownSubmenuElement.id = STYLE_MENU_DROPDOWN_SUBMENU_ID
           styleMenuDropdownSubmenuElement.classList.add('menu')
-      
+
           // Position correctly
           styleMenuDropdownSubmenuElement.style.position = 'absolute'
           styleMenuDropdownSubmenuElement.style.maxHeight = 'initial'
@@ -334,14 +341,14 @@ export default class CanvasHelper {
               callback: () => {
                 // Set style attribute
                 setStyleAttribute(stylableAttribute, styleOption.value)
-  
+
                 // Keep correct reference
                 currentStyleAttributes[stylableAttribute.key] = styleOption.value
                 selectedStyle = styleOption
-  
+
                 // Update icon
                 setIcon(iconElement, styleOption.icon)
-  
+
                 // Close menu
                 styleMenuDropdownSubmenuElement.remove()
               }

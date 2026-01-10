@@ -56,7 +56,7 @@ export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
     if (selectedNodes.length === 0) return
 
     const autoResizeHeightEnabled = selectedNodes.some(node => node.getData().dynamicHeight)
-    
+
     CanvasHelper.addPopupMenuOption(
       canvas,
       CanvasHelper.createPopupMenuOption({
@@ -97,12 +97,12 @@ export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
     if (!renderedMarkdownContainer) return
 
     renderedMarkdownContainer.style.height = "min-content"
-    let newHeight = renderedMarkdownContainer.clientHeight
+    const newHeight = renderedMarkdownContainer.clientHeight
     renderedMarkdownContainer.style.removeProperty("height")
 
     this.setNodeHeight(node, newHeight)
   }
-  
+
   private async onNodeTextContentChanged(_canvas: Canvas, node: CanvasNode, dom: HTMLElement) {
     if (!this.isValidNodeType(node.getData())) return
     if (!this.canBeResized(node)) return
@@ -119,7 +119,7 @@ export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
 
   private setNodeHeight(node: CanvasNode, height: number) {
     if (height === 0) return
-    
+
     // Limit the height to the maximum allowed
     const maxHeight = this.plugin.settings.getSetting('autoResizeNodeMaxHeight')
     if (maxHeight != -1 && height > maxHeight) height = maxHeight

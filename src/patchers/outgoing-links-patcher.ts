@@ -5,7 +5,6 @@ export default class OutgoingLinksPatcher extends Patcher {
   protected async patch() {
     if (!this.plugin.settings.getSetting('canvasMetadataCompatibilityEnabled')) return
 
-    const that = this
     await Patcher.waitForViewRequest<any>(this.plugin, "outgoing-link", view => {
       Patcher.patchPrototype<OutgoingLink>(this.plugin, view.outgoingLink, {
         recomputeLinks: Patcher.OverrideExisting(next => function (...args: any[]): void {

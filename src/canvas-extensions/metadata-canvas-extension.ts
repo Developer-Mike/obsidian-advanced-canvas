@@ -1,7 +1,7 @@
-import { Canvas, CanvasView } from "src/@types/Canvas"
-import CanvasExtension from "./canvas-extension"
-import { CURRENT_SPEC_VERSION } from "src/utils/migration-helper"
 import { Notice } from "obsidian"
+import { Canvas, CanvasView } from "src/@types/Canvas"
+import { CURRENT_SPEC_VERSION } from "src/utils/migration-helper"
+import CanvasExtension from "./canvas-extension"
 
 export default class MetadataCanvasExtension extends CanvasExtension {
   isEnabled() { return true }
@@ -26,7 +26,7 @@ export default class MetadataCanvasExtension extends CanvasExtension {
   }
 
   private onCanvasChanged(canvas: Canvas) {
-    let metadata = canvas.data?.metadata
+    const metadata = canvas.data?.metadata
     if (!metadata || metadata.version !== CURRENT_SPEC_VERSION)
       return new Notice("Metadata node not found or version mismatch. Should have been migrated (but wasn't).")
 
@@ -57,8 +57,8 @@ export default class MetadataCanvasExtension extends CanvasExtension {
 
   private onMetadataChanged(canvas: Canvas) {
     // Remove old cssclasses
-    if (this.canvasCssclassesCache.has(canvas.view))
-      canvas.wrapperEl.classList.remove(...this.canvasCssclassesCache.get(canvas.view)!)
+    const oldCssClasses = this.canvasCssclassesCache.get(canvas.view)
+    if (oldCssClasses) canvas.wrapperEl.classList.remove(...oldCssClasses)
 
     // Set new cssclasses
     const currentClasses = canvas.metadata?.frontmatter?.cssclasses as string[] ?? []

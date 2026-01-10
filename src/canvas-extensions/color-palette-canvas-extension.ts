@@ -7,9 +7,9 @@ const CUSTOM_COLORS_MOD_STYLES_ID = 'mod-custom-colors'
 
 export default class ColorPaletteCanvasExtension extends CanvasExtension {
   observer: MutationObserver | null = null
-  
+
   isEnabled() { return true }
-  
+
   init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       'window-open',
@@ -40,7 +40,7 @@ export default class ColorPaletteCanvasExtension extends CanvasExtension {
 
     for (const win of this.plugin.windowsManager.windows) {
       const doc = win.document
-      
+
       doc.getElementById(CUSTOM_COLORS_MOD_STYLES_ID)?.remove()
 
       const customColorModStyle = doc.createElement('style')
@@ -55,8 +55,8 @@ export default class ColorPaletteCanvasExtension extends CanvasExtension {
     if (this.observer) this.observer.disconnect()
 
     this.observer = new MutationObserver(mutations => {
-      const colorMenuOpened = mutations.some(mutation => 
-        Object.values(mutation.addedNodes).some((node: Node) => 
+      const colorMenuOpened = mutations.some(mutation =>
+        Object.values(mutation.addedNodes).some((node: Node) =>
           node instanceof HTMLElement && node.classList.contains('canvas-submenu') && Object.values(node.childNodes).some((node: Node) =>
             node instanceof HTMLElement && node.classList.contains('canvas-color-picker-item')
           )
@@ -71,7 +71,7 @@ export default class ColorPaletteCanvasExtension extends CanvasExtension {
       for (const colorId of this.getCustomColors()) {
         const customColorMenuItem = this.createColorMenuItem(canvas, colorId)
         if (currentNodeColor === colorId) customColorMenuItem.classList.add('is-active')
-        
+
         submenu.insertBefore(customColorMenuItem, submenu.lastChild)
       }
     })
@@ -100,11 +100,11 @@ export default class ColorPaletteCanvasExtension extends CanvasExtension {
   private getCustomColors(): string[] {
     const colors: string[] = []
 
-    while (true) {
-      const colorId = (DEFAULT_COLORS_COUNT + colors.length + 1).toString()
-      if (!getComputedStyle(document.body).getPropertyValue(`--canvas-color-${colorId}`)) break
-
-      colors.push(colorId)
+    const style = getComputedStyle(document.body)
+    let colorIndex = DEFAULT_COLORS_COUNT + 1
+    while (style.getPropertyValue(`--canvas-color-${colorIndex}`)) {
+      colors.push(colorIndex.toString())
+      colorIndex++
     }
 
     return colors

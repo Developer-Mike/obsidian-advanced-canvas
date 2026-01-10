@@ -210,7 +210,6 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
 }
 
 export const SETTINGS = {
-  // @ts-ignore
   general: {
     label: 'General',
     description: 'General settings of the Advanced Canvas plugin.',
@@ -640,7 +639,7 @@ export const SETTINGS = {
     children: { }
   },
 } as const satisfies {
-  [key in keyof AdvancedCanvasPluginSettingsValues]: SettingsHeading & {
+  [key in keyof AdvancedCanvasPluginSettingsValues | "general"]?: SettingsHeading & {
     children: {
       [key in keyof AdvancedCanvasPluginSettingsValues]?: Setting
     }
@@ -696,7 +695,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
   }
 
   display(): void {
-    let { containerEl } = this
+    const { containerEl } = this
     containerEl.empty()
 
     this.createKofiBanner(containerEl)
@@ -716,7 +715,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       settingsHeaderChildrenContainerEl.appendChild(document.createElement('span')) // Add empty span to not trigger the :first-child selector in the CSS
       containerEl.appendChild(settingsHeaderChildrenContainerEl)
 
-      for (let [settingId, setting] of Object.entries(heading.children) as [keyof AdvancedCanvasPluginSettingsValues, Setting][]) {
+      for (const [settingId, setting] of Object.entries(heading.children) as [keyof AdvancedCanvasPluginSettingsValues, Setting][]) {
         if (!(settingId in DEFAULT_SETTINGS_VALUES)) continue
 
         switch (setting.type) {

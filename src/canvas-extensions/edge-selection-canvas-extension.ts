@@ -1,6 +1,6 @@
-import { Canvas, CanvasEdge } from "src/@types/Canvas"
-import CanvasExtension from "./canvas-extension"
+import { Canvas } from "src/@types/Canvas"
 import CanvasHelper, { ConnectionDirection, MenuOption } from "src/utils/canvas-helper"
+import CanvasExtension from "./canvas-extension"
 
 const DIRECTION_MENU_MAP: Record<ConnectionDirection, MenuOption> = {
   connected: {
@@ -45,7 +45,7 @@ export default class EdgeSelectionCanvasExtension extends CanvasExtension {
       // reduce unapplicable options for frequent use case
       const node = canvas.nodes.get(selectionNodeData[0].id)
       if (!node) return
-      
+
       const edges = canvas.getEdgesForNode(node)
       // hide all options if no edges
       if (edges.length === 0) return

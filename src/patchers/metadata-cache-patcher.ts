@@ -1,4 +1,4 @@
-import { ExtendedMetadataCache, TFile } from "obsidian"
+import { ExtendedMetadataCache, FrontmatterLinkCache, TFile } from "obsidian"
 import { CanvasData, CanvasFileNodeData, CanvasNodeData, CanvasTextNodeData } from "src/@types/AdvancedJsonCanvas"
 import { ExtendedCachedMetadata, MetadataCacheMap } from "src/@types/Obsidian"
 import HashHelper from "src/utils/hash-helper"
@@ -15,7 +15,7 @@ export default class MetadataCachePatcher extends Patcher {
         // Bypass the "md" extension check by handling the "canvas" extension here
         if (FilepathHelper.extension(filepath) === 'canvas') {
           if (!this.fileCache.hasOwnProperty(filepath)) return null
-          
+
           const hash = this.fileCache[filepath].hash
           return this.metadataCache[hash] || null
         }
@@ -57,7 +57,7 @@ export default class MetadataCachePatcher extends Patcher {
             const getLinks = (value: string[]) => value.map((v) => {
               if (!v.startsWith('[[') || !v.endsWith(']]')) return null // Frontmatter only supports wikilinks
               const [link, ...aliases] = v.slice(2, -2).split('|')
-              
+
               return {
                 key: key,
                 displayText: aliases.length > 0 ? aliases.join('|') : link,
@@ -70,7 +70,7 @@ export default class MetadataCachePatcher extends Patcher {
             else if (Array.isArray(value)) return getLinks(value)
 
             return []
-          })
+          }).filter(v => v !== null) as FrontmatterLinkCache[]
         }
 
         // Extract canvas file node embeds
@@ -99,7 +99,7 @@ export default class MetadataCachePatcher extends Patcher {
               ...embed,
               position: {
                 nodeId: content.nodes?.[index]?.id,
-                start: { line: 0, col: 1, offset: 0 }, // 0 for node 
+                start: { line: 0, col: 1, offset: 0 }, // 0 for node
                 end: { line: 0, col: 1, offset: index } // index of node
               }
             }))
@@ -111,7 +111,7 @@ export default class MetadataCachePatcher extends Patcher {
               ...link,
               position: {
                 nodeId: content.nodes?.[index]?.id,
-                start: { line: 0, col: 1, offset: 0 }, // 0 for node 
+                start: { line: 0, col: 1, offset: 0 }, // 0 for node
                 end: { line: 0, col: 1, offset: index } // index of node
               }
             }))
@@ -138,7 +138,7 @@ export default class MetadataCachePatcher extends Patcher {
               return acc
             }, {} as Record<string, ExtendedCachedMetadata>)
           }
-        } satisfies ExtendedCachedMetadata
+        } as ExtendedCachedMetadata
 
         // Trigger metadata cache change event
         this.trigger('changed', file, "", this.metadataCache[fileHash])
@@ -179,7 +179,7 @@ export default class MetadataCachePatcher extends Patcher {
         // Show links between files with edges
         if (that.plugin.settings.getSetting('treatFileNodeEdgesAsLinks')) {
           // Extract canvas file edges
-          ;(cachedContent.edges ?? []).forEach(edge => {
+          (cachedContent.edges ?? []).forEach(edge => {
             const from = cachedContent.nodes?.find((node: CanvasNodeData) => node.id === edge.fromNode)
             const to = cachedContent.nodes?.find((node: CanvasNodeData) => node.id === edge.toNode)
             if (!from || !to) return
@@ -232,7 +232,7 @@ export default class MetadataCachePatcher extends Patcher {
             }
           ]
         }
-    
+
         // Update resolved links for "from" node
         this.resolvedLinks[from] = {
           ...this.resolvedLinks[from],

@@ -1,4 +1,4 @@
-import { App, CachedMetadata, TFile } from "./Obsidian"
+import { App, TFile } from "./Obsidian"
 
 export default interface SuggestManager {
   app: App

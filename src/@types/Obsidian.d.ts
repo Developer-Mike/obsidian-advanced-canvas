@@ -1,4 +1,4 @@
-import { CachedMetadata, EmbedCache, FrontMatterCache, FrontmatterLinkCache, LinkCache, Pos, TagCache } from "obsidian"
+import { CachedMetadata, EmbedCache, LinkCache } from "obsidian"
 import { CustomWorkspaceEvents } from "./CustomWorkspaceEvents"
 import SuggestManager from "./SuggestManager"
 
@@ -30,10 +30,10 @@ declare module "obsidian" {
     metadataCache: ExtendedMetadataCache
     /** @public */ // exclude only the on method that takes a string and not a specific event name
     workspace: Omit<Omit<ExtendedWorkspace, 'on'>, 'trigger'> & {
-      on<K extends keyof CustomWorkspaceEvents>(name: K, callback: (...args: Parameters<CustomWorkspaceEvents[K]>) => void): EventRef
       trigger<K extends keyof CustomWorkspaceEvents>(name: K, ...args: Parameters<CustomWorkspaceEvents[K]>): void
 
       // Inbuilt
+      on<K extends keyof CustomWorkspaceEvents>(name: K, callback: (...args: Parameters<CustomWorkspaceEvents[K]>) => void): EventRef
       on(name: 'quick-preview', callback: (file: TFile, data: string) => any, ctx?: any): EventRef
       on(name: 'resize', callback: () => any, ctx?: any): EventRef
       on(name: 'active-leaf-change', callback: (leaf: WorkspaceLeaf | null) => any, ctx?: any): EventRef
@@ -72,11 +72,11 @@ declare module "obsidian" {
 
   export interface EmbedContext {
     app: App
-    
+
     containerEl: HTMLElement
     sourcePath?: string
     linktext?: string
-    
+
     displayMode?: boolean
     showInline?: boolean
     depth?: number

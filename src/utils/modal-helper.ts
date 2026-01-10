@@ -6,7 +6,7 @@ export class AbstractSelectionModal extends FuzzySuggestModal<string> {
 
   constructor(app: App, placeholder: string, suggestions: string[]) {
     super(app)
-    
+
     this.suggestions = suggestions
 
     this.setPlaceholder(placeholder)
@@ -50,7 +50,7 @@ export class FileNameModal extends SuggestModal<string> {
     const suggestions = [queryWithExtension]
 
     if (this.parentPath.length > 0) suggestions.splice(0, 0, `${this.parentPath}/${queryWithExtension}`)
-      
+
     // Filter out suggestions for files that already exist
     return suggestions.filter(s => this.app.vault.getAbstractFileByPath(s) === null)
   }
@@ -73,7 +73,7 @@ export class FileSelectModal extends SuggestModal<string> {
   files: string[]
   suggestNewFile: boolean
 
-  constructor(app: App, extensionsRegex?: RegExp, suggestNewFile: boolean = false) {
+  constructor(app: App, extensionsRegex?: RegExp, suggestNewFile = false) {
     super(app)
 
     this.files = this.app.vault.getFiles()

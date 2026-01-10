@@ -66,10 +66,10 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
     if (event.defaultPrevented || event.target !== canvas.wrapperEl || canvas.isDragging || canvas.readonly) return
     preventDefault.value = true
 
-    let pos = canvas.posFromEvt(event)
+    const pos = canvas.posFromEvt(event)
 
     switch (this.plugin.settings.getSetting('nodeTypeOnDoubleClick')) {
-      case 'file':
+      case 'file': {
         const file = await new FileSelectModal(this.plugin.app, undefined, true).awaitInput()
         canvas.createFileNode({
           pos: pos,
@@ -78,6 +78,7 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
         })
 
         break
+      }
       default:
         canvas.createTextNode({
           pos: pos,

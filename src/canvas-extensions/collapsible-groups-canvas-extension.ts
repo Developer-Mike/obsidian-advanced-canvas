@@ -1,10 +1,9 @@
 import { setIcon } from "obsidian"
+import { CanvasData, CanvasGroupNodeData } from "src/@types/AdvancedJsonCanvas"
 import { BBox, Canvas, CanvasNode, SelectionData } from "src/@types/Canvas"
 import BBoxHelper from "src/utils/bbox-helper"
 import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "./canvas-extension"
-import { CanvasData, CanvasGroupNodeData } from "src/@types/AdvancedJsonCanvas"
-import { satisfies } from "src/settings"
 
 export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
   isEnabled() { return 'collapsibleGroupsFeatureEnabled' as const }

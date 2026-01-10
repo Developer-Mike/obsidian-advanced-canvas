@@ -12,12 +12,12 @@ type FunctionKeys<T> = {
 }[keyof T]
 
 // The type of the function at key K in T
-type KeyFunction<T, K extends FunctionKeys<T>> = 
+type KeyFunction<T, K extends FunctionKeys<T>> =
   T[K] extends (...args: any[]) => any ? T[K] : never
 
 // The type of a patch function for key K in T
-type KeyFunctionReplacement<T, K extends FunctionKeys<T>, R extends ReturnType<KeyFunction<T, K>>> = 
-  (this: T, ...args: Parameters<KeyFunction<T, K>>) => IsAny<ReturnType<KeyFunction<T, K>>> extends false 
+type KeyFunctionReplacement<T, K extends FunctionKeys<T>, R extends ReturnType<KeyFunction<T, K>>> =
+  (this: T, ...args: Parameters<KeyFunction<T, K>>) => IsAny<ReturnType<KeyFunction<T, K>>> extends false
   ? ReturnType<KeyFunction<T, K>> & NotAny<R>
   : any
 
@@ -86,7 +86,7 @@ export default abstract class Patcher {
     plugin: Plugin,
     object: T | undefined,
     patches: FunctionPatchObject<T>,
-    prototype: boolean = false,
+    prototype = false,
     uninstallers?: Array<() => void>
   ): T | null {
     if (!object) return null
@@ -109,8 +109,8 @@ export default abstract class Patcher {
   }
 
   static tryPatchWorkspacePrototype<T>(
-    plugin: Plugin, 
-    getTarget: () => T | undefined, 
+    plugin: Plugin,
+    getTarget: () => T | undefined,
     patches: FunctionPatchObject<T>,
     uninstallers?: Array<() => void>
   ): Promise<T> {

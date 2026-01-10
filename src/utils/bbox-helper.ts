@@ -8,7 +8,7 @@ export default class BBoxHelper {
     let maxX = -Infinity
     let maxY = -Infinity
 
-    for (let bbox of bboxes) {
+    for (const bbox of bboxes) {
       minX = Math.min(minX, bbox.minX)
       minY = Math.min(minY, bbox.minY)
       maxX = Math.max(maxX, bbox.maxX)
@@ -19,8 +19,8 @@ export default class BBoxHelper {
   }
 
   static scaleBBox(bbox: BBox, scale: number): BBox {
-    let diffX = (scale - 1) * (bbox.maxX - bbox.minX)
-    let diffY = (scale - 1) * (bbox.maxY - bbox.minY)
+    const diffX = (scale - 1) * (bbox.maxX - bbox.minX)
+    const diffY = (scale - 1) * (bbox.maxY - bbox.minY)
 
     return {
       minX: bbox.minX - diffX / 2,
@@ -41,7 +41,7 @@ export default class BBoxHelper {
         ? x >= bbox.minX && x <= bbox.maxX && y >= bbox.minY && y <= bbox.maxY
         : x > bbox.minX && x < bbox.maxX && y > bbox.minY && y < bbox.maxY
     }
-  
+
     return canTouchEdge
       ? position.minX >= bbox.minX && position.maxX <= bbox.maxX &&
         position.minY >= bbox.minY && position.maxY <= bbox.maxY

@@ -1,6 +1,5 @@
-import { around } from "monkey-around"
-import Patcher from "./patcher"
 import SearchView, { MatchData, SearchQuery } from "src/@types/SearchPlugin"
+import Patcher from "./patcher"
 
 export default class SearchPatcher extends Patcher {
   protected async patch() {

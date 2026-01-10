@@ -22,8 +22,8 @@ export default class EdgeExposerExtension extends CanvasExtension {
         if (!edgeData) return
 
         for (const exposedDataKey of getExposedEdgeData(this.plugin.settings)) {
-            const datasetPairs = edgeData[exposedDataKey] instanceof Object
-              ? Object.entries(edgeData[exposedDataKey])
+            const datasetPairs = edgeData[exposedDataKey] && typeof edgeData[exposedDataKey] === 'object'
+              ? Object.entries(edgeData[exposedDataKey] as Record<string, string>)
               : [[exposedDataKey, edgeData[exposedDataKey]]]
 
             for (const [key, value] of datasetPairs) {
