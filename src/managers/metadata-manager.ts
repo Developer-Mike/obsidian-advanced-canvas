@@ -26,6 +26,11 @@ export default class MetadataManager {
       "advanced-canvas:canvas-view-unloaded:before",
       (view: CanvasView) => this.updateMetadataFile(view)
     )
+
+    this.plugin.app.workspace.on(
+      "file-open",
+      async (file: TFile | null) => this.openCanvasFileThroughMetadataFile(file)
+    )
   }
 
   private async updateMetadataFile(view: CanvasView) {
@@ -78,6 +83,17 @@ export default class MetadataManager {
     await this.plugin.app.fileManager.processFrontMatter(metadataFile as TFile, fm =>
       Object.assign(fm, updatedFrontmatter)
     )
+  }
+
+  private async openCanvasFileThroughMetadataFile(file: TFile | null) {
+    const path = file?.path
+    if (!path?.endsWith(METADATA_FILE_SUFFIX)) return
+
+    const canvasFilePath = path.slice(0, -METADATA_FILE_SUFFIX.length)
+    const canvasFile = this.plugin.app.vault.getAbstractFileByPath(canvasFilePath)
+    if (!(canvasFile instanceof TFile)) return
+
+    await this.plugin.app.workspace.getLeaf(false).openFile(canvasFile)
   }
 }
 
