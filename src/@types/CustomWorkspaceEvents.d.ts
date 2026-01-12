@@ -19,6 +19,10 @@ export interface CustomWorkspaceEvents {
   // Custom canvas events
   /** Fired when a new canvas gets loaded */
   'advanced-canvas:canvas-changed': (canvas: Canvas) => void
+  /** Fired before the canvas view gets saved */
+  'advanced-canvas:canvas-view-saved:before': (view: CanvasView) => void
+  /** Fired after the canvas view gets saved */
+  'advanced-canvas:canvas-view-saved:after': (view: CanvasView) => void
   /** Fired before the canvas view gets unloaded */
   'advanced-canvas:canvas-view-unloaded:before': (view: CanvasView) => void
   /** Fired when the canvas' metadata gets changed */
@@ -93,8 +97,4 @@ export interface CustomWorkspaceEvents {
   'advanced-canvas:data-loaded:before': (canvas: Canvas, data: CanvasData, setData: (data: CanvasData) => void) => void
   /** Fired after the canvas data gets set */
   'advanced-canvas:data-loaded:after': (canvas: Canvas, data: CanvasData, setData: (data: CanvasData) => void) => void
-  /** Fired before the canvas gets saved */
-  'advanced-canvas:canvas-saved:before': (canvas: Canvas) => void
-  /** Fired after the canvas gets saved */
-  'advanced-canvas:canvas-saved:after': (canvas: Canvas) => void
 }

@@ -99,6 +99,12 @@ export default class CanvasPatcher extends Patcher {
         that.plugin.app.workspace.trigger('advanced-canvas:canvas-changed', this.canvas)
         return result
       }),
+      save: Patcher.OverrideExisting(next => function (...args: any): Promise<void> {
+        that.plugin.app.workspace.trigger('advanced-canvas:canvas-view-saved:before', this)
+        const result = next.call(this, ...args)
+        result.then(() => that.plugin.app.workspace.trigger('advanced-canvas:canvas-view-saved:after', this))
+        return result
+      }),
       close: Patcher.OverrideExisting(next => function (...args: any): void {
         that.plugin.app.workspace.trigger('advanced-canvas:canvas-view-unloaded:before', this)
         return next.call(this, ...args)
@@ -298,12 +304,6 @@ export default class CanvasPatcher extends Patcher {
         const result = next.call(this, data, clearCanvas)
         if (!silent) that.plugin.app.workspace.trigger('advanced-canvas:data-loaded:after', this, data, setData)
 
-        return result
-      }),
-      requestSave: Patcher.OverrideExisting(next => function (...args: any): void {
-        that.plugin.app.workspace.trigger('advanced-canvas:canvas-saved:before', this)
-        const result = next.call(this, ...args)
-        that.plugin.app.workspace.trigger('advanced-canvas:canvas-saved:after', this)
         return result
       })
     })

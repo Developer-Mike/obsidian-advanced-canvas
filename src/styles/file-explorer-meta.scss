@@ -1,0 +1,3 @@
+.nav-file:has(> .nav-file-title[data-path$=".canvas.meta.md"]) {
+  display: none;
+}

@@ -1,4 +1,9 @@
+import { CanvasFileNodeData } from "assets/formats/advanced-json-canvas/spec/1.0-1.0"
+import { TFile } from "obsidian"
+import { CanvasView } from "src/@types/Canvas"
 import AdvancedCanvasPlugin from "src/main"
+
+export const METADATA_FILE_SUFFIX = '.meta.md'
 
 export default class MetadataManager {
   private plugin: AdvancedCanvasPlugin
@@ -12,7 +17,67 @@ export default class MetadataManager {
   }
 
   private listen() {
+    this.plugin.app.workspace.on(
+      "advanced-canvas:canvas-view-saved:after",
+      (view: CanvasView) => this.updateMetadataFile(view)
+    )
 
+    this.plugin.app.workspace.on(
+      "advanced-canvas:canvas-view-unloaded:before",
+      (view: CanvasView) => this.updateMetadataFile(view)
+    )
+  }
+
+  private async updateMetadataFile(view: CanvasView) {
+    if (!view._loaded) return
+
+    // Get canvas file path
+    const path = view?.file?.path
+    if (!path) return
+
+    // Get canvas data
+    const data = view?.canvas?.getData()
+
+    // Generate the embeds array
+    const embeds: [string, string][] = data.nodes
+      .filter(node => node.type === "file" && (node as any).file)
+      .map((node: CanvasFileNodeData) => [node.id, node.file])
+
+    // Get metadata file
+    const metadataFilePath = `${path}${METADATA_FILE_SUFFIX}`
+    let metadataFile = this.plugin.app.vault.getAbstractFileByPath(metadataFilePath)
+
+    // Get the frontmatter of the metadata file if it exists
+    let frontmatter = {}
+    if (metadataFile instanceof TFile)
+      await this.plugin.app.fileManager.processFrontMatter(metadataFile, fm => { frontmatter = fm })
+
+    // Remove metadata file if no frontmatter nor embeds exist
+    if (metadataFile instanceof TFile && Object.keys(frontmatter).length === 0 && embeds.length === 0) {
+      await this.plugin.app.vault.delete(metadataFile)
+      return
+    }
+
+    // Create metadata file if it doesn't exist
+    if (!(metadataFile instanceof TFile))
+      metadataFile = await this.plugin.app.vault.create(metadataFilePath, "")
+
+    // Update metadata file frontmatter
+    const updatedFrontmatter = JSON.parse(JSON.stringify(frontmatter))
+
+    // Update metadata embeds
+    let embedsText = "# Embeds\n"
+    embeds.forEach(([id, embedPath]) => {
+      embedsText += `- [[${path}#${id}]] -> [[${embedPath}]]\n`
+    })
+
+    // Write text to metadata file
+    await this.plugin.app.vault.modify(metadataFile as TFile, embedsText)
+
+    // Restore frontmatter
+    await this.plugin.app.fileManager.processFrontMatter(metadataFile as TFile, fm =>
+      Object.assign(fm, updatedFrontmatter)
+    )
   }
 }
 

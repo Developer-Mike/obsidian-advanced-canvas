@@ -59,6 +59,7 @@ export interface CanvasView extends ItemView {
   getViewData(): string
   setViewData(data: string): void
 
+  save(): Promise<void>
   close(): void
 
   data: string
