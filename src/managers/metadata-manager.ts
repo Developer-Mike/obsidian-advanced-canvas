@@ -1,3 +1,22 @@
+import AdvancedCanvasPlugin from "src/main"
+
+export default class MetadataManager {
+  private plugin: AdvancedCanvasPlugin
+
+  constructor(plugin: AdvancedCanvasPlugin) {
+    this.plugin = plugin
+
+    if (!this.plugin.settings.getSetting('canvasMetadataCompatibilityEnabled')) return
+
+    this.listen()
+  }
+
+  private listen() {
+
+  }
+}
+
+/*
 import { ExtendedMetadataCache, FrontmatterLinkCache, TFile } from "obsidian"
 import { CanvasData, CanvasFileNodeData, CanvasNodeData, CanvasTextNodeData } from "src/@types/AdvancedJsonCanvas"
 import { ExtendedCachedMetadata, MetadataCacheMap } from "src/@types/Obsidian"
@@ -249,3 +268,4 @@ export default class MetadataCachePatcher extends Patcher {
     }))
   }
 }
+*/

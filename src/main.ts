@@ -8,17 +8,13 @@ import DebugHelper from './utils/debug-helper'
 // Managers
 import SettingsManager from './settings'
 import WindowsManager from './managers/windows-manager'
+import MetadataManager from './managers/metadata-manager'
 
 // Patchers
 import Patcher from './patchers/patcher'
 import CanvasPatcher from './patchers/canvas-patcher'
 import LinkSuggestionsPatcher from './patchers/link-suggestions-patcher'
 import EmbedPatcher from './patchers/embed-patcher'
-import MetadataCachePatcher from './patchers/metadata-cache-patcher'
-import BacklinksPatcher from './patchers/backlinks-patcher'
-import OutgoingLinksPatcher from './patchers/outgoing-links-patcher'
-import PropertiesPatcher from './patchers/properties-patcher'
-import SearchPatcher from './patchers/search-patcher'
 import SearchCommandPatcher from './patchers/search-command-patcher'
 
 // Canvas Extensions
@@ -61,11 +57,6 @@ const PATCHERS = [
   CanvasPatcher,
   LinkSuggestionsPatcher,
   EmbedPatcher,
-  MetadataCachePatcher,
-  BacklinksPatcher,
-  OutgoingLinksPatcher,
-  PropertiesPatcher,
-  SearchPatcher,
   SearchCommandPatcher,
 ]
 
@@ -110,6 +101,7 @@ export default class AdvancedCanvasPlugin extends Plugin {
 
   settings: SettingsManager
   windowsManager: WindowsManager
+  metadataManager: MetadataManager
 
   patchers: Patcher[]
   canvasExtensions: CanvasExtension[]
@@ -122,6 +114,7 @@ export default class AdvancedCanvasPlugin extends Plugin {
     this.settings.addSettingsTab()
 
     this.windowsManager = new WindowsManager(this)
+    this.metadataManager = new MetadataManager(this)
 
     this.patchers = PATCHERS.map((Patcher: any) => {
       try { return new Patcher(this) }
