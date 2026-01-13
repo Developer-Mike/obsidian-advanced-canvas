@@ -25,11 +25,13 @@ export default class MetadataManager {
   ): TFile | null {
     if (!canvasFile?.path) return null
 
+    if (canvasFile.path in this.metadataCreationTasks) {
+      if (callback) this.metadataCreationTasks[canvasFile.path].then(callback)
+      return null // Still being created
+    }
+
     const metadataFilePath = path ?? `${canvasFile.path}${METADATA_FILE_SUFFIX}`
     let metadataFile = canvasFile.vault?.getAbstractFileByPath(metadataFilePath)
-
-    if (!metadataFile && callback)
-      this.metadataCreationTasks[canvasFile.path]?.then(callback)
 
     // Verify ownership using frontmatter key
     if (metadataFile instanceof TFile) {
@@ -38,7 +40,7 @@ export default class MetadataManager {
       // Instead of checking if correct ownership, we check if incorrect ownership exists -> reclaim on accidental deletion of property
       if (metadataFileCache?.frontmatterLinks?.some(link =>
         link.key === METADATA_FRONTMATTER_KEY &&
-        this.plugin.app.metadataCache.getFirstLinkpathDest(link.link, (metadataFile as TFile).path) !== canvasFile
+        this.plugin.app.metadataCache.getFirstLinkpathDest(link.link, (metadataFile as TFile).path)?.path !== canvasFile.path
       )) {
         console.warn(`MetadataManager: Thought found metadata file '${metadataFile.path}' but ownership verification of canvas '${canvasFile.path}' failed.`)
         metadataFile = null
@@ -135,8 +137,14 @@ export default class MetadataManager {
   private async updateMetadataFile(file: TAbstractFile, forceCreate = false) {
     if (!(file instanceof TFile) || file?.extension !== 'canvas') return
 
+    // Get canvas data
+    let data: Partial<CanvasData> = {}
+    try { data = JSON.parse(await this.plugin.app.vault.read(file)) as CanvasData } catch { }
+
     // Get metadata file
     let metadataFile = forceCreate ? null : this.getMetadataFile(file)
+    let frontmatter: Record<string, any> = {}
+    if (metadataFile) await this.plugin.app.fileManager.processFrontMatter(metadataFile, fm => { frontmatter = fm })
 
     // Create metadata file if it doesn't exist
     if (!metadataFile) {
@@ -146,40 +154,29 @@ export default class MetadataManager {
         return
       }
 
-      const creationTask = this.plugin.app.vault.create(
-        `${file.path}${METADATA_FILE_SUFFIX}`, ""
-      )
-
+      // Create metadata file
+      const creationTask = this.plugin.app.vault.create(`${file.path}${METADATA_FILE_SUFFIX}`, "")
       this.metadataCreationTasks[file.path] = creationTask
       metadataFile = await creationTask
       delete this.metadataCreationTasks[file.path]
+
+      // Sync frontmatter from canvas file on initial creation
+      const canvasFrontmatter = data?.metadata?.frontmatter
+      if (canvasFrontmatter) Object.assign(frontmatter, canvasFrontmatter)
     }
 
-    // Get the frontmatter of the metadata file if it exists
-    let frontmatter: Record<string, any> = {}
-    if (metadataFile) await this.plugin.app.fileManager.processFrontMatter(
-      metadataFile, fm => { frontmatter = fm }
-    )
-
-    // Get canvas data
-    let data = { nodes: [], edges: [] } as any as CanvasData
-    try { data = JSON.parse(await this.plugin.app.vault.read(file)) as CanvasData } catch { }
-    if (!data?.nodes || !Array.isArray(data.nodes)) return
-
-    // Update metadata file frontmatter
-    delete frontmatter[METADATA_FRONTMATTER_KEY]
-    const updatedFrontmatter = {
-      [METADATA_FRONTMATTER_KEY]: `[[${file.path}]]`,
-      ...frontmatter
-    }
+    // Update the frontmatter ownership key
+    if (!(METADATA_FRONTMATTER_KEY in frontmatter))
+      frontmatter[METADATA_FRONTMATTER_KEY] = `[[${file.path}]]`
 
     // Update metadata text
     let metadataText = "\n>[!WARNING] This is an auto-generated file. Do not edit directly **BELOW** this line.\n\n"
 
     // Update metadata embeds (file nodes)
-    const embeds: [string, string][] = data.nodes
-      .filter(node => node.type === "file" && (node as any).file)
-      .map((node: CanvasFileNodeData) => [node.id, node.file])
+    const embeds: [string, string][] = data?.nodes
+      ?.filter(node => node.type === "file" && (node as any).file)
+      ?.map((node: CanvasFileNodeData) => [node.id, node.file])
+      ?? []
 
     let embedsText = "# Embeds\n"
     embeds.forEach(([id, embedPath]) => {
@@ -193,8 +190,9 @@ export default class MetadataManager {
     await this.plugin.app.vault.modify(metadataFile as TFile, metadataText)
 
     // Restore frontmatter
-    await this.plugin.app.fileManager.processFrontMatter(metadataFile as TFile, fm =>
-      Object.assign(fm, updatedFrontmatter)
+    await this.plugin.app.fileManager.processFrontMatter(
+      metadataFile as TFile,
+      fm => Object.assign(fm, frontmatter)
     )
   }
 

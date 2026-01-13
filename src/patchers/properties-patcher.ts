@@ -15,18 +15,26 @@ export default class PropertiesPatcher extends Patcher {
           // Use metadata file instead of canvas file directly (if available)
           if (file?.extension === 'canvas') {
             const metadataFile = that.plugin.metadataManager.getMetadataFile(
-              this.file,
-              undefined,
+              this.file, undefined,
               () => (this.onLoadFile as any)(file, ...args)
             )
 
             if (metadataFile) {
               this.file = metadataFile
+              this.relayCanvasFile = file
               return next.call(this, metadataFile, ...args)
             }
-          }
+          } else delete this.relayCanvasFile
 
           return next.call(this, file, ...args)
+        }),
+        saveFrontmatter: Patcher.OverrideExisting(next => function (frontmatter: { [key: string]: any }, ...args: any[]): void {
+          // If relaying from metadata file to canvas file, update canvas file frontmatter
+          if (this.relayCanvasFile) {
+            console.log(frontmatter)
+          }
+
+          return next.call(this, frontmatter, ...args)
         })
       })
     })

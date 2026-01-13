@@ -12,4 +12,7 @@ export default interface PropertiesView {
   onLoadFile: (file?: TFile) => void
   updateFrontmatter: (file: TFile, content: string) => { [ key: string ]: any } | null
   saveFrontmatter: (frontmatter: { [key: string]: any }) => void
+
+  /** Custom AC property */
+  relayCanvasFile?: TFile
 }
