@@ -1,5 +1,5 @@
 import { CanvasFileNodeData } from "assets/formats/advanced-json-canvas/spec/1.0-1.0"
-import { TAbstractFile, TFile } from "obsidian"
+import { TAbstractFile, TFile, WorkspaceLeaf } from "obsidian"
 import { CanvasData } from "src/@types/AdvancedJsonCanvas"
 import { Canvas } from "src/@types/Canvas"
 import AdvancedCanvasPlugin from "src/main"
@@ -106,11 +106,15 @@ export default class MetadataManager {
       (file: TAbstractFile) => this.deleteMetadataFile(file)
     ))
 
+    // FIXME: Metadata files still get suggested .suggestion-item .suggestion-title
+
     // FIXME: Clicking on metadata file search results does not open the canvas file
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      "file-open",
-      async (file: TFile | null) => {
-        console.log(file, this.plugin.app.workspace.getLeaf(false).getEphemeralState())
+      "active-leaf-change",
+      (leaf: WorkspaceLeaf) => {
+        /* leaf.setEphemeralState = (state: any) => {
+          console.log("Ephemeral state set:", state)
+        } */
       }
     ))
 
@@ -161,11 +165,6 @@ export default class MetadataManager {
     try { data = JSON.parse(await this.plugin.app.vault.read(file)) as CanvasData } catch { }
     if (!data?.nodes || !Array.isArray(data.nodes)) return
 
-    // Generate the embeds array
-    const embeds: [string, string][] = data.nodes
-      .filter(node => node.type === "file" && (node as any).file)
-      .map((node: CanvasFileNodeData) => [node.id, node.file])
-
     // Update metadata file frontmatter
     delete frontmatter[METADATA_FRONTMATTER_KEY]
     const updatedFrontmatter = {
@@ -176,12 +175,18 @@ export default class MetadataManager {
     // Update metadata text
     let metadataText = "\n>[!WARNING] This is an auto-generated file. Do not edit directly **BELOW** this line.\n\n"
 
-    // Update metadata embeds
+    // Update metadata embeds (file nodes)
+    const embeds: [string, string][] = data.nodes
+      .filter(node => node.type === "file" && (node as any).file)
+      .map((node: CanvasFileNodeData) => [node.id, node.file])
+
     let embedsText = "# Embeds\n"
     embeds.forEach(([id, embedPath]) => {
       embedsText += `- [[${embedPath}|${id}]]\n`
     })
     metadataText += embedsText
+
+    // FIXME: Update metadata links (text nodes)
 
     // Write text to metadata file
     await this.plugin.app.vault.modify(metadataFile as TFile, metadataText)
