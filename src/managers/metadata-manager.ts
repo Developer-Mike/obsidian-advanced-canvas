@@ -46,7 +46,7 @@ export default class MetadataManager {
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (canvas: Canvas) => MetadataManager.getMetadataFile(canvas.view?.file) !== null,
-        (canvas: Canvas) => this.plugin.app.workspace.getLeaf(true).openFile(
+        (canvas: Canvas) => this.plugin.app.workspace.getLeaf(false).openFile(
           MetadataManager.getMetadataFile(canvas.view?.file) as TFile
         )
       )
@@ -91,14 +91,18 @@ export default class MetadataManager {
     // Update metadata file frontmatter
     const updatedFrontmatter = JSON.parse(JSON.stringify(frontmatter))
 
+    // Update metadata text
+    let metadataText = "\n>[!WARNING] This is an auto-generated file. Do not edit directly **BELOW** this line.\n\n"
+
     // Update metadata embeds
     let embedsText = "# Embeds\n"
     embeds.forEach(([id, embedPath]) => {
       embedsText += `- [[${embedPath}|${id}]]\n`
     })
+    metadataText += embedsText
 
     // Write text to metadata file
-    await this.plugin.app.vault.modify(metadataFile as TFile, embedsText)
+    await this.plugin.app.vault.modify(metadataFile as TFile, metadataText)
 
     // Restore frontmatter
     await this.plugin.app.fileManager.processFrontMatter(metadataFile as TFile, fm =>
