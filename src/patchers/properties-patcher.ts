@@ -14,7 +14,11 @@ export default class PropertiesPatcher extends Patcher {
         onLoadFile: Patcher.OverrideExisting(next => function (file?: TFile, ...args: any[]): void {
           // Use metadata file instead of canvas file directly (if available)
           if (file?.extension === 'canvas') {
-            const metadataFile = MetadataManager.getMetadataFile(this.file)
+            const metadataFile = MetadataManager.getMetadataFile(
+              this.file,
+              undefined,
+              () => (this.onLoadFile as any)(file, ...args)
+            )
 
             if (metadataFile) {
               this.file = metadataFile

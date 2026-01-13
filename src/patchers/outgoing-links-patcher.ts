@@ -11,7 +11,12 @@ export default class OutgoingLinksPatcher extends Patcher {
         recomputeLinks: Patcher.OverrideExisting(next => function (...args: any[]): void {
           // Use metadata file instead of canvas file directly (if available)
           if (this.file?.extension === 'canvas') {
-            const metadataFile = MetadataManager.getMetadataFile(this.file)
+            const metadataFile = MetadataManager.getMetadataFile(
+              this.file,
+              undefined,
+              () => (this.recomputeLinks as any)(...args)
+            )
+
             if (metadataFile) this.file = metadataFile
           }
 
