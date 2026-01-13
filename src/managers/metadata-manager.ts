@@ -35,9 +35,10 @@ export default class MetadataManager {
     if (metadataFile instanceof TFile) {
       const metadataFileCache = this.plugin.app.metadataCache.getFileCache(metadataFile as TFile)
 
-      if (!metadataFileCache?.frontmatterLinks?.some(link =>
+      // Instead of checking if correct ownership, we check if incorrect ownership exists -> reclaim on accidental deletion of property
+      if (metadataFileCache?.frontmatterLinks?.some(link =>
         link.key === METADATA_FRONTMATTER_KEY &&
-        this.plugin.app.metadataCache.getFirstLinkpathDest(link.link, (metadataFile as TFile).path) === canvasFile
+        this.plugin.app.metadataCache.getFirstLinkpathDest(link.link, (metadataFile as TFile).path) !== canvasFile
       )) {
         console.warn(`MetadataManager: Thought found metadata file '${metadataFile.path}' but ownership verification of canvas '${canvasFile.path}' failed.`)
         metadataFile = null
