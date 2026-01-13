@@ -170,7 +170,7 @@ export default class MetadataManager {
       frontmatter[METADATA_FRONTMATTER_KEY] = `[[${file.path}]]`
 
     // Update metadata text
-    let metadataText = "\n>[!WARNING] This is an auto-generated file. Do not edit directly **BELOW** this line.\n\n"
+    let metadataText = "\n>[!WARNING] This is an auto-generated file. Do not edit directly (it will be overwritten)!\n\n"
 
     // Update metadata embeds (file nodes)
     const embeds: [string, string][] = data?.nodes
