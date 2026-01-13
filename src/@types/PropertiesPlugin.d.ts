@@ -6,12 +6,12 @@ export default interface PropertiesView {
   modifyingFile: TFile
 
   rawFrontmatter: string
-  frontmatter: { [key: string]: any }
+  frontmatter: Record<string, any>
 
   isSupportedFile: (file?: TFile) => boolean
   onLoadFile: (file?: TFile) => void
-  updateFrontmatter: (file: TFile, content: string) => { [ key: string ]: any } | null
-  saveFrontmatter: (frontmatter: { [key: string]: any }) => void
+  updateFrontmatter: (file: TFile, content: string) => Record<string, any> | null
+  saveFrontmatter: (frontmatter: Record<string, any>) => void
 
   /** Custom AC property */
   relayCanvasFile?: TFile
