@@ -10,7 +10,7 @@ export const METADATA_FRONTMATTER_KEY = 'canvas-metadata'
 
 export default class MetadataManager {
   private plugin: AdvancedCanvasPlugin
-  private static metadataCreationTasks: Record<string, Promise<TFile>> = {}
+  private metadataCreationTasks: Record<string, Promise<TFile>> = {}
 
   /**
     * Get the metadata file associated with a canvas file
@@ -18,7 +18,7 @@ export default class MetadataManager {
     * @property path Optional path to HINT the metadata file location (validation is still performed)
     * @property callback Optional callback to be called when the metadata file is created (if it is being created right now)
     */
-  static getMetadataFile(
+  getMetadataFile(
     canvasFile: TFile | null,
     path?: string,
     callback?: (file: TFile) => void
@@ -26,12 +26,39 @@ export default class MetadataManager {
     if (!canvasFile?.path) return null
 
     const metadataFilePath = path ?? `${canvasFile.path}${METADATA_FILE_SUFFIX}`
-    const metadataFile = canvasFile.vault?.getAbstractFileByPath(metadataFilePath)
+    let metadataFile = canvasFile.vault?.getAbstractFileByPath(metadataFilePath)
 
     if (!metadataFile && callback)
-      MetadataManager.metadataCreationTasks[canvasFile.path]?.then(callback)
+      this.metadataCreationTasks[canvasFile.path]?.then(callback)
 
-    // FIXME: Verify ownership using frontmatter key
+    // Verify ownership using frontmatter key
+    if (metadataFile instanceof TFile) {
+      const metadataFileCache = this.plugin.app.metadataCache.getFileCache(metadataFile as TFile)
+
+      if (!metadataFileCache?.frontmatterLinks?.some(link =>
+        link.key === METADATA_FRONTMATTER_KEY &&
+        this.plugin.app.metadataCache.getFirstLinkpathDest(link.link, (metadataFile as TFile).path) === canvasFile
+      )) {
+        console.warn(`MetadataManager: Thought found metadata file '${metadataFile.path}' but ownership verification of canvas '${canvasFile.path}' failed.`)
+        metadataFile = null
+      }
+    }
+
+    // If no metadata file found, try a desperate search
+    if (!metadataFile) {
+      console.warn(`MetadataManager: Could not find metadata file for canvas '${canvasFile.path}'. Trying desperate search...`)
+      const backlinkedFiles = this.plugin.app.metadataCache.getBacklinksForFile(canvasFile).data
+
+      for (const [backlinkSourcePath, backlinks] of backlinkedFiles.entries()) {
+        if (!backlinkSourcePath.endsWith(METADATA_FILE_SUFFIX)) continue
+        if (!backlinks.some(occurence => (occurence as any).key === METADATA_FRONTMATTER_KEY)) continue
+
+        metadataFile = this.getMetadataFile(canvasFile, backlinkSourcePath)
+        if (metadataFile) break
+      }
+
+      console.warn(`MetadataManager: Desperate search ${metadataFile ? 'succeeded' : 'failed'} for canvas '${canvasFile.path}'.`)
+    }
 
     return metadataFile instanceof TFile ? metadataFile : null
   }
@@ -50,7 +77,7 @@ export default class MetadataManager {
 
     this.plugin.registerEvent(this.plugin.app.vault.on(
       "create",
-      (file: TAbstractFile) => this.updateMetadataFile(file)
+      (file: TAbstractFile) => this.updateMetadataFile(file, true)
     ))
 
     this.plugin.registerEvent(this.plugin.app.vault.on(
@@ -73,6 +100,7 @@ export default class MetadataManager {
     ))
 
     // FIXME: If deleted outside obsidian, metadata file remains
+    // FIXME: app.metadataCache.unresolvedLinks
     this.plugin.registerEvent(this.plugin.app.vault.on(
       "delete",
       (file: TAbstractFile) => this.deleteMetadataFile(file)
@@ -91,29 +119,35 @@ export default class MetadataManager {
       name: 'Open Canvas Metadata File',
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
-        (canvas: Canvas) => MetadataManager.getMetadataFile(canvas.view?.file) !== null,
+        (canvas: Canvas) => this.getMetadataFile(canvas.view?.file) !== null,
         (canvas: Canvas) => this.plugin.app.workspace.getLeaf(false).openFile(
-          MetadataManager.getMetadataFile(canvas.view?.file) as TFile
+          this.getMetadataFile(canvas.view?.file) as TFile
         )
       )
     })
   }
 
-  private async updateMetadataFile(file: TAbstractFile) {
+  private async updateMetadataFile(file: TAbstractFile, forceCreate = false) {
     if (!(file instanceof TFile) || file?.extension !== 'canvas') return
 
     // Get metadata file
-    let metadataFile = MetadataManager.getMetadataFile(file)
+    let metadataFile = forceCreate ? null : this.getMetadataFile(file)
 
     // Create metadata file if it doesn't exist
     if (!metadataFile) {
+      // If file already exists, but is not owned, throw a warning and skip creation
+      if (this.plugin.app.vault.getAbstractFileByPath(`${file.path}${METADATA_FILE_SUFFIX}`) instanceof TFile) {
+        console.warn(`MetadataManager: Metadata file for canvas '${file.path}' exists but ownership verification failed. Skipping metadata update.`)
+        return
+      }
+
       const creationTask = this.plugin.app.vault.create(
         `${file.path}${METADATA_FILE_SUFFIX}`, ""
       )
 
-      MetadataManager.metadataCreationTasks[file.path] = creationTask
+      this.metadataCreationTasks[file.path] = creationTask
       metadataFile = await creationTask
-      delete MetadataManager.metadataCreationTasks[file.path]
+      delete this.metadataCreationTasks[file.path]
     }
 
     // Get the frontmatter of the metadata file if it exists
@@ -162,7 +196,7 @@ export default class MetadataManager {
     if (!(file instanceof TFile) || file?.extension !== 'canvas') return
 
     const oldMetadataFilePath = `${oldPath}${METADATA_FILE_SUFFIX}`
-    const metadataFile = MetadataManager.getMetadataFile(file, oldMetadataFilePath)
+    const metadataFile = this.getMetadataFile(file, oldMetadataFilePath)
     if (!metadataFile) return
 
     const newMetadataFilePath = `${file.path}${METADATA_FILE_SUFFIX}`
@@ -172,7 +206,7 @@ export default class MetadataManager {
   private async deleteMetadataFile(file: TAbstractFile | null) {
     if (!(file instanceof TFile) || file?.extension !== 'canvas') return
 
-    const metadataFile = MetadataManager.getMetadataFile(file)
+    const metadataFile = this.getMetadataFile(file)
     if (!metadataFile) return
 
     await this.plugin.app.vault.delete(metadataFile)
