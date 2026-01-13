@@ -54,10 +54,12 @@ export default class MetadataManager {
     )
 
     // FIXME: Clicking on metadata file search results does not open the canvas file
-    /* this.plugin.app.workspace.on(
+    this.plugin.app.workspace.on(
       "file-open",
-      async (file: TFile | null) => this.openCanvasFileThroughMetadataFile(file)
-    ) */
+      async (file: TFile | null) => {
+        console.log(file, this.plugin.app.workspace.getLeaf(false).getEphemeralState())
+      }
+    )
 
     this.plugin.addCommand({
       id: 'open-canvas-metadata-file',

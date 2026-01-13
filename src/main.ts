@@ -13,6 +13,7 @@ import MetadataManager from './managers/metadata-manager'
 // Patchers
 import Patcher from './patchers/patcher'
 import CanvasPatcher from './patchers/canvas-patcher'
+import PropertiesPatcher from './patchers/properties-patcher'
 import OutgoingLinksPatcher from './patchers/outgoing-links-patcher'
 import LinkSuggestionsPatcher from './patchers/link-suggestions-patcher'
 import EmbedPatcher from './patchers/embed-patcher'
@@ -56,6 +57,7 @@ import CanvasWrapperExposerExtension from './canvas-extensions/dataset-exposers/
 
 const PATCHERS = [
   CanvasPatcher,
+  PropertiesPatcher,
   OutgoingLinksPatcher,
   LinkSuggestionsPatcher,
   EmbedPatcher,
