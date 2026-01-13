@@ -60,9 +60,19 @@ export default class MetadataManager {
 
     this.plugin.registerEvent(this.plugin.app.vault.on(
       "rename",
-      (file: TAbstractFile, oldPath: string) => this.renameMetadataFile(file, oldPath)
+      (file: TAbstractFile, oldPath: string) => {
+        // We need to wait for the metadata cache update because the canvas rename
+        // triggers a link change in the metadata file as well
+        const dependenciesUpdatedEvent = this.plugin.app.metadataCache.on("changed", () => {
+          this.plugin.app.metadataCache.offref(dependenciesUpdatedEvent) // Listen once
+          this.renameMetadataFile(file, oldPath)
+        })
+
+        this.plugin.registerEvent(dependenciesUpdatedEvent)
+      }
     ))
 
+    // FIXME: If deleted outside obsidian, metadata file remains
     this.plugin.registerEvent(this.plugin.app.vault.on(
       "delete",
       (file: TAbstractFile) => this.deleteMetadataFile(file)
