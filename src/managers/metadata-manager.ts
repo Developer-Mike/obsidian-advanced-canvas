@@ -1,17 +1,25 @@
 import { CanvasFileNodeData } from "assets/formats/advanced-json-canvas/spec/1.0-1.0"
-import { TFile } from "obsidian"
+import { TAbstractFile, TFile } from "obsidian"
 import { Canvas, CanvasView } from "src/@types/Canvas"
 import AdvancedCanvasPlugin from "src/main"
 import CanvasHelper from "src/utils/canvas-helper"
 
 export const METADATA_FILE_SUFFIX = '.meta.md'
+export const METADATA_FRONTMATTER_KEY = 'canvas-metadata'
 
 export default class MetadataManager {
   private plugin: AdvancedCanvasPlugin
 
-  static getMetadataFile(canvasFile: TFile | null): TFile | null {
-    const metadataFilePath = `${canvasFile?.path}${METADATA_FILE_SUFFIX}`
+  /**
+    * Get the metadata file associated with a canvas file
+    * @property canvasFile The canvas file
+    * @property path Optional path to HINT the metadata file location (validation is still performed)
+    */
+  static getMetadataFile(canvasFile: TFile | null, path?: string): TFile | null {
+    const metadataFilePath = path ?? `${canvasFile?.path}${METADATA_FILE_SUFFIX}`
     const metadataFile = canvasFile?.vault?.getAbstractFileByPath(metadataFilePath)
+
+    // FIXME: Verify ownership using frontmatter key
 
     return metadataFile instanceof TFile ? metadataFile : null
   }
@@ -35,6 +43,17 @@ export default class MetadataManager {
       (view: CanvasView) => this.updateMetadataFile(view)
     )
 
+    this.plugin.app.vault.on(
+      "rename",
+      (file: TAbstractFile, oldPath: string) => this.renameMetadataFile(file, oldPath)
+    )
+
+    this.plugin.app.vault.on(
+      "delete",
+      (file: TAbstractFile) => this.deleteMetadataFile(file)
+    )
+
+    // FIXME: Clicking on metadata file search results does not open the canvas file
     /* this.plugin.app.workspace.on(
       "file-open",
       async (file: TFile | null) => this.openCanvasFileThroughMetadataFile(file)
@@ -72,7 +91,7 @@ export default class MetadataManager {
     let metadataFile = MetadataManager.getMetadataFile(canvasFile)
 
     // Get the frontmatter of the metadata file if it exists
-    let frontmatter = {}
+    let frontmatter: Record<string, any> = {}
     if (metadataFile) await this.plugin.app.fileManager.processFrontMatter(
       metadataFile, fm => { frontmatter = fm }
     )
@@ -89,7 +108,11 @@ export default class MetadataManager {
     )
 
     // Update metadata file frontmatter
-    const updatedFrontmatter = JSON.parse(JSON.stringify(frontmatter))
+    delete frontmatter[METADATA_FRONTMATTER_KEY]
+    const updatedFrontmatter = {
+      [METADATA_FRONTMATTER_KEY]: `[[${canvasFile.path}]]`,
+      ...frontmatter
+    }
 
     // Update metadata text
     let metadataText = "\n>[!WARNING] This is an auto-generated file. Do not edit directly **BELOW** this line.\n\n"
@@ -108,6 +131,26 @@ export default class MetadataManager {
     await this.plugin.app.fileManager.processFrontMatter(metadataFile as TFile, fm =>
       Object.assign(fm, updatedFrontmatter)
     )
+  }
+
+  private async renameMetadataFile(file: TAbstractFile, oldPath: string) {
+    if (!(file instanceof TFile) || file?.extension !== 'canvas') return
+
+    const oldMetadataFilePath = `${oldPath}${METADATA_FILE_SUFFIX}`
+    const metadataFile = MetadataManager.getMetadataFile(file, oldMetadataFilePath)
+    if (!metadataFile) return
+
+    const newMetadataFilePath = `${file.path}${METADATA_FILE_SUFFIX}`
+    await this.plugin.app.vault.rename(metadataFile, newMetadataFilePath)
+  }
+
+  private async deleteMetadataFile(file: TAbstractFile | null) {
+    if (!(file instanceof TFile) || file?.extension !== 'canvas') return
+
+    const metadataFile = MetadataManager.getMetadataFile(file)
+    if (!metadataFile) return
+
+    await this.plugin.app.vault.delete(metadataFile)
   }
 
   private async openCanvasFileThroughMetadataFile(file: TFile | null) {
