@@ -69,7 +69,6 @@ export default class MetadataManager {
       .map((node: CanvasFileNodeData) => [node.id, node.file])
 
     // Get metadata file
-    const metadataFilePath = `${path}${METADATA_FILE_SUFFIX}`
     let metadataFile = MetadataManager.getMetadataFile(canvasFile)
 
     // Get the frontmatter of the metadata file if it exists
@@ -85,7 +84,9 @@ export default class MetadataManager {
     }
 
     // Create metadata file if it doesn't exist
-    metadataFile ??= await this.plugin.app.vault.create(metadataFilePath, "")
+    metadataFile ??= await this.plugin.app.vault.create(
+      `${canvasFile.path}${METADATA_FILE_SUFFIX}`, ""
+    )
 
     // Update metadata file frontmatter
     const updatedFrontmatter = JSON.parse(JSON.stringify(frontmatter))
