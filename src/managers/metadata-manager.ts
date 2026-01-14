@@ -1,5 +1,5 @@
 import { CanvasFileNodeData } from "assets/formats/advanced-json-canvas/spec/1.0-1.0"
-import { TAbstractFile, TFile, WorkspaceLeaf } from "obsidian"
+import { TAbstractFile, TFile } from "obsidian"
 import { CanvasData } from "src/@types/AdvancedJsonCanvas"
 import { Canvas } from "src/@types/Canvas"
 import AdvancedCanvasPlugin from "src/main"
@@ -120,17 +120,8 @@ export default class MetadataManager {
       (file: TAbstractFile) => this.deleteMetadataFile(file)
     ))
 
-    // FIXME: Metadata files still get suggested .suggestion-item .suggestion-title
-
-    // FIXME: Clicking on metadata file search results does not open the canvas file
-    this.plugin.registerEvent(this.plugin.app.workspace.on(
-      "active-leaf-change",
-      (leaf: WorkspaceLeaf) => {
-        /* leaf.setEphemeralState = (state: any) => {
-          console.log("Ephemeral state set:", state)
-        } */
-      }
-    ))
+    // FIXME: Metadata files still get suggested
+    // FIXME: Inline suggestions don't work
 
     this.plugin.addCommand({
       id: 'open-canvas-metadata-file',
@@ -139,7 +130,8 @@ export default class MetadataManager {
         this.plugin,
         (canvas: Canvas) => this.getMetadataFile(canvas.view?.file) !== null,
         (canvas: Canvas) => this.plugin.app.workspace.getLeaf(false).openFile(
-          this.getMetadataFile(canvas.view?.file) as TFile
+          this.getMetadataFile(canvas.view?.file) as TFile,
+          { state: { ignoreRedirect: true } }
         )
       )
     })
@@ -208,7 +200,7 @@ export default class MetadataManager {
       frontmatter[METADATA_FRONTMATTER_KEY] = `[[${canvasFile.path}]]`
 
     // Update metadata text
-    let metadataText = "\n>[!WARNING] This is an auto-generated file. Do not edit directly (it will be overwritten)!\n\n"
+    let metadataText = "\n>[!WARNING] This is an auto-generated file. Do not edit directly vvvBELOWvvv (it will be overwritten)!\n\n"
 
     // Update metadata embeds (file nodes)
     const embeds: [string, string][] = data?.nodes
@@ -281,16 +273,5 @@ export default class MetadataManager {
     if (!metadataFile) return
 
     await this.plugin.app.vault.delete(metadataFile)
-  }
-
-  private async openCanvasFileThroughMetadataFile(file: TFile | null) {
-    const path = file?.path
-    if (!path?.endsWith(METADATA_FILE_SUFFIX)) return
-
-    const canvasFilePath = path.slice(0, -METADATA_FILE_SUFFIX.length)
-    const canvasFile = this.plugin.app.vault.getAbstractFileByPath(canvasFilePath)
-    if (!(canvasFile instanceof TFile)) return
-
-    await this.plugin.app.workspace.getLeaf(false).openFile(canvasFile)
   }
 }
