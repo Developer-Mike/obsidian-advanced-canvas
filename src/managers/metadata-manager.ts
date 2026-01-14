@@ -167,14 +167,14 @@ export default class MetadataManager {
 
     // Get metadata file
     let metadataFile = forceCreate ? null : this.getMetadataFile(canvasFile)
-    let frontmatter: Record<string, any> = {}
-    if (metadataFile) await this.plugin.app.fileManager.processFrontMatter(metadataFile, fm => { frontmatter = fm })
-
-    // If currently syncing from metadata file to canvas file, skip to avoid loops
     if (this.metadataSyncTasks.has(metadataFile?.path ?? '')) {
       this.metadataSyncTasks.delete(metadataFile?.path ?? '')
       return
     }
+
+    // Get metadata file frontmatter
+    let frontmatter: Record<string, any> = {}
+    if (metadataFile) await this.plugin.app.fileManager.processFrontMatter(metadataFile, fm => { frontmatter = fm })
 
     // Create metadata file if it doesn't exist
     if (!metadataFile) {
@@ -228,6 +228,7 @@ export default class MetadataManager {
 
   private async updateCanvasFile(metadataFile: TFile) {
     if (!metadataFile?.path?.endsWith(METADATA_FILE_SUFFIX)) return
+    if (this.metadataSyncTasks.has(metadataFile.path)) return
     this.metadataSyncTasks.add(metadataFile.path)
 
     let canvasFile: TFile | null = null
