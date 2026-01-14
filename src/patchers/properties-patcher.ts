@@ -28,19 +28,6 @@ export default class PropertiesPatcher extends Patcher {
           } else delete this.relayCanvasFile
 
           return next.call(this, file, ...args)
-        }),
-        saveFrontmatter: Patcher.OverrideExisting(next => function (frontmatter: Record<string, any>, ...args: any[]): void {
-          // FIXME: If relaying from metadata file to canvas file, update canvas file frontmatter
-          if (this.relayCanvasFile) (async () => {
-            const data = await that.plugin.app.vault.read(this.relayCanvasFile!)
-            const json = JSON.parse(data) as Partial<CanvasData>
-            json.metadata ??= {} as any
-            json.metadata!.frontmatter = frontmatter
-
-            await that.plugin.app.vault.modify(this.relayCanvasFile!, JSON.stringify(json, null, 2))
-          })()
-
-          return next.call(this, frontmatter, ...args)
         })
       })
     })

@@ -10,6 +10,7 @@ export const METADATA_FRONTMATTER_KEY = 'canvas-metadata'
 
 export default class MetadataManager {
   private plugin: AdvancedCanvasPlugin
+  private metadataSyncTasks: Set<string> = new Set()
   private metadataCreationTasks: Record<string, Promise<TFile>> = {}
 
   /**
@@ -76,7 +77,19 @@ export default class MetadataManager {
   }
 
   private async listen() {
+    // Catch unresolved links that may origin from an orphaned metadata file
+    this.plugin.registerEvent(this.plugin.app.metadataCache.on(
+      "changed",
+      (file: TFile) => this.cleanUpOrphanedMetadataFiles(file)
+    ))
+
     await new Promise<void>(res => this.plugin.app.workspace.onLayoutReady(() => res()))
+
+    // Sync back metadata file changes to canvas file (e.g. if modified by bases)
+    this.plugin.registerEvent(this.plugin.app.metadataCache.on(
+      "changed",
+      (file: TFile) => this.updateCanvasFile(file)
+    ))
 
     this.plugin.registerEvent(this.plugin.app.vault.on(
       "create",
@@ -102,8 +115,6 @@ export default class MetadataManager {
       }
     ))
 
-    // FIXME: If deleted outside obsidian, metadata file remains
-    // FIXME: app.metadataCache.unresolvedLinks
     this.plugin.registerEvent(this.plugin.app.vault.on(
       "delete",
       (file: TAbstractFile) => this.deleteMetadataFile(file)
@@ -134,31 +145,58 @@ export default class MetadataManager {
     })
   }
 
-  private async updateMetadataFile(file: TAbstractFile, forceCreate = false) {
-    if (!(file instanceof TFile) || file?.extension !== 'canvas') return
+  private async cleanUpOrphanedMetadataFiles(file: TFile) {
+    if (!(file instanceof TFile) || !file.path.endsWith(METADATA_FILE_SUFFIX)) return
+
+    const unresolvedLinks = this.plugin.app.metadataCache.unresolvedLinks[file.path]
+    if (!unresolvedLinks) return
+
+    for (const link in unresolvedLinks) {
+      if (!link.endsWith('.canvas')) continue
+
+      const fileCache = this.plugin.app.metadataCache.getFileCache(file)
+      const canvasMetadataKeyValue = fileCache?.frontmatterLinks?.find(fl => fl.key === METADATA_FRONTMATTER_KEY)
+
+      if (canvasMetadataKeyValue?.link === link) {
+        console.warn(`MetadataManager: Deleting orphaned metadata file '${file.path}' (linked canvas '${link}' does not exist).`)
+        await this.plugin.app.vault.delete(file)
+
+        break
+      }
+    }
+  }
+
+  private async updateMetadataFile(canvasFile: TAbstractFile, forceCreate = false) {
+    if (!(canvasFile instanceof TFile) || canvasFile?.extension !== 'canvas') return
 
     // Get canvas data
     let data: Partial<CanvasData> = {}
-    try { data = JSON.parse(await this.plugin.app.vault.read(file)) as CanvasData } catch { }
+    try { data = JSON.parse(await this.plugin.app.vault.read(canvasFile)) as CanvasData } catch { }
 
     // Get metadata file
-    let metadataFile = forceCreate ? null : this.getMetadataFile(file)
+    let metadataFile = forceCreate ? null : this.getMetadataFile(canvasFile)
     let frontmatter: Record<string, any> = {}
     if (metadataFile) await this.plugin.app.fileManager.processFrontMatter(metadataFile, fm => { frontmatter = fm })
+
+    // If currently syncing from metadata file to canvas file, skip to avoid loops
+    if (this.metadataSyncTasks.has(metadataFile?.path ?? '')) {
+      this.metadataSyncTasks.delete(metadataFile?.path ?? '')
+      return
+    }
 
     // Create metadata file if it doesn't exist
     if (!metadataFile) {
       // If file already exists, but is not owned, throw a warning and skip creation
-      if (this.plugin.app.vault.getAbstractFileByPath(`${file.path}${METADATA_FILE_SUFFIX}`) instanceof TFile) {
-        console.warn(`MetadataManager: Metadata file for canvas '${file.path}' exists but ownership verification failed. Skipping metadata update.`)
+      if (this.plugin.app.vault.getAbstractFileByPath(`${canvasFile.path}${METADATA_FILE_SUFFIX}`) instanceof TFile) {
+        console.warn(`MetadataManager: Metadata file for canvas '${canvasFile.path}' exists but ownership verification failed. Skipping metadata update.`)
         return
       }
 
       // Create metadata file
-      const creationTask = this.plugin.app.vault.create(`${file.path}${METADATA_FILE_SUFFIX}`, "")
-      this.metadataCreationTasks[file.path] = creationTask
+      const creationTask = this.plugin.app.vault.create(`${canvasFile.path}${METADATA_FILE_SUFFIX}`, "")
+      this.metadataCreationTasks[canvasFile.path] = creationTask
       metadataFile = await creationTask
-      delete this.metadataCreationTasks[file.path]
+      delete this.metadataCreationTasks[canvasFile.path]
 
       // Sync frontmatter from canvas file on initial creation
       const canvasFrontmatter = data?.metadata?.frontmatter
@@ -167,7 +205,7 @@ export default class MetadataManager {
 
     // Update the frontmatter ownership key
     if (!(METADATA_FRONTMATTER_KEY in frontmatter))
-      frontmatter[METADATA_FRONTMATTER_KEY] = `[[${file.path}]]`
+      frontmatter[METADATA_FRONTMATTER_KEY] = `[[${canvasFile.path}]]`
 
     // Update metadata text
     let metadataText = "\n>[!WARNING] This is an auto-generated file. Do not edit directly (it will be overwritten)!\n\n"
@@ -194,6 +232,35 @@ export default class MetadataManager {
       metadataFile as TFile,
       fm => Object.assign(fm, frontmatter)
     )
+  }
+
+  private async updateCanvasFile(metadataFile: TFile) {
+    if (!metadataFile?.path?.endsWith(METADATA_FILE_SUFFIX)) return
+    this.metadataSyncTasks.add(metadataFile.path)
+
+    let canvasFile: TFile | null = null
+    this.plugin.app.metadataCache.getFileCache(metadataFile)?.frontmatterLinks?.forEach(link => {
+      if (link.key !== METADATA_FRONTMATTER_KEY) return
+      const linkedFile = this.plugin.app.metadataCache.getFirstLinkpathDest(link.link, metadataFile.path)
+
+      if (linkedFile instanceof TFile && linkedFile.extension === 'canvas') canvasFile = linkedFile
+    })
+    if (!canvasFile) return
+
+    // Get canvas data
+    let data: Partial<CanvasData> = {}
+    try { data = JSON.parse(await this.plugin.app.vault.read(canvasFile)) as CanvasData } catch { }
+
+    // Get metadata file frontmatter
+    let frontmatter: Record<string, any> = {}
+    await this.plugin.app.fileManager.processFrontMatter(metadataFile, fm => { frontmatter = fm })
+
+    // Update canvas data frontmatter
+    data.metadata ??= {} as any
+    data.metadata!.frontmatter = frontmatter
+
+    // Write updated canvas data
+    await this.plugin.app.vault.modify(canvasFile, JSON.stringify(data, null, 2))
   }
 
   private async renameMetadataFile(file: TAbstractFile, oldPath: string) {
