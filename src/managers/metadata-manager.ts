@@ -1,4 +1,4 @@
-import { CanvasFileNodeData } from "assets/formats/advanced-json-canvas/spec/1.0-1.0"
+import { CanvasFileNodeData, CanvasTextNodeData } from "assets/formats/advanced-json-canvas/spec/1.0-1.0"
 import { TAbstractFile, TFile } from "obsidian"
 import { CanvasData } from "src/@types/AdvancedJsonCanvas"
 import { Canvas } from "src/@types/Canvas"
@@ -120,9 +120,6 @@ export default class MetadataManager {
       (file: TAbstractFile) => this.deleteMetadataFile(file)
     ))
 
-    // FIXME: Metadata files still get suggested
-    // FIXME: Inline suggestions don't work
-
     this.plugin.addCommand({
       id: 'open-canvas-metadata-file',
       name: 'Open Canvas Metadata File',
@@ -200,21 +197,32 @@ export default class MetadataManager {
       frontmatter[METADATA_FRONTMATTER_KEY] = `[[${canvasFile.path}]]`
 
     // Update metadata text
-    let metadataText = "\n>[!WARNING] This is an auto-generated file. Do not edit directly vvvBELOWvvv (it will be overwritten)!\n\n"
+    let metadataText = "\n>[!WARNING] This is an auto-generated file. Do not edit directly BELOW (it will be overwritten)!\n\n"
 
     // Update metadata embeds (file nodes)
-    const embeds: [string, string][] = data?.nodes
+    const fileNodes: [string, string][] = data?.nodes
       ?.filter(node => node.type === "file" && (node as any).file)
       ?.map((node: CanvasFileNodeData) => [node.id, node.file])
       ?? []
 
-    let embedsText = "# Embeds\n"
-    embeds.forEach(([id, embedPath]) => {
-      embedsText += `- [[${embedPath}|${id}]]\n`
+    let fileNodesText = "# File Nodes\n"
+    fileNodes.forEach(([id, file]) => {
+      fileNodesText += `- [[${canvasFile.path}#${id}|${id}]] -> [[${file}]]\n`
     })
-    metadataText += embedsText
+    metadataText += fileNodesText
 
-    // FIXME: Update metadata links (text nodes)
+    // FIXME: Update metadata text nodes
+    const textNodes: [string, string][] = data?.nodes
+      ?.filter(node => node.type === "text" && (node as any).text)
+      ?.map((node: CanvasTextNodeData) => [node.id, node.text])
+      ?? []
+
+    let textNodesText = "\n# Text Nodes\n"
+    textNodes.forEach(([id, text]) => {
+      const textPreview = text.length > 30 ? text.substring(0, 27) + '...' : text
+      textNodesText += `## ${textPreview}\nNode: [[${canvasFile.path}#${id}|${id}]]\n${text}\n\n`
+    })
+    metadataText += textNodesText
 
     // Write text to metadata file
     await this.plugin.app.vault.modify(metadataFile as TFile, metadataText)
