@@ -199,30 +199,15 @@ export default class MetadataManager {
     // Update metadata text
     let metadataText = "\n>[!WARNING] This is an auto-generated file. Do not edit directly BELOW (it will be overwritten)!\n\n"
 
-    // Update metadata embeds (file nodes)
-    const fileNodes: [string, string][] = data?.nodes
-      ?.filter(node => node.type === "file" && (node as any).file)
-      ?.map((node: CanvasFileNodeData) => [node.id, node.file])
-      ?? []
-
-    let fileNodesText = "# File Nodes\n"
-    fileNodes.forEach(([id, file]) => {
-      fileNodesText += `- [[${canvasFile.path}#${id}|${id}]] -> [[${file}]]\n`
+    // Update metadata nodes
+    let nodesText = "# Nodes\n"
+    data?.nodes?.forEach(node => {
+      if (node.type === "text")
+        nodesText += `## ${node.id}\n${(node as CanvasTextNodeData).text}\n\n`
+      else if (node.type === "file")
+        nodesText += `## ${node.id}\n[[${(node as CanvasFileNodeData).file}]]\n\n`
     })
-    metadataText += fileNodesText
-
-    // FIXME: Update metadata text nodes
-    const textNodes: [string, string][] = data?.nodes
-      ?.filter(node => node.type === "text" && (node as any).text)
-      ?.map((node: CanvasTextNodeData) => [node.id, node.text])
-      ?? []
-
-    let textNodesText = "\n# Text Nodes\n"
-    textNodes.forEach(([id, text]) => {
-      const textPreview = text.length > 30 ? text.substring(0, 27) + '...' : text
-      textNodesText += `## ${textPreview}\nNode: [[${canvasFile.path}#${id}|${id}]]\n${text}\n\n`
-    })
-    metadataText += textNodesText
+    metadataText += nodesText
 
     // Write text to metadata file
     await this.plugin.app.vault.modify(metadataFile as TFile, metadataText)
