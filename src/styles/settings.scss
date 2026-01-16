@@ -15,9 +15,7 @@
   }
 }
 
-.ac-settings-heading {  
-  border-bottom: 1px solid var(--color-accent);
-
+.ac-settings-heading {
   &:not(:first-child) {
     margin-top: var(--size-4-10) !important;
   }
