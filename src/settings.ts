@@ -25,7 +25,6 @@ export interface AdvancedCanvasPluginSettingsValues {
   disableFontSizeRelativeToZoom: boolean
 
   canvasMetadataCompatibilityEnabled: boolean
-  treatFileNodeEdgesAsLinks: boolean
   enableSingleNodeLinks: boolean
 
   combineCustomStylesInDropdown: boolean
@@ -122,7 +121,6 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   disableFontSizeRelativeToZoom: false,
 
   canvasMetadataCompatibilityEnabled: true,
-  treatFileNodeEdgesAsLinks: true,
   enableSingleNodeLinks: true,
 
   combineCustomStylesInDropdown: false,
@@ -294,14 +292,9 @@ export const SETTINGS = {
   },
   canvasMetadataCompatibilityEnabled: {
     label: 'Enable .canvas metadata cache compatibility',
-    description: 'Make .canvas files compatible with the backlinks and outgoing links feature and show the connections in the graph view.',
+    description: 'Make .canvas files compatible with the backlinks and outgoing links feature and show the connections in the graph view by creating a "Sidecar" note for each canvas.',
     infoSection: 'full-metadata-cache-support',
     children: {
-      treatFileNodeEdgesAsLinks: {
-        label: 'Treat edges between file nodes as links',
-        description: 'When enabled, edges between file nodes will be treated as links. This means that if file node A.md has an edge to file node B.md in the canvas, file A.md will have a link to file B.md in the outgoing links section and show a connection in the graph view.',
-        type: 'boolean'
-      },
       enableSingleNodeLinks: {
         label: 'Enable support for linking to a node using a [[wikilink]]',
         description: 'When enabled, you can link and embed a node using [[canvas-file#node-id]].',
