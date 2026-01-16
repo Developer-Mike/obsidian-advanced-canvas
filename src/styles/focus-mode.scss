@@ -3,11 +3,11 @@
     filter: blur(5px);
   }
 
-  .canvas-edges {
+  .canvas-edges > g:not(.is-focused) {
     filter: blur(5px);
   }
 
-  .canvas-path-label-wrapper {
+  .canvas-path-label-wrapper > .canvas-path-label:not(.is-focused) {
     filter: blur(5px);
   }
 }

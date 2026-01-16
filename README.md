@@ -475,6 +475,8 @@ If you want to edit the look of the highlighted edges, you need to edit the `is-
 ## Focus Mode
 Focus on a single node by blurring all other nodes.
 
+If "[Edge Highlight](#edge-highlight)" is enabled, edges connected to the focused node won't be blurred.
+
 <details>
     <summary>Focus Mode Example</summary>
     <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/docs/focus-mode.png" alt="Focus Mode Example"/>
