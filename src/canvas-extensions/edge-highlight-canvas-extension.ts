@@ -14,15 +14,19 @@ export default class EdgeHighlightCanvasExtension  extends CanvasExtension {
   private onSelectionChanged(canvas: Canvas, oldSelection: Set<CanvasElement>) {
     const connectedEdgesToBeHighlighted = new Set(canvas.getSelectionData().nodes
       .flatMap(nodeData => [
-        ...canvas.edgeFrom.get(canvas.nodes.get(nodeData.id)!) ?? [], 
-        ...(this.plugin.settings.getSetting("highlightIncomingEdges") ? 
+        ...canvas.edgeFrom.get(canvas.nodes.get(nodeData.id)!) ?? [],
+        ...(this.plugin.settings.getSetting("highlightIncomingEdges") ?
           canvas.edgeTo.get(canvas.nodes.get(nodeData.id)!) ?? [] :
           []
         )
       ]))
 
     for (const edge of canvas.edges.values()) {
-      edge.lineGroupEl.classList.toggle("is-focused", 
+      edge.lineGroupEl.classList.toggle("is-focused",
+        canvas.selection.has(edge) || connectedEdgesToBeHighlighted.has(edge)
+      )
+
+      edge.lineEndGroupEl.classList.toggle("is-focused",
         canvas.selection.has(edge) || connectedEdgesToBeHighlighted.has(edge)
       )
     }
