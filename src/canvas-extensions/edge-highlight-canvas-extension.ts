@@ -22,13 +22,11 @@ export default class EdgeHighlightCanvasExtension  extends CanvasExtension {
       ]))
 
     for (const edge of canvas.edges.values()) {
-      edge.lineGroupEl.classList.toggle("is-focused",
-        canvas.selection.has(edge) || connectedEdgesToBeHighlighted.has(edge)
-      )
+      const isFocused = canvas.selection.has(edge) || connectedEdgesToBeHighlighted.has(edge)
 
-      edge.lineEndGroupEl.classList.toggle("is-focused",
-        canvas.selection.has(edge) || connectedEdgesToBeHighlighted.has(edge)
-      )
+      edge.lineGroupEl.classList.toggle("is-focused", isFocused)
+      edge.lineEndGroupEl?.classList?.toggle("is-focused", isFocused)
+      edge.labelElement?.textareaEl?.classList?.toggle("is-focused", isFocused)
     }
   }
 }
