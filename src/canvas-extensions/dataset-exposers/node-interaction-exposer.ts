@@ -14,7 +14,7 @@ export default class NodeInteractionExposerExtension extends CanvasExtension {
       (canvas: Canvas, node: CanvasNode) => {
         const nodeData = node?.getData()
         if (!nodeData) return
-        
+
         const interactionEl = canvas.nodeInteractionLayer.interactionEl
         if (!interactionEl) return
 
@@ -25,14 +25,14 @@ export default class NodeInteractionExposerExtension extends CanvasExtension {
 
           for (const [key, value] of datasetPairs as [string, string][]) {
             const modifiedKey = TARGET_NODE_DATASET_PREFIX + key.toString().charAt(0).toUpperCase() + key.toString().slice(1)
-            
+
             if (!value) delete interactionEl.dataset[modifiedKey]
             else interactionEl.dataset[modifiedKey] = value
           }
         }
 
         // Custom treatment for portal nodes
-        if (PortalsCanvasExtension.isPortalElement(node)) interactionEl.dataset.isFromPortal = 'true'
+        if (PortalsCanvasExtension.isPortalElement(node.id)) interactionEl.dataset.isFromPortal = 'true'
         else delete interactionEl.dataset.isFromPortal
       }
     ))

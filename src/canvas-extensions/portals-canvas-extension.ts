@@ -4,6 +4,7 @@ import { BBox, Canvas, CanvasEdge, CanvasEdgeEnd, CanvasElement, CanvasElementsD
 import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "./canvas-extension"
 
+const PORTAL_ID_PREFIX = 'acportal-'
 const PORTAL_PADDING = 50
 const MIN_OPEN_PORTAL_SIZE = { width: 200, height: 200 }
 
@@ -96,7 +97,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
 
   private onContainingNodesRequested(_canvas: Canvas, _bbox: BBox, nodes: CanvasNode[]) {
     // Remove nodes from portals from the list
-    const filteredNodes = nodes.filter(node => !PortalsCanvasExtension.isPortalElement(node))
+    const filteredNodes = nodes.filter(node => !PortalsCanvasExtension.isPortalElement(node.id))
     nodes.splice(0, nodes.length, ...filteredNodes)
   }
 
@@ -104,7 +105,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     // Unselect nodes from portals
     updateSelection(() => {
       const updatedSelection = Array.from(canvas.selection)
-        .filter(canvasElement => !PortalsCanvasExtension.isPortalElement(canvasElement))
+        .filter(canvasElement => !PortalsCanvasExtension.isPortalElement(canvasElement.id))
       canvas.selection = new Set(updatedSelection)
     })
   }
@@ -187,15 +188,15 @@ export default class PortalsCanvasExtension extends CanvasExtension {
 
   private onEdgeConnectionTryDraggingBefore(_canvas: Canvas, edge: CanvasEdge, _event: PointerEvent, cancelRef: { value: boolean }) {
     // If not from a portal, return
-    if (!PortalsCanvasExtension.isPortalElement(edge)) return
+    if (!PortalsCanvasExtension.isPortalElement(edge.id)) return
 
     cancelRef.value = true // Cancel dragging
     new Notice('Updating edges from portals is not supported yet.')
   }
 
   private onEdgeConnectionDraggingAfter(canvas: Canvas, edge: CanvasEdge, _event: PointerEvent, _newEdge: boolean, _side: 'from' | 'to', _previousEnds?: { from: CanvasEdgeEnd, to: CanvasEdgeEnd }) {
-    if (PortalsCanvasExtension.isPortalElement(edge)) return // If edge is from a portal, return
-    if (!PortalsCanvasExtension.isPortalElement(edge.from.node) || !PortalsCanvasExtension.isPortalElement(edge.to.node)) return // Do not cancel if at least one end is not from a portal
+    if (PortalsCanvasExtension.isPortalElement(edge.id)) return // If edge is from a portal, return
+    if (!PortalsCanvasExtension.isPortalElement(edge.from.node.id) || !PortalsCanvasExtension.isPortalElement(edge.to.node.id)) return // Do not cancel if at least one end is not from a portal
 
     canvas.removeEdge(edge)
     new Notice('Creating edges with both ends in portals are not supported yet.')
@@ -256,7 +257,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
 
   // Remove all edges and nodes from portals
   private onGetData(_canvas: Canvas, data: CanvasData) {
-    data.nodes = data.nodes.filter(nodeData => PortalsCanvasExtension.getNestedIds(nodeData.id).length === 1)
+    data.nodes = data.nodes.filter(nodeData => !PortalsCanvasExtension.isPortalElement(nodeData.id))
 
     // Remove intermediate isPortalLoaded property from nodes
     for (const nodeData of data.nodes) delete (nodeData as CanvasFileNodeData).isPortalLoaded
@@ -267,7 +268,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     ) as Map<string, CanvasFileNodeData>
 
     data.edges = data.edges.filter(edgeData => {
-      if (PortalsCanvasExtension.getNestedIds(edgeData.id).length > 1) return false // Came from portal
+      if (PortalsCanvasExtension.isPortalElement(edgeData.id)) return false // Came from portal
 
       const isFromNodeFromPortal = PortalsCanvasExtension.getNestedIds(edgeData.fromNode).length > 1
       const isToNodeFromPortal = PortalsCanvasExtension.getNestedIds(edgeData.toNode).length > 1
@@ -351,7 +352,10 @@ export default class PortalsCanvasExtension extends CanvasExtension {
 
     // Add nodes from portal
     for (const nodeDataFromPortal of portalFileData.nodes) {
-      const newNodeId = `${portalNodeData.id}-${nodeDataFromPortal.id}`
+      let newNodeId = `${portalNodeData.id}-${nodeDataFromPortal.id}`
+      if (!newNodeId.startsWith(PORTAL_ID_PREFIX))
+        newNodeId = PORTAL_ID_PREFIX + newNodeId
+
       const addedNode = {
         ...nodeDataFromPortal,
         id: newNodeId,
@@ -368,7 +372,9 @@ export default class PortalsCanvasExtension extends CanvasExtension {
 
     // Add edges from portal
     for (const edgeDataFromPortal of portalFileData.edges) {
-      const newEdgeId = `${portalNodeData.id}-${edgeDataFromPortal.id}`
+      let newEdgeId = `${portalNodeData.id}-${edgeDataFromPortal.id}`
+      if (!newEdgeId.startsWith(PORTAL_ID_PREFIX))
+        newEdgeId = PORTAL_ID_PREFIX + newEdgeId
 
       const fromNodeId = `${portalNodeData.id}-${edgeDataFromPortal.fromNode}`
       const toNodeId = `${portalNodeData.id}-${edgeDataFromPortal.toNode}`
@@ -424,16 +430,22 @@ export default class PortalsCanvasExtension extends CanvasExtension {
   }
 
   static getNestedIds(id: string): string[] {
-    return id.split("-")
+    if (!this.isPortalElement(id)) return [id]
+
+    const trimmedId = id.substring(PORTAL_ID_PREFIX.length)
+    return trimmedId.split("-")
   }
 
-  static isPortalElement(canvasElement: CanvasElement | CanvasNodeData | CanvasEdgeData): boolean {
-    return this.getNestedIds(canvasElement.id).length > 1
+  static isPortalElement(id: string): boolean {
+    return id.startsWith(PORTAL_ID_PREFIX)
   }
 
   private isChildOfPortal(portal: CanvasFileNodeData, canvasElement: CanvasElement | CanvasNodeData | CanvasEdgeData, directChild = true): boolean {
+    const nestedIds = PortalsCanvasExtension.getNestedIds(canvasElement.id)
+    if (nestedIds.length < 2) return false // Not nested
+
     return canvasElement.id !== portal.id && // Not the portal itself
-      canvasElement.id.startsWith(portal.id) && // Is a child of the portal
-      (!directChild || PortalsCanvasExtension.getNestedIds(canvasElement.id).length === PortalsCanvasExtension.getNestedIds(portal.id).length + 1) // It's a direct child
+      nestedIds.contains(portal.id) && // Is a child of the portal
+      (!directChild || nestedIds[nestedIds.length - 2] === portal.id) // Is a direct child
   }
 }
