@@ -1,0 +1,27 @@
+.canvas-wrapper[data-context-filter-active="true"] {
+  .canvas-node.ac-context-hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .canvas-edges .ac-context-hidden,
+  .canvas-path-label-wrapper.ac-context-hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+.canvas-wrapper[data-context-filter-active="true"][data-focus-mode-enabled="true"] {
+  .canvas-node.ac-context-hidden {
+    opacity: 1;
+    visibility: visible;
+    filter: blur(5px);
+  }
+
+  .canvas-edges .ac-context-hidden,
+  .canvas-path-label-wrapper.ac-context-hidden {
+    opacity: 1;
+    filter: blur(5px);
+  }
+}

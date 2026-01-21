@@ -1,5 +1,5 @@
-.canvas-wrapper[data-focus-mode-enabled="true"] .canvas:has(.canvas-node.is-focused) {
- .canvas-node:not(.is-focused) {
+.canvas-wrapper[data-focus-mode-enabled="true"] .canvas:has(.canvas-node.is-focused, .canvas-node.ac-context-focus, .canvas-node.ac-context-neighbor) {
+  .canvas-node:not(.is-focused):not(.ac-context-focus):not(.ac-context-neighbor) {
     filter: blur(5px);
   }
 
@@ -9,5 +9,19 @@
 
   .canvas-path-label-wrapper > .canvas-path-label:not(.is-focused) {
     filter: blur(5px);
+  }
+}
+
+.canvas-wrapper[data-focus-mode-enabled="true"][data-context-filter-active="true"] .canvas:has(.canvas-node.is-focused, .canvas-node.ac-context-focus, .canvas-node.ac-context-neighbor) {
+  .ac-context-hidden {
+    filter: blur(5px);
+  }
+
+  .canvas-edges {
+    filter: none;
+  }
+
+  .canvas-path-label-wrapper {
+    filter: none;
   }
 }
