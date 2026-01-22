@@ -4,7 +4,8 @@ import { BBox, Canvas, CanvasEdge, CanvasEdgeEnd, CanvasElement, CanvasElementsD
 import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "./canvas-extension"
 
-const PORTAL_ID_PREFIX = 'acportal-'
+const PORTAL_ID_DELIMITER = '||'
+const PORTAL_ID_PREFIX = `acportal${PORTAL_ID_DELIMITER}`
 const PORTAL_PADDING = 50
 const MIN_OPEN_PORTAL_SIZE = { width: 200, height: 200 }
 
@@ -352,7 +353,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
 
     // Add nodes from portal
     for (const nodeDataFromPortal of portalFileData.nodes) {
-      let newNodeId = `${portalNodeData.id}-${nodeDataFromPortal.id}`
+      let newNodeId = `${portalNodeData.id}${PORTAL_ID_DELIMITER}${nodeDataFromPortal.id}`
       if (!newNodeId.startsWith(PORTAL_ID_PREFIX))
         newNodeId = PORTAL_ID_PREFIX + newNodeId
 
@@ -372,12 +373,12 @@ export default class PortalsCanvasExtension extends CanvasExtension {
 
     // Add edges from portal
     for (const edgeDataFromPortal of portalFileData.edges) {
-      let newEdgeId = `${portalNodeData.id}-${edgeDataFromPortal.id}`
+      let newEdgeId = `${portalNodeData.id}${PORTAL_ID_DELIMITER}${edgeDataFromPortal.id}`
       if (!newEdgeId.startsWith(PORTAL_ID_PREFIX))
         newEdgeId = PORTAL_ID_PREFIX + newEdgeId
 
-      const fromNodeId = `${portalNodeData.id}-${edgeDataFromPortal.fromNode}`
-      const toNodeId = `${portalNodeData.id}-${edgeDataFromPortal.toNode}`
+      const fromNodeId = `${portalNodeData.id}${PORTAL_ID_DELIMITER}${edgeDataFromPortal.fromNode}`
+      const toNodeId = `${portalNodeData.id}${PORTAL_ID_DELIMITER}${edgeDataFromPortal.toNode}`
 
       addedData.edges.push({
         ...edgeDataFromPortal,
@@ -426,14 +427,14 @@ export default class PortalsCanvasExtension extends CanvasExtension {
   private getParentPortalId(elementId: string): string | undefined {
     const nestedIds = PortalsCanvasExtension.getNestedIds(elementId)
     if (nestedIds.length < 2) return undefined
-    return nestedIds.slice(0, -1).join("-")
+    return nestedIds.slice(0, -1).join(PORTAL_ID_DELIMITER)
   }
 
   static getNestedIds(id: string): string[] {
     if (!this.isPortalElement(id)) return [id]
 
     const trimmedId = id.substring(PORTAL_ID_PREFIX.length)
-    return trimmedId.split("-")
+    return trimmedId.split(PORTAL_ID_DELIMITER)
   }
 
   static isPortalElement(id: string): boolean {
