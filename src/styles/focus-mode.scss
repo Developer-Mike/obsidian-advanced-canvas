@@ -1,5 +1,5 @@
-.canvas-wrapper[data-focus-mode-enabled="true"] .canvas:has(.canvas-node.is-focused, .canvas-node.ac-context-neighbor) {
-  .canvas-node:not(.is-focused):not(.ac-context-neighbor) {
+.canvas-wrapper[data-focus-mode-enabled="true"] .canvas:has(.canvas-node.is-focused, .canvas-node.ac-focus-neighbor) {
+  .canvas-node:not(.is-focused):not(.ac-focus-neighbor) {
     filter: blur(5px);
   }
 

@@ -111,8 +111,6 @@ export interface AdvancedCanvasPluginSettingsValues {
 
   edgeSelectionEnabled: boolean
   selectEdgeByDirection: boolean
-
-  contextFilterEnabled: boolean
 }
 
 export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
@@ -211,8 +209,6 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
 
   edgeSelectionEnabled: false,
   selectEdgeByDirection: false,
-
-  contextFilterEnabled: false,
 }
 
 export const SETTINGS = {
@@ -637,12 +633,6 @@ export const SETTINGS = {
         type: 'boolean'
       }
     }
-  },
-  contextFilterEnabled: {
-    label: 'Context Filter',
-    description: 'Show only nodes connected to the selected node (one level deep).',
-    infoSection: 'context-filter',
-    children: { }
   },
   focusModeFeatureEnabled: {
     label: 'Focus mode',

@@ -7,7 +7,7 @@ const CONTROL_MENU_FOCUS_TOGGLE_ID = 'focus-mode-toggle'
 const FOCUS_MODE_ENABLED = "focusModeEnabled"
 const FOCUS_HIDE_NODES_ENABLED = "focusHideNodesEnabled"
 
-const NODE_NEIGHBOR_CLASS = "ac-context-neighbor"
+const NODE_NEIGHBOR_CLASS = "ac-focus-neighbor"
 const HIDDEN_CLASS = "ac-focus-hidden"
 
 export default class FocusModeCanvasExtension extends CanvasExtension {
