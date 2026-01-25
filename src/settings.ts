@@ -83,6 +83,7 @@ export interface AdvancedCanvasPluginSettingsValues {
   collapsedGroupPreviewOnDrag: boolean
 
   focusModeFeatureEnabled: boolean
+  hideNodes: boolean
 
   presentationFeatureEnabled: boolean
   showSetStartNodeInPopup: boolean
@@ -182,6 +183,7 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   collapsedGroupPreviewOnDrag: true,
 
   focusModeFeatureEnabled: false,
+  hideNodes: false,
 
   presentationFeatureEnabled: true,
   showSetStartNodeInPopup: false,
@@ -646,7 +648,13 @@ export const SETTINGS = {
     label: 'Focus mode',
     description: 'Focus on a single node and blur all other nodes.',
     infoSection: 'focus-mode',
-    children: { }
+    children: {
+      hideNodes: {
+        label: 'Hide nodes',
+        description: 'When enabled, the focus mode will hide nodes instead of bluring.',
+        type: 'boolean'
+      }
+    }
   },
 } as const satisfies {
   [key in keyof AdvancedCanvasPluginSettingsValues | "general"]?: SettingsHeading & {
