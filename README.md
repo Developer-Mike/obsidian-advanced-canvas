@@ -175,6 +175,8 @@ Quickly locate text within your canvas using a familiar search experience. Advan
     *   Create a new text node
 *   `Advanced Canvas: Create file node`
     *   Create a new file node
+*   `Advanced Canvas: Group selected nodes`
+    *   Create a group node around the selected nodes
 *   `Advanced Canvas: Select all edges`
     *   Select all edges
 *   `Advanced Canvas: Zoom to selection`
