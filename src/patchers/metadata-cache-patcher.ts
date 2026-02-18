@@ -1,5 +1,5 @@
 import { ExtendedMetadataCache, FrontmatterLinkCache, TFile } from "obsidian"
-import { CanvasData, CanvasFileNodeData, CanvasNodeData, CanvasTextNodeData } from "src/@types/AdvancedJsonCanvas"
+import { CanvasData, CanvasFileNodeData, CanvasTextNodeData } from "src/@types/AdvancedJsonCanvas"
 import { ExtendedCachedMetadata, MetadataCacheMap } from "src/@types/Obsidian"
 import HashHelper from "src/utils/hash-helper"
 import FilepathHelper from "src/utils/filepath-helper"
@@ -22,6 +22,7 @@ export default class MetadataCachePatcher extends Patcher {
 
         return next.call(this, filepath, ...args)
       }),
+      // FIXME
       computeFileMetadataAsync: Patcher.OverrideExisting(next => async function (file: TFile, ...args: any[]) {
         // Call the original function if the file is not a canvas file
         if (FilepathHelper.extension(file.path) !== 'canvas')
@@ -150,6 +151,7 @@ export default class MetadataCachePatcher extends Patcher {
         // Resolve links (This wouldn't get called in the original function too)
         this.resolveLinks(file.path, content)
       }),
+      // FIXME
       resolveLinks: Patcher.OverrideExisting(next => async function (filepath: string, cachedContent: Partial<CanvasData>) { // Custom argument cachedContent
         // Call the original function if the file is not a canvas file
         if (FilepathHelper.extension(filepath) !== 'canvas')
@@ -176,33 +178,11 @@ export default class MetadataCachePatcher extends Patcher {
           return acc
         }, {} as Record<string, number>)
 
-        // Show links between files with edges
-        if (that.plugin.settings.getSetting('treatFileNodeEdgesAsLinks')) {
-          // Extract canvas file edges
-          (cachedContent.edges ?? []).forEach(edge => {
-            const from = cachedContent.nodes?.find((node: CanvasNodeData) => node.id === edge.fromNode)
-            const to = cachedContent.nodes?.find((node: CanvasNodeData) => node.id === edge.toNode)
-            if (!from || !to) return
-
-            // Check if both nodes are file nodes
-            if (from.type !== 'file' || to.type !== 'file' || !(from as CanvasFileNodeData).file || !(from as CanvasFileNodeData).file) return
-
-            const fromFile = (from as CanvasFileNodeData).file
-            const toFile = (to as CanvasFileNodeData).file
-
-            // Register the link for the "from" node to the "to" node
-            this.registerInternalLinkAC(file.name, fromFile, toFile)
-
-            // Check if the edge is bidirectional or unidirectional - if yes, register the link for the "to" node to the "from" node as well
-            if (!(edge.toEnd !== 'none' || edge.fromEnd === 'arrow'))
-              this.registerInternalLinkAC(file.name, toFile, fromFile)
-          })
-        }
-
         // Trigger metadata cache change event
         this.trigger('resolve', file)
         this.trigger('resolved') // TODO: Use workQueue like in the original function
       }),
+      // FIXME
       registerInternalLinkAC: _next => async function (canvasName: string, from: string, to: string) {
         // If the "from" node is the same as the "to" node, don't register the link
         if (from === to) return

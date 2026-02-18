@@ -1,4 +1,4 @@
-import { ItemView, Plugin } from 'obsidian'
+import { ItemView, Plugin, requireApiVersion } from 'obsidian'
 import { Canvas, CanvasView } from './@types/Canvas'
 
 // Utils
@@ -59,14 +59,17 @@ import CanvasWrapperExposerExtension from './canvas-extensions/dataset-exposers/
 
 const PATCHERS = [
   CanvasPatcher,
+  SearchCommandPatcher,
+
   LinkSuggestionsPatcher,
   EmbedPatcher,
+
   MetadataCachePatcher,
-  BacklinksPatcher,
+  (!requireApiVersion("1.12.0") && BacklinksPatcher),
   OutgoingLinksPatcher,
+
   PropertiesPatcher,
   SearchPatcher,
-  SearchCommandPatcher,
 ]
 
 const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
@@ -124,6 +127,8 @@ export default class AdvancedCanvasPlugin extends Plugin {
     this.windowsManager = new WindowsManager(this)
 
     this.patchers = PATCHERS.map((Patcher: any) => {
+      if (!Patcher) return
+
       try { return new Patcher(this) }
       catch (e) {
         console.error(`Error initializing patcher ${Patcher.name}:`, e)
