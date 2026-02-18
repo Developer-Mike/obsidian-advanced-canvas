@@ -33,6 +33,22 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
       'advanced-canvas:data-loaded:before',
       (_canvas: Canvas, data: CanvasData, _setData: (data: CanvasData) => void) => this.collapseNodes(data)
     ))
+
+    this.plugin.addCommand({
+      id: 'toggle-collapse-group',
+      name: 'Toggle collapse group',
+      checkCallback: CanvasHelper.canvasCommand(
+        this.plugin,
+        (canvas: Canvas) => canvas.selection.size === 1 && canvas.selection.values().next().value.getData().type === 'group',
+        (canvas: Canvas) => this.toggleCollapseGroup(canvas, canvas.selection.values().next().value)
+      )
+    })
+  }
+
+  private toggleCollapseGroup(canvas: Canvas, node: CanvasNode) {
+    const data = node.getData() as CanvasGroupNodeData
+    this.setCollapsed(node.canvas, node, data.collapsed ? undefined : true)
+    canvas.markMoved(node)
   }
 
   private onNodeChanged(canvas: Canvas, groupNode: CanvasNode) {
@@ -47,11 +63,7 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
     collapseEl.className = 'collapse-button'
     setIcon(collapseEl, groupNodeData.collapsed ? 'plus-circle' : 'minus-circle')
 
-    collapseEl.onclick = () => {
-      const groupNodeData = groupNode.getData() as CanvasGroupNodeData
-      this.setCollapsed(canvas, groupNode, groupNodeData.collapsed ? undefined : true)
-      canvas.markMoved(groupNode)
-    }
+    collapseEl.onclick = () => this.toggleCollapseGroup(canvas, groupNode)
 
     groupNode.collapseEl = collapseEl
     groupNode.labelEl?.insertAdjacentElement('afterend', collapseEl)
