@@ -1,3 +1,9 @@
+.canvas-wrapper.mod-readonly {
+  .canvas-controls .canvas-control-group:nth-child(3), .canvas-card-menu {
+    display: none;
+  }
+}
+
 .canvas-wrapper.mod-readonly[data-hide-background-grid-when-in-readonly="true"] .canvas-background {
   visibility: hidden;
 }
