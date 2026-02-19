@@ -17,6 +17,7 @@ import EmbedPatcher from './patchers/embed-patcher'
 import MetadataCachePatcher from './patchers/metadata-cache-patcher'
 import BacklinksPatcher from './patchers/backlinks-patcher'
 import OutgoingLinksPatcher from './patchers/outgoing-links-patcher'
+import FileManagerPatcher from './patchers/file-manager-patcher'
 import PropertiesPatcher from './patchers/properties-patcher'
 import SearchPatcher from './patchers/search-patcher'
 import SearchCommandPatcher from './patchers/search-command-patcher'
@@ -68,6 +69,7 @@ const PATCHERS = [
   (!requireApiVersion("1.12.0") && BacklinksPatcher),
   OutgoingLinksPatcher,
 
+  FileManagerPatcher,
   PropertiesPatcher,
   SearchPatcher,
 ]
