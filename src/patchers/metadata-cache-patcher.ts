@@ -7,6 +7,8 @@ import HashHelper from "src/utils/hash-helper"
 import TaskQueue from "src/utils/task-queue"
 import Patcher from "./patcher"
 
+// FIXME: Frontmatter search not working
+
 export default class MetadataCachePatcher extends Patcher {
   protected async patch() {
     if (!this.plugin.settings.getSetting('canvasMetadataCompatibilityEnabled')) return
@@ -24,7 +26,6 @@ export default class MetadataCachePatcher extends Patcher {
         return next.call(this, filepath, ...args)
       }),
       computeFileMetadataAsync: Patcher.OverrideExisting(next => async function (file: TFile, ...args: any[]) {
-        console.log("computeFileMetadataAsync called for file", file.path)
         if (file instanceof TFile && file?.extension === 'canvas')
           return CanvasMetadataHandler.computeCanvasFileMetadataAsync.call(this, file)
 
@@ -74,7 +75,7 @@ class CanvasMetadataHandler {
 
     CanvasMetadataHandler.linkResolveQueue.setOnFinished(() => this.trigger('resolved'))
     await CanvasMetadataHandler.linkResolveQueue.add(
-      () => this.resolveLinks(file.path)
+      () => CanvasMetadataHandler.resolveCanvasLinks.call(this, file.path)
     )
   }
 
@@ -202,22 +203,35 @@ class CanvasMetadataHandler {
     return metadata as ExtendedCachedMetadata
   }
 
-  static resolveCanvasLinks(this: ExtendedMetadataCache, filepath: string) {
+  static async resolveCanvasLinks(this: ExtendedMetadataCache, filepath: string) {
     const file = this.vault.getAbstractFileByPath(filepath)
     if (!(file instanceof TFile)) return
 
     const metadata = this.getFileCache(file)
     const references = [...(metadata?.links ?? []), ...(metadata?.embeds ?? [])]
+    const referenceLinks = references.map(ref => ref.link).sort()
 
-    this.resolvedLinks[filepath] = references.reduce((acc, metadataReference) => {
-      const resolvedLinkpath = this.getFirstLinkpathDest(metadataReference.link, filepath)
-      if (!resolvedLinkpath) return acc
+    const resolvedLinks: Record<string, number> = {}
+    const unresolvedLinks: Record<string, number> = {}
 
-      acc[resolvedLinkpath.path] = (acc[resolvedLinkpath.path] ?? 0) + 1
+    for (const link of referenceLinks) {
+      const resolved = this.getFirstLinkpathDest(link, filepath)
 
-      return acc
-    }, {} as Record<string, number>)
+      if (resolved) {
+        resolvedLinks[resolved.path] ??= 0
+        resolvedLinks[resolved.path]++
+      } else {
+        const strippedLink = link.endsWith('.md') ? link.slice(0, -3) : link
 
+        unresolvedLinks[strippedLink] ??= 0
+        unresolvedLinks[strippedLink]++
+      }
+    }
+
+    this.resolvedLinks[filepath] = resolvedLinks
+    this.unresolvedLinks[filepath] = unresolvedLinks
+
+    await sleep(1)
     this.trigger('resolve', file)
   }
 }
