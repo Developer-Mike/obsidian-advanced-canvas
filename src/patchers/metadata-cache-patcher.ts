@@ -7,8 +7,6 @@ import HashHelper from "src/utils/hash-helper"
 import TaskQueue from "src/utils/task-queue"
 import Patcher from "./patcher"
 
-// FIXME: Frontmatter search not working
-
 export default class MetadataCachePatcher extends Patcher {
   protected async patch() {
     if (!this.plugin.settings.getSetting('canvasMetadataCompatibilityEnabled')) return
@@ -124,16 +122,14 @@ class CanvasMetadataHandler {
 
     // Create frontmatter metadata entry
     const frontmatter = content.metadata?.frontmatter
-    metadata.frontmatter = {
-      frontmatterPosition: {
-        start: { line: 0, col: 0, offset: 0 },
-        end: { line: 0, col: 0, offset: 0 }
-      },
-      frontmatter: frontmatter,
-      frontmatterLinks: []
+    metadata.frontmatterPosition = {
+      start: { line: 0, col: 0, offset: 0 },
+      end: { line: 0, col: 0, offset: 0 }
     }
+    metadata.frontmatter = frontmatter
 
     // Extract frontmatter links
+    metadata.frontmatterLinks = []
     for (const [key, value] of Object.entries(frontmatter ?? {})) {
       const getLinks = (value: string[]) => value.map((v) => {
         if (!v.startsWith('[[') || !v.endsWith(']]')) return null // Frontmatter only supports wikilinks
