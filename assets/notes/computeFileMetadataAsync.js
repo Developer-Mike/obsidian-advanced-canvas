@@ -193,3 +193,56 @@ switch (a.label) {
       [2]
     );
 }
+
+////
+
+
+function bf(e) {
+  return (new TextDecoder).decode(new Uint8Array(e))
+}
+
+async function processFile(file, path, cache, stats, that) {
+  // 1. Read the file as binary
+  const binaryData = await this.vault.readBinary(file);
+
+  // 2. Process data and generate hash
+  const fileData = bf(binaryData);
+  const fileHash = await Ef(binaryData);
+
+  // 3. Update local cache metadata
+  cache.mtime = stats.mtime;
+  cache.size = stats.size;
+  cache.hash = fileHash;
+  this.saveFileCache(path, cache);
+
+  // 4. Check if we already have metadata for this hash
+  let metadata = this.metadataCache[fileHash];
+
+  if (metadata) {
+      this.queueFileForLinkResolution(file);
+      this.trigger("changed", file, fileData, metadata);
+      return; // Exit early if metadata exists
+  }
+
+  // 5. Handle indexing (with a 10-second timeout warning)
+  const timeoutId = setTimeout(() => {
+      new db("Indexing taking a long time for " + file.path);
+  }, 10000);
+
+  try {
+      // 6. Perform the actual work/parsing
+      metadata = await this.work(binaryData);
+  } finally {
+      // Always clear the timeout regardless of success or failure
+      clearTimeout(timeoutId);
+  }
+
+  // 7. Handle the result of the work
+  if (metadata) {
+      this.saveMetaCache(fileHash, metadata);
+      this.queueFileForLinkResolution(file);
+      this.trigger("changed", file, fileData, metadata);
+  } else {
+      console.log("Metadata failed to parse", file);
+  }
+}

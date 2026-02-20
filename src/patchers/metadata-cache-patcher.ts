@@ -1,5 +1,7 @@
-import { ExtendedMetadataCache, Notice, TFile } from "obsidian"
-import { ExtendedCachedMetadata } from "src/@types/Obsidian"
+import { CanvasData, CanvasTextNodeData } from "assets/formats/advanced-json-canvas/spec/1.0-1.0"
+import { EmbedCache, ExtendedMetadataCache, FrontmatterLinkCache, LinkCache, Notice, TFile } from "obsidian"
+import { CanvasFileNodeData } from "src/@types/AdvancedJsonCanvas"
+import { ExtendedCachedMetadata, ExtendedEmbedCache, ExtendedLinkCache } from "src/@types/Obsidian"
 import AdvancedCanvasPlugin from "src/main"
 import FilepathHelper from "src/utils/filepath-helper"
 import HashHelper from "src/utils/hash-helper"
@@ -24,7 +26,7 @@ export default class MetadataCachePatcher extends Patcher {
       }),
       computeFileMetadataAsync: Patcher.OverrideExisting(next => async function (file: TFile, ...args: any[]) {
         if (file instanceof TFile && file?.extension === 'canvas')
-          return CanvasMetadataHandler.computeFileMetadataAsync.call(this, plugin, file)
+          return CanvasMetadataHandler.computeFileMetadataAsync.call(this, file)
 
         return next.call(this, file, ...args)
       }),
@@ -46,7 +48,7 @@ export default class MetadataCachePatcher extends Patcher {
 }
 
 class CanvasMetadataHandler {
-  static async computeFileMetadataAsync(this: ExtendedMetadataCache, plugin: AdvancedCanvasPlugin, file: TFile) {
+  static async computeFileMetadataAsync(this: ExtendedMetadataCache, file: TFile) {
     // Add file to uniqueFileLookup
     this.uniqueFileLookup.add(file.name.toLowerCase(), file)
 
@@ -64,12 +66,12 @@ class CanvasMetadataHandler {
         isStale = false
     }
 
-    if (isStale) await CanvasMetadataHandler.updateMetadataCache.call(this, plugin, file)
+    if (isStale) await CanvasMetadataHandler.updateMetadataCache.call(this, file)
 
     this.resolveLinks(file.path)
   }
 
-  static async updateMetadataCache(this: ExtendedMetadataCache, plugin: AdvancedCanvasPlugin, file: TFile) {
+  static async updateMetadataCache(this: ExtendedMetadataCache, file: TFile) {
     const bytes = await this.vault.readBinary(file)
     const data = new TextDecoder().decode(new Uint8Array(bytes))
     const hash = await HashHelper.getBytesHash(bytes)
@@ -93,7 +95,7 @@ class CanvasMetadataHandler {
     }, 10000)
 
     try {
-      metadata = await CanvasMetadataHandler.computeCanvasMetadataAsync.call(this, plugin, bytes)
+      metadata = await CanvasMetadataHandler.computeCanvasMetadataAsync.call(this, data)
     } finally {
       clearTimeout(slowIndexingTimeout)
     }
@@ -101,128 +103,108 @@ class CanvasMetadataHandler {
     if (metadata) {
       this.saveMetaCache(hash, metadata)
       this.trigger("changed", file, data, metadata)
+
+      // FIXME: If workQueue is not empty, don't trigger the "finished" event yet
+      if (await Promise.race([
+        this.workQueue.promise.then(() => false),
+        new Promise(resolve => setTimeout(() => resolve(true), 0))
+      ])) this.trigger('finished')
     } else {
       console.log("Canvas metadata failed to parse", file)
     }
   }
 
-  static computeCanvasMetadataAsync(this: ExtendedMetadataCache, plugin: AdvancedCanvasPlugin, buffer: ArrayBuffer): Promise<ExtendedCachedMetadata> {
-    // FIXME
+  static async computeCanvasMetadataAsync(this: ExtendedMetadataCache, data: string): Promise<ExtendedCachedMetadata> {
+    const content = JSON.parse(data || '{}') as Partial<CanvasData>
+    const metadata = {
+      v: 1
+    } as Partial<ExtendedCachedMetadata>
+
+    // Create frontmatter metadata entry
+    const frontmatter = content.metadata?.frontmatter
+    metadata.frontmatter = {
+      frontmatterPosition: {
+        start: { line: 0, col: 0, offset: 0 },
+        end: { line: 0, col: 0, offset: 0 }
+      },
+      frontmatter: frontmatter,
+      frontmatterLinks: []
+    }
+
+    // Extract frontmatter links
+    for (const [key, value] of Object.entries(frontmatter ?? {})) {
+      const getLinks = (value: string[]) => value.map((v) => {
+        if (!v.startsWith('[[') || !v.endsWith(']]')) return null // Frontmatter only supports wikilinks
+        const [link, ...aliases] = v.slice(2, -2).split('|')
+
+        return {
+          key: key,
+          displayText: aliases.length > 0 ? aliases.join('|') : link,
+          link: link,
+          original: v
+        } satisfies FrontmatterLinkCache
+      }).filter((v) => v !== null) as FrontmatterLinkCache[]
+
+      if (typeof value === 'string') metadata.frontmatterLinks?.push(...getLinks([value]))
+      else if (Array.isArray(value)) metadata.frontmatterLinks?.push(...getLinks(value))
+    }
+
+    // Add text node entries, links and embeds in parallel
+    metadata.nodes = {}
+    metadata.links = []
+    metadata.embeds = []
+    await Promise.all((content.nodes ?? []).map(async (node, index) => {
+      if (node.type !== 'text') return
+
+      const text = (node as CanvasTextNodeData).text
+      const buffer = new TextEncoder().encode(text).buffer
+      const nodeMetadata = await this.computeMetadataAsync(buffer)
+      if (!nodeMetadata) return
+
+      metadata.nodes![node.id] = nodeMetadata
+      metadata.links!.push(...(nodeMetadata.links ?? []).map(link => ({
+        ...link,
+        position: {
+          nodeId: node.id,
+          start: { line: 0, col: 1, offset: 0 }, // 0 for node
+          end: { line: 0, col: 1, offset: index } // index of node
+        }
+      } satisfies ExtendedLinkCache)))
+      metadata.embeds!.push(...(nodeMetadata.embeds ?? []).map(embed => ({
+        ...embed,
+        position: {
+          nodeId: node.id,
+          start: { line: 0, col: 1, offset: 0 }, // 0 for node
+          end: { line: 0, col: 1, offset: index } // index of node
+        }
+      }) as ExtendedEmbedCache))
+    }))
+
+    // Add file nodes as embeds
+    for (const [index, node] of (content.nodes ?? []).entries()) {
+      if (node.type !== 'file') continue
+
+      const file = (node as CanvasFileNodeData).file!
+      if (!file) continue
+
+      metadata.embeds.push({
+        link: file,
+        original: file,
+        displayText: file,
+        position: {
+          start: { line: 0, col: 1, offset: 0 }, // 0 for nodes
+          end: { line: 0, col: 1, offset: index } // index of node
+        }
+      })
+    }
+
+    return metadata as ExtendedCachedMetadata
   }
 
   static resolveLinks(this: ExtendedMetadataCache, plugin: AdvancedCanvasPlugin, filepath: string) {
     // FIXME
   }
 }
-
-/* computeMetadata
-// Read canvas data
-const content = JSON.parse(await this.vault.cachedRead(file) || '{}') as CanvasData
-
-// Extract frontmatter
-const frontmatter = content.metadata?.frontmatter
-const frontmatterData = {} as Partial<ExtendedCachedMetadata>
-if (frontmatter) {
-  frontmatterData.frontmatterPosition = {
-    start: { line: 0, col: 0, offset: 0 },
-    end: { line: 0, col: 0, offset: 0 }
-  }
-
-  frontmatterData.frontmatter = frontmatter
-
-  frontmatterData.frontmatterLinks = Object.entries(frontmatter).flatMap(([key, value]) => {
-    const getLinks = (value: string[]) => value.map((v) => {
-      if (!v.startsWith('[[') || !v.endsWith(']]')) return null // Frontmatter only supports wikilinks
-      const [link, ...aliases] = v.slice(2, -2).split('|')
-
-      return {
-        key: key,
-        displayText: aliases.length > 0 ? aliases.join('|') : link,
-        link: link,
-        original: v
-      }
-    }).filter((v) => v !== null)
-
-    if (typeof value === 'string') return getLinks([value])
-    else if (Array.isArray(value)) return getLinks(value)
-
-    return []
-  }).filter(v => v !== null) as FrontmatterLinkCache[]
-}
-
-// Extract canvas file node embeds
-const fileNodesEmbeds = content.nodes
-  ?.map((nodeData: CanvasFileNodeData, index) => nodeData.type === 'file' && nodeData.file ? {
-    link: nodeData.file,
-    original: nodeData.file,
-    displayText: nodeData.file,
-    position: {
-      start: { line: 0, col: 1, offset: 0 }, // 0 for nodes
-      end: { line: 0, col: 1, offset: index } // index of node
-    }
-  } : null)
-  ?.filter(entry => entry !== null) ?? []
-
-// Extract canvas text node links/embeds
-const textEncoder = new TextEncoder()
-const nodesMetadataPromises = content.nodes
-  ?.map((node: CanvasTextNodeData) => node.type === "text" ? textEncoder.encode(node.text).buffer : null)
-  ?.map((buffer: ArrayBuffer | null) => buffer ? this.computeMetadataAsync(buffer) as Promise<ExtendedCachedMetadata> : Promise.resolve(null)) ?? []
-const nodesMetadata = await Promise.all(nodesMetadataPromises) // Wait for all text nodes to be resolved
-
-const textNodesEmbeds = nodesMetadata
-  .map((metadata: ExtendedCachedMetadata | null, index: number) => (
-    (metadata?.embeds ?? []).map(embed => ({
-      ...embed,
-      position: {
-        nodeId: content.nodes?.[index]?.id,
-        start: { line: 0, col: 1, offset: 0 }, // 0 for node
-        end: { line: 0, col: 1, offset: index } // index of node
-      }
-    }))
-  )).flat()
-
-const textNodesLinks = nodesMetadata
-  .map((metadata: ExtendedCachedMetadata | null, index: number) => (
-    (metadata?.links ?? []).map(link => ({
-      ...link,
-      position: {
-        nodeId: content.nodes?.[index]?.id,
-        start: { line: 0, col: 1, offset: 0 }, // 0 for node
-        end: { line: 0, col: 1, offset: index } // index of node
-      }
-    }))
-  )).flat()
-
-// Update metadata cache
-;(this.metadataCache as MetadataCacheMap)[fileHash] = {
-  v: 1,
-  ...frontmatterData,
-  embeds: [
-    ...fileNodesEmbeds,
-    ...textNodesEmbeds
-  ],
-  links: [
-    ...textNodesLinks
-  ],
-  nodes: {
-    ...nodesMetadata.reduce((acc, metadata, index) => {
-      const nodeId = content.nodes?.[index]?.id
-
-      if (nodeId && metadata)
-        acc[nodeId] = metadata
-
-      return acc
-    }, {} as Record<string, ExtendedCachedMetadata>)
-  }
-} as ExtendedCachedMetadata
-
-// If workQueue is not empty, don't trigger the "finished" event yet
-if (await Promise.race([this.workQueue.promise.then(() => false), new Promise(resolve => setTimeout(() => resolve(true), 0))]))
-  this.trigger('finished', file, "", this.metadataCache[fileHash], true) // (needed for metadataTypeManager)
-  */
-
-///////////////////////////////////
 
 /* resolve links
 // Get file object
