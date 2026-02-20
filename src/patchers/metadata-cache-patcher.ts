@@ -1,17 +1,16 @@
 import { CanvasData, CanvasTextNodeData } from "assets/formats/advanced-json-canvas/spec/1.0-1.0"
-import { EmbedCache, ExtendedMetadataCache, FrontmatterLinkCache, LinkCache, Notice, TFile } from "obsidian"
+import { ExtendedMetadataCache, FrontmatterLinkCache, Notice, TFile } from "obsidian"
 import { CanvasFileNodeData } from "src/@types/AdvancedJsonCanvas"
 import { ExtendedCachedMetadata, ExtendedEmbedCache, ExtendedLinkCache } from "src/@types/Obsidian"
-import AdvancedCanvasPlugin from "src/main"
 import FilepathHelper from "src/utils/filepath-helper"
 import HashHelper from "src/utils/hash-helper"
+import TaskQueue from "src/utils/task-queue"
 import Patcher from "./patcher"
 
 export default class MetadataCachePatcher extends Patcher {
   protected async patch() {
     if (!this.plugin.settings.getSetting('canvasMetadataCompatibilityEnabled')) return
 
-    const plugin = this.plugin
     Patcher.patchPrototype<ExtendedMetadataCache>(this.plugin, this.plugin.app.metadataCache, {
       getCache: Patcher.OverrideExisting(next => function (filepath: string, ...args: any[]): ExtendedCachedMetadata | null {
         // Bypass the "md" extension check by handling the "canvas" extension here
@@ -25,30 +24,30 @@ export default class MetadataCachePatcher extends Patcher {
         return next.call(this, filepath, ...args)
       }),
       computeFileMetadataAsync: Patcher.OverrideExisting(next => async function (file: TFile, ...args: any[]) {
+        console.log("computeFileMetadataAsync called for file", file.path)
         if (file instanceof TFile && file?.extension === 'canvas')
-          return CanvasMetadataHandler.computeFileMetadataAsync.call(this, file)
+          return CanvasMetadataHandler.computeCanvasFileMetadataAsync.call(this, file)
 
         return next.call(this, file, ...args)
       }),
       resolveLinks: Patcher.OverrideExisting(next => async function (filepath: string) {
-        if (FilepathHelper.extension(filepath) === 'canvas')
-          return CanvasMetadataHandler.resolveLinks.call(this, plugin, filepath)
+        const result = next.call(this, filepath)
 
-        return next.call(this, filepath)
+        // Run custom logic that triggers 'resolve' and 'resolved' events
+        if (FilepathHelper.extension(filepath) === 'canvas')
+          CanvasMetadataHandler.resolveCanvasLinks.call(this, filepath)
+
+        return result
       })
     })
-
-    // metadataCache.watchVaultChanges makes a copy of computeFileMetadataAsync that gets called on the "modify" event
-    // To fix this, AC creates a new event listener for "modify" that only handles canvas files
-    this.plugin.registerEvent(this.plugin.app.vault.on('modify', (file: TFile) => {
-      if (FilepathHelper.extension(file.path) !== 'canvas') return
-      this.plugin.app.metadataCache.computeFileMetadataAsync(file)
-    }))
   }
 }
 
 class CanvasMetadataHandler {
-  static async computeFileMetadataAsync(this: ExtendedMetadataCache, file: TFile) {
+  static metadataQueue: TaskQueue = new TaskQueue()
+  static linkResolveQueue: TaskQueue = new TaskQueue()
+
+  static async computeCanvasFileMetadataAsync(this: ExtendedMetadataCache, file: TFile) {
     // Add file to uniqueFileLookup
     this.uniqueFileLookup.add(file.name.toLowerCase(), file)
 
@@ -66,9 +65,17 @@ class CanvasMetadataHandler {
         isStale = false
     }
 
-    if (isStale) await CanvasMetadataHandler.updateMetadataCache.call(this, file)
+    if (isStale) {
+      CanvasMetadataHandler.linkResolveQueue.setOnFinished(() => this.trigger('finished'))
+      await CanvasMetadataHandler.metadataQueue.add(
+        () => CanvasMetadataHandler.updateMetadataCache.call(this, file)
+      )
+    }
 
-    this.resolveLinks(file.path)
+    CanvasMetadataHandler.linkResolveQueue.setOnFinished(() => this.trigger('resolved'))
+    await CanvasMetadataHandler.linkResolveQueue.add(
+      () => this.resolveLinks(file.path)
+    )
   }
 
   static async updateMetadataCache(this: ExtendedMetadataCache, file: TFile) {
@@ -103,12 +110,6 @@ class CanvasMetadataHandler {
     if (metadata) {
       this.saveMetaCache(hash, metadata)
       this.trigger("changed", file, data, metadata)
-
-      // FIXME: If workQueue is not empty, don't trigger the "finished" event yet
-      if (await Promise.race([
-        this.workQueue.promise.then(() => false),
-        new Promise(resolve => setTimeout(() => resolve(true), 0))
-      ])) this.trigger('finished')
     } else {
       console.log("Canvas metadata failed to parse", file)
     }
@@ -201,70 +202,22 @@ class CanvasMetadataHandler {
     return metadata as ExtendedCachedMetadata
   }
 
-  static resolveLinks(this: ExtendedMetadataCache, plugin: AdvancedCanvasPlugin, filepath: string) {
-    // FIXME
+  static resolveCanvasLinks(this: ExtendedMetadataCache, filepath: string) {
+    const file = this.vault.getAbstractFileByPath(filepath)
+    if (!(file instanceof TFile)) return
+
+    const metadata = this.getFileCache(file)
+    const references = [...(metadata?.links ?? []), ...(metadata?.embeds ?? [])]
+
+    this.resolvedLinks[filepath] = references.reduce((acc, metadataReference) => {
+      const resolvedLinkpath = this.getFirstLinkpathDest(metadataReference.link, filepath)
+      if (!resolvedLinkpath) return acc
+
+      acc[resolvedLinkpath.path] = (acc[resolvedLinkpath.path] ?? 0) + 1
+
+      return acc
+    }, {} as Record<string, number>)
+
+    this.trigger('resolve', file)
   }
 }
-
-/* resolve links
-// Get file object
-const file = this.vault.getAbstractFileByPath(filepath) as TFile
-if (!file) return
-
-// Get metadata cache entry
-const metadataCache = this.metadataCache[this.fileCache[filepath]?.hash] as ExtendedCachedMetadata
-if (!metadataCache) return
-
-// List of all links in the file
-const metadataReferences = [...(metadataCache.links || []), ...(metadataCache.embeds || [])]
-
-// Update resolved links
-this.resolvedLinks[filepath] = metadataReferences.reduce((acc, metadataReference) => {
-  const resolvedLinkpath = this.getFirstLinkpathDest(metadataReference.link, filepath)
-  if (!resolvedLinkpath) return acc
-
-  acc[resolvedLinkpath.path] = (acc[resolvedLinkpath.path] || 0) + 1
-
-  return acc
-}, {} as Record<string, number>)
-
-// Trigger metadata cache change event
-this.trigger('resolve', file)
-this.trigger('resolved') // TODO: Use workQueue like in the original function
-}),
-// FIXME
-registerInternalLinkAC: _next => async function (canvasName: string, from: string, to: string) {
-// If the "from" node is the same as the "to" node, don't register the link
-if (from === to) return
-
-// Get the file object for the "from" node
-const fromFile = this.vault.getAbstractFileByPath(from)
-if (!fromFile || !(fromFile instanceof TFile)) return
-
-// If the "from" node is not a "md" or "canvas" file, don't register the link
-if (!['md', 'canvas'].includes(fromFile.extension)) return
-
-// Update metadata cache for "from" node
-const fromFileHash = this.fileCache[from]?.hash ?? await HashHelper.getFileHash(that.plugin, fromFile) // Some files might not be resolved yet
-const fromFileMetadataCache = (this.metadataCache[fromFileHash] ?? { v: 1 }) as ExtendedCachedMetadata
-this.metadataCache[fromFileHash] = {
-  ...fromFileMetadataCache,
-  links: [
-    ...(fromFileMetadataCache.links || []),
-    {
-      link: to,
-      original: to,
-      displayText: `${canvasName} → ${to}`,
-      position: {
-        start: { line: 0, col: 0, offset: 0 },
-        end: { line: 0, col: 0, offset: 0 }
-      }
-    }
-  ]
-}
-
-// Update resolved links for "from" node
-this.resolvedLinks[from] = {
-  ...this.resolvedLinks[from],
-  [to]: (this.resolvedLinks[from]?.[to] || 0) + 1
-}*/
