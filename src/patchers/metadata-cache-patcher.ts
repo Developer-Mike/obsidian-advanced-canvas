@@ -1,7 +1,8 @@
-import { ExtendedMetadataCache, TFile } from "obsidian"
+import { ExtendedMetadataCache, Notice, TFile } from "obsidian"
 import { ExtendedCachedMetadata } from "src/@types/Obsidian"
 import AdvancedCanvasPlugin from "src/main"
 import FilepathHelper from "src/utils/filepath-helper"
+import HashHelper from "src/utils/hash-helper"
 import Patcher from "./patcher"
 
 export default class MetadataCachePatcher extends Patcher {
@@ -45,7 +46,7 @@ export default class MetadataCachePatcher extends Patcher {
 }
 
 class CanvasMetadataHandler {
-  static computeFileMetadataAsync(this: ExtendedMetadataCache, plugin: AdvancedCanvasPlugin, file: TFile) {
+  static async computeFileMetadataAsync(this: ExtendedMetadataCache, plugin: AdvancedCanvasPlugin, file: TFile) {
     // Add file to uniqueFileLookup
     this.uniqueFileLookup.add(file.name.toLowerCase(), file)
 
@@ -63,30 +64,58 @@ class CanvasMetadataHandler {
         isStale = false
     }
 
-    if (isStale) CanvasMetadataHandler.updateMetadataCache.call(this, plugin, file)
+    if (isStale) await CanvasMetadataHandler.updateMetadataCache.call(this, plugin, file)
 
     this.resolveLinks(file.path)
   }
 
-  static updateMetadataCache(this: ExtendedMetadataCache, plugin: AdvancedCanvasPlugin, file: TFile) {
+  static async updateMetadataCache(this: ExtendedMetadataCache, plugin: AdvancedCanvasPlugin, file: TFile) {
+    const bytes = await this.vault.readBinary(file)
+    const data = new TextDecoder().decode(new Uint8Array(bytes))
+    const hash = await HashHelper.getBytesHash(bytes)
 
+    // Update cache
+    const cache = {
+      mtime: file.stat.mtime,
+      size: file.stat.size,
+      hash: hash
+    }
+    this.saveFileCache(file.path, cache)
+
+    // Check if metadata already exists for the hash
+    let metadata = this.metadataCache[cache.hash]
+    if (metadata) return this.trigger(
+      "changed", file, data, metadata
+    )
+
+    const slowIndexingTimeout = setTimeout(() => {
+      new Notice(`Canvas indexing taking a long time for file ${file.path}`)
+    }, 10000)
+
+    try {
+      metadata = await CanvasMetadataHandler.computeCanvasMetadataAsync.call(this, plugin, bytes)
+    } finally {
+      clearTimeout(slowIndexingTimeout)
+    }
+
+    if (metadata) {
+      this.saveMetaCache(hash, metadata)
+      this.trigger("changed", file, data, metadata)
+    } else {
+      console.log("Canvas metadata failed to parse", file)
+    }
+  }
+
+  static computeCanvasMetadataAsync(this: ExtendedMetadataCache, plugin: AdvancedCanvasPlugin, buffer: ArrayBuffer): Promise<ExtendedCachedMetadata> {
+    // FIXME
   }
 
   static resolveLinks(this: ExtendedMetadataCache, plugin: AdvancedCanvasPlugin, filepath: string) {
-
+    // FIXME
   }
 }
 
 /* computeMetadata
-// Update the cache
-const fileHash = await HashHelper.getFileHash(that.plugin, file)
-this.saveFileCache(file.path, {
-  hash: fileHash, // Hash wouldn't get set in the original function
-  mtime: file.stat.mtime,
-  size: file.stat.size
-})
-
-// Don't use workQueue like in the original function bc it's impossible
 // Read canvas data
 const content = JSON.parse(await this.vault.cachedRead(file) || '{}') as CanvasData
 
@@ -187,9 +216,6 @@ const textNodesLinks = nodesMetadata
     }, {} as Record<string, ExtendedCachedMetadata>)
   }
 } as ExtendedCachedMetadata
-
-// Trigger metadata cache change event
-this.trigger('changed', file, "", this.metadataCache[fileHash])
 
 // If workQueue is not empty, don't trigger the "finished" event yet
 if (await Promise.race([this.workQueue.promise.then(() => false), new Promise(resolve => setTimeout(() => resolve(true), 0))]))
