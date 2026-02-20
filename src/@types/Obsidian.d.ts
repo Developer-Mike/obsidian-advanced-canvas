@@ -102,11 +102,8 @@ declare module "obsidian" {
     computeFileMetadataAsync: (file: TFile) => void
     saveFileCache: (filepath: string, cache: FileCacheEntry) => void
     linkResolver: () => void
-    resolveLinks: (filepath: string, /* custom */ cachedContent: any) => void
+    resolveLinks: (filepath: string) => void
     getBacklinksForFile: (file: TFile) => { data: Map<string, LinkCache[]> }
-
-    // Custom
-    registerInternalLinkAC: (canvasName: string, from: string, to: string) => void
   }
 }
 

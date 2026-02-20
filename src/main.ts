@@ -59,18 +59,22 @@ import EdgeExposerExtension from './canvas-extensions/dataset-exposers/edge-expo
 import CanvasWrapperExposerExtension from './canvas-extensions/dataset-exposers/canvas-wrapper-exposer'
 
 const PATCHERS = [
+  // Core canvas patchers
   CanvasPatcher,
   SearchCommandPatcher,
 
-  LinkSuggestionsPatcher,
-  EmbedPatcher,
-
+  // Core metadata patchers
   MetadataCachePatcher,
+  FileManagerPatcher,
+
+  // Direct metadata dependant patchers
+  PropertiesPatcher,
   (!requireApiVersion("1.12.0") && BacklinksPatcher),
   OutgoingLinksPatcher,
 
-  FileManagerPatcher,
-  PropertiesPatcher,
+  // Metadata dependant patchers
+  LinkSuggestionsPatcher,
+  EmbedPatcher,
   SearchPatcher,
 ]
 
