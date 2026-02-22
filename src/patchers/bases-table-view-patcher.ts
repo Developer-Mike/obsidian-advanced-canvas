@@ -1,4 +1,4 @@
-import { BasesTableCell, BasesTableRow, BasesTableRowContext, BasesTableView, BasesViewRegistrationEntry } from "src/@types/BasesPlugin"
+import { BasesTableCell, BasesTableCellContext, BasesTableRow, BasesTableView, BasesViewRegistrationEntry } from "src/@types/BasesPlugin"
 import Patcher from "./patcher"
 
 export default class BasesTableViewPatcher extends Patcher {
@@ -60,7 +60,7 @@ export default class BasesTableViewPatcher extends Patcher {
 
   private patchCell(cell: BasesTableCell) {
     Patcher.patchPrototype<BasesTableCell>(this.plugin, cell, {
-      render: Patcher.OverrideExisting(next => function (ctx: BasesTableRowContext): void {
+      render: Patcher.OverrideExisting(next => function (ctx: BasesTableCellContext): void {
         const isCanvas = ctx.file?.extension === "canvas"
         if (isCanvas) ctx.file.extension = "md"
 
