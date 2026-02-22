@@ -40,9 +40,9 @@ export default abstract class Patcher {
 
   protected abstract patch(): Promise<void>
 
-  protected static async waitForViewRequest<T>(plugin: AdvancedCanvasPlugin, viewType: string, patch: (view: T) => void): Promise<T> {
+  protected static async waitForMapValueLookup<T>(map: Record<string, any>, viewType: string, patch: (view: T) => void): Promise<T> {
     return new Promise(resolve => {
-      const uninstaller = around(plugin.app.viewRegistry.viewByType, {
+      const uninstaller = around(map, {
         [viewType]: (next: any) => function (...args: any): any {
           const view = next.call(this, ...args)
           patch(view)
@@ -57,6 +57,10 @@ export default abstract class Patcher {
         }
       })
     })
+  }
+
+  protected static async waitForViewRequest<T>(plugin: AdvancedCanvasPlugin, viewType: string, patch: (view: T) => void): Promise<T> {
+    return this.waitForMapValueLookup(plugin.app.viewRegistry.viewByType, viewType, patch)
   }
 
   static OverrideExisting<T, K extends FunctionKeys<T>, R extends ReturnType<KeyFunction<T, K>>>(

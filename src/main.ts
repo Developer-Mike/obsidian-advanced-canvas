@@ -57,7 +57,7 @@ import NodeInteractionExposerExtension from './canvas-extensions/dataset-exposer
 import NodeExposerExtension from './canvas-extensions/dataset-exposers/node-exposer'
 import EdgeExposerExtension from './canvas-extensions/dataset-exposers/edge-exposer'
 import CanvasWrapperExposerExtension from './canvas-extensions/dataset-exposers/canvas-wrapper-exposer'
-import BasesPatcher from './patchers/bases-patcher'
+import BasesTableViewPatcher from './patchers/bases-table-view-patcher'
 
 const PATCHERS = [
   // Core canvas patchers
@@ -74,7 +74,7 @@ const PATCHERS = [
   OutgoingLinksPatcher,
 
   // Metadata dependant patchers
-  (requireApiVersion("1.9.0") && BasesPatcher),
+  (requireApiVersion("1.9.0") && BasesTableViewPatcher),
   LinkSuggestionsPatcher,
   EmbedPatcher,
   SearchPatcher,

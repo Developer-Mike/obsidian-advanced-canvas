@@ -1,29 +1,26 @@
-import { EventRef } from "obsidian"
+import { TFile } from "obsidian"
 
-export default interface BasesView {
-  controller: BasesController
-
-  onViewChanged(): void
-}
-
-export interface BasesController {
-  events: BasesEvents
-  view: BasesTableView
-
-  selectView: (view: string) => void
-  setQueryAndView: (query: any, view: string) => void
-}
-
-export interface BasesEvents {
-  on(name: 'view-changed', callback: () => any, ctx?: any): EventRef
+export interface BasesViewRegistrationEntry<T> {
+  factory(...args: any): T
 }
 
 export interface BasesTableView {
-  type: "table" | "list" | "cards" | string
+  type: "table"
+  rows: BasesTableRow[]
 
-  rows?: BasesTableRow[]
+  updateVirtualDisplay(): void
 }
 
 export interface BasesTableRow {
-  render(): void
+  cells: BasesTableCell[]
+
+  render(...args: any[]): void
+}
+
+export interface BasesTableCell {
+  render(ctx: BasesTableCellContext): void
+}
+
+export interface BasesTableCellContext {
+  file: TFile
 }
