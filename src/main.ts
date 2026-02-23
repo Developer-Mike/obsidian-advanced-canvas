@@ -1,4 +1,4 @@
-import { ItemView, Plugin } from 'obsidian'
+import { ItemView, Plugin, requireApiVersion } from 'obsidian'
 import { Canvas, CanvasView } from './@types/Canvas'
 
 // Utils
@@ -17,6 +17,7 @@ import EmbedPatcher from './patchers/embed-patcher'
 import MetadataCachePatcher from './patchers/metadata-cache-patcher'
 import BacklinksPatcher from './patchers/backlinks-patcher'
 import OutgoingLinksPatcher from './patchers/outgoing-links-patcher'
+import FileManagerPatcher from './patchers/file-manager-patcher'
 import PropertiesPatcher from './patchers/properties-patcher'
 import SearchPatcher from './patchers/search-patcher'
 import SearchCommandPatcher from './patchers/search-command-patcher'
@@ -56,17 +57,27 @@ import NodeInteractionExposerExtension from './canvas-extensions/dataset-exposer
 import NodeExposerExtension from './canvas-extensions/dataset-exposers/node-exposer'
 import EdgeExposerExtension from './canvas-extensions/dataset-exposers/edge-exposer'
 import CanvasWrapperExposerExtension from './canvas-extensions/dataset-exposers/canvas-wrapper-exposer'
+import BasesTableViewPatcher from './patchers/bases-table-view-patcher'
 
 const PATCHERS = [
+  // Core canvas patchers
   CanvasPatcher,
+  SearchCommandPatcher,
+
+  // Core metadata patchers
+  MetadataCachePatcher,
+  FileManagerPatcher,
+
+  // Direct metadata dependant patchers
+  PropertiesPatcher,
+  (!requireApiVersion("1.12.0") && BacklinksPatcher),
+  OutgoingLinksPatcher,
+
+  // Metadata dependant patchers
+  (requireApiVersion("1.9.0") && BasesTableViewPatcher),
   LinkSuggestionsPatcher,
   EmbedPatcher,
-  MetadataCachePatcher,
-  BacklinksPatcher,
-  OutgoingLinksPatcher,
-  PropertiesPatcher,
   SearchPatcher,
-  SearchCommandPatcher,
 ]
 
 const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
@@ -124,6 +135,8 @@ export default class AdvancedCanvasPlugin extends Plugin {
     this.windowsManager = new WindowsManager(this)
 
     this.patchers = PATCHERS.map((Patcher: any) => {
+      if (!Patcher) return
+
       try { return new Patcher(this) }
       catch (e) {
         console.error(`Error initializing patcher ${Patcher.name}:`, e)

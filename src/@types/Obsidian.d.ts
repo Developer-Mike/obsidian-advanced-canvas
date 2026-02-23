@@ -1,4 +1,4 @@
-import { CachedMetadata, EmbedCache, LinkCache } from "obsidian"
+import { CachedMetadata, EmbedCache, LinkCache, Pos } from "obsidian"
 import { CustomWorkspaceEvents } from "./CustomWorkspaceEvents"
 import SuggestManager from "./SuggestManager"
 
@@ -101,12 +101,10 @@ declare module "obsidian" {
 
     computeFileMetadataAsync: (file: TFile) => void
     saveFileCache: (filepath: string, cache: FileCacheEntry) => void
+    saveMetaCache: (hash: string, cache: ExtendedCachedMetadata) => void
     linkResolver: () => void
-    resolveLinks: (filepath: string, /* custom */ cachedContent: any) => void
-    getBacklinksForFile: (file: TFile) => { data: Map<string, LinkCache[]> }
-
-    // Custom
-    registerInternalLinkAC: (canvasName: string, from: string, to: string) => void
+    resolveLinks: (filepath: string) => void
+    getBacklinksForFile: (file: TFile) => { data: Map<string, ExtendedLinkCache[]> }
   }
 }
 
@@ -125,10 +123,22 @@ export interface MetadataCacheMap {
 }
 
 export interface ExtendedCachedMetadata extends CachedMetadata {
-  links?: LinkCache[]
-  embeds?: EmbedCache[]
+  links?: ExtendedLinkCache[]
+  embeds?: ExtendedEmbedCache[]
   nodes?: NodesCache
   v: number
+}
+
+export interface ExtendedPos extends Pos {
+  nodeId?: string
+}
+
+export interface ExtendedLinkCache extends LinkCache {
+  position: ExtendedPos
+}
+
+export interface ExtendedEmbedCache extends EmbedCache {
+  position: ExtendedPos
 }
 
 export interface NodesCache {

@@ -33,7 +33,7 @@ export default class MetadataCanvasExtension extends CanvasExtension {
     // Add proxy to metadata to listen for changes
     const that = this
     const validator = {
-      get(target: any, key: string) {
+      get(target: any, key: string): any {
         if (typeof target[key] === 'object' && target[key] !== null)
           return new Proxy(target[key], validator)
         else return target[key]

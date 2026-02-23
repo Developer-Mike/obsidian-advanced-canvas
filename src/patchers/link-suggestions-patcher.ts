@@ -24,7 +24,8 @@ export default class LinkSuggestionsPatcher extends Patcher {
         if (!targetFile) return result
 
         // Check if file exits and really is a canvas file
-        if (!(targetFile instanceof TFile) || targetFile.extension !== "canvas") return result
+        if (!(targetFile instanceof TFile) || targetFile.extension !== "canvas")
+          return result
 
         const fileCache = this.app.metadataCache.getFileCache(targetFile)
         if (!fileCache) return result
