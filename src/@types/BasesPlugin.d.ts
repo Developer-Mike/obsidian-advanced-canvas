@@ -1,5 +1,9 @@
 import { TFile } from "obsidian"
 
+export interface BasesPlugin {
+  registrations: Record<string, BasesViewRegistrationEntry<any>>
+}
+
 export interface BasesViewRegistrationEntry<T> {
   factory(...args: any): T
 }

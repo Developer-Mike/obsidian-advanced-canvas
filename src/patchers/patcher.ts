@@ -112,7 +112,7 @@ export default abstract class Patcher {
     return object
   }
 
-  static async waitFor<T, V>(
+  static async patchOnce<T, V>(
     plugin: Plugin,
     object: T | undefined,
     patches: (resolve: (vaule: V) => void) => FunctionPatchObject<T>
