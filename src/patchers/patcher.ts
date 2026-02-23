@@ -112,6 +112,20 @@ export default abstract class Patcher {
     return object
   }
 
+  static async waitFor<T, V>(
+    plugin: Plugin,
+    object: T | undefined,
+    patches: (resolve: (vaule: V) => void) => FunctionPatchObject<T>
+  ): Promise<V> {
+    const uninstallers: (() => void)[] = []
+    const value = await new Promise<V>(resolve =>
+      this.patch(plugin, object, patches(resolve), false, uninstallers)
+    )
+    for (const uninstall of uninstallers) uninstall()
+
+    return value
+  }
+
   static tryPatchWorkspacePrototype<T>(
     plugin: Plugin,
     getTarget: () => T | undefined,
