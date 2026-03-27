@@ -518,7 +518,7 @@ export default class CommandsCanvasExtension extends CanvasExtension {
   }
 
   private onPopupMenuCreated(canvas: Canvas) {
-    // LLM-Agent 修改: Add link option for selected node, generating canvas link with node ID.
+    // LLM-Agent 修改: Add link option for selected node, generating canvas link with node ID..
     const selectedNodes = canvas.getSelectionData().nodes
     if (selectedNodes.length !== 1) return
 
