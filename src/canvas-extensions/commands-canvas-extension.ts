@@ -15,6 +15,11 @@ export default class CommandsCanvasExtension extends CanvasExtension {
   isEnabled() { return 'commandsFeatureEnabled' as const }
 
   init() {
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      'advanced-canvas:popup-menu-created',
+      (canvas: Canvas) => this.onPopupMenuCreated(canvas)
+    ))
+
     this.plugin.addCommand({
       id: 'toggle-readonly',
       name: 'Toggle readonly',
@@ -510,5 +515,33 @@ export default class CommandsCanvasExtension extends CanvasExtension {
     }, null as { node: CanvasNode, distance: number } | null)
 
     return closestNode?.node
+  }
+
+  private onPopupMenuCreated(canvas: Canvas) {
+    // LLM-Agent 修改: Add link option for selected node, generating canvas link with node ID.
+    const selectedNodes = canvas.getSelectionData().nodes
+    if (selectedNodes.length !== 1) return
+
+    const selectedNode = canvas.nodes.get(selectedNodes[0].id)
+    if (!selectedNode) return
+
+    CanvasHelper.addPopupMenuOption(
+      canvas,
+      CanvasHelper.createPopupMenuOption({
+        id: 'add-node-link',
+        label: 'Add Link',
+        icon: 'link',
+        callback: () => {
+          const canvasFileName = canvas.view.file.basename
+          const nodeId = selectedNode.getData().id
+          const linkString = `[[${canvasFileName}.canvas#${nodeId}]]`
+          navigator.clipboard.writeText(linkString).then(() => {
+            new Notice(`Link copied: ${linkString}`)
+          }).catch(() => {
+            new Notice(`Failed to copy link: ${linkString}`)
+          })
+        }
+      })
+    )
   }
 }
