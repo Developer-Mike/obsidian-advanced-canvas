@@ -245,7 +245,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     if (!tryContinue || this.visitedNodeIds.length === 0) {
       const startNode = canvas.metadata['startNode'] && canvas.nodes.get(canvas.metadata['startNode'])
       if (!startNode) {
-        new Notice('No start node found. Please mark a node as a start node trough the popup menu.')
+        new Notice('No start node found. Please mark a node as a start node through the popup menu.')
         return
       }
 
