@@ -756,7 +756,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
 
     if (infoSection !== undefined) {
       setting.addExtraButton(button => button
-        .setTooltip("Open github documentation")
+        .setTooltip("Open GitHub documentation")
         .setIcon('info')
         .onClick(async () => {
           // eslint-disable-next-line obsidianmd/prefer-create-el -- Temp virtual anchor

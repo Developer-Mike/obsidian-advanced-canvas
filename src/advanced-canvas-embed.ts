@@ -1,5 +1,6 @@
 import App, { Component, EmbedContext, MarkdownRenderer, TFile } from "obsidian"
 import { CanvasData, CanvasFileNodeData, CanvasGroupNodeData, CanvasTextNodeData } from "./@types/AdvancedJsonCanvas"
+import TextHelper from "./utils/text-helper"
 
 export default class AdvancedCanvasEmbed extends Component {
   private context: EmbedContext
@@ -53,8 +54,15 @@ export default class AdvancedCanvasEmbed extends Component {
     else if (canvasNode.type === "group") nodeContent = `**Group Node:** ${(canvasNode as CanvasGroupNodeData).label}`
     else if (canvasNode.type === "file") nodeContent = `**File Node:** ${(canvasNode as CanvasFileNodeData).file}`
 
-    this.context.containerEl.classList.add("markdown-embed")
     this.context.containerEl.empty() // Clear the container (for re-rendering on changes)
-    await MarkdownRenderer.render(this.context.app as unknown as App, nodeContent, this.context.containerEl, this.file.path, this)
+    this.context.containerEl.classList.add("ac-card-embed")
+    if (canvasNode.color !== undefined) {
+      this.context.containerEl.classList.add("is-themed")
+      this.context.containerEl.classList.add(`mod-canvas-color-${canvasNode.color}`)
+    }
+
+    const markdownContainer = this.context.containerEl.createSpan()
+    markdownContainer.classList.add("markdown-content")
+    await MarkdownRenderer.render(this.context.app as unknown as App, nodeContent, markdownContainer, this.file.path, this)
   }
 }
