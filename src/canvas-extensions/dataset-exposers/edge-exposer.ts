@@ -22,26 +22,23 @@ export default class EdgeExposerExtension extends CanvasExtension {
         if (!edgeData) return
 
         for (const exposedDataKey of getExposedEdgeData(this.plugin.settings)) {
-            const datasetPairs = edgeData[exposedDataKey] && typeof edgeData[exposedDataKey] === 'object'
-              ? Object.entries(edgeData[exposedDataKey] as Record<string, string>)
-              : [[exposedDataKey, edgeData[exposedDataKey]]]
+          const datasetPairs = edgeData[exposedDataKey] && typeof edgeData[exposedDataKey] === 'object'
+            ? Object.entries(edgeData[exposedDataKey] as Record<string, string>)
+            : [[exposedDataKey, edgeData[exposedDataKey]]]
 
-            for (const [key, value] of datasetPairs) {
-              const stringifiedKey = JSON.stringify(key)
-              if (!stringifiedKey) continue
+          for (const [key, value] of datasetPairs as [string, string][]) {
+            if (!value) {
+              delete edge.path.display.dataset[key]
 
-              if (!value) {
-                delete edge.path.display.dataset[stringifiedKey]
+              if (edge.fromLineEnd?.el) delete edge.fromLineEnd.el.dataset[key]
+              if (edge.toLineEnd?.el) delete edge.toLineEnd.el.dataset[key]
+            } else {
+              edge.path.display.dataset[key] = value
 
-                if (edge.fromLineEnd?.el) delete edge.fromLineEnd.el.dataset[stringifiedKey]
-                if (edge.toLineEnd?.el) delete edge.toLineEnd.el.dataset[stringifiedKey]
-              } else {
-                edge.path.display.dataset[stringifiedKey] = JSON.stringify(value)
-
-                if (edge.fromLineEnd?.el) edge.fromLineEnd.el.dataset[stringifiedKey] = JSON.stringify(value)
-                if (edge.toLineEnd?.el) edge.toLineEnd.el.dataset[stringifiedKey] = JSON.stringify(value)
-              }
+              if (edge.fromLineEnd?.el) edge.fromLineEnd.el.dataset[key] = value
+              if (edge.toLineEnd?.el) edge.toLineEnd.el.dataset[key] = value
             }
+          }
         }
       }
     ))

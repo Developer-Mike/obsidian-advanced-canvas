@@ -699,6 +699,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
   display(): void {
     const { containerEl } = this
     containerEl.empty()
+    containerEl.classList.add("ac-settings")
 
     this.createKofiBanner(containerEl)
 
