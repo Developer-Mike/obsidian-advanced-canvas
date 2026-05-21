@@ -20,7 +20,7 @@ export default class CopyNodeReferenceCanvasExtension extends CanvasExtension {
     if (!popupMenuEl) return
 
     const selectionNodeData = canvas.getSelectionData().nodes
-    if (selectionNodeData.length !== 1) return
+    if (selectionNodeData.length !== 1 && canvas.getSelectionData().edges.length === 0) return
 
     const menuOption: MenuOption = {
       id: 'node-popup-menu-option-copy-reference',
@@ -33,7 +33,7 @@ export default class CopyNodeReferenceCanvasExtension extends CanvasExtension {
     CanvasHelper.addPopupMenuOption(canvas, popupMenuOption)
   }
 
-  static copyWikilinkToNode(file: TFile, nodeData: CanvasNodeData){
+  static copyWikilinkToNode(file: TFile, nodeData: CanvasNodeData) {
     const wikilink = `[[${file.path}#${nodeData.id}|${file.name} (${TextHelper.toTitleCase(nodeData.type)} node)]]`
     navigator.clipboard.writeText(wikilink).then(() =>
       new Notice("Copied wikilink to node to clipboard.", 2000)
