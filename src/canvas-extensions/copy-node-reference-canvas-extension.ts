@@ -6,7 +6,7 @@ import TextHelper from "../utils/text-helper"
 import { CanvasNodeData } from "obsidian/canvas"
 
 export default class CopyNodeReferenceCanvasExtension extends CanvasExtension {
-  isEnabled() { return 'enableSingleNodeLinks' as const }
+  isEnabled() { return 'enableSingleNodeReferenceCopy' as const }
 
   init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
