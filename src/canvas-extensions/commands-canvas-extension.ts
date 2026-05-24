@@ -7,6 +7,7 @@ import CanvasHelper from "src/utils/canvas-helper"
 import { FileSelectModal } from "src/utils/modal-helper"
 import TextHelper from "src/utils/text-helper"
 import CanvasExtension from "./canvas-extension"
+import CopyNodeReferenceCanvasExtension from "./copy-node-reference-canvas-extension";
 
 type Direction = 'up' | 'down' | 'left' | 'right'
 const DIRECTIONS = ['up', 'down', 'left', 'right'] as Direction[]
@@ -196,10 +197,7 @@ export default class CommandsCanvasExtension extends CanvasExtension {
           const nodeData = canvas.getSelectionData().nodes[0]
           if (!nodeData) return
 
-          const wikilink = `[[${file.path}#${nodeData.id}|${file.name} (${TextHelper.toTitleCase(nodeData.type)} node)]]`
-          navigator.clipboard.writeText(wikilink).then(() =>
-            new Notice("Copied wikilink to node to clipboard.", 2000)
-          ).catch(() => new Notice("Failed to copy wikilink to node to clipboard.", 2000))
+          CopyNodeReferenceCanvasExtension.copyWikilinkToNode(file, nodeData)
         }
       )
     })

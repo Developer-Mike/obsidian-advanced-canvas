@@ -23,6 +23,7 @@ export interface AdvancedCanvasPluginSettingsValues {
 
   canvasMetadataCompatibilityEnabled: boolean
   enableSingleNodeLinks: boolean
+  enableSingleNodeReferenceCopy: boolean
 
   combineCustomStylesInDropdown: boolean
 
@@ -119,6 +120,7 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
 
   canvasMetadataCompatibilityEnabled: true,
   enableSingleNodeLinks: true,
+  enableSingleNodeReferenceCopy: false,
 
   combineCustomStylesInDropdown: false,
 
@@ -295,6 +297,11 @@ export const SETTINGS = {
       enableSingleNodeLinks: {
         label: 'Enable support for linking to a node using a [[wikilink]]',
         description: 'When enabled, you can link and embed a node using [[canvas-file#node-id]] (Use the "Copy wikilink to node" command to get an id).',
+        type: 'boolean'
+      },
+      enableSingleNodeReferenceCopy: {
+        label: 'Show button to copy node [[wikilink]]',
+        description: `When enabled, a button in the node popup menu appears which send the node's [[canvas-file#node-id]] to the clipboard.`,
         type: 'boolean'
       }
     }
