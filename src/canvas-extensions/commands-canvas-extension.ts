@@ -1,13 +1,12 @@
-import { Notice, TFile } from "obsidian"
+import { TFile } from "obsidian"
 import { CanvasFileNodeData } from "src/@types/AdvancedJsonCanvas"
 import { Canvas, CanvasNode } from "src/@types/Canvas"
 import { ExtendedCachedMetadata } from "src/@types/Obsidian"
 import BBoxHelper from "src/utils/bbox-helper"
 import CanvasHelper from "src/utils/canvas-helper"
 import { FileSelectModal } from "src/utils/modal-helper"
-import TextHelper from "src/utils/text-helper"
 import CanvasExtension from "./canvas-extension"
-import CopyNodeReferenceCanvasExtension from "./copy-node-reference-canvas-extension";
+import CopyNodeReferenceCanvasExtension from "./copy-node-reference-canvas-extension"
 
 type Direction = 'up' | 'down' | 'left' | 'right'
 const DIRECTIONS = ['up', 'down', 'left', 'right'] as Direction[]
