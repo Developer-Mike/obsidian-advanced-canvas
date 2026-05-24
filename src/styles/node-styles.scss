@@ -112,7 +112,7 @@
     /* Fix blurry text */
     backface-visibility: hidden;
 
-    .canvas-node-content .markdown-embed-content {
+    .canvas-node-content > .markdown-embed-content {
       transform: skewX(20deg);
     }
   }
