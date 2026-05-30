@@ -181,6 +181,33 @@ export default class CanvasPatcher extends Patcher {
         return nodes
       }),
       createGroupNode: Patcher.OverrideExisting(next => function (...args: any): CanvasNode {
+        const data = args[0]
+        const topPadding = that.plugin.settings.getSetting('groupNodeTopPadding')
+        const selectedBBoxes: BBox[] = []
+
+        for (const element of Array.from(this.selection?.values() ?? [])) {
+          if (typeof (element as { getBBox?: unknown }).getBBox !== 'function') continue
+          selectedBBoxes.push((element as { getBBox: () => BBox }).getBBox())
+        }
+
+        if (topPadding > 0 && selectedBBoxes.length > 0 && data?.pos && data?.size) {
+          const selectionBBox = BBoxHelper.combineBBoxes(selectedBBoxes)
+          const groupBBox = {
+            minX: data.pos.x,
+            minY: data.pos.y,
+            maxX: data.pos.x + data.size.width,
+            maxY: data.pos.y + data.size.height
+          }
+
+          if (BBoxHelper.insideBBox(selectionBBox, groupBBox, true)) {
+            args[0] = {
+              ...data,
+              pos: { ...data.pos, y: data.pos.y - topPadding },
+              size: { ...data.size, height: data.size.height + topPadding }
+            }
+          }
+        }
+
         const node = next.call(this, ...args)
         that.plugin.app.workspace.trigger('advanced-canvas:node-created', this, node)
         return node

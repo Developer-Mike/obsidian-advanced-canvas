@@ -54,6 +54,7 @@ export interface AdvancedCanvasPluginSettingsValues {
   zoomToClonedNode: boolean
   cloneNodeMargin: number
   expandNodeStepSize: number
+  groupNodeTopPadding: number
 
   nativeFileSearchEnabled: boolean
 
@@ -151,6 +152,7 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   zoomToClonedNode: true,
   cloneNodeMargin: 20,
   expandNodeStepSize: 20,
+  groupNodeTopPadding: 20,
 
   nativeFileSearchEnabled: true,
 
@@ -286,6 +288,12 @@ export const SETTINGS = {
         description: 'The step size for expanding the node.',
         type: 'number',
         parse: (value: string) => Math.max(1, parseInt(value) || 0)
+      },
+      groupNodeTopPadding: {
+        label: 'Group node top padding',
+        description: 'Extra top padding added when creating a group around selected nodes to avoid clipping node labels.',
+        type: 'number',
+        parse: (value: string) => Math.max(0, parseInt(value) || 0)
       }
     }
   },
