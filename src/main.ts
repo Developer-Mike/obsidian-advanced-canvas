@@ -28,6 +28,7 @@ import MetadataCanvasExtension from './canvas-extensions/metadata-canvas-extensi
 import NodeRatioCanvasExtension from './canvas-extensions/node-ratio-canvas-extension'
 import VariableBreakpointCanvasExtension from './canvas-extensions/variable-breakpoint-canvas-extension'
 import GroupCanvasExtension from './canvas-extensions/group-canvas-extension'
+import NodeTemplatesCanvasExtension from './canvas-extensions/node-templates-canvas-extension'
 import PresentationCanvasExtension from './canvas-extensions/presentation-canvas-extension'
 import ZOrderingCanvasExtension from './canvas-extensions/z-ordering-canvas-extension'
 import BetterReadonlyCanvasExtension from './canvas-extensions/better-readonly-canvas-extension'
@@ -106,6 +107,7 @@ const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   CommandsCanvasExtension,
   BetterReadonlyCanvasExtension,
   GroupCanvasExtension,
+  NodeTemplatesCanvasExtension,
   VariableBreakpointCanvasExtension,
   EdgeHighlightCanvasExtension,
   AutoFileNodeEdgesCanvasExtension,
