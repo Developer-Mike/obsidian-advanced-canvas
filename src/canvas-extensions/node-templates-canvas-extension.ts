@@ -1,10 +1,10 @@
-import { Canvas, CanvasNode, Position } from "src/@types/Canvas"
-import CanvasHelper from "src/utils/canvas-helper"
-import CanvasExtension from "./canvas-extension"
+import { TFile } from "obsidian"
 import { CanvasColor, CanvasNodeData } from "obsidian/canvas"
 import { AnyCanvasNodeData } from "src/@types/AdvancedJsonCanvas"
-import { TFile } from "obsidian"
+import { Canvas, CanvasNode, Position } from "src/@types/Canvas"
+import CanvasHelper from "src/utils/canvas-helper"
 import { FileSelectModal } from "src/utils/modal-helper"
+import CanvasExtension from "./canvas-extension"
 
 export default class NodeTemplatesCanvasExtension extends CanvasExtension {
   isEnabled() { return true }
@@ -95,15 +95,14 @@ export default class NodeTemplatesCanvasExtension extends CanvasExtension {
               node = canvas.createFileNode({ ...creationOptions, file: tfile })
             } else if (template.type === 'group') node = canvas.createGroupNode(creationOptions)
             else if (template.type === 'link') node = canvas.createLinkNode(creationOptions)
-            else return
+            else throw new Error(`Unknown template type: ${template.type}`)
 
             // FIXME: Delete history containing blank state
 
             const data = node.getData()
             node.setData({
               ...data,
-              ...template,
-
+              color: template.color ?? data.color,
               styleAttributes: {
                 ...data.styleAttributes,
                 ...template.styleAttributes
