@@ -10,6 +10,15 @@ export default class NodeTemplatesCanvasExtension extends CanvasExtension {
   isEnabled() { return true }
 
   init() {
+    this.plugin.addCommand({
+      id: 'save-node-as-template',
+      name: 'Save node as template',
+      checkCallback: CanvasHelper.canvasCommand(
+        this.plugin,
+        (canvas: Canvas) => canvas.getSelectionData().nodes.length === 1,
+        (canvas: Canvas) => this.saveNodeAsTemplate(canvas)
+      )
+    })
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       'advanced-canvas:canvas-changed',
@@ -21,6 +30,7 @@ export default class NodeTemplatesCanvasExtension extends CanvasExtension {
     const templates = [
       {
         type: 'text',
+        icon: 'circle',
         color: '0' as CanvasColor,
         width: 200,
         height: 100,
@@ -58,7 +68,7 @@ export default class NodeTemplatesCanvasExtension extends CanvasExtension {
         height: 400,
         label: 'Group template'
       }
-    ] as ({ width: number, height: number } & Partial<CanvasNodeData & { path?: string }>)[]
+    ] as ({ icon?: string, width: number, height: number } & Partial<CanvasNodeData & { path: string }>)[]
 
     for (let i = 0; i < templates.length; i++) {
       const template = templates[i]
@@ -70,7 +80,7 @@ export default class NodeTemplatesCanvasExtension extends CanvasExtension {
           {
             id: `create-template-node-${i}`,
             label: `Drag to add template node ${i + 1}`,
-            icon: 'book-dashed'
+            icon: template.icon ?? 'book-dashed'
           },
           () => ({ width: template.width, height: template.height }),
           async (canvas: Canvas, pos: Position) => {
@@ -112,5 +122,9 @@ export default class NodeTemplatesCanvasExtension extends CanvasExtension {
         )
       )
     }
+  }
+
+  private saveNodeAsTemplate(canvas: Canvas) {
+
   }
 }
