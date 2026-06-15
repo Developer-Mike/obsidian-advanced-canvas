@@ -211,6 +211,8 @@ Save and reuse node styles as templates. This allows you to quickly apply consis
 
 Saving a node as a template can be done using the new `Advanced Canvas: Save node as template` if you have exactly ONE node selected. After selecting the icon used for the new template, the template will be available in the card menu (horizontal menu at the bottom of the canvas view) for quick application to new nodes.
 
+To remove a template you can right-click on the template in the card menu and select `Remove`.
+
 ## Node Styles
 You can customize the default node styles using the settings. This includes various shapes, border styles, and text alignment options.
 
