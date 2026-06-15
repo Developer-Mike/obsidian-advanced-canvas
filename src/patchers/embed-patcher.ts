@@ -1,6 +1,6 @@
 import { Component, EmbedContext, TFile } from "obsidian"
-import Patcher from "./patcher"
 import AdvancedCanvasEmbed from "src/advanced-canvas-embed"
+import Patcher from "./patcher"
 
 export default class EmbedPatcher extends Patcher {
   async patch() {

@@ -26,7 +26,7 @@ export default class CopyNodeReferenceCanvasExtension extends CanvasExtension {
       id: 'node-popup-menu-option-copy-reference',
       label: 'Copy wikilink to node',
       icon: 'link',
-      callback: () => CopyNodeReferenceCanvasExtension.copyWikilinkToNode(canvas.view.file, selectionData.nodes[0]!)
+      callback: () => CopyNodeReferenceCanvasExtension.copyWikilinkToNode(canvas.view.file, selectionData.nodes[0])
     }
 
     const popupMenuOption = CanvasHelper.createPopupMenuOption(menuOption)

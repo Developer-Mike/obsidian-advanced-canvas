@@ -132,7 +132,7 @@ export default class CanvasHelper {
     }
 
     const sisterElement = index >= 0 ? popupMenuEl.children[index] : popupMenuEl.children[popupMenuEl.children.length + index]
-    popupMenuEl.insertAfter(element, sisterElement!)
+    popupMenuEl.insertAfter(element, sisterElement)
   }
 
   static getCenterCoordinates(canvas: Canvas, nodeSize: Size): Position {

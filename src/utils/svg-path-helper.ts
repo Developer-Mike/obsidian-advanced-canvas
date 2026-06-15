@@ -5,12 +5,12 @@ export default class SvgPathHelper {
     let newPositions = [...positions]
     if (positions.length <= 2) return newPositions
 
-    newPositions = [positions[0]!]
+    newPositions = [positions[0]]
 
     for (let i = 1; i < positions.length - 2; i++) {
-      const p1 = positions[i]!
-      const p2 = positions[i + 1]!
-      const p3 = positions[i + 2]!
+      const p1 = positions[i]
+      const p2 = positions[i + 1]
+      const p3 = positions[i + 2]
 
       const t1 = (1 - tension) / 2
       const t2 = 1 - t1
@@ -30,7 +30,7 @@ export default class SvgPathHelper {
       newPositions.push({ x: x, y: y })
     }
 
-    const lastPoint = positions[positions.length - 1]!
+    const lastPoint = positions[positions.length - 1]
     newPositions.push(lastPoint)
 
     return newPositions
@@ -38,9 +38,9 @@ export default class SvgPathHelper {
 
   static pathArrayToSvgPath(positions: Position[]): string {
     for (let i = 0; i < positions.length - 2; i++) {
-      const p1 = positions[i]!
-      const p2 = positions[i + 1]!
-      const p3 = positions[i + 2]!
+      const p1 = positions[i]
+      const p2 = positions[i + 1]
+      const p3 = positions[i + 2]
 
       const currentDirection = {
         x: p2.x - p1.x,
@@ -71,17 +71,17 @@ export default class SvgPathHelper {
     pathArray = pathArray.filter((position, index) => {
       if (index === 0) return true
 
-      const previous = pathArray[index - 1]!
+      const previous = pathArray[index - 1]
       return !(position.x === previous.x && position.y === previous.y)
     })
 
     const commands: string[] = []
-    commands.push(`M ${pathArray[0]!.x} ${pathArray[0]!.y}`)
+    commands.push(`M ${pathArray[0].x} ${pathArray[0].y}`)
 
     for (let i = 1; i < pathArray.length - 1; i++) {
-      const previous = pathArray[i - 1]!
-      const current = pathArray[i]!
-      const next = pathArray[i + 1]!
+      const previous = pathArray[i - 1]
+      const current = pathArray[i]
+      const next = pathArray[i + 1]
 
       const prevDelta = { x: current.x - previous.x, y: current.y - previous.y }
       const nextDelta = { x: next.x - current.x, y: next.y - current.y }
@@ -126,7 +126,7 @@ export default class SvgPathHelper {
       commands.push(`A ${effectiveRadius} ${effectiveRadius} 0 0 ${sweepFlag} ${secondAnchor.x} ${secondAnchor.y}`)
     }
 
-    const last = pathArray[pathArray.length - 1]!
+    const last = pathArray[pathArray.length - 1]
     commands.push(`L ${last.x} ${last.y}`)
 
     return commands.join(' ')

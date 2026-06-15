@@ -1,6 +1,6 @@
 export default class TextHelper {
   static toCamelCase(str: string): string {
-    return str.replace(/-./g, (x: string) => x[1]!.toUpperCase())
+    return str.replace(/-./g, (x: string) => x[1].toUpperCase())
   }
 
   static toTitleCase(str: string): string {

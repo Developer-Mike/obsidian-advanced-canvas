@@ -50,7 +50,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (canvas: Canvas) => !canvas.readonly && !this.isPresentationMode && canvas.getSelectionData().nodes.length === 1,
-        (canvas: Canvas) => this.setStartNode(canvas, canvas.nodes.get(canvas.getSelectionData().nodes[0]!.id))
+        (canvas: Canvas) => this.setStartNode(canvas, canvas.nodes.get(canvas.getSelectionData().nodes[0].id))
       )
     })
 
@@ -139,7 +139,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     const selectedNodesData = canvas.getSelectionData().nodes
     if (canvas.readonly || selectedNodesData.length !== 1 || canvas.selection.size > 1) return
 
-    const selectedNode = canvas.nodes.get(selectedNodesData[0]!.id)
+    const selectedNode = canvas.nodes.get(selectedNodesData[0].id)
     if (!selectedNode) return
 
     CanvasHelper.addPopupMenuOption(

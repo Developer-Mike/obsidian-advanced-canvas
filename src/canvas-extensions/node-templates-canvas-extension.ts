@@ -1,4 +1,4 @@
-import App, { FuzzyMatch, FuzzySuggestModal, getIconIds, Menu, Notice, setIcon, TFile } from "obsidian"
+import { FuzzyMatch, FuzzySuggestModal, getIconIds, Menu, Notice, setIcon, TFile } from "obsidian"
 import { CanvasColor, CanvasNodeData } from "obsidian/canvas"
 import { AnyCanvasNodeData } from "src/@types/AdvancedJsonCanvas"
 import { Canvas, CanvasNode, Position } from "src/@types/Canvas"
@@ -12,7 +12,7 @@ export interface NodeTemplate {
   width: number
   height: number
   color?: CanvasColor
-  styleAttributes?: Record<string, any>
+  styleAttributes?: Record<string, string>
   path?: string // for file nodes
   url?: string // for link nodes
 }
@@ -29,7 +29,7 @@ export default class NodeTemplatesCanvasExtension extends CanvasExtension {
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (canvas: Canvas) => canvas.getSelectionData().nodes.length === 1,
-        (canvas: Canvas) => this.saveNodeAsTemplate(canvas)
+        (canvas: Canvas) => void this.saveNodeAsTemplate(canvas)
       )
     })
 
@@ -59,7 +59,7 @@ export default class NodeTemplatesCanvasExtension extends CanvasExtension {
             icon: template.icon ?? 'book-dashed'
           },
           () => ({ width: template.width, height: template.height }),
-          (canvas: Canvas, pos: Position) => this.createNodeFromTemplate(canvas, template, pos),
+          (canvas: Canvas, pos: Position) => void this.createNodeFromTemplate(canvas, template, pos),
           (e: PointerEvent) => this.createTemplateContextMenu(e)
         )
       )
@@ -109,13 +109,13 @@ export default class NodeTemplatesCanvasExtension extends CanvasExtension {
     menu.addItem(item => item
       .setTitle("Remove")
       .setIcon("trash")
-      .onClick(() => {
+      .onClick(async () => {
         const buttonEl = e.target as HTMLElement
         const index = parseInt(buttonEl.id.replace(TEMPLATE_NODE_BUTTON_ID_PREFIX, ""))
 
         const templates = this.plugin.settings.getSetting("nodeTemplates")
         templates.splice(index, 1)
-        this.plugin.settings.setSetting({ nodeTemplates: templates })
+        await this.plugin.settings.setSetting({ nodeTemplates: templates })
 
         const canvas = this.plugin.getCurrentCanvas()
         if (canvas) this.onCardMenuCreated(canvas)
@@ -133,7 +133,7 @@ export default class NodeTemplatesCanvasExtension extends CanvasExtension {
       return
     }
 
-    this.plugin.settings.setSetting({
+    await this.plugin.settings.setSetting({
       nodeTemplates: [
         ...this.plugin.settings.getSetting("nodeTemplates"),
         {
@@ -185,7 +185,7 @@ class IconModal extends FuzzySuggestModal<string> {
         resolve(item)
       }
 
-      this.onClose = () => setTimeout(() => {
+      this.onClose = () => window.setTimeout(() => {
         resolve(null)
       }, 10)
 

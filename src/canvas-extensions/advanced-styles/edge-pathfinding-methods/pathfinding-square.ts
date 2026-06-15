@@ -205,8 +205,8 @@ export default class EdgePathfindingSquare extends EdgePathfindingMethod {
         )
 
         center = {
-          x: pathArray[1]!.x,
-          y: pathArray[1]!.y
+          x: pathArray[1].x,
+          y: pathArray[1].y
         }
       }
     }

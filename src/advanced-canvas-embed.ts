@@ -1,6 +1,5 @@
 import App, { Component, EmbedContext, MarkdownRenderer, TFile } from "obsidian"
 import { CanvasData, CanvasFileNodeData, CanvasGroupNodeData, CanvasTextNodeData } from "./@types/AdvancedJsonCanvas"
-import TextHelper from "./utils/text-helper"
 
 export default class AdvancedCanvasEmbed extends Component {
   private context: EmbedContext

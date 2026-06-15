@@ -33,7 +33,7 @@ export default class NodeStylesExtension extends CanvasExtension {
 
     CanvasHelper.addStyleAttributesToPopup(
       this.plugin, canvas, availableNodeStyles,
-      selectionNodeData[0]!.styleAttributes ?? {},
+      selectionNodeData[0].styleAttributes ?? {},
       (attribute, value) => this.setStyleAttributeForSelection(canvas, attribute, value)
     )
   }

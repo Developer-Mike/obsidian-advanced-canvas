@@ -110,7 +110,7 @@ export default class ZOrderingCanvasExtension  extends CanvasExtension {
       const node = sortedNodes[i]
       const finalZIndex = zIndex + i
 
-      node!.setZIndex(finalZIndex)
+      node.setZIndex(finalZIndex)
     }
   }
 

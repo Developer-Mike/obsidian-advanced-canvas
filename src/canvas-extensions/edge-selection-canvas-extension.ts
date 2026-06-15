@@ -43,7 +43,7 @@ export default class EdgeSelectionCanvasExtension extends CanvasExtension {
     if (selectionNodeData.length === 1) {
       // for better user experience and performance,
       // reduce unapplicable options for frequent use case
-      const node = canvas.nodes.get(selectionNodeData[0]!.id)
+      const node = canvas.nodes.get(selectionNodeData[0].id)
       if (!node) return
 
       const edges = canvas.getEdgesForNode(node)
