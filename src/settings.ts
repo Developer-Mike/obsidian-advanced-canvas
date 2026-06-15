@@ -3,6 +3,7 @@ import { BooleanSetting, ButtonSetting, DimensionSetting, DropdownSetting, Numbe
 import { GET_EDGE_CSS_STYLES_MANAGER } from "./canvas-extensions/advanced-styles/edge-styles"
 import { GET_NODE_CSS_STYLES_MANAGER } from "./canvas-extensions/advanced-styles/node-styles"
 import { BUILTIN_EDGE_STYLE_ATTRIBUTES, BUILTIN_NODE_STYLE_ATTRIBUTES, StyleAttribute } from "./canvas-extensions/advanced-styles/style-config"
+import { NodeTemplate } from "./canvas-extensions/node-templates-canvas-extension"
 import { VARIABLE_BREAKPOINT_CSS_VAR } from "./canvas-extensions/variable-breakpoint-canvas-extension"
 import AdvancedCanvasPlugin from "./main"
 import CssStylesConfigManager from "./managers/css-styles-config-manager"
@@ -31,6 +32,7 @@ export interface AdvancedCanvasPluginSettingsValues {
   customNodeStyleAttributes: StyleAttribute[]
   defaultTextNodeColor: number
   defaultTextNodeStyleAttributes: { [key: string]: string }
+  nodeTemplates: NodeTemplate[]
 
   edgesStylingFeatureEnabled: boolean
   customEdgeStyleAttributes: StyleAttribute[]
@@ -128,6 +130,7 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   customNodeStyleAttributes: [],
   defaultTextNodeColor: 0,
   defaultTextNodeStyleAttributes: {},
+  nodeTemplates: [],
 
   edgesStylingFeatureEnabled: true,
   customEdgeStyleAttributes: [],

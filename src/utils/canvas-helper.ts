@@ -45,7 +45,7 @@ export default class CanvasHelper {
     controlGroup.appendChild(element)
   }
 
-  static createCardMenuOption(canvas: Canvas, menuOption: MenuOption, previewNodeSize: () => Size, onPlaced: (canvas: Canvas, pos: Position) => void): HTMLElement {
+  static createCardMenuOption(canvas: Canvas, menuOption: MenuOption, previewNodeSize: () => Size, onPlaced: (canvas: Canvas, pos: Position) => void, onRightClick?: (e: MouseEvent) => void): HTMLElement {
     /* eslint-disable-next-line obsidianmd/prefer-create-el -- So we can return it */
     const menuOptionElement = activeDocument.createElement("div")
     if (menuOption.id) menuOptionElement.id = menuOption.id
@@ -56,6 +56,11 @@ export default class CanvasHelper {
 
     menuOptionElement.addEventListener('click', (_e) => {
       onPlaced(canvas, this.getCenterCoordinates(canvas, previewNodeSize()))
+    })
+
+    if (onRightClick) menuOptionElement.addEventListener('contextmenu', (e) => {
+      e.preventDefault()
+      onRightClick(e)
     })
 
     menuOptionElement.addEventListener('pointerdown', (e) => {

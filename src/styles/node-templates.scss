@@ -1,0 +1,14 @@
+.icon-modal-suggestion {
+  display: flex;
+  align-items: center;
+  gap: var(--size-4-4);
+
+  .icon-modal-suggestion-icon {
+    line-height: 0;
+  }
+
+  .icon-modal-suggestion-id {
+    font-size: var(--font-ui-smaller);
+    color: var(--text-muted);
+  }
+}
