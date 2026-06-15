@@ -30,6 +30,7 @@ This plugin enhances the Obsidian canvas with a wide array of features:
     *   [Enhanced Readonly Mode](#better-readonly): Finer control over canvas interaction in readonly mode.
     *   [Improved Image Export](#image-export): Export to PNG/SVG with transparency and other options.
 *   **Node Customization:**
+    *   [Node Templates](#node-templates): Save and reuse node styles as templates.
     *   [Node Styles](#node-styles): Includes various [Flowchart Shapes](#node-shapes), [Border Styles](#border-styles), and Text Alignment.
     *   [Auto Node Resizing](#auto-node-resizing): Nodes adapt to their content size automatically.
     *   [Variable Breakpoints](#variable-breakpoints): Control content rendering based on zoom level.
@@ -204,6 +205,11 @@ Quickly locate text within your canvas using a familiar search experience. Advan
 *   `Advanced Canvas: Pull backlinks to canvas`
     *   Create file nodes for all backlinks of the selected nodes / the whole canvas if no node is selected
 </details>
+
+## Node Templates
+Save and reuse node styles as templates. This allows you to quickly apply consistent styling to new nodes without having to manually adjust each style attribute every time.
+
+Saving a node as a template can be done using the new `Advanced Canvas: Save node as template` if you have exactly ONE node selected. After selecting the icon used for the new template, the template will be available in the card menu (horizontal menu at the bottom of the canvas view) for quick application to new nodes.
 
 ## Node Styles
 You can customize the default node styles using the settings. This includes various shapes, border styles, and text alignment options.
