@@ -1,6 +1,6 @@
 import { TFile } from "obsidian"
 import { CanvasFileNodeData } from "src/@types/AdvancedJsonCanvas"
-import { Canvas, CanvasNode } from "src/@types/Canvas"
+import { Canvas, CanvasEdge, CanvasElement, CanvasNode } from "src/@types/Canvas"
 import { ExtendedCachedMetadata } from "src/@types/Obsidian"
 import BBoxHelper from "src/utils/bbox-helper"
 import CanvasHelper from "src/utils/canvas-helper"
@@ -10,6 +10,26 @@ import CopyNodeReferenceCanvasExtension from "./copy-node-reference-canvas-exten
 
 type Direction = 'up' | 'down' | 'left' | 'right'
 const DIRECTIONS = ['up', 'down', 'left', 'right'] as Direction[]
+
+// Added by an LLM agent
+/** The value the "Invisible" (eye-off) style option sets - see BUILTIN_*_STYLE_ATTRIBUTES. */
+const INVISIBLE_STYLE_VALUE = 'invisible'
+
+/**
+ * Added by an LLM agent.
+ * Which style attribute carries the "Invisible" option per element kind, plus the key the style it
+ * replaced gets parked under - so toggling back restores e.g. a dashed border instead of the default.
+ */
+const INVISIBLE_STYLE_KEYS = {
+  node: { style: 'border', restore: 'borderBeforeInvisible' },
+  edge: { style: 'path', restore: 'pathBeforeInvisible' }
+} as const
+
+// Added by an LLM agent
+type InvisibleStyleTarget = {
+  element: CanvasElement
+  keys: (typeof INVISIBLE_STYLE_KEYS)[keyof typeof INVISIBLE_STYLE_KEYS]
+}
 
 export default class CommandsCanvasExtension extends CanvasExtension {
   isEnabled() { return 'commandsFeatureEnabled' as const }
@@ -22,6 +42,17 @@ export default class CommandsCanvasExtension extends CanvasExtension {
         this.plugin,
         (_canvas: Canvas) => true,
         (canvas: Canvas) => canvas.setReadonly(!canvas.readonly)
+      )
+    })
+
+    // Added by an LLM agent
+    this.plugin.addCommand({
+      id: 'toggle-invisible-style',
+      name: 'Toggle invisible style',
+      checkCallback: CanvasHelper.canvasCommand(
+        this.plugin,
+        (canvas: Canvas) => !canvas.readonly && this.getInvisibleStyleTargets(canvas).length > 0,
+        (canvas: Canvas) => this.toggleInvisibleStyle(canvas)
       )
     })
 
@@ -314,6 +345,62 @@ export default class CommandsCanvasExtension extends CanvasExtension {
         }
       )
     })
+  }
+
+  /**
+   * Added by an LLM agent.
+   * The selected elements the "Invisible" style option can be applied to, paired with the style
+   * attribute that carries it. Nodes/edges are skipped while their styling feature is disabled - the
+   * style attribute never reaches the DOM then, so toggling it would silently do nothing.
+   */
+  private getInvisibleStyleTargets(canvas: Canvas): InvisibleStyleTarget[] {
+    const targets: InvisibleStyleTarget[] = []
+
+    for (const element of canvas.selection) {
+      // Edges are the only selectable elements with a path
+      const kind = (element as CanvasEdge).path !== undefined ? 'edge' : 'node'
+      const featureSetting = kind === 'edge' ? 'edgesStylingFeatureEnabled' : 'nodeStylingFeatureEnabled'
+      if (!this.plugin.settings.getSetting(featureSetting)) continue
+
+      targets.push({ element, keys: INVISIBLE_STYLE_KEYS[kind] })
+    }
+
+    return targets
+  }
+
+  /**
+   * Added by an LLM agent.
+   * Hides the whole selection, unless it is already fully hidden - then it gets restored to whatever
+   * style it had before being hidden.
+   */
+  private toggleInvisibleStyle(canvas: Canvas) {
+    const targets = this.getInvisibleStyleTargets(canvas)
+    if (targets.length === 0) return
+
+    const hide = !targets.every(({ element, keys }) =>
+      element.getData().styleAttributes?.[keys.style] === INVISIBLE_STYLE_VALUE)
+
+    for (const { element, keys } of targets) {
+      const elementData = element.getData()
+      const styleAttributes = elementData.styleAttributes ?? {}
+
+      // Skip elements that are already in the target state - re-hiding an already hidden element
+      // would park "invisible" as its own previous style and strand it there
+      if ((styleAttributes[keys.style] === INVISIBLE_STYLE_VALUE) === hide) continue
+
+      // Unset attributes are set to null instead of being dropped, so the dataset exposer removes
+      // the now-stale data attribute from the DOM
+      element.setData({
+        ...elementData,
+        styleAttributes: {
+          ...styleAttributes,
+          [keys.style]: hide ? INVISIBLE_STYLE_VALUE : (styleAttributes[keys.restore] ?? null),
+          [keys.restore]: hide ? (styleAttributes[keys.style] ?? null) : null
+        }
+      })
+    }
+
+    canvas.pushHistory(canvas.getData())
   }
 
   private createTextNode(canvas: Canvas) {

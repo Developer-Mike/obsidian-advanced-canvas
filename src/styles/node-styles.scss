@@ -248,6 +248,37 @@
   }
   //#endregion
 
+  //#region Group Label Size (added by an LLM agent)
+  // The label already scales with the zoom level via a transform - this only multiplies its font size on top of that
+  &[data-group-label-size] {
+    &[data-group-label-size='0.75'] { --group-label-size-multiplier: 0.75; }
+    &[data-group-label-size='1.5'] { --group-label-size-multiplier: 1.5; }
+    &[data-group-label-size='2'] { --group-label-size-multiplier: 2; }
+    &[data-group-label-size='3'] { --group-label-size-multiplier: 3; }
+
+    .canvas-group-label {
+      font-size: calc(1.5em * var(--group-label-size-multiplier, 1));
+    }
+  }
+  //#endregion
+
+  //#region Group Opacity (added by an LLM agent)
+  // Obsidian tints a group with `color-mix(in oklch, var(--canvas-color) 7%, transparent)` on the
+  // content element - this replaces that 7% with the configured value, so 100% is a solid fill.
+  // Only the fill changes: the border and the label are left at full strength.
+  &[data-group-opacity] {
+    &[data-group-opacity='0.25'] { --group-opacity: 0.25; }
+    &[data-group-opacity='0.5'] { --group-opacity: 0.5; }
+    &[data-group-opacity='0.75'] { --group-opacity: 0.75; }
+    &[data-group-opacity='1'] { --group-opacity: 1; }
+
+    // Needs to outweigh Obsidian's own `.canvas-node.is-themed .canvas-node-content` rule
+    .canvas-node-container > .canvas-node-content {
+      background-color: color-mix(in oklch, var(--canvas-color) calc(var(--group-opacity, 0.07) * 100%), transparent);
+    }
+  }
+  //#endregion
+
   //#region Borders
   &[data-border='dashed'] .canvas-node-container {
     box-shadow: none;

@@ -9,6 +9,8 @@ export interface MenuOption {
   id?: string
   label: string
   icon: string
+  /** If set, the option is rendered as a text button instead of an icon button (the label stays as the tooltip) */
+  text?: string
   callback?: () => void
 }
 
@@ -83,7 +85,12 @@ export default class CanvasHelper {
     const menuOptionElement = activeDocument.createElement('button')
     if (menuOption.id) menuOptionElement.id = menuOption.id
     menuOptionElement.classList.add('clickable-icon')
-    setIcon(menuOptionElement, menuOption.icon)
+
+    if (menuOption.text !== undefined) {
+      menuOptionElement.classList.add('mod-text-option')
+      menuOptionElement.textContent = menuOption.text
+    } else setIcon(menuOptionElement, menuOption.icon)
+
     setTooltip(menuOptionElement, menuOption.label, { placement: 'top' })
     menuOptionElement.addEventListener('click', () => menuOption.callback?.())
 

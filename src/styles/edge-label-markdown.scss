@@ -1,0 +1,62 @@
+/* Added by an LLM agent */
+/* Styling for edge labels that show rendered markdown instead of their raw source.
+   The classes are only present while the label is NOT being edited - during editing the label
+   falls back to the core plain-text look. */
+
+.canvas-path-label.ac-markdown-label {
+  /* The core label is a plain text box - rendered markdown needs block layout */
+  white-space: normal;
+  text-align: left;
+  max-width: var(--ac-markdown-label-max-width, 400px);
+
+  /* Let links, embeds and code blocks receive clicks (the extension stops those from
+     reaching the canvas' own label click handler) */
+  user-select: text;
+
+  /* Collapse the outer margins so the label isn't padded by its first/last block */
+  > :first-child { margin-top: 0; }
+  > :last-child { margin-bottom: 0; }
+
+  p {
+    margin-block: var(--size-2-2);
+  }
+
+  ul, ol {
+    margin-block: var(--size-2-2);
+    padding-inline-start: var(--size-4-4);
+  }
+
+  img,
+  .image-embed img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  pre {
+    margin-block: var(--size-2-2);
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+}
+
+/* Embeds, code block widgets, tables and images have no intrinsic width, so a shrink-to-fit
+   label collapses to a few pixels around them. Give the label a definite box instead, and cap
+   its height - an embedded note is otherwise free to be thousands of pixels tall. */
+.canvas-path-label.ac-markdown-label.ac-markdown-label-block {
+  width: var(--ac-markdown-label-max-width, 400px);
+  max-height: var(--ac-markdown-label-max-height, 300px);
+  overflow-y: auto;
+
+  .internal-embed,
+  .external-embed,
+  [class*="block-language-"] {
+    display: block;
+    width: 100%;
+  }
+}

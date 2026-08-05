@@ -1,0 +1,65 @@
+/* Added by an LLM agent */
+/* Applies the configured default group label size, group opacity, edge width and arrow size to
+   every element that doesn't have a value of its own set in the node/edge popup.
+
+   The data attributes are only set on the canvas wrapper while the corresponding setting isn't
+   at 1x (see default-style-sizes-canvas-extension.ts), so Obsidian's own sizing is untouched by
+   default. An element with an explicit size sets its own `--*-multiplier` (see node-styles.scss
+   and edge-styles.scss), which takes precedence over the default via the `var()` fallback. */
+
+//#region Group label size
+.canvas-wrapper[data-default-group-label-size] {
+  &[data-default-group-label-size='0.75'] { --default-group-label-size-multiplier: 0.75; }
+  &[data-default-group-label-size='1.5'] { --default-group-label-size-multiplier: 1.5; }
+  &[data-default-group-label-size='2'] { --default-group-label-size-multiplier: 2; }
+  &[data-default-group-label-size='3'] { --default-group-label-size-multiplier: 3; }
+
+  .canvas-node .canvas-group-label {
+    font-size: calc(1.5em * var(--group-label-size-multiplier, var(--default-group-label-size-multiplier, 1)));
+  }
+}
+//#endregion
+
+//#region Group opacity
+// 0.07 is Obsidian's own group tint - see the Group Opacity region in node-styles.scss
+.canvas-wrapper[data-default-group-opacity] {
+  &[data-default-group-opacity='0.25'] { --default-group-opacity: 0.25; }
+  &[data-default-group-opacity='0.5'] { --default-group-opacity: 0.5; }
+  &[data-default-group-opacity='0.75'] { --default-group-opacity: 0.75; }
+  &[data-default-group-opacity='1'] { --default-group-opacity: 1; }
+
+  .canvas-node.canvas-node-group .canvas-node-container > .canvas-node-content {
+    background-color: color-mix(in oklch, var(--canvas-color) calc(var(--group-opacity, var(--default-group-opacity, 0.07)) * 100%), transparent);
+  }
+}
+//#endregion
+
+//#region Edge width
+.canvas-wrapper[data-default-edge-width] {
+  &[data-default-edge-width='0.5'] { --default-edge-width-multiplier: 0.5; }
+  &[data-default-edge-width='2'] { --default-edge-width-multiplier: 2; }
+  &[data-default-edge-width='3'] { --default-edge-width-multiplier: 3; }
+
+  .canvas-edges path.canvas-display-path {
+    stroke-width: calc(2px * var(--zoom-multiplier) * var(--edge-width-multiplier, var(--default-edge-width-multiplier, 1)));
+  }
+
+  .canvas-edges g.is-focused path.canvas-display-path,
+  .canvas:not(.is-connecting) .canvas-edges g:hover path.canvas-display-path {
+    stroke-width: calc(5.5px * var(--zoom-multiplier) * var(--edge-width-multiplier, var(--default-edge-width-multiplier, 1)));
+  }
+}
+//#endregion
+
+//#region Arrow size
+.canvas-wrapper[data-default-arrow-size] {
+  &[data-default-arrow-size='0.5'] { --default-arrow-size-multiplier: 0.5; }
+  &[data-default-arrow-size='1.5'] { --default-arrow-size-multiplier: 1.5; }
+  &[data-default-arrow-size='2'] { --default-arrow-size-multiplier: 2; }
+
+  // Obsidian anchors the arrow at `center top`, so scaling keeps the tip on the node border
+  .canvas-edges polygon.canvas-path-end {
+    transform: scale(calc(var(--zoom-multiplier) * var(--arrow-size-multiplier, var(--default-arrow-size-multiplier, 1))));
+  }
+}
+//#endregion

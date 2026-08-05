@@ -14,6 +14,65 @@
 }
 //#endregion
 
+//#region Invisible path (added by an LLM agent)
+// Hides the line and its arrow heads. The interaction path is left alone, so the edge can still be
+// clicked, dragged and re-styled where it runs - it just doesn't draw anything. The label (if any)
+// stays visible, mirroring how an invisible node border keeps the node's content.
+.canvas-edges {
+  path.canvas-display-path[data-path='invisible'],
+  [data-path='invisible'] polygon.canvas-path-end {
+    opacity: 0;
+  }
+
+  // Ghost the whole edge back in while it's selected, so an invisible edge can still be found.
+  // (`is-focused` comes from the edge highlight feature - hover below covers it when that's off.)
+  g.is-focused {
+    path.canvas-display-path[data-path='invisible'],
+    [data-path='invisible'] polygon.canvas-path-end {
+      opacity: 0.3;
+    }
+  }
+}
+
+// The arrow heads live in a second `.canvas-edges` svg, which isn't hovered along with the line -
+// so hovering only ghosts the line itself. Exports are unaffected: `.is-exporting` kills pointer
+// events, so nothing is ever hovered while exporting.
+.canvas:not(.is-connecting) .canvas-edges g:hover path.canvas-display-path[data-path='invisible'] {
+  opacity: 0.3;
+}
+//#endregion
+
+//#region Edge width
+.canvas-edges path[data-edge-width] {
+  &[data-edge-width='0.5'] { --edge-width-multiplier: 0.5; }
+  &[data-edge-width='2'] { --edge-width-multiplier: 2; }
+  &[data-edge-width='3'] { --edge-width-multiplier: 3; }
+}
+
+// Mirrors Obsidian's own selectors (+ the attribute) so the width multiplier also applies while focused/hovered
+.canvas-edges path.canvas-display-path[data-edge-width] {
+  stroke-width: calc(2px * var(--zoom-multiplier) * var(--edge-width-multiplier, 1));
+}
+
+.canvas-edges g.is-focused path.canvas-display-path[data-edge-width],
+.canvas:not(.is-connecting) .canvas-edges g:hover path.canvas-display-path[data-edge-width] {
+  stroke-width: calc(5.5px * var(--zoom-multiplier) * var(--edge-width-multiplier, 1));
+}
+//#endregion
+
+//#region Arrow size
+.canvas-edges [data-arrow-size] {
+  &[data-arrow-size='0.5'] { --arrow-size-multiplier: 0.5; }
+  &[data-arrow-size='1.5'] { --arrow-size-multiplier: 1.5; }
+  &[data-arrow-size='2'] { --arrow-size-multiplier: 2; }
+
+  // Obsidian anchors the arrow at `center top`, so scaling keeps the tip on the node border
+  polygon.canvas-path-end {
+    transform: scale(calc(var(--zoom-multiplier) * var(--arrow-size-multiplier, 1)));
+  }
+}
+//#endregion
+
 //#region Arrow
 .canvas-edges {
   [data-arrow='triangle-outline'], [data-arrow='diamond-outline'], [data-arrow='circle-outline'] {

@@ -1,0 +1,7 @@
+/* Added by an LLM agent */
+/* Hides all group labels while the `hideGroupLabels` setting is on (toggled by the
+   "Toggle group label visibility" command). The label stays visible while it is being
+   edited, so renaming a group still works with the labels hidden. */
+.canvas-wrapper[data-hide-group-labels="true"] .canvas-node .canvas-group-label:not(:focus) {
+  display: none;
+}

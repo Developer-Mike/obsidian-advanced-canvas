@@ -2,7 +2,11 @@
 @use "styles/search-command";
 @use "styles/menu";
 @use "styles/node-styles";
+@use "styles/group-label-wrap"; // Added by an LLM agent
+@use "styles/group-label-visibility"; // Added by an LLM agent
 @use "styles/edge-styles";
+@use "styles/edge-label-markdown"; // Added by an LLM agent
+@use "styles/default-style-sizes"; // Added by an LLM agent
 @use "styles/node-templates";
 @use "styles/export";
 @use "styles/better-default-settings";
@@ -11,6 +15,7 @@
 @use "styles/collapsible-groups";
 @use "styles/floating-edge";
 @use "styles/focus-mode";
+@use "styles/canvas-filter"; // Added by an LLM agent
 @use "styles/presentation";
 @use "styles/portals";
 @use "styles/embeds";

@@ -1,0 +1,7 @@
+/* Added by an LLM agent */
+/* Hides the nodes and edges that got filtered out by one of the canvas filter commands
+   (see `canvas-extensions/canvas-filter-canvas-extension.ts`). The class is only ever set at
+   runtime, so nothing of this ends up in the canvas file. */
+.canvas-wrapper .advanced-canvas-filtered-out {
+  display: none;
+}

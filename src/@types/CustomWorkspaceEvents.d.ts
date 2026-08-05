@@ -48,6 +48,8 @@ export interface CustomWorkspaceEvents {
   'advanced-canvas:node-changed': (canvas: Canvas, node: CanvasNode) => void
   /** Fired when any edge gets changed */
   'advanced-canvas:edge-changed': (canvas: Canvas, edge: CanvasEdge) => void
+  /** Fired after an edge recalculated its default path (`bezier` and the `d` attributes are already set) */
+  'advanced-canvas:edge-path-updated': (canvas: Canvas, edge: CanvasEdge) => void
   /** Fired when any node gets rendered */
   'advanced-canvas:node-rendered': (canvas: Canvas, node: CanvasNode) => void
   /** Fired when the text content of a node gets changed (While typing) */

@@ -22,6 +22,19 @@ const CUSTOM_ICONS = {
   'border-dashed': `<path stroke="currentColor" fill="none" stroke-width="8.333" stroke-dasharray="13.7" d="M91.6667 45.8333v4.1667c0 2.0833-2.0833 4.1667-4.1667 4.1667H12.5c-2.0833 0-4.1667-2.0833-4.1667-4.1667v-4.1667"/>`,
   'border-dotted': `<path stroke="currentColor" fill="none" stroke-width="8.333" stroke-dasharray="8.7" d="M91.6667 45.8333v4.1667c0 2.0833-2.0833 4.1667-4.1667 4.1667H12.5c-2.0833 0-4.1667-2.0833-4.1667-4.1667v-4.1667"/>`,
 
+  // Group label size icons - "Aa" glyphs at increasing sizes (added by an LLM agent)
+  'label-size-small': `<text x="50" y="50" dominant-baseline="central" text-anchor="middle" font-size="40" font-weight="bold" fill="currentColor" stroke="none">Aa</text>`,
+  'label-size-default': `<text x="50" y="50" dominant-baseline="central" text-anchor="middle" font-size="55" font-weight="bold" fill="currentColor" stroke="none">Aa</text>`,
+  'label-size-large': `<text x="50" y="50" dominant-baseline="central" text-anchor="middle" font-size="70" font-weight="bold" fill="currentColor" stroke="none">Aa</text>`,
+  'label-size-huge': `<text x="50" y="50" dominant-baseline="central" text-anchor="middle" font-size="90" font-weight="bold" fill="currentColor" stroke="none">Aa</text>`,
+
+  // Group opacity icons - a square filled at the corresponding opacity (added by an LLM agent)
+  'opacity-default': `<rect x="12.5" y="12.5" width="75" height="75" rx="12.5" stroke="currentColor" stroke-width="8.333" fill="currentColor" fill-opacity="0.07"/>`,
+  'opacity-25':`<rect x="12.5" y="12.5" width="75" height="75" rx="12.5" stroke="currentColor" stroke-width="8.333" fill="currentColor" fill-opacity="0.25"/>`,
+  'opacity-50': `<rect x="12.5" y="12.5" width="75" height="75" rx="12.5" stroke="currentColor" stroke-width="8.333" fill="currentColor" fill-opacity="0.5"/>`,
+  'opacity-75': `<rect x="12.5" y="12.5" width="75" height="75" rx="12.5" stroke="currentColor" stroke-width="8.333" fill="currentColor" fill-opacity="0.75"/>`,
+  'opacity-100': `<rect x="12.5" y="12.5" width="75" height="75" rx="12.5" stroke="currentColor" stroke-width="8.333" fill="currentColor" fill-opacity="1"/>`,
+
   'path-solid': `<path stroke="currentColor" fill="none" stroke-width="8.5" d="M37.5 79.1667h35.4167a14.5833 14.5833 90 000-29.1667h-45.8333a14.5833 14.5833 90 010-29.1667H62.5"/>`,
   'path-dotted': `<path stroke="currentColor" fill="none" stroke-width="8.5" stroke-dasharray="8.8" d="M37.5 79.1667h35.4167a14.5833 14.5833 90 000-29.1667h-45.8333a14.5833 14.5833 90 010-29.1667H62.5"/>`,
   'path-short-dashed': `<path stroke="currentColor" fill="none" stroke-width="8.5" stroke-dasharray="15" d="M37.5 79.1667h35.4167a14.5833 14.5833 90 000-29.1667h-45.8333a14.5833 14.5833 90 010-29.1667H62.5"/>`,
@@ -35,6 +48,16 @@ const CUSTOM_ICONS = {
   'arrow-diamond-outline': `<path stroke="currentColor" stroke-width="8.5" fill="none" d="M 50 0 L 100 50 L 50 100 L 0 50 Z"/>`,
   'arrow-circle': `<circle stroke="currentColor" fill="currentColor" cx="50" cy="50" r="45"/>`,
   'arrow-circle-outline': `<circle stroke="currentColor" stroke-width="8.5" fill="none" cx="50" cy="50" r="45"/>`,
+
+  'edge-width-thin': `<path stroke="currentColor" fill="none" stroke-width="4" d="M37.5 79.1667h35.4167a14.5833 14.5833 90 000-29.1667h-45.8333a14.5833 14.5833 90 010-29.1667H62.5"/>`,
+  'edge-width-default': `<path stroke="currentColor" fill="none" stroke-width="8.5" d="M37.5 79.1667h35.4167a14.5833 14.5833 90 000-29.1667h-45.8333a14.5833 14.5833 90 010-29.1667H62.5"/>`,
+  'edge-width-thick': `<path stroke="currentColor" fill="none" stroke-width="17" d="M37.5 79.1667h35.4167a14.5833 14.5833 90 000-29.1667h-45.8333a14.5833 14.5833 90 010-29.1667H62.5"/>`,
+  'edge-width-extra-thick': `<path stroke="currentColor" fill="none" stroke-width="25.5" d="M37.5 79.1667h35.4167a14.5833 14.5833 90 000-29.1667h-45.8333a14.5833 14.5833 90 010-29.1667H62.5"/>`,
+
+  'arrow-size-small': `<path stroke="currentColor" fill="currentColor" d="M 39 38 L 61 50 L 39 62 Z"/>`,
+  'arrow-size-default': `<path stroke="currentColor" fill="currentColor" d="M 33 30 L 68 50 L 33 70 Z"/>`,
+  'arrow-size-large': `<path stroke="currentColor" fill="currentColor" d="M 24 20 L 79 50 L 24 80 Z"/>`,
+  'arrow-size-extra-large': `<path stroke="currentColor" fill="currentColor" d="M 15 10 L 90 50 L 15 90 Z"/>`,
 
   'pathfinding-method-bezier': `<path stroke="currentColor" fill="none" stroke-width="8.5" d="M37.5 79.1667h35.4167a14.5833 14.5833 90 000-29.1667h-45.8333a14.5833 14.5833 90 010-29.1667H62.5"/>`,
   'pathfinding-method-square': `<path stroke="currentColor" fill="none" stroke-width="8.5" d="M72.9167 79.1667 72.9167 50 27.0833 50 27.0833 20.8333"/>`,

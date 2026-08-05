@@ -30,7 +30,7 @@ This plugin enhances the Obsidian canvas with a wide array of features:
     *   [Improved Image Export](#image-export): Export to PNG/SVG with transparency and other options.
 *   **Node Customization:**
     *   [Node Templates](#node-templates): Save and reuse node styles as templates.
-    *   [Node Styles](#node-styles): Includes various [Flowchart Shapes](#node-shapes), [Border Styles](#border-styles), and Text Alignment.
+    *   [Node Styles](#node-styles): Includes various [Flowchart Shapes](#node-shapes), [Border Styles](#border-styles), [Group Label Size](#group-label-size), [Group Opacity](#group-opacity), and Text Alignment.
     *   [Auto Node Resizing](#auto-node-resizing): Nodes adapt to their content size automatically.
     *   [Variable Breakpoints](#variable-breakpoints): Control content rendering based on zoom level.
     *   [Alternative Text Rendering](#alternative-text-rendering): Fix rendering inconsistencies between nodes in edit mode and reading mode.
@@ -40,6 +40,7 @@ This plugin enhances the Obsidian canvas with a wide array of features:
     *   [Edge Styles](#edge-styles): Includes [Path Styles](#path-styles) (dotted, dashed), [Arrow Styles](#arrow-styles), and [Pathfinding Methods](#pathfinding-methods).
     *   [Floating Edges](#floating-edges-automatic-edge-side): Edges automatically adjust their connection side.
     *   [Flip Edge](#flip-edge): Quickly reverse edge direction.
+    *   [Markdown Edge Labels](#markdown-edge-labels): Render edge labels as markdown - links, embeds, formatting and code blocks.
 *   **Interaction & Workflow:**
     *   [Canvas Commands](#canvas-commands): A suite of commands for efficient canvas manipulation.
     *   [Native-Like File Search](#native-like-file-search): Search for text within the whole canvas using a native-like interface.
@@ -49,6 +50,7 @@ This plugin enhances the Obsidian canvas with a wide array of features:
     *   [Edge Highlight](#edge-highlight): Highlight edges when a connected node is selected.
     *   [Edge Selection](#edge-selection): Select edges connected to the selected node(s).
     *   [Focus Mode](#focus-mode): Highlight a single node by blurring others.
+    *   [Canvas Filter](#canvas-filter): Temporarily hide everything that doesn't match a color, tag or connection filter.
     *   [Encapsulate Selection](#encapsulate-selection): Move selected nodes to a new canvas, linking back to it.
     *   Create groups independently of the nodes.
 *   **Styling & Extensibility:**
@@ -154,6 +156,7 @@ Advanced Canvas now allows you to link or embed the content of a *single node* f
 *   Customize default file node size
 *   Modify the minimum node size
 *   Disable the font scaling relative to the zoom level
+*   Connect edges to the arrow base - end an edge's line at the back of its arrow head instead of running it on towards the node, so a line that arrives at an angle meets the arrow centred instead of off to one side (triangle arrow heads only)
 
 ## Native-Like File Search
 Quickly locate text within your canvas using a familiar search experience. Advanced Canvas integrates a native-like file search specifically for canvas content.
@@ -173,6 +176,10 @@ Quickly locate text within your canvas using a familiar search experience. Advan
 
 *   `Advanced Canvas: Toggle readonly`
     *   Toggle the readonly state of the canvas
+*   `Advanced Canvas: Toggle invisible style` <sup>(added by an LLM agent)</sup>
+    *   Hide/unhide the selection — the same `Invisible` (eye-off) option the style menu offers, applied to the whole selection at once (`Border` for nodes, `Path Style` for edges)
+    *   Hides everything selected unless it is already fully hidden, in which case it is unhidden
+    *   Unhiding restores the style each element had before it was hidden (e.g. a dashed border), not the default one
 *   `Advanced Canvas: Create text node`
     *   Create a new text node
 *   `Advanced Canvas: Create file node`
@@ -274,13 +281,34 @@ Set the style of the border to dotted, dashed or invisible.
     <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/docs/border-styles.png" alt="Border Styles Example"/>
 </details>
 
+### Group Label Size
+Set the font size of a group's label. The value is a multiplier applied on top of the default label size - the label still scales with the zoom level as usual, it just gets bigger or smaller relative to everything else.
+
+#### Usage
+*   Select a group and use the `Label Size` option in the popup menu to pick a multiplier (0.75x, 1x, 1.5x, 2x or 3x).
+
+Need a size that isn't in the list? Add your own value with a [custom style](#custom-styles) that sets `--group-label-size-multiplier` on the node.
+
+Labels that are too long for their group wrap onto multiple lines instead of being cut off. This is enabled by default and can be turned off with the `Wrap group labels` setting under `General`.
+
+### Group Opacity
+Set how strongly a group's fill is tinted with its colour. Obsidian's own default is a 7% tint; at 100% the group becomes a solid block of colour. Only the fill changes - the border, the label and the nodes inside the group stay fully visible.
+
+#### Usage
+*   Select a group and use the `Opacity` option in the popup menu to pick a value (default 7%, 25%, 50%, 75% or solid 100%).
+*   Set the `Default group opacity` setting under `General` to apply an opacity to every group that doesn't have one of its own.
+
+Need a value that isn't in the list? Add your own with a [custom style](#custom-styles) that sets `--group-opacity` on the node (`1` = solid).
+
 *(Note: Text Alignment options (Left, Center, Right) are also available for nodes.)*
 
 ## Edge Styles
 You can customize the default edge styles using the settings.
 
 ### Path Styles
-Set the style of the edge paths to dotted, short-dashed or long-dashed.
+Set the style of the edge paths to dotted, short-dashed, long-dashed or invisible.
+
+The `Invisible` path style hides the line and its arrow heads while keeping the edge itself intact — it stays selectable where it runs, and its label (if it has one) stays visible. Hovering or selecting an invisible edge fades it back in faintly so you can still find it; exported images keep it fully hidden.
 
 <details>
     <summary>Edge Path Styles Example</summary>
@@ -294,6 +322,12 @@ Set the style of the arrows to triangle outline, halved triangle, thin triangle,
     <summary>Arrow Styles Example</summary>
     <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/docs/edge-arrow-styles.png" alt="Edge Arrow Styles Example"/>
 </details>
+
+### Edge Width
+Set the thickness of the edge path to thin (0.5x), default (1x), thick (2x) or extra thick (3x).
+
+### Arrow Size
+Set the size of the edge's arrows to small (0.5x), default (1x), large (1.5x) or extra large (2x).
 
 ### Pathfinding Methods
 Set the pathfinding method of the edges (arrows) to default, straight, squared or A*.
@@ -485,6 +519,24 @@ Resize nodes automatically when their text content changes. Toggle this feature 
     <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/docs/auto-node-resizing.gif" alt="Auto Node Resizing Example"/>
 </details>
 
+## Markdown Edge Labels
+<!-- Added by an LLM agent -->
+Render edge labels as markdown instead of plain text. Anything Obsidian can render in a note works in a label - bold/italic text, internal and external links, embeds (`![[Note#^block]]`), lists, and code blocks (including ones provided by other plugins).
+
+### Render mode
+The "Render mode" setting controls how much of that is actually rendered:
+
+- **Embeds only** (default) - a label is only rendered when it is *nothing but* note embeds. That means either one or more bare `![[Note#^block]]` embeds (one per line), or a single ` ```sync ` block whose body is bare embeds. Every other label - prose, formatting, a bare `[[link]]`, an embed with text around it - is left exactly as core Obsidian renders it, as plain text. Use this when you only want labels to pull their content out of a note and want the rest to stay predictable.
+- **Full markdown** - render every label as markdown.
+
+Switching modes re-renders open canvases immediately; no reload needed.
+
+Clicking a label still selects the edge, and clicking it again opens it for editing, where the **raw markdown source** is shown so it stays editable as plain text. Clicking a link, embed or other interactive element inside a rendered label activates that element instead of entering edit mode.
+
+Labels containing an embed, table or image get a fixed width (they have no intrinsic width and would otherwise collapse to a few pixels) and a capped height - both are configurable in the settings via "Max label width" and "Max label height". Taller content scrolls inside the label.
+
+To style rendered labels yourself, target the `.canvas-path-label.ac-markdown-label` CSS class in a custom CSS snippet (`.ac-markdown-label-block` is additionally set on labels with embedded content).
+
 ## Edge Highlight
 Highlight edges when a connected node is selected. This feature helps to visually identify relationships between nodes.
 
@@ -498,6 +550,35 @@ If "[Edge Highlight](#edge-highlight)" is enabled, edges connected to the focuse
 <details>
     <summary>Focus Mode Example</summary>
     <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/docs/focus-mode.png" alt="Focus Mode Example"/>
+</details>
+
+## Canvas Filter
+<!-- Added by an LLM agent -->
+Temporarily hide the nodes and edges that don't match a filter, so you can concentrate on one part of a large canvas. The filter is purely visual - nothing is written to the canvas file, and reopening the canvas (or `Advanced Canvas: Reset filter`) brings everything back.
+
+Group nodes stay visible as long as they fully contain at least one of the remaining nodes.
+
+<details>
+    <summary>View available commands</summary>
+
+*   `Advanced Canvas: Reset filter`
+    *   Show all nodes and edges again
+*   `Advanced Canvas: Filter by color of selection`
+    *   Show only the nodes that have one of the colors of the current selection
+    *   If one of the selected elements has no color, colorless nodes stay visible as well
+*   `Advanced Canvas: Filter by tag`
+    *   Pick a tag and show only the nodes carrying it - file nodes are matched via their metadata (including frontmatter tags), text nodes via their content
+    *   Nested tags are included, e.g. filtering by `#project` also shows nodes tagged `#project/canvas`
+*   `Advanced Canvas: Filter to selection and connected nodes`
+    *   Show the selection plus everything reachable from it, following edges in both directions
+*   `Advanced Canvas: Filter to selection and outgoing nodes`
+    *   Same, but only follows edges pointing away from the selection
+*   `Advanced Canvas: Filter to selection and incoming nodes`
+    *   Same, but only follows edges pointing towards the selection
+*   `Advanced Canvas: Hide selection`
+    *   Hide the currently selected nodes and edges
+*   `Advanced Canvas: Hide selection and its edges`
+    *   Hide the currently selected nodes together with all edges connected to them
 </details>
 
 ## Better Readonly

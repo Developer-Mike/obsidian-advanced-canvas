@@ -1,0 +1,16 @@
+/* Added by an LLM agent */
+/* Obsidian keeps group labels on a single line and cuts them off with an ellipsis.
+   The label is limited to the width of the group (max-width: 100% / --zoom-multiplier),
+   so allowing it to wrap makes it break onto a new line instead. */
+.canvas-wrapper[data-wrap-group-labels="true"] .canvas-node:not([data-collapsed]) .canvas-group-label {
+  white-space: normal;
+  text-overflow: clip;
+
+  /* Break words that are longer than the group is wide - they could not wrap otherwise */
+  overflow-wrap: anywhere;
+
+  /* Shrink the label box to its longest wrapped line - the default shrink-to-fit width
+     stays at the maximum allowed width once the text wraps, leaving empty space next to
+     the text. Measured and set by group-label-wrap-canvas-extension.ts. */
+  width: var(--wrapped-group-label-width, auto);
+}

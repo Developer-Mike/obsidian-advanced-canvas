@@ -105,6 +105,8 @@ declare module "obsidian" {
     linkResolver: () => void
     resolveLinks: (filepath: string) => void
     getBacklinksForFile: (file: obsidian.TFile) => { data: Map<string, ExtendedLinkCache[]> }
+    /** Added by an LLM agent: all tags of the vault, mapped to how often they're used */
+    getTags: () => { [tag: string]: number }
   }
 }
 

@@ -21,6 +21,13 @@ export interface AdvancedCanvasPluginSettingsValues {
   minNodeSize: number
   maxNodeWidth: number
   disableFontSizeRelativeToZoom: boolean
+  wrapGroupLabels: boolean // Added by an LLM agent
+  hideGroupLabels: boolean // Added by an LLM agent
+  defaultGroupLabelSize: keyof typeof SETTINGS.general.children.defaultGroupLabelSize.options // Added by an LLM agent
+  defaultGroupOpacity: keyof typeof SETTINGS.general.children.defaultGroupOpacity.options // Added by an LLM agent
+  defaultEdgeWidth: keyof typeof SETTINGS.general.children.defaultEdgeWidth.options // Added by an LLM agent
+  defaultArrowSize: keyof typeof SETTINGS.general.children.defaultArrowSize.options // Added by an LLM agent
+  connectEdgesToArrowBase: boolean // Added by an LLM agent
 
   canvasMetadataCompatibilityEnabled: boolean
   enableSingleNodeLinks: boolean
@@ -85,6 +92,8 @@ export interface AdvancedCanvasPluginSettingsValues {
 
   focusModeFeatureEnabled: boolean
 
+  canvasFilterFeatureEnabled: boolean // Added by an LLM agent
+
   presentationFeatureEnabled: boolean
   showSetStartNodeInPopup: boolean
   defaultSlideDimensions: [number, number]
@@ -111,6 +120,11 @@ export interface AdvancedCanvasPluginSettingsValues {
 
   edgeSelectionEnabled: boolean
   selectEdgeByDirection: boolean
+
+  edgeLabelMarkdownEnabled: boolean // Added by an LLM agent
+  edgeLabelMarkdownRenderMode: keyof typeof SETTINGS.edgeLabelMarkdownEnabled.children.edgeLabelMarkdownRenderMode.options // Added by an LLM agent
+  edgeLabelMarkdownMaxWidth: number // Added by an LLM agent
+  edgeLabelMarkdownMaxHeight: number // Added by an LLM agent
 }
 
 export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
@@ -121,6 +135,13 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   minNodeSize: 60,
   maxNodeWidth: -1,
   disableFontSizeRelativeToZoom: false,
+  wrapGroupLabels: true, // Added by an LLM agent
+  hideGroupLabels: false, // Added by an LLM agent
+  defaultGroupLabelSize: '1', // Added by an LLM agent
+  defaultGroupOpacity: 'default', // Added by an LLM agent
+  defaultEdgeWidth: '1', // Added by an LLM agent
+  defaultArrowSize: '1', // Added by an LLM agent
+  connectEdgesToArrowBase: false, // Added by an LLM agent
 
   canvasMetadataCompatibilityEnabled: true,
   enableSingleNodeLinks: true,
@@ -185,6 +206,8 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
 
   focusModeFeatureEnabled: false,
 
+  canvasFilterFeatureEnabled: true, // Added by an LLM agent
+
   presentationFeatureEnabled: true,
   showSetStartNodeInPopup: false,
   defaultSlideDimensions: [1200, 675],
@@ -211,6 +234,11 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
 
   edgeSelectionEnabled: false,
   selectEdgeByDirection: false,
+
+  edgeLabelMarkdownEnabled: false, // Added by an LLM agent
+  edgeLabelMarkdownRenderMode: 'embeds-only', // Added by an LLM agent
+  edgeLabelMarkdownMaxWidth: 400, // Added by an LLM agent
+  edgeLabelMarkdownMaxHeight: 300, // Added by an LLM agent
 }
 
 export const SETTINGS = {
@@ -268,6 +296,67 @@ export const SETTINGS = {
       disableFontSizeRelativeToZoom: {
         label: 'Disable font size relative to zoom',
         description: 'When enabled, the font size of e.g. group node titles and edge labels will not increase when zooming out.',
+        type: 'boolean'
+      },
+      wrapGroupLabels: { // Added by an LLM agent
+        label: 'Wrap group labels',
+        description: 'When enabled, a group label that is too long for the group will wrap onto multiple lines instead of being cut off.',
+        type: 'boolean'
+      },
+      hideGroupLabels: { // Added by an LLM agent
+        label: 'Hide group labels',
+        description: 'When enabled, group labels are hidden. Can be toggled with the "Toggle group label visibility" command.',
+        type: 'boolean'
+      },
+      defaultGroupLabelSize: { // Added by an LLM agent
+        label: 'Default group label size',
+        description: 'The label size used by groups that don\'t have a label size of their own set in the node popup.',
+        type: 'dropdown',
+        options: {
+          '0.75': 'Small (0.75x)',
+          '1': 'Default (1x)',
+          '1.5': 'Large (1.5x)',
+          '2': 'Huge (2x)',
+          '3': 'Giant (3x)'
+        }
+      } as DropdownSetting,
+      defaultGroupOpacity: { // Added by an LLM agent
+        label: 'Default group opacity',
+        description: 'The fill opacity used by groups that don\'t have an opacity of their own set in the node popup. 100% is a solid colour. Only the fill changes - the border and the label stay fully visible.',
+        type: 'dropdown',
+        options: {
+          'default': 'Default (7%)',
+          '0.25': '25%',
+          '0.5': '50%',
+          '0.75': '75%',
+          '1': 'Solid (100%)'
+        }
+      } as DropdownSetting,
+      defaultEdgeWidth: { // Added by an LLM agent
+        label: 'Default edge width',
+        description: 'The width used by edges that don\'t have an edge width of their own set in the edge popup.',
+        type: 'dropdown',
+        options: {
+          '0.5': 'Thin (0.5x)',
+          '1': 'Default (1x)',
+          '2': 'Thick (2x)',
+          '3': 'Extra Thick (3x)'
+        }
+      } as DropdownSetting,
+      defaultArrowSize: { // Added by an LLM agent
+        label: 'Default arrow size',
+        description: 'The arrow size used by edges that don\'t have an arrow size of their own set in the edge popup.',
+        type: 'dropdown',
+        options: {
+          '0.5': 'Small (0.5x)',
+          '1': 'Default (1x)',
+          '1.5': 'Large (1.5x)',
+          '2': 'Extra Large (2x)'
+        }
+      } as DropdownSetting,
+      connectEdgesToArrowBase: { // Added by an LLM agent
+        label: 'Connect edges to the arrow base',
+        description: 'When enabled, an edge\'s line stops at the back of its arrow head instead of continuing on towards the node. Without this, a line that reaches a node at an angle runs through the arrow and attaches off-centre. Only affects triangle arrow heads.',
         type: 'boolean'
       }
     }
@@ -574,7 +663,7 @@ export const SETTINGS = {
   },
   aspectRatioControlFeatureEnabled: {
     label: 'Aspect ratio control',
-    description: 'Change the aspect ratio of nodes using the context menu.',
+    description: 'Change the aspect ratio of nodes using the node popup menu or the context menu.',
     children: { }
   },
   variableBreakpointFeatureEnabled: {
@@ -654,10 +743,44 @@ export const SETTINGS = {
       }
     }
   },
+  // Added by an LLM agent
+  edgeLabelMarkdownEnabled: {
+    label: 'Markdown edge labels',
+    description: 'Render edge labels as markdown instead of plain text. Editing a label still shows its raw source. Use "Render mode" below to limit this to note embeds only.',
+    infoSection: 'markdown-edge-labels',
+    children: {
+      edgeLabelMarkdownRenderMode: {
+        label: 'Render mode',
+        description: 'What gets rendered. "Embeds only" renders a label that is nothing but note embeds - either bare (![[Note#^block]]) or wrapped in a ```sync code block - and leaves every other label as plain text.',
+        type: 'dropdown',
+        options: {
+          'embeds-only': 'Embeds only',
+          'full': 'Full markdown'
+        }
+      } as DropdownSetting,
+      edgeLabelMarkdownMaxWidth: {
+        label: 'Max label width',
+        description: 'The maximum width of a rendered edge label, in pixels.',
+        type: 'number',
+        parse: (value: string) => Math.max(50, parseInt(value) || 400)
+      },
+      edgeLabelMarkdownMaxHeight: {
+        label: 'Max label height',
+        description: 'The maximum height of a rendered edge label containing an embed, table or image, in pixels. Taller content scrolls.',
+        type: 'number',
+        parse: (value: string) => Math.max(50, parseInt(value) || 300)
+      }
+    }
+  },
   focusModeFeatureEnabled: {
     label: 'Focus mode',
     description: 'Focus on a single node and blur all other nodes.',
     infoSection: 'focus-mode',
+    children: { }
+  },
+  canvasFilterFeatureEnabled: { // Added by an LLM agent
+    label: 'Canvas filter',
+    description: 'Adds commands to temporarily hide the nodes and edges that don\'t match a filter (color, tag or connection to the selection). The filter is purely visual - nothing gets written to the canvas file.',
     children: { }
   },
 } as const satisfies {

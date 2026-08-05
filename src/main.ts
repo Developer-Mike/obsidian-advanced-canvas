@@ -28,6 +28,9 @@ import MetadataCanvasExtension from './canvas-extensions/metadata-canvas-extensi
 import NodeRatioCanvasExtension from './canvas-extensions/node-ratio-canvas-extension'
 import VariableBreakpointCanvasExtension from './canvas-extensions/variable-breakpoint-canvas-extension'
 import GroupCanvasExtension from './canvas-extensions/group-canvas-extension'
+import GroupLabelWrapCanvasExtension from './canvas-extensions/group-label-wrap-canvas-extension' // Added by an LLM agent
+import GroupLabelVisibilityCanvasExtension from './canvas-extensions/group-label-visibility-canvas-extension' // Added by an LLM agent
+import DefaultStyleSizesCanvasExtension from './canvas-extensions/default-style-sizes-canvas-extension' // Added by an LLM agent
 import NodeTemplatesCanvasExtension from './canvas-extensions/node-templates-canvas-extension'
 import PresentationCanvasExtension from './canvas-extensions/presentation-canvas-extension'
 import ZOrderingCanvasExtension from './canvas-extensions/z-ordering-canvas-extension'
@@ -41,12 +44,15 @@ import BetterDefaultSettingsCanvasExtension from './canvas-extensions/better-def
 import ColorPaletteCanvasExtension from './canvas-extensions/color-palette-canvas-extension'
 import CollapsibleGroupsCanvasExtension from './canvas-extensions/collapsible-groups-canvas-extension'
 import FocusModeCanvasExtension from './canvas-extensions/focus-mode-canvas-extension'
+import CanvasFilterCanvasExtension from './canvas-extensions/canvas-filter-canvas-extension' // Added by an LLM agent
 import AutoFileNodeEdgesCanvasExtension from './canvas-extensions/auto-file-node-edges-canvas-extension'
 import FlipEdgeCanvasExtension from './canvas-extensions/flip-edge-canvas-extension'
 import EdgeSelectionCanvasExtension from './canvas-extensions/edge-selection-canvas-extension'
 import ExportCanvasExtension from './canvas-extensions/export-canvas-extension'
 import FloatingEdgeCanvasExtension from './canvas-extensions/floating-edge-canvas-extension'
 import EdgeHighlightCanvasExtension from './canvas-extensions/edge-highlight-canvas-extension'
+import EdgeLabelMarkdownCanvasExtension from './canvas-extensions/edge-label-markdown-canvas-extension' // Added by an LLM agent
+import EdgeArrowBaseCanvasExtension from './canvas-extensions/edge-arrow-base-canvas-extension' // Added by an LLM agent
 import CopyNodeReferenceCanvasExtension from './canvas-extensions/copy-node-reference-canvas-extension'
 import ReadingModeFixCanvasExtension from './canvas-extensions/reading-mode-fix-canvas-extension'
 
@@ -109,14 +115,21 @@ const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   BetterReadonlyCanvasExtension,
   ReadingModeFixCanvasExtension,
   GroupCanvasExtension,
+  GroupLabelWrapCanvasExtension, // Added by an LLM agent
+  GroupLabelVisibilityCanvasExtension, // Added by an LLM agent
+  DefaultStyleSizesCanvasExtension, // Added by an LLM agent
   NodeTemplatesCanvasExtension,
   VariableBreakpointCanvasExtension,
   EdgeHighlightCanvasExtension,
+  EdgeLabelMarkdownCanvasExtension, // Added by an LLM agent
+  // Has to come after EdgeStylesExtension - it measures the final path of pathfinding edges
+  EdgeArrowBaseCanvasExtension, // Added by an LLM agent
   AutoFileNodeEdgesCanvasExtension,
   FlipEdgeCanvasExtension,
   ZOrderingCanvasExtension,
   ExportCanvasExtension,
   FocusModeCanvasExtension,
+  CanvasFilterCanvasExtension, // Added by an LLM agent
   EncapsulateCanvasExtension,
   EdgeSelectionCanvasExtension,
   CopyNodeReferenceCanvasExtension

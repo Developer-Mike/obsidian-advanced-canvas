@@ -157,17 +157,38 @@ export interface CanvasEdgeEnd {
   end: EndType
 }
 
+/* Extended by an LLM agent: the methods below already existed on the core class, they just weren't typed */
+export interface CanvasEdgeLabelElement {
+  edge: CanvasEdge
+  initialTextState: string
+  isEditing: boolean
+  textareaEl: HTMLElement
+  wrapperEl: HTMLElement
+
+  render(): void
+  /** Replaces the label's text content */
+  setText(text: string): void
+  /** Enters edit mode (makes `textareaEl` contenteditable) */
+  focus(position?: Position): void
+  /** Leaves edit mode - destroys the label if it ended up empty */
+  blur(): void
+  /** Removes the label from the canvas and unsets `edge.labelElement` */
+  destroy(skipSave?: boolean): void
+}
+
 export interface CanvasEdge extends CanvasElement {
   label: string
 
   from: CanvasEdgeEnd
-  fromLineEnd: {
+  /** Unset while the `from` end has no arrow head */
+  fromLineEnd?: {
     el: HTMLElement
     type: 'arrow'
   }
 
   to: CanvasEdgeEnd
-  toLineEnd: {
+  /** Unset while the `to` end has no arrow head */
+  toLineEnd?: {
     el: HTMLElement
     type: 'arrow'
   }
@@ -181,19 +202,11 @@ export interface CanvasEdge extends CanvasElement {
   }
 
   path: {
-    interaction: HTMLElement
-    display: HTMLElement
+    interaction: SVGPathElement
+    display: SVGPathElement
   }
 
-  labelElement: {
-    edge: CanvasEdge
-    initialTextState: string
-    isEditing: boolean
-    textareaEl: HTMLElement
-    wrapperEl: HTMLElement
-
-    render(): void
-  }
+  labelElement: CanvasEdgeLabelElement | null
 
   lineGroupEl: HTMLElement
   lineEndGroupEl: HTMLElement

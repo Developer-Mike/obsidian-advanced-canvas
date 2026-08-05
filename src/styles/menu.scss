@@ -3,6 +3,21 @@
   display: none;
 }
 
+/* Popup Menu */
+.clickable-icon.mod-text-option {
+  width: auto;
+  padding: 0 var(--size-4-2);
+  font-size: var(--font-ui-smaller);
+  font-weight: var(--font-medium);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.clickable-icon.mod-text-option.is-active {
+  color: var(--text-on-accent);
+  background-color: var(--interactive-accent);
+}
+
 .canvas-control-item[data-toggled="true"] {
   background-color: var(--color-accent);
 

@@ -485,6 +485,11 @@ export default class CanvasPatcher extends Patcher {
 
         return result
       }),
+      updatePath: Patcher.OverrideExisting(next => function (...args: any): void {
+        const result = next.call(this, ...args)
+        that.plugin.app.workspace.trigger('advanced-canvas:edge-path-updated', this.canvas, this)
+        return result
+      }),
       getCenter: Patcher.OverrideExisting(next => function (...args: any): Position {
         const result = next.call(this, ...args)
         that.plugin.app.workspace.trigger('advanced-canvas:edge-center-requested', this.canvas, this, result)
