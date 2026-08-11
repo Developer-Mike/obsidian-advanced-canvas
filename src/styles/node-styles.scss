@@ -1,5 +1,5 @@
 .reactive-node {
-  --border-color: rgb(var(--canvas-color));
+  --border-color: var(--canvas-color);
   --border-width: 3px;
   --box-shadow: none;
 
@@ -12,18 +12,19 @@
 
   /* Themed */
   &.is-themed {
-    --border-color: rgba(var(--canvas-color), 0.7);
+    --border-color: rgb(from var(--canvas-color) r g b / 0.7);
   }
 
   &.is-themed {
     &.is-focused, &.is-selected {
-      --border-color: rgb(var(--canvas-color));
+      --border-color: var(--canvas-color);
       --box-shadow: var(--shadow-border-themed);
     }
   }
 }
 
 .canvas-node {
+
   //#region Text Alignment
   &[data-text-align='center'] {
     .markdown-preview-view {
@@ -43,6 +44,7 @@
   &[data-text-align='right'] {
     text-align: right;
   }
+
   //#endregion
 
   //#region Shape
@@ -232,7 +234,7 @@
     /* Add theme fill if not editing */
     &.is-themed:not(:has(.embed-iframe)) {
       .canvas-node-container, &::after, &::before {
-        box-shadow: inset 0 0 0 1000px rgba(var(--canvas-color), 0.07) !important;
+        box-shadow: inset 0 0 0 1000px rgb(from var(--canvas-color) r g b / 0.07) !important;
       }
     }
 
@@ -246,6 +248,7 @@
       z-index: -1;
     }
   }
+
   //#endregion
 
   //#region Borders
@@ -275,6 +278,7 @@
       box-shadow: none;
     }
   }
+
   //#endregion
 
   //#region Combinations
