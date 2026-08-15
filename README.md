@@ -96,16 +96,11 @@ Please consider supporting the plugin. There are many hours of work and effort b
 Compatible with the [JSON Canvas](https://github.com/obsidianmd/jsoncanvas) format, the [Advanced JSON Canvas](https://github.com/Developer-Mike/obsidian-advanced-canvas/blob/main/assets/formats/advanced-json-canvas/README.md) format takes it a step further by adding more features and flexibility. The Advanced JSON Canvas format was introduced to provide longevity, readability, interoperability, and extensibility for canvases created with Advanced Canvas.
 
 ## Full Metadata Cache Support
-Advanced Canvas enables `.canvas` files to be indexed by the metadata cache. This means that there is now full compatibility with the graph view, outgoing links and backlinks. You can even enable (optional) the creation of an outgoing link if two embeds in a canvas are connected by an edge. This feature brings the full power of Obsidian's linking system to the canvas file format.
+Advanced Canvas enables `.canvas` files to be indexed by the metadata cache. This means that there is now full compatibility with the graph view, outgoing links and backlinks. This feature brings the full power of Obsidian's linking system to the canvas file format.
 
 <details>
     <summary>Metadata Cache Support Example</summary>
     <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/docs/metadata-cache-support.png" alt="Metadata Cache Support Example"/>
-</details>
-
-<details>
-    <summary>Outgoing Link Using An Edge Example</summary>
-    <img src="https://raw.githubusercontent.com/Developer-Mike/obsidian-advanced-canvas/main/assets/docs/edge-metadata-cache.png" alt="Outgoing Link Using An Edge Example"/>
 </details>
 
 <details>
