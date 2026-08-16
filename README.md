@@ -408,9 +408,12 @@ Add custom colors to the color picker. You can add them using the following CSS 
 ```css
 body {
     /* Where X is the index of the color in the palette (1-6 are used by Obsidian) */
-    --canvas-color-X: 0, 255, 0; /* RGB values */
+    --canvas-color-X: rgb(0, 255, 0);
 }
 ```
+
+> [!IMPORTANT]
+> In Obsidian version `< 1.13` the color needs to be written as comma-separated RGB values (e.g. `--canvas-color-X: 0, 255, 0;` for green) instead of a CSS color value (e.g. `green` or `#00ff00`).
 
 <details>
     <summary>Custom Colors In Palette Example</summary>

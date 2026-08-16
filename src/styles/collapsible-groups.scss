@@ -4,13 +4,13 @@
   top: calc(-1 * var(--size-4-1) * var(--zoom-multiplier));
 
   padding: var(--size-4-1) var(--size-4-2);
-  
+
   transform-origin: bottom left;
   transform: translate(0, -100%) scale(var(--zoom-multiplier));
-  
+
   border-radius: var(--radius-s);
   color: var(--text-muted);
-  background-color: rgba(var(--canvas-color), 0.1);
+  background-color: rgb(from var(--canvas-color) r g b / 0.1);
 
   font-size: 1.5em;
   line-height: 1;
