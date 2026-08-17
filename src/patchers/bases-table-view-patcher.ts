@@ -1,11 +1,11 @@
 import { BasesPlugin, BasesTableCell, BasesTableCellContext, BasesTableRow, BasesTableView, BasesViewRegistrationEntry } from "src/@types/BasesPlugin"
-import Patcher from "./patcher"
+import Patcher, { invoke } from "./patcher"
 
 export default class BasesTableViewPatcher extends Patcher {
   protected async patch() {
     if (!this.plugin.settings.getSetting('canvasMetadataCompatibilityEnabled')) return
 
-    const bases: BasesPlugin = this.plugin.app.internalPlugins.getEnabledPluginById("bases")
+    const bases = this.plugin.app.internalPlugins.getEnabledPluginById("bases") as unknown as BasesPlugin | null
     if (!bases) return // Core plugin not enabled
 
     void this.patchViewFactory(bases)
@@ -15,8 +15,8 @@ export default class BasesTableViewPatcher extends Patcher {
     const that = this // eslint-disable-line @typescript-eslint/no-this-alias -- For patcher
 
     await Patcher.patchOnce<BasesViewRegistrationEntry<BasesTableView>, BasesTableView>(this.plugin, bases.registrations.table, resolve => ({
-      factory: Patcher.OverrideExisting(next => function (...args: unknown[]): BasesTableView {
-        const view = next.call(this, ...args)
+      factory: Patcher.OverrideExisting(next => function (...args: Parameters<typeof next>): BasesTableView {
+        const view = invoke(next, this, ...args)
 
         void that.patchTableView(view)
         resolve(view)
@@ -30,8 +30,8 @@ export default class BasesTableViewPatcher extends Patcher {
     const that = this // eslint-disable-line @typescript-eslint/no-this-alias -- For patcher
 
     await Patcher.patchOnce<BasesTableView, BasesTableRow>(this.plugin, basesView, resolve => ({
-      updateVirtualDisplay: Patcher.OverrideExisting(next => function (...args: unknown[]): void {
-        const result = next.call(this, ...args)
+      updateVirtualDisplay: Patcher.OverrideExisting(next => function (...args: Parameters<typeof next>): void {
+        const result = invoke(next, this, ...args)
 
         if (this.rows.length > 0) {
           const row = this.rows.first()!
@@ -49,8 +49,8 @@ export default class BasesTableViewPatcher extends Patcher {
     const that = this // eslint-disable-line @typescript-eslint/no-this-alias -- For patcher
 
     await Patcher.patchOnce<BasesTableRow, BasesTableCell>(this.plugin, row, resolve => ({
-      render: Patcher.OverrideExisting(next => function (...args: unknown[]): void {
-        let result = next.call(this, ...args)
+      render: Patcher.OverrideExisting(next => function (...args: Parameters<typeof next>): void {
+        let result = invoke(next, this, ...args)
 
         if (this.cells.length > 0) {
           const cell = this.cells.first()!
@@ -58,8 +58,7 @@ export default class BasesTableViewPatcher extends Patcher {
           void that.patchTableCell(cell)
           resolve(cell)
 
-          // Re-render the first cell
-          result = next.call(this, ...args)
+          result = invoke(next, this, ...args)
         }
 
         return result
@@ -73,7 +72,7 @@ export default class BasesTableViewPatcher extends Patcher {
         const isCanvas = ctx.file?.extension === "canvas"
         if (isCanvas) ctx.file.extension = "md"
 
-        const result = next.call(this, ctx)
+        const result = invoke(next, this, ctx)
 
         if (isCanvas) ctx.file.extension = "canvas"
         return result

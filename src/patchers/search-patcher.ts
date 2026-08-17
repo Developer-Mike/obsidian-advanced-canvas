@@ -1,5 +1,5 @@
 import SearchView, { MatchData, SearchQuery } from "src/@types/SearchPlugin"
-import Patcher from "./patcher"
+import Patcher, { invoke } from "./patcher"
 
 export default class SearchPatcher extends Patcher {
   protected async patch() {
@@ -10,8 +10,8 @@ export default class SearchPatcher extends Patcher {
       // Patch the search view until the searchQuery is set or the plugin is unloaded
       const uninstallers: (() => void)[] = []
       Patcher.patchThisAndPrototype(this.plugin, view, {
-        startSearch: next => function (...args: unknown[]): void {
-          const result = next.call(this, ...args)
+        startSearch: next => function (...args: Parameters<typeof next>): void {
+          const result = invoke(next, this, ...args)
 
           // Patch the searchQuery and revert the search view patch
           if (this.searchQuery) {
@@ -27,13 +27,13 @@ export default class SearchPatcher extends Patcher {
 
   private patchSearchQuery(searchQuery: SearchQuery) {
     Patcher.patchThisAndPrototype(this.plugin, searchQuery, {
-      _match: Patcher.OverrideExisting(next => function (data: MatchData): void {
+      _match: Patcher.OverrideExisting(next => function (data: MatchData): unknown {
         const isCanvas = data.strings.filepath?.endsWith(".canvas") ?? false
 
         if (isCanvas && !data.cache)
           data.cache = this.app.metadataCache.getCache(data.strings.filepath)
 
-        return next.call(this, data)
+        return invoke(next, this, data)
       })
     })
   }

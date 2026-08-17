@@ -1,5 +1,5 @@
 import { DataWriteOptions, TFile } from "obsidian"
-import Patcher from "./patcher"
+import Patcher, { invoke } from "./patcher"
 
 export default class FileManagerPatcher extends Patcher {
   protected async patch() {
@@ -11,12 +11,10 @@ export default class FileManagerPatcher extends Patcher {
         // Check if the file is a canvas file
         if (file?.extension === 'canvas') {
           that.plugin.app.vault.process(file, (data: string) => {
-            const content = JSON.parse(data)
+            const content = JSON.parse(data) as { metadata: { frontmatter: unknown } }
 
-            // Modify frontmatter
             fn(content.metadata.frontmatter)
 
-            // Save changes
             return JSON.stringify(content, null, 2)
           }).catch(() => console.error("Failed to update metadata object in canvas file."))
 
@@ -24,7 +22,7 @@ export default class FileManagerPatcher extends Patcher {
         }
 
         // Otherwise, call the original method
-        return next.call(this, file, fn, options)
+        return invoke(next, this, file, fn, options)
       }),
     })
   }

@@ -1,5 +1,5 @@
 import SuggestManager, { Suggestion } from "src/@types/SuggestManager"
-import Patcher from "./patcher"
+import Patcher, { invoke } from "./patcher"
 import { TFile } from "obsidian"
 import { ExtendedCachedMetadata } from "src/@types/Obsidian"
 
@@ -7,13 +7,14 @@ export default class LinkSuggestionsPatcher extends Patcher {
   async patch() {
     if (!this.plugin.settings.getSetting('enableSingleNodeLinks')) return
 
-    const suggestManager = this.plugin.app.workspace.editorSuggest.suggests
+    const suggests = this.plugin.app.workspace.editorSuggest.suggests as unknown as ({ suggestManager?: SuggestManager })[]
+    const suggestManager = suggests
       .find(s => s.suggestManager)?.suggestManager
     if (!suggestManager) return console.warn("LinkSuggestionsPatcher: No suggest manager found.")
 
     Patcher.patchThisAndPrototype<SuggestManager>(this.plugin, suggestManager, {
       getHeadingSuggestions: Patcher.OverrideExisting(next => async function (context: unknown, path: string, subpath: string) {
-        const result = await next.call(this, context, path, subpath)
+        const result = await invoke(next, this, context, path, subpath)
 
         // Don't add suggestions if the file is not a canvas file
         if (!path.endsWith(".canvas")) return result

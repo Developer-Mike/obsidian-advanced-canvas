@@ -1,5 +1,5 @@
 import PropertiesView from "src/@types/PropertiesPlugin"
-import Patcher from "./patcher"
+import Patcher, { invoke } from "./patcher"
 import { TFile } from "obsidian"
 
 export default class PropertiesPatcher extends Patcher {
@@ -14,14 +14,14 @@ export default class PropertiesPatcher extends Patcher {
           if (file?.extension === 'canvas') return true
 
           // Otherwise, call the original method
-          return next.call(this, file)
+          return invoke(next, this, file)
         }),
         updateFrontmatter: Patcher.OverrideExisting(next => function (file: TFile, content: string): { [key: string]: unknown } | null {
           // Check if the file is a canvas file
           if (file?.extension === 'canvas') {
             let frontmatter
 
-            try { frontmatter = JSON.parse(content)?.metadata?.frontmatter ?? {} }
+            try { frontmatter = (JSON.parse(content) as { metadata?: { frontmatter?: Record<string, unknown> } })?.metadata?.frontmatter ?? {} }
             catch { frontmatter = {} }
 
             this.rawFrontmatter = JSON.stringify(frontmatter, null, 2)
@@ -31,7 +31,7 @@ export default class PropertiesPatcher extends Patcher {
           }
 
           // Otherwise, call the original method
-          return next.call(this, file, content)
+          return invoke(next, this, file, content)
         }),
         saveFrontmatter: Patcher.OverrideExisting(next => function (frontmatter: { [key: string]: unknown }): void {
           // Check if the file is a canvas file
@@ -39,7 +39,7 @@ export default class PropertiesPatcher extends Patcher {
             if (this.file !== this.modifyingFile) return
 
             this.app.vault.process(this.file, (data: string) => {
-              const content = JSON.parse(data)
+              const content = JSON.parse(data) as { metadata?: { frontmatter?: Record<string, unknown> } }
               if (content?.metadata) content.metadata.frontmatter = frontmatter
 
               return JSON.stringify(content, null, 2)
@@ -49,7 +49,7 @@ export default class PropertiesPatcher extends Patcher {
           }
 
           // Otherwise, call the original method
-          return next.call(this, frontmatter)
+          return invoke(next, this, frontmatter)
         })
       })
     })
