@@ -39,8 +39,8 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
       name: 'Toggle collapse group',
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
-        (canvas: Canvas) => canvas.selection.size === 1 && canvas.selection.values().next().value.getData().type === 'group',
-        (canvas: Canvas) => this.toggleCollapseGroup(canvas, canvas.selection.values().next().value)
+        (canvas: Canvas) => canvas.selection.size === 1 && ([...canvas.selection][0] as CanvasNode | undefined)?.getData().type === 'group',
+        (canvas: Canvas) => this.toggleCollapseGroup(canvas, [...canvas.selection][0] as CanvasNode)
       )
     })
   }
@@ -59,7 +59,7 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
     groupNode.collapseEl?.remove()
 
     // Add collapse/expand button next to the label
-    const collapseEl = activeDocument.createElement('div')
+    const collapseEl = activeWindow.createDiv()
     collapseEl.className = 'collapse-button'
     setIcon(collapseEl, groupNodeData.collapsed ? 'plus-circle' : 'minus-circle')
 
@@ -84,7 +84,7 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
   }
 
   private setCollapsed(canvas: Canvas, groupNode: CanvasNode, collapsed: boolean | undefined) {
-    groupNode.setData({ ...groupNode.getData(), collapsed: collapsed } as CanvasGroupNodeData)
+    groupNode.setData({ ...groupNode.getData(), collapsed: collapsed })
     canvas.setData(canvas.getData())
 
     canvas.history.current--

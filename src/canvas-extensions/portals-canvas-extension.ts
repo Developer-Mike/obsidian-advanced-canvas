@@ -220,7 +220,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
       if (nodeData.portal) this.setPortalOpen(canvas, node, false)
 
       return null
-    }).filter(node => node !== null) as CanvasNode[]
+    }).filter(node => node !== null)
 
     if (selectedFileNodes.length !== 1) return
 

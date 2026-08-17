@@ -71,7 +71,7 @@ export default class EdgeStylesExtension extends CanvasExtension {
 
         const selectedNodes = canvas.getSelectionData().nodes
           .map(nodeData => canvas.nodes.get(nodeData.id))
-          .filter(node => node !== undefined) as CanvasNode[]
+          .filter(node => node !== undefined)
         const selectedNodeBBoxes = selectedNodes.map(node => node.getBBox())
         const selectedNodeBBox = BBoxHelper.combineBBoxes(selectedNodeBBoxes)
 

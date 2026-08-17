@@ -25,7 +25,7 @@ export default class ZOrderingCanvasExtension  extends CanvasExtension {
   private selectionContextMenu(canvas: Canvas, menu: Menu) {
     const selectedNodes = canvas.getSelectionData().nodes
       .map(nodeData => canvas.nodes.get(nodeData.id))
-      .filter(node => node !== undefined) as CanvasNode[]
+      .filter(node => node !== undefined)
 
     this.addZOrderingContextMenuItems(canvas, selectedNodes, menu)
   }
@@ -48,13 +48,13 @@ export default class ZOrderingCanvasExtension  extends CanvasExtension {
     }
 
     menu.addItem(item => {
-      item.setTitle('Bring to Front')
+      item.setTitle('Bring to front')
       item.setIcon('bring-to-front')
       item.onClick(() => this.moveMaxLayers(canvas, nodes, true))
     })
 
     menu.addItem(item => {
-      item.setTitle('Send to Back')
+      item.setTitle('Send to back')
       item.setIcon('send-to-back')
       item.onClick(() => this.moveMaxLayers(canvas, nodes, false))
     })
