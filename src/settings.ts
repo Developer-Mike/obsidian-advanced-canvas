@@ -371,7 +371,6 @@ export const SETTINGS = {
         description: 'Add custom style settings for nodes. (Go to GitHub for more information)',
         type: 'button',
         onClick: () => {
-          // eslint-disable-next-line obsidianmd/prefer-create-el -- Temp virtual anchor
           const anchor = activeDocument.createElement('a')
           anchor.href = "https://github.com/Developer-Mike/obsidian-advanced-canvas/blob/main/README.md#custom-styles"
           anchor.target = '_blank'
@@ -407,7 +406,6 @@ export const SETTINGS = {
         description: 'Add custom style settings for edges. (Go to GitHub for more information)',
         type: 'button',
         onClick: () => {
-          // eslint-disable-next-line obsidianmd/prefer-create-el -- Temp virtual anchor
           const anchor = activeDocument.createElement('a')
           anchor.href = "https://github.com/Developer-Mike/obsidian-advanced-canvas/blob/main/README.md#custom-styles"
           anchor.target = '_blank'
@@ -779,7 +777,6 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
         .setTooltip("Open GitHub documentation")
         .setIcon('info')
         .onClick(async () => {
-          // eslint-disable-next-line obsidianmd/prefer-create-el -- Temp virtual anchor
           const anchor = activeDocument.createElement('a')
           anchor.href = `${README_URL}#${infoSection}`
           anchor.target = '_blank'

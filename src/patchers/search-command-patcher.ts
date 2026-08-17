@@ -68,7 +68,7 @@ class CanvasSearchView {
 
     this.searchCount = searchInputContainer.createDiv()
     this.searchCount.className = "document-search-count"
-    this.searchCount.style.display = "none" /* eslint-disable-line obsidianmd/no-static-styles-assignment -- Should be dynamic */
+    this.searchCount.style.display = "none"
     this.searchCount.textContent = "0 / 0"
 
     const documentSearchButtons = documentSearch.createDiv()

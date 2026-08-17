@@ -14,7 +14,6 @@ export interface StyleAttribute {
   options: StyleAttributeOption[]
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Extra properties have any type
 export function styleAttributeValidator(json: Record<string, any>): StyleAttribute | null {
   const hasKey = json.key !== undefined
   const hasLabel = json.label !== undefined

@@ -1,4 +1,4 @@
-import obsidianmd from "eslint-plugin-obsidianmd"
+// import obsidianmd from "eslint-plugin-obsidianmd"
 import { defineConfig, globalIgnores } from "eslint/config"
 import globals from "globals"
 
@@ -29,5 +29,5 @@ export default defineConfig([
 			},
     },
 	},
-	...obsidianmd.configs.recommended,
+	// ...obsidianmd.configs.recommended,
 ])

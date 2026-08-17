@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any -- Unknown typings remaining */
 import { App, TFile } from "obsidian"
 
 export default interface PropertiesView {

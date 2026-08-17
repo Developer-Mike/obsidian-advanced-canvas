@@ -20,7 +20,6 @@ export default class ReadingModeFixCanvasExtension extends CanvasExtension {
   }
 
   private updateNodeRenderer(node: CanvasNode) {
-    /* eslint-disable @typescript-eslint/no-explicit-any -- Not making a type for one property */
     const renderer = (node.child as any)?.previewMode?.renderer
     if (!renderer) return
 

@@ -97,7 +97,6 @@ export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
     const renderedMarkdownContainer = node.nodeEl.querySelector(".markdown-preview-view.markdown-rendered") as HTMLElement
     if (!renderedMarkdownContainer) return
 
-    /* eslint-disable-next-line obsidianmd/no-static-styles-assignment -- Should be dynamic */
     renderedMarkdownContainer.style.height = "min-content"
     const newHeight = renderedMarkdownContainer.clientHeight
     renderedMarkdownContainer.style.removeProperty("height")
@@ -112,7 +111,6 @@ export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
     const cmScroller = dom.querySelector(".cm-scroller") as HTMLElement
     if (!cmScroller) return
 
-    /* eslint-disable-next-line obsidianmd/no-static-styles-assignment -- Should be dynamic */
     cmScroller.style.height = "min-content"
     const newHeight = cmScroller.scrollHeight
     cmScroller.style.removeProperty("height")

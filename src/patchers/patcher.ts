@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any -- It's a generic wrapper */
 import { around } from "monkey-around"
 import AdvancedCanvasPlugin from "src/main"
 import { Plugin } from "obsidian"

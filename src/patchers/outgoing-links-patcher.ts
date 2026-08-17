@@ -5,7 +5,6 @@ export default class OutgoingLinksPatcher extends Patcher {
   protected async patch() {
     if (!this.plugin.settings.getSetting('canvasMetadataCompatibilityEnabled')) return
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- We do not have typings for the Outgoing Links plugin
     await Patcher.waitForViewRequest<any>(this.plugin, "outgoing-link", view => {
       Patcher.patchPrototype<OutgoingLink>(this.plugin, view.outgoingLink, {
         recomputeLinks: Patcher.OverrideExisting(next => function (...args: unknown[]): void {

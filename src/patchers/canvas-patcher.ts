@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any -- Too many anys */
 /* eslint-disable-next-line import/no-extraneous-dependencies -- Included in Obsidian */
 import { EditorView, ViewUpdate } from "@codemirror/view"
 import { around } from "monkey-around"
@@ -360,12 +359,10 @@ export default class CanvasPatcher extends Patcher {
         }
 
         // Save the data to the file (only if the canvas isn't loading)
-        /* eslint-disable-next-line @typescript-eslint/no-deprecated -- It's my lint and I know the consequences */
         this.canvas.data = this.canvas.getData()
         if (this.initialized) this.canvas.view.requestSave()
 
         // Add to the undo stack
-        /* eslint-disable-next-line @typescript-eslint/no-deprecated -- It's my lint and I know the consequences */
         if (addHistory) this.canvas.pushHistory(this.canvas.data)
 
         return result
@@ -468,7 +465,6 @@ export default class CanvasPatcher extends Patcher {
         }
 
         // Save the data to the file (only if the canvas isn't loading)
-        /* eslint-disable-next-line @typescript-eslint/no-deprecated -- It's my lint and I know the consequences */
         this.canvas.data = this.canvas.getData()
         if (this.initialized) this.canvas.view.requestSave()
 

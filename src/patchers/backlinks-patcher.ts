@@ -9,7 +9,6 @@ export default class BacklinksPatcher extends Patcher {
     if (!this.plugin.settings.getSetting('canvasMetadataCompatibilityEnabled')) return
 
     const that = this // eslint-disable-line @typescript-eslint/no-this-alias -- For patcher
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- We do not have typings for the Backlink plugin
     await Patcher.waitForViewRequest<any>(this.plugin, "backlink", view => {
       Patcher.patchPrototype<Backlink>(this.plugin, view.backlink, {
         recomputeBacklink: Patcher.OverrideExisting(next => function (file: TFile): void {
