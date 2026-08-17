@@ -53,7 +53,7 @@ export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
     const selectedNodes = canvas.getSelectionData().nodes
       .filter(nodeData => this.isValidNodeType(nodeData))
       .map(nodeData => canvas.nodes.get(nodeData.id))
-      .filter(node => node !== undefined) as CanvasNode[]
+      .filter(node => node !== undefined)
     if (selectedNodes.length === 0) return
 
     const autoResizeHeightEnabled = selectedNodes.some(node => node.getData().dynamicHeight)
@@ -97,9 +97,9 @@ export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
     const renderedMarkdownContainer = node.nodeEl.querySelector(".markdown-preview-view.markdown-rendered") as HTMLElement
     if (!renderedMarkdownContainer) return
 
-    renderedMarkdownContainer.style.height = "min-content"
+    renderedMarkdownContainer.setCssStyles({ height: "min-content" })
     const newHeight = renderedMarkdownContainer.clientHeight
-    renderedMarkdownContainer.style.removeProperty("height")
+    renderedMarkdownContainer.setCssStyles({ height: "" })
 
     this.setNodeHeight(node, newHeight)
   }
@@ -111,9 +111,9 @@ export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
     const cmScroller = dom.querySelector(".cm-scroller") as HTMLElement
     if (!cmScroller) return
 
-    cmScroller.style.height = "min-content"
+    cmScroller.setCssStyles({ height: "min-content" })
     const newHeight = cmScroller.scrollHeight
-    cmScroller.style.removeProperty("height")
+    cmScroller.setCssStyles({ height: "" })
 
     this.setNodeHeight(node, newHeight)
   }
