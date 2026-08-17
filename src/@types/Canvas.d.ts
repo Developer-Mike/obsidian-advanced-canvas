@@ -1,4 +1,4 @@
-import { App, ItemView, TFile, WorkspaceLeaf } from "obsidian"
+import { App, TextFileView, TFile, WorkspaceLeaf } from "obsidian"
 import { AnyCanvasNodeData, CanvasData, CanvasEdgeData, CanvasMetadata, CanvasNodeData, EndType, Side } from "./AdvancedJsonCanvas"
 
 export interface Size {
@@ -50,25 +50,19 @@ export interface CanvasConfig {
   minContainerDimension: number
 }
 
-export interface CanvasView extends ItemView {
+export interface CanvasView extends TextFileView {
   _loaded: boolean
   file: TFile
   canvas: Canvas
   leaf: CanvasWorkspaceLeaf
 
-  getViewData(): string
-  setViewData(data: string): void
-
   close(): void
 
-  data: string
   lastSavedData: string
-  requestSave(): void
 }
 
 export interface CanvasWorkspaceLeaf extends WorkspaceLeaf {
   id: string
-  rebuildView(): void
 }
 
 export interface CanvasElement {
@@ -312,13 +306,13 @@ export interface Canvas {
   deselectAll(): void
 
   toggleObjectSnapping(enabled: boolean): void
-  dragTempNode(dragEvent: any, nodeSize: Size, onDropped: (position: Position) => void): void
+  dragTempNode(dragEvent: unknown, nodeSize: Size, onDropped: (position: Position) => void): void
 
-  createTextNode(options: { [key: string]: any }): CanvasNode
-  createGroupNode(options: { [key: string]: any }): CanvasNode
-  createFileNode(options: { [key: string]: any }): CanvasNode
+  createTextNode(options: { [key: string]: unknown }): CanvasNode
+  createGroupNode(options: { [key: string]: unknown }): CanvasNode
+  createFileNode(options: { [key: string]: unknown }): CanvasNode
   createFileNodes(filepaths: string[], position: Position): CanvasNode[]
-  createLinkNode(options: { [key: string]: any }): CanvasNode
+  createLinkNode(options: { [key: string]: unknown }): CanvasNode
 
   addNode(node: CanvasNode): void
   removeNode(node: CanvasNode): void
