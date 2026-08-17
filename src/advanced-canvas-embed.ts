@@ -1,4 +1,4 @@
-import App, { Component, EmbedContext, MarkdownRenderer, TFile } from "obsidian"
+import { Component, EmbedContext, MarkdownRenderer, TFile } from "obsidian"
 import { CanvasData, CanvasFileNodeData, CanvasGroupNodeData, CanvasTextNodeData } from "./@types/AdvancedJsonCanvas"
 
 export default class AdvancedCanvasEmbed extends Component {
@@ -62,6 +62,6 @@ export default class AdvancedCanvasEmbed extends Component {
 
     const markdownContainer = this.context.containerEl.createSpan()
     markdownContainer.classList.add("markdown-content")
-    await MarkdownRenderer.render(this.context.app as unknown as App, nodeContent, markdownContainer, this.file.path, this)
+    await MarkdownRenderer.render(this.context.app, nodeContent, markdownContainer, this.file.path, this)
   }
 }

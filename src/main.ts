@@ -1,4 +1,4 @@
-import { ItemView, Plugin, requireApiVersion } from 'obsidian'
+import { Plugin, requireApiVersion, TextFileView } from 'obsidian'
 import { Canvas, CanvasView } from './@types/Canvas'
 
 // Utils
@@ -62,7 +62,10 @@ import EdgeExposerExtension from './canvas-extensions/dataset-exposers/edge-expo
 import CanvasWrapperExposerExtension from './canvas-extensions/dataset-exposers/canvas-wrapper-exposer'
 import BasesTableViewPatcher from './patchers/bases-table-view-patcher'
 
-const PATCHERS = [
+type PatcherConstructor = new (plugin: AdvancedCanvasPlugin) => Patcher
+type CanvasExtensionConstructor = new (plugin: AdvancedCanvasPlugin) => CanvasExtension
+
+const PATCHERS: (PatcherConstructor | false)[] = [
   // Core canvas patchers
   CanvasPatcher,
   SearchCommandPatcher,
@@ -83,7 +86,7 @@ const PATCHERS = [
   SearchPatcher,
 ]
 
-const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
+const CANVAS_EXTENSIONS: CanvasExtensionConstructor[] = [
   // Advanced JSON Canvas Extensions
   MetadataCanvasExtension,
   NodeStylesExtension,
@@ -140,35 +143,37 @@ export default class AdvancedCanvasPlugin extends Plugin {
 
     this.windowsManager = new WindowsManager(this)
 
-    this.patchers = PATCHERS.map((Patcher: any) => {
-      if (!Patcher) return
+    this.patchers = PATCHERS.map((PatcherClass) => {
+      if (!PatcherClass) return undefined
 
-      try { return new Patcher(this) }
+      try { return new PatcherClass(this) }
       catch (e) {
-        console.error(`Error initializing patcher ${Patcher.name}:`, e)
+        console.error(`Error initializing patcher ${PatcherClass.name}:`, e)
+        return undefined
       }
-    })
+    }).filter((p): p is Patcher => p !== undefined)
 
-    this.canvasExtensions = CANVAS_EXTENSIONS.map((Extension: any) => {
-      try { return new Extension(this) }
+    this.canvasExtensions = CANVAS_EXTENSIONS.map((ExtensionClass) => {
+      try { return new ExtensionClass(this) }
       catch (e) {
-        console.error(`Error initializing ac-extension ${Extension.name}:`, e)
+        console.error(`Error initializing ac-extension ${ExtensionClass.name}:`, e)
+        return undefined
       }
-    })
+    }).filter((e): e is CanvasExtension => e !== undefined)
   }
 
   onunload() {}
 
   getCanvases(): Canvas[] {
     return this.app.workspace.getLeavesOfType('canvas')
-      .map(leaf => (leaf.view as CanvasView)?.canvas)
+      .map(leaf => (leaf.view as unknown as CanvasView)?.canvas)
       .filter(canvas => canvas)
   }
 
   getCurrentCanvasView(): CanvasView | null {
-    const canvasView = this.app.workspace.getActiveViewOfType(ItemView)
+    const canvasView = this.app.workspace.getActiveViewOfType(TextFileView)
     if (canvasView?.getViewType() !== 'canvas') return null
-    return canvasView as CanvasView
+    return canvasView as unknown as CanvasView
   }
 
   getCurrentCanvas(): Canvas | null {
@@ -179,7 +184,7 @@ export default class AdvancedCanvasPlugin extends Plugin {
     const fileRecoveryPlugin = this.app.internalPlugins.plugins['file-recovery']?.instance
     if (!fileRecoveryPlugin) return
 
-    fileRecoveryPlugin.forceAdd(path, content)
+    (fileRecoveryPlugin as unknown as { forceAdd: (path: string, content: string) => void }).forceAdd(path, content)
   }
 
   // this.app.plugins.plugins["advanced-canvas"].enableDebugMode()

@@ -46,14 +46,14 @@ export default class CssStylesConfigManager<T> {
     const textContent = sheet?.ownerNode?.textContent?.trim()
     if (!textContent) return []
 
-    const configs = []
+    const configs: Record<string, unknown>[] = []
 
     const matches = textContent.matchAll(this.configRegex)
     for (const match of matches) {
       const yamlString = match[1]
       if (!yamlString) continue
 
-      const configYaml = parseYaml(yamlString)
+      const configYaml = parseYaml(yamlString) as Record<string, unknown>
       configs.push(configYaml)
     }
 

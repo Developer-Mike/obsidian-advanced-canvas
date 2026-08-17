@@ -371,7 +371,7 @@ export const SETTINGS = {
         description: 'Add custom style settings for nodes. (Go to GitHub for more information)',
         type: 'button',
         onClick: () => {
-          const anchor = activeDocument.createElement('a')
+          const anchor = activeWindow.createEl('a')
           anchor.href = "https://github.com/Developer-Mike/obsidian-advanced-canvas/blob/main/README.md#custom-styles"
           anchor.target = '_blank'
           anchor.click()
@@ -406,7 +406,7 @@ export const SETTINGS = {
         description: 'Add custom style settings for edges. (Go to GitHub for more information)',
         type: 'button',
         onClick: () => {
-          const anchor = activeDocument.createElement('a')
+          const anchor = activeWindow.createEl('a')
           anchor.href = "https://github.com/Developer-Mike/obsidian-advanced-canvas/blob/main/README.md#custom-styles"
           anchor.target = '_blank'
           anchor.click()
@@ -653,7 +653,7 @@ export const SETTINGS = {
     }
   },
   focusModeFeatureEnabled: {
-    label: 'Focus mode',
+    label: 'Focus Mode',
     description: 'Focus on a single node and blur all other nodes.',
     infoSection: 'focus-mode',
     children: { }
@@ -777,7 +777,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
         .setTooltip("Open GitHub documentation")
         .setIcon('info')
         .onClick(async () => {
-          const anchor = activeDocument.createElement('a')
+          const anchor = activeWindow.createEl('a')
           anchor.href = `${README_URL}#${infoSection}`
           anchor.target = '_blank'
           anchor.click()
@@ -792,7 +792,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           .setValue(this.settingsManager.getSetting(settingsKey) as boolean)
           .onChange(async (value) => {
             await this.settingsManager.setSetting({ [settingsKey]: value })
-            new Notice("Reload obsidian to apply the changes.")
+            new Notice("Reload Obsidian to apply the changes.")
           })
       )
     }
@@ -887,7 +887,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       new SettingEl(nestedContainerEl)
         .setName(styleAttribute.label)
         .addDropdown(dropdown => dropdown
-          .addOptions(Object.fromEntries(styleAttribute.options.map(option => [option.value, option.value === null ? `${option.label} (default)` : option.label])))
+          .addOptions(Object.fromEntries(styleAttribute.options.map(option => [option.value ?? 'null', option.value === null ? `${option.label} (default)` : option.label])))
           .setValue((this.settingsManager.getSetting(settingId) as { [key: string]: string })[styleAttribute.key] ?? 'null')
           .onChange(async (value) => {
             const newValue = this.settingsManager.getSetting(settingId) as { [key: string]: string }
