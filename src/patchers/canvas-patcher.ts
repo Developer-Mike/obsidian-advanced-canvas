@@ -4,11 +4,12 @@ import { around } from "monkey-around"
 import { editorInfoField, requireApiVersion, Side, WorkspaceLeaf } from "obsidian"
 import { BBox, Canvas, CanvasEdge, CanvasElement, CanvasElementsData, CanvasNode, CanvasPopupMenu, CanvasView, NodeInteractionLayer, Position, SelectionData } from "src/@types/Canvas"
 import JSONC from "tiny-jsonc"
-import Patcher from "./patcher"
+import Patcher, { invoke } from "./patcher"
 import BBoxHelper from "src/utils/bbox-helper"
 import { CanvasData, CanvasEdgeData, CanvasNodeData } from "src/@types/AdvancedJsonCanvas"
 import MigrationHelper from "src/utils/migration-helper"
 
+// LLM-EDITED: Type-only refactors in this file.
 export default class CanvasPatcher extends Patcher {
   protected async patch() {
     // Check if there are already loaded canvas view leafs
@@ -19,10 +20,10 @@ export default class CanvasPatcher extends Patcher {
       console.debug(`Patching and reloading loaded canvas views (Count: ${loadedCanvasViewLeafs.length})`)
 
       // Patch the loaded canvas views
-      this.patchCanvas(loadedCanvasViewLeafs.first()!.view as CanvasView)
+      this.patchCanvas(loadedCanvasViewLeafs.first()!.view as unknown as CanvasView)
 
       // Reload the canvas views
-      for (const leaf of loadedCanvasViewLeafs) (leaf as any).rebuildView()
+      for (const leaf of loadedCanvasViewLeafs) void (leaf as unknown as { rebuildView(): Promise<void> }).rebuildView()
     } else {
       // Patch the canvas view as soon it gets requested
       await Patcher.waitForViewRequest<CanvasView>(this.plugin, "canvas", view => this.patchCanvas(view))
@@ -32,13 +33,21 @@ export default class CanvasPatcher extends Patcher {
 
   private patchCanvas(view: CanvasView) {
     const that = this // eslint-disable-line @typescript-eslint/no-this-alias -- For patcher
+    interface EphemeralState {
+      subpath?: string
+      match?: {
+        matches?: number[][]
+        nodeId?: string
+      }
+    }
 
     // Patch canvas view
     Patcher.patchPrototype<CanvasView>(this.plugin, view, {
-      setEphemeralState: Patcher.OverrideExisting(next => function (state: any): void {
+      setEphemeralState: Patcher.OverrideExisting(next => function (state: unknown): void {
+        const s = state as EphemeralState
         // Select and zoom to the node if it exists (Link subpath)
-        if (state?.subpath) {
-          const nodeId = (state.subpath as string).replace(/^#/, '')
+        if (s?.subpath) {
+          const nodeId = (s.subpath).replace(/^#/, '')
           const node = this.canvas.nodes.get(nodeId)
 
           if (node) {
@@ -49,8 +58,8 @@ export default class CanvasPatcher extends Patcher {
         }
 
         // Select and zoom to the node if match exists (backlink) but no nodeId is specified (metadataCache limitation) - if nodeId exists, it comes from search
-        if (state.match?.matches?.[0] && !state.match?.nodeId) {
-          const match = state.match.matches[0]
+        if (s.match?.matches?.[0] && !s.match?.nodeId) {
+          const match = s.match.matches[0]
 
           const elementType = match[0] === 0 ? 'nodes' : 'edges' // Misuse start offset as element type indicator
           const elementIndex = match[1] // Misuse end offset as element index
@@ -66,9 +75,10 @@ export default class CanvasPatcher extends Patcher {
           }
         }
 
-        return next.call(this, state)
+        return invoke(next, this, state)
       }),
-      setViewData: Patcher.OverrideExisting(next => function (json: string, ...args: any): void {
+      setViewData: Patcher.OverrideExisting(next => function (...args: Parameters<typeof next>): void {
+        let [json, ...rest] = args
         json = json !== '' ? json : '{"nodes": [], "edges": []}'
 
         try {
@@ -85,7 +95,7 @@ export default class CanvasPatcher extends Patcher {
 
         let result
         try {
-          result = next.call(this, json, ...args)
+          result = invoke(next, this, json, ...rest)
         } catch (e) {
           console.error('Invalid JSON, repairing through Advanced Canvas:', e)
 
@@ -94,28 +104,28 @@ export default class CanvasPatcher extends Patcher {
 
           // Try to parse it with trailing commas
           json = JSON.stringify(JSONC.parse(json), null, 2)
-          result = next.call(this, json, ...args)
+          result = invoke(next, this, json, ...rest)
         }
 
         that.plugin.app.workspace.trigger('advanced-canvas:canvas-changed', this.canvas)
         return result
       }),
-      close: Patcher.OverrideExisting(next => function (...args: any): void {
+      close: Patcher.OverrideExisting(next => function (...args: Parameters<typeof next>): void {
         that.plugin.app.workspace.trigger('advanced-canvas:canvas-view-unloaded:before', this)
-        return next.call(this, ...args)
+        return invoke(next, this, ...args)
       }),
     })
 
     // Patch canvas
     Patcher.patchPrototype<Canvas>(this.plugin, view.canvas, {
-      markViewportChanged: Patcher.OverrideExisting(next => function (...args: any): void {
+      markViewportChanged: Patcher.OverrideExisting(next => function (...args: Parameters<typeof next>): void {
         that.plugin.app.workspace.trigger('advanced-canvas:viewport-changed:before', this)
-        const result = next.call(this, ...args)
+        const result = invoke(next, this, ...args)
         that.plugin.app.workspace.trigger('advanced-canvas:viewport-changed:after', this)
         return result
       }),
       markMoved: Patcher.OverrideExisting(next => function (node: CanvasNode): void {
-        const result = next.call(this, node)
+        const result = invoke(next, this, node)
 
         if (!this.viewportChanged) {
           if (node.prevX !== node.x || node.prevY !== node.y)
@@ -136,105 +146,105 @@ export default class CanvasPatcher extends Patcher {
       onDoubleClick: Patcher.OverrideExisting(next => function (event: MouseEvent): void {
         const preventDefault = { value: false }
         that.plugin.app.workspace.trigger('advanced-canvas:double-click', this, event, preventDefault)
-        if (!preventDefault.value) next.call(this, event)
+        if (!preventDefault.value) invoke(next, this, event)
       }),
       setDragging: Patcher.OverrideExisting(next => function (dragging: boolean): void {
-        const result = next.call(this, dragging)
+        const result = invoke(next, this, dragging)
         that.plugin.app.workspace.trigger('advanced-canvas:dragging-state-changed', this, dragging)
         return result
       }),
       // OBSIDIAN-FIX
       cloneData: Patcher.OverrideExisting(next => function (elements: CanvasElementsData, shift: Position): CanvasElementsData {
-        const result = next.call(this, elements, shift)
+        const result = invoke(next, this, elements, shift)
 
         // Deep clone the data to avoid modifying the original data
-        elements.nodes = elements.nodes.map(nodeData => JSON.parse(JSON.stringify(nodeData)))
-        elements.edges = elements.edges.map(edgeData => JSON.parse(JSON.stringify(edgeData)))
+        elements.nodes = elements.nodes.map(nodeData => JSON.parse(JSON.stringify(nodeData)) as CanvasNodeData)
+        elements.edges = elements.edges.map(edgeData => JSON.parse(JSON.stringify(edgeData)) as CanvasEdgeData)
 
         return result
       }),
       getContainingNodes: Patcher.OverrideExisting(next => function (bbox: BBox): CanvasNode[] {
-        const result = next.call(this, bbox)
+        const result = invoke(next, this, bbox)
         that.plugin.app.workspace.trigger('advanced-canvas:containing-nodes-requested', this, bbox, result)
         return result
       }),
       updateSelection: Patcher.OverrideExisting(next => function (update: () => void): void {
         const oldSelection = new Set(this.selection)
-        const result = next.call(this, update)
-        that.plugin.app.workspace.trigger('advanced-canvas:selection-changed', this, oldSelection, (update: () => void) => next.call(this, update))
+        const result = invoke(next, this, update)
+        that.plugin.app.workspace.trigger('advanced-canvas:selection-changed', this, oldSelection, (update: () => void) => invoke(next, this, update))
         return result
       }),
-      createTextNode: Patcher.OverrideExisting(next => function (...args: any): CanvasNode {
-        const node = next.call(this, ...args)
+      createTextNode: Patcher.OverrideExisting(next => function (...args: Parameters<typeof next>): CanvasNode {
+        const node = invoke(next, this, ...args)
         that.plugin.app.workspace.trigger('advanced-canvas:node-created', this, node)
         return node
       }),
-      createFileNode: Patcher.OverrideExisting(next => function (...args: any): CanvasNode {
-        const node = next.call(this, ...args)
+      createFileNode: Patcher.OverrideExisting(next => function (...args: Parameters<typeof next>): CanvasNode {
+        const node = invoke(next, this, ...args)
         that.plugin.app.workspace.trigger('advanced-canvas:node-created', this, node)
         return node
       }),
-      createFileNodes: Patcher.OverrideExisting(next => function (...args: any): CanvasNode[] {
-        const nodes = next.call(this, ...args)
+      createFileNodes: Patcher.OverrideExisting(next => function (...args: Parameters<typeof next>): CanvasNode[] {
+        const nodes = invoke(next, this, ...args)
         nodes.forEach((node: CanvasNode) => that.plugin.app.workspace.trigger('advanced-canvas:node-created', this, node))
         return nodes
       }),
-      createGroupNode: Patcher.OverrideExisting(next => function (...args: any): CanvasNode {
-        const node = next.call(this, ...args)
+      createGroupNode: Patcher.OverrideExisting(next => function (...args: Parameters<typeof next>): CanvasNode {
+        const node = invoke(next, this, ...args)
         that.plugin.app.workspace.trigger('advanced-canvas:node-created', this, node)
         return node
       }),
-      createLinkNode: Patcher.OverrideExisting(next => function (...args: any): CanvasNode {
-        const node = next.call(this, ...args)
+      createLinkNode: Patcher.OverrideExisting(next => function (...args: Parameters<typeof next>): CanvasNode {
+        const node = invoke(next, this, ...args)
         that.plugin.app.workspace.trigger('advanced-canvas:node-created', this, node)
         return node
       }),
       addNode: Patcher.OverrideExisting(next => function (node: CanvasNode): void {
         that.patchNode(node)
-        return next.call(this, node)
+        return invoke(next, this, node)
       }),
       addEdge: Patcher.OverrideExisting(next => function (edge: CanvasEdge): void {
         that.patchEdge(edge)
         if (!this.viewportChanged) that.plugin.app.workspace.trigger('advanced-canvas:edge-created', this, edge)
-        return next.call(this, edge)
+        return invoke(next, this, edge)
       }),
       removeNode: Patcher.OverrideExisting(next => function (node: CanvasNode): void {
-        const result = next.call(this, node)
+        const result = invoke(next, this, node)
         if (!this.isClearing) that.plugin.app.workspace.trigger('advanced-canvas:node-removed', this, node)
         return result
       }),
       removeEdge: Patcher.OverrideExisting(next => function (edge: CanvasEdge): void {
-        const result = next.call(this, edge)
+        const result = invoke(next, this, edge)
         if (!this.isClearing) that.plugin.app.workspace.trigger('advanced-canvas:edge-removed', this, edge)
         return result
       }),
-      handleCopy: Patcher.OverrideExisting(next => function (...args: any): void {
+      handleCopy: Patcher.OverrideExisting(next => function (...args: Parameters<typeof next>): void {
         this.isCopying = true
-        const result = next.call(this, ...args)
+        const result = invoke(next, this, ...args)
         this.isCopying = false
 
         return result
       }),
-      handlePaste: Patcher.OverrideExisting(next => function (...args: any): void {
+      handlePaste: Patcher.OverrideExisting(next => function (...args: Parameters<typeof next>): void {
         this.isPasting = true
-        const result = next.call(this, ...args)
+        const result = invoke(next, this, ...args)
         this.isPasting = false
 
         return result
       }),
-      getSelectionData: Patcher.OverrideExisting(next => function (...args: any): SelectionData {
-        const result = next.call(this, ...args)
+      getSelectionData: Patcher.OverrideExisting(next => function (...args: Parameters<typeof next>): SelectionData {
+        const result = invoke(next, this, ...args)
         if (this.isCopying) that.plugin.app.workspace.trigger('advanced-canvas:copy', this, result)
         return result
       }),
       zoomToBbox: Patcher.OverrideExisting(next => function (bbox: BBox): void {
         that.plugin.app.workspace.trigger('advanced-canvas:zoom-to-bbox:before', this, bbox)
-        const result = next.call(this, bbox)
+        const result = invoke(next, this, bbox)
         that.plugin.app.workspace.trigger('advanced-canvas:zoom-to-bbox:after', this, bbox)
         return result
       }),
       // Custom
-      zoomToRealBbox: (_next: any) => function (bbox: BBox): void {
+      zoomToRealBbox: (_next: unknown) => function (bbox: BBox): void {
         if (this.canvasRect.width === 0 || this.canvasRect.height === 0) return
 
         that.plugin.app.workspace.trigger('advanced-canvas:zoom-to-bbox:before', this, bbox)
@@ -253,36 +263,36 @@ export default class CanvasPatcher extends Patcher {
         that.plugin.app.workspace.trigger('advanced-canvas:zoom-to-bbox:after', this, bbox)
       },
       setReadonly: Patcher.OverrideExisting(next => function (readonly: boolean): void {
-        const result = next.call(this, readonly)
+        const result = invoke(next, this, readonly)
         that.plugin.app.workspace.trigger('advanced-canvas:readonly-changed', this, readonly)
         return result
       }),
-      undo: Patcher.OverrideExisting(next => function (...args: any): void {
-        const result = next.call(this, ...args)
+      undo: Patcher.OverrideExisting(next => function (...args: Parameters<typeof next>): void {
+        const result = invoke(next, this, ...args)
         this.importData(this.getData(), true) // Force update the canvas data
         that.plugin.app.workspace.trigger('advanced-canvas:undo', this)
         return result
       }),
-      redo: Patcher.OverrideExisting(next => function (...args: any): void {
-        const result = next.call(this, ...args)
+      redo: Patcher.OverrideExisting(next => function (...args: Parameters<typeof next>): void {
+        const result = invoke(next, this, ...args)
         this.importData(this.getData(), true) // Force update the canvas data
         that.plugin.app.workspace.trigger('advanced-canvas:redo', this)
         return result
       }),
-      clear: Patcher.OverrideExisting(next => function (...args: any): void {
+      clear: Patcher.OverrideExisting(next => function (...args: Parameters<typeof next>): void {
         this.isClearing = true
-        const result = next.call(this, ...args)
+        const result = invoke(next, this, ...args)
         this.isClearing = false
         return result
       }),
       /*setData: Patcher.OverrideExisting(next => function (...args: any): void {
         //
-        const result = next.call(this, ...args)
+        const result = invoke(next, this, ...args)
         //
         return result
       }),*/
-      getData: Patcher.OverrideExisting(next => function (...args: any): CanvasData {
-        const result = next.call(this, ...args)
+      getData: Patcher.OverrideExisting(next => function (...args: Parameters<typeof next>): CanvasData {
+        const result = invoke(next, this, ...args)
         that.plugin.app.workspace.trigger('advanced-canvas:data-requested', this, result)
         return result
       }),
@@ -296,14 +306,14 @@ export default class CanvasPatcher extends Patcher {
         }
 
         if (!silent) that.plugin.app.workspace.trigger('advanced-canvas:data-loaded:before', this, data, setData)
-        const result = next.call(this, data, clearCanvas)
+        const result = invoke(next, this, data, clearCanvas)
         if (!silent) that.plugin.app.workspace.trigger('advanced-canvas:data-loaded:after', this, data, setData)
 
         return result
       }),
-      requestSave: Patcher.OverrideExisting(next => function (...args: any): void {
+      requestSave: Patcher.OverrideExisting(next => function (...args: Parameters<typeof next>): void {
         that.plugin.app.workspace.trigger('advanced-canvas:canvas-saved:before', this)
-        const result = next.call(this, ...args)
+        const result = invoke(next, this, ...args)
         that.plugin.app.workspace.trigger('advanced-canvas:canvas-saved:after', this)
         return result
       })
@@ -311,10 +321,10 @@ export default class CanvasPatcher extends Patcher {
 
     // Patch canvas popup menu
     Patcher.patchPrototype<CanvasPopupMenu>(this.plugin, view.canvas.menu, {
-      render: Patcher.OverrideExisting(next => function (...args: any): void {
-        const result = next.call(this, ...args)
+      render: Patcher.OverrideExisting(next => function (...args: Parameters<typeof next>): void {
+        const result = invoke(next, this, ...args)
         that.plugin.app.workspace.trigger('advanced-canvas:popup-menu-created', this.canvas)
-        next.call(this) // Re-Center the popup menu
+        invoke(next, this) // Re-Center the popup menu
         return result
       })
     })
@@ -322,7 +332,7 @@ export default class CanvasPatcher extends Patcher {
     // Patch interaction layer
     Patcher.patchPrototype<NodeInteractionLayer>(this.plugin, view.canvas.nodeInteractionLayer, {
       setTarget: Patcher.OverrideExisting(next => function (node: CanvasNode): void {
-        const result = next.call(this, node)
+        const result = invoke(next, this, node)
         that.plugin.app.workspace.trigger('advanced-canvas:node-interaction', this.canvas, node)
         return result
       })
@@ -332,8 +342,8 @@ export default class CanvasPatcher extends Patcher {
     this.plugin.registerEditorExtension([EditorView.updateListener.of((update: ViewUpdate) => {
       if (!update.docChanged) return
 
-      const editor = update.state.field(editorInfoField) as any
-      const node = editor.node as CanvasNode | undefined
+      const editor = update.state.field(editorInfoField) as { node?: CanvasNode }
+      const node = editor.node
       if (!node) return
 
       that.plugin.app.workspace.trigger('advanced-canvas:node-text-content-changed', node.canvas, node, update)
@@ -344,13 +354,13 @@ export default class CanvasPatcher extends Patcher {
     const that = this // eslint-disable-line @typescript-eslint/no-this-alias -- For patcher
 
     Patcher.patch<CanvasNode>(this.plugin, node, {
-      render: Patcher.OverrideExisting(next => function (...args: any): void {
-        const result = next.call(this, ...args)
+      render: Patcher.OverrideExisting(next => function (...args: Parameters<typeof next>): void {
+        const result = invoke(next, this, ...args)
         that.plugin.app.workspace.trigger('advanced-canvas:node-rendered', this.canvas, node)
         return result
       }),
       setData: Patcher.OverrideExisting(next => function (data: CanvasNodeData, addHistory?: boolean): void {
-        const result = next.call(this, data)
+        const result = invoke(next, this, data)
 
         if (node.initialized && !node.isDirty) {
           node.isDirty = true
@@ -359,11 +369,12 @@ export default class CanvasPatcher extends Patcher {
         }
 
         // Save the data to the file (only if the canvas isn't loading)
-        this.canvas.data = this.canvas.getData()
+        const canvasWithData = this.canvas as { data: CanvasData }
+        canvasWithData.data = this.canvas.getData()
         if (this.initialized) this.canvas.view.requestSave()
 
         // Add to the undo stack
-        if (addHistory) this.canvas.pushHistory(this.canvas.data)
+        if (addHistory) this.canvas.pushHistory(canvasWithData.data)
 
         return result
       }),
@@ -380,7 +391,7 @@ export default class CanvasPatcher extends Patcher {
         const persistentZIndex = this.getData().zIndex
 
         // If no persistent zIndex is set, use the dynamic zIndex
-        if (persistentZIndex === undefined) return next.call(this)
+        if (persistentZIndex === undefined) return invoke(next, this)
 
         // Update the min zIndex of dynamic zIndex -> so everything is above the current persistent zIndex
         this.canvas.zIndexCounter = Math.max(this.canvas.zIndexCounter, persistentZIndex)
@@ -392,7 +403,7 @@ export default class CanvasPatcher extends Patcher {
         const persistentZIndex = this.getData().zIndex
 
         // If no persistent zIndex is set, use the dynamic zIndex
-        if (persistentZIndex === undefined) return next.call(this)
+        if (persistentZIndex === undefined) return invoke(next, this)
 
         // Use the persistent zIndex
         this.zIndex = persistentZIndex
@@ -403,18 +414,19 @@ export default class CanvasPatcher extends Patcher {
 
         this.nodeEl.style.zIndex = this.zIndex.toString()
       }),
-      setIsEditing: Patcher.OverrideExisting(next => function (editing: boolean, ...args: any): void {
-        const result = next.call(this, editing, ...args)
+      setIsEditing: Patcher.OverrideExisting(next => function (...args: Parameters<typeof next>): void {
+        const result = invoke(next, this, ...args)
+        const [editing] = args
         that.plugin.app.workspace.trigger('advanced-canvas:node-editing-state-changed', this.canvas, node, editing)
         return result
       }),
       updateBreakpoint: Patcher.OverrideExisting(next => function (breakpoint: boolean): void {
         const breakpointRef = { value: breakpoint }
         that.plugin.app.workspace.trigger('advanced-canvas:node-breakpoint-changed', this.canvas, node, breakpointRef)
-        return next.call(this, breakpointRef.value)
+        return invoke(next, this, breakpointRef.value)
       }),
-      getBBox: Patcher.OverrideExisting(next => function (...args: any): BBox {
-        const result = next.call(this, ...args)
+      getBBox: Patcher.OverrideExisting(next => function (...args: Parameters<typeof next>): BBox {
+        const result = invoke(next, this, ...args)
         that.plugin.app.workspace.trigger('advanced-canvas:node-bbox-requested', this.canvas, node, result)
         return result
       }),
@@ -429,17 +441,17 @@ export default class CanvasPatcher extends Patcher {
           }, { once: true })
         })
 
-        const result = next.call(this, e, side)
+        const result = invoke(next, this, e, side)
         return result
       }),
       // File nodes
-      setFile: next => function (...args: any): void {
-        const result = next.call(this, ...args)
+      setFile: next => function (...args: Parameters<typeof next>): void {
+        const result = invoke(next, this, ...args)
         that.plugin.app.workspace.trigger('advanced-canvas:node-changed', this.canvas, this)
         return result
       },
-      setFilePath: next => function (...args: any): void {
-        const result = next.call(this, ...args)
+      setFilePath: next => function (...args: Parameters<typeof next>): void {
+        const result = invoke(next, this, ...args)
         that.plugin.app.workspace.trigger('advanced-canvas:node-changed', this.canvas, this)
         return result
       }
@@ -456,7 +468,7 @@ export default class CanvasPatcher extends Patcher {
 
     Patcher.patch<CanvasEdge>(this.plugin, edge, {
       setData: Patcher.OverrideExisting(next => function (data: CanvasEdgeData, addHistory?: boolean): void {
-        const result = next.call(this, data)
+        const result = invoke(next, this, data)
 
         if (this.initialized && !this.isDirty) {
           this.isDirty = true
@@ -465,7 +477,8 @@ export default class CanvasPatcher extends Patcher {
         }
 
         // Save the data to the file (only if the canvas isn't loading)
-        this.canvas.data = this.canvas.getData()
+        const canvasWithData = this.canvas as { data: CanvasData }
+        canvasWithData.data = this.canvas.getData()
         if (this.initialized) this.canvas.view.requestSave()
 
         // Add to the undo stack
@@ -473,16 +486,16 @@ export default class CanvasPatcher extends Patcher {
 
         return result
       }),
-      render: Patcher.OverrideExisting(next => function (...args: any): void {
-        const result = next.call(this, ...args)
+      render: Patcher.OverrideExisting(next => function (...args: Parameters<typeof next>): void {
+        const result = invoke(next, this, ...args)
         that.plugin.app.workspace.trigger('advanced-canvas:edge-changed', this.canvas, this)
 
         // TODO: EdgeStyleExtension console.count(`Edge Rendered ${this.canvas.isClearing}`)
 
         return result
       }),
-      getCenter: Patcher.OverrideExisting(next => function (...args: any): Position {
-        const result = next.call(this, ...args)
+      getCenter: Patcher.OverrideExisting(next => function (...args: Parameters<typeof next>): Position {
+        const result = invoke(next, this, ...args)
         that.plugin.app.workspace.trigger('advanced-canvas:edge-center-requested', this.canvas, this, result)
         return result
       }),
@@ -494,7 +507,7 @@ export default class CanvasPatcher extends Patcher {
         // Save the previous ends
         const previousEnds = { from: this.from, to: this.to }
 
-        const result = next.call(this, e)
+        const result = invoke(next, this, e)
 
         // a = i.posFromEvt(e)
         // s = M$(r.node.getBBox(), r.side)
@@ -530,8 +543,8 @@ export default class CanvasPatcher extends Patcher {
 
     // Patch CanvasElement object
     const uninstall = around(canvasElement, {
-      initialize: next => function (this: any, ...args: any): void {
-        const result = next.call(this, ...args)
+      initialize: (next: CanvasElement["initialize"]) => function (this: CanvasElement, ...args: Parameters<CanvasElement["initialize"]>): void {
+        const result = invoke(next, this, ...args)
 
         onReady()
         uninstall() // Uninstall the patch
