@@ -2,24 +2,29 @@ import { around } from "monkey-around"
 import AdvancedCanvasPlugin from "src/main"
 import { Plugin } from "obsidian"
 
+/** Typed wrapper for Function.prototype.call — preserves return type that .call() erases to `any`. */
+export function invoke<T, A extends unknown[], R>(fn: (this: T, ...args: A) => R, thisArg: T, ...args: A): R {
+  return fn.call(thisArg, ...args) as R
+}
+
 // Is any
 type IsAny<T> = 0 extends 1 & T ? true : false
 type NotAny<T> = IsAny<T> extends true ? never : T
 
 // All keys in T that are functions
 type FunctionKeys<T> = {
-  [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never
+  [K in keyof T]: T[K] extends (...args: unknown[]) => unknown ? K : never
 }[keyof T]
 
 // The type of the function at key K in T
 type KeyFunction<T, K extends FunctionKeys<T>> =
-  T[K] extends (...args: any[]) => any ? T[K] : never
+  T[K] extends (...args: unknown[]) => unknown ? T[K] : never
 
 // The type of a patch function for key K in T
 type KeyFunctionReplacement<T, K extends FunctionKeys<T>, R extends ReturnType<KeyFunction<T, K>>> =
   (this: T, ...args: Parameters<KeyFunction<T, K>>) => IsAny<ReturnType<KeyFunction<T, K>>> extends false
   ? ReturnType<KeyFunction<T, K>> & NotAny<R>
-  : any
+  : unknown
 
 // The wrapper of a patch function for key K in T
 type PatchFunctionWrapper<T, K extends FunctionKeys<T>, R extends ReturnType<KeyFunction<T, K>>> =
@@ -40,15 +45,14 @@ export default abstract class Patcher {
 
   protected abstract patch(): Promise<void>
 
-  protected static async waitForMapValueLookup<T>(map: Record<string, any>, viewType: string, patch: (view: T) => void): Promise<T> {
+  protected static async waitForMapValueLookup<T>(map: Record<string, unknown>, viewType: string, patch: (view: T) => void): Promise<T> {
     return new Promise(resolve => {
       const uninstaller = around(map, {
-        [viewType]: next => function (this: any, ...args: any[]): void {
-          const view = next.call(this, ...args)
+        [viewType]: (next: (...args: unknown[]) => T) => function (this: unknown, ...args: unknown[]): T {
+          const view = invoke(next, this, ...args)
           patch(view)
 
-          // Create a new view
-          const patchedView = next.call(this, ...args)
+          const patchedView = invoke(next, this, ...args)
 
           uninstaller()
           resolve(patchedView)
@@ -94,9 +98,8 @@ export default abstract class Patcher {
     uninstallers?: Array<() => void>
   ): T | null {
     if (!object) return null
-    const target = prototype ? object.constructor.prototype : object
+    const target: T = prototype ? (object.constructor.prototype as T) : object
 
-    // Validate override requirements
     for (const key of Object.keys(patches) as Array<FunctionKeys<T>>) {
       const patch = patches[key]
       if (patch?.__overrideExisting) {
@@ -105,7 +108,10 @@ export default abstract class Patcher {
       }
     }
 
-    const uninstaller = around(target, patches)
+    const uninstaller = around(
+      target as Record<string, (...args: unknown[]) => unknown>,
+      patches as Parameters<typeof around>[1]
+    )
     if (uninstallers) uninstallers.push(uninstaller)
     plugin.register(uninstaller)
 
