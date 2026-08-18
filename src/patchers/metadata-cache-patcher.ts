@@ -22,7 +22,7 @@ export default class MetadataCachePatcher extends Patcher {
           return (hash && this.metadataCache[hash] as ExtendedCachedMetadata) || null
         }
 
-        return invoke(next, this, filepath, ...args) as ExtendedCachedMetadata
+        return invoke(next, this, filepath, ...args)
       }),
       computeFileMetadataAsync: Patcher.OverrideExisting(next => async function (file: TFile, ...args: unknown[]) {
         if (file instanceof TFile && file?.extension === 'canvas')
@@ -54,7 +54,7 @@ async function computeCanvasFileMetadataAsync(this: MetadataCache, file: TFile) 
   if (!cache) this.saveFileCache(file.path, { mtime: 0, size: 0, hash: "" })
   else {
     const unchanged = cache.mtime === file.stat.mtime && cache.size === file.stat.size
-    const hasMetadataCache = cache.hash && Object.prototype.hasOwnProperty.call(this.metadataCache, cache.hash) as unknown as boolean
+    const hasMetadataCache = cache.hash && Object.prototype.hasOwnProperty.call(this.metadataCache, cache.hash)
 
     if (unchanged && hasMetadataCache)
       isStale = false
