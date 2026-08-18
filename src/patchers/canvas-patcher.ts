@@ -2,14 +2,13 @@
 import { EditorView, ViewUpdate } from "@codemirror/view"
 import { around } from "monkey-around"
 import { editorInfoField, requireApiVersion, Side, WorkspaceLeaf } from "obsidian"
-import { BBox, Canvas, CanvasEdge, CanvasElement, CanvasElementsData, CanvasNode, CanvasPopupMenu, CanvasView, NodeInteractionLayer, Position, SelectionData } from "src/@types/Canvas"
+import { CanvasData, CanvasEdgeData, CanvasNodeData } from "src/@types/AdvancedJsonCanvas"
+import { BBox, Canvas, CanvasEdge, CanvasElement, CanvasElementsData, CanvasEphemeralState, CanvasNode, CanvasPopupMenu, CanvasView, CanvasWorkspaceLeaf, NodeInteractionLayer, Position, SelectionData } from "src/@types/Canvas"
+import BBoxHelper from "src/utils/bbox-helper"
+import MigrationHelper from "src/utils/migration-helper"
 import JSONC from "tiny-jsonc"
 import Patcher, { invoke } from "./patcher"
-import BBoxHelper from "src/utils/bbox-helper"
-import { CanvasData, CanvasEdgeData, CanvasNodeData } from "src/@types/AdvancedJsonCanvas"
-import MigrationHelper from "src/utils/migration-helper"
 
-// LLM-EDITED: Type-only refactors in this file.
 export default class CanvasPatcher extends Patcher {
   protected async patch() {
     // Check if there are already loaded canvas view leafs
@@ -23,7 +22,7 @@ export default class CanvasPatcher extends Patcher {
       this.patchCanvas(loadedCanvasViewLeafs.first()!.view as unknown as CanvasView)
 
       // Reload the canvas views
-      for (const leaf of loadedCanvasViewLeafs) void (leaf as unknown as { rebuildView(): Promise<void> }).rebuildView()
+      for (const leaf of loadedCanvasViewLeafs) void (leaf as unknown as CanvasWorkspaceLeaf).rebuildView()
     } else {
       // Patch the canvas view as soon it gets requested
       await Patcher.waitForViewRequest<CanvasView>(this.plugin, "canvas", view => this.patchCanvas(view))
@@ -33,18 +32,11 @@ export default class CanvasPatcher extends Patcher {
 
   private patchCanvas(view: CanvasView) {
     const that = this // eslint-disable-line @typescript-eslint/no-this-alias -- For patcher
-    interface EphemeralState {
-      subpath?: string
-      match?: {
-        matches?: number[][]
-        nodeId?: string
-      }
-    }
 
     // Patch canvas view
     Patcher.patchPrototype<CanvasView>(this.plugin, view, {
       setEphemeralState: Patcher.OverrideExisting(next => function (state: unknown): void {
-        const s = state as EphemeralState
+        const s = state as CanvasEphemeralState
         // Select and zoom to the node if it exists (Link subpath)
         if (s?.subpath) {
           const nodeId = (s.subpath).replace(/^#/, '')

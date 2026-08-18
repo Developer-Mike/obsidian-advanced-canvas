@@ -61,8 +61,17 @@ export interface CanvasView extends TextFileView {
   lastSavedData: string
 }
 
+export interface CanvasEphemeralState {
+  subpath?: string
+  match?: {
+    matches?: number[][]
+    nodeId?: string
+  }
+}
+
 export interface CanvasWorkspaceLeaf extends WorkspaceLeaf {
   id: string
+  rebuildView(): void
 }
 
 export interface CanvasElement {
@@ -74,6 +83,15 @@ export interface CanvasElement {
 
   child: {
     data: string
+
+    previewMode ?: {
+      renderer?: {
+        text?: string
+        set: (text: string) => void
+
+        onRendered: (cb: () => void) => void
+      }
+    }
 
     editMode: {
       cm: {

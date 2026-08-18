@@ -54,7 +54,7 @@ async function computeCanvasFileMetadataAsync(this: MetadataCache, file: TFile) 
   if (!cache) this.saveFileCache(file.path, { mtime: 0, size: 0, hash: "" })
   else {
     const unchanged = cache.mtime === file.stat.mtime && cache.size === file.stat.size
-    const hasMetadataCache = cache.hash && Object.prototype.hasOwnProperty.call(this.metadataCache, cache.hash)
+    const hasMetadataCache = cache.hash && Object.prototype.hasOwnProperty.call(this.metadataCache, cache.hash) as unknown as boolean
 
     if (unchanged && hasMetadataCache)
       isStale = false

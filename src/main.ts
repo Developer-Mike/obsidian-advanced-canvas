@@ -61,6 +61,7 @@ import NodeExposerExtension from './canvas-extensions/dataset-exposers/node-expo
 import EdgeExposerExtension from './canvas-extensions/dataset-exposers/edge-exposer'
 import CanvasWrapperExposerExtension from './canvas-extensions/dataset-exposers/canvas-wrapper-exposer'
 import BasesTableViewPatcher from './patchers/bases-table-view-patcher'
+import FileRecovery from './@types/FileRecoveryPlugin'
 
 type PatcherConstructor = new (plugin: AdvancedCanvasPlugin) => Patcher
 type CanvasExtensionConstructor = new (plugin: AdvancedCanvasPlugin) => CanvasExtension
@@ -181,10 +182,10 @@ export default class AdvancedCanvasPlugin extends Plugin {
   }
 
   createFileSnapshot(path: string, content: string) {
-    const fileRecoveryPlugin = this.app.internalPlugins.plugins['file-recovery']?.instance
+    const fileRecoveryPlugin = this.app.internalPlugins.plugins['file-recovery']?.instance as unknown as FileRecovery | undefined
     if (!fileRecoveryPlugin) return
 
-    (fileRecoveryPlugin as unknown as { forceAdd: (path: string, content: string) => void }).forceAdd(path, content)
+    fileRecoveryPlugin.forceAdd(path, content)
   }
 
   // this.app.plugins.plugins["advanced-canvas"].enableDebugMode()

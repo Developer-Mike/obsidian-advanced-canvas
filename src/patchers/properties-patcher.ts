@@ -1,6 +1,7 @@
 import PropertiesView from "src/@types/PropertiesPlugin"
 import Patcher, { invoke } from "./patcher"
 import { TFile } from "obsidian"
+import { Canvas } from "src/@types/Canvas"
 
 export default class PropertiesPatcher extends Patcher {
   protected async patch() {
@@ -21,7 +22,7 @@ export default class PropertiesPatcher extends Patcher {
           if (file?.extension === 'canvas') {
             let frontmatter
 
-            try { frontmatter = (JSON.parse(content) as { metadata?: { frontmatter?: Record<string, unknown> } })?.metadata?.frontmatter ?? {} }
+            try { frontmatter = (JSON.parse(content) as Partial<Canvas>)?.metadata?.frontmatter ?? {} }
             catch { frontmatter = {} }
 
             this.rawFrontmatter = JSON.stringify(frontmatter, null, 2)
@@ -39,7 +40,7 @@ export default class PropertiesPatcher extends Patcher {
             if (this.file !== this.modifyingFile) return
 
             this.app.vault.process(this.file, (data: string) => {
-              const content = JSON.parse(data) as { metadata?: { frontmatter?: Record<string, unknown> } }
+              const content = JSON.parse(data) as Partial<Canvas>
               if (content?.metadata) content.metadata.frontmatter = frontmatter
 
               return JSON.stringify(content, null, 2)
