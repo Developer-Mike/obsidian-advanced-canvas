@@ -3,7 +3,7 @@ import { BBox, Canvas, CanvasEdge, CanvasEdgeEnd, CanvasElement, CanvasNode, Can
 import { CanvasData } from "./AdvancedJsonCanvas"
 
 export interface EventRef {
-  fn: (...args: any) => any
+  fn: (...args: unknown) => unknown
 }
 
 export interface CustomWorkspaceEvents {
@@ -50,7 +50,7 @@ export interface CustomWorkspaceEvents {
   /** Fired when any node gets rendered */
   'advanced-canvas:node-rendered': (canvas: Canvas, node: CanvasNode) => void
   /** Fired when the text content of a node gets changed (While typing) */
-  'advanced-canvas:node-text-content-changed': (canvas: Canvas, node: CanvasNode, viewUpdate: any) => void
+  'advanced-canvas:node-text-content-changed': (canvas: Canvas, node: CanvasNode, viewUpdate: unknown) => void
   /** Fired before an existing edge tries to get dragged */
   'advanced-canvas:edge-connection-try-dragging:before': (canvas: Canvas, edge: CanvasEdge, event: PointerEvent, cancelRef: { value: boolean }) => void
   /** Fired before an edge gets dragged */

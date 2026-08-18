@@ -1,4 +1,4 @@
-import App, { FuzzyMatch, FuzzySuggestModal, SuggestModal, TFile } from 'obsidian'
+import { App, FuzzyMatch, FuzzySuggestModal, SuggestModal, TFile } from 'obsidian'
 import FilepathHelper from 'src/utils/filepath-helper'
 
 export class AbstractSelectionModal extends FuzzySuggestModal<string> {

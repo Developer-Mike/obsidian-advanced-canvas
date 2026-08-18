@@ -26,19 +26,19 @@ export default class MetadataCanvasExtension extends CanvasExtension {
   }
 
   private onCanvasChanged(canvas: Canvas): void {
-    const metadata = canvas.data?.metadata
+    const metadata = canvas.getData()?.metadata
     if (!metadata || metadata.version !== CURRENT_SPEC_VERSION)
       return void new Notice("Metadata node not found or version mismatch. Should have been migrated (but wasn't).")
 
     // Add proxy to metadata to listen for changes
     const that = this // eslint-disable-line @typescript-eslint/no-this-alias -- For patcher
-    const validator: ProxyHandler<any> = {
-      get(target: any, key: string): any {
+    const validator: ProxyHandler<Record<string, unknown>> = {
+      get(target: Record<string, unknown>, key: string): unknown {
         if (typeof target[key] === 'object' && target[key] !== null)
-          return new Proxy(target[key], validator)
+          return new Proxy(target[key] as Record<string, unknown>, validator)
         else return target[key]
       },
-      set(target: any, key: string, value: any) {
+      set(target: Record<string, unknown>, key: string, value: unknown) {
         target[key] = value
 
         that.plugin.app.workspace.trigger('advanced-canvas:canvas-metadata-changed', canvas)
@@ -49,7 +49,7 @@ export default class MetadataCanvasExtension extends CanvasExtension {
     }
 
     // Set canvas metadata
-    canvas.metadata = new Proxy(metadata, validator)
+    canvas.metadata = new Proxy(metadata as unknown as Record<string, unknown>, validator) as unknown as typeof metadata
 
     // Trigger metadata change event
     this.plugin.app.workspace.trigger('advanced-canvas:canvas-metadata-changed', canvas)

@@ -39,7 +39,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
           canvas,
           canvas.getSelectionData().nodes
             .map(nodeData => canvas.nodes.get(nodeData.id))
-            .filter(node => node !== undefined) as CanvasNode[]
+            .filter(node => node !== undefined)
         )
       )
     })
@@ -86,7 +86,6 @@ export default class ExportCanvasExtension extends CanvasExtension {
       .setName('Pixel ratio')
       .setDesc('Higher pixel ratios result in higher resolution images but also larger file sizes.')
       .addSlider(slider => slider
-        .setDynamicTooltip()
         .setLimits(0.2, 5, 0.1)
         .setValue(pixelRatioFactor)
         .onChange(value => pixelRatioFactor = value)
@@ -335,7 +334,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
         if (!isWholeCanvas) baseFilename += ` - Selection of ${nodesToExport.length}`
         const filename = `${baseFilename}.${svg ? 'svg' : 'png'}`
 
-        const downloadEl = activeDocument.createElement('a')
+        const downloadEl = activeWindow.createEl('a')
         downloadEl.href = imageDataUri
         downloadEl.download = filename
         downloadEl.click()
@@ -366,7 +365,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
 
   private getInteractionBlocker() {
     // Progress bar (like when loading the workspace)
-    const interactionBlocker = activeDocument.createElement('div')
+    const interactionBlocker = activeWindow.createDiv()
     interactionBlocker.classList.add('progress-bar-container')
 
     const progressBar = interactionBlocker.createDiv()
@@ -407,7 +406,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
     bbox.maxY += height + watermarkPadding.y
 
 
-    const watermarkEl = activeDocument.createElementNS('http://www.w3.org/2000/svg', 'svg')
+    const watermarkEl = activeWindow.createSvg('svg')
     watermarkEl.id = 'watermark-ac'
     watermarkEl.style.transform = `translate(${bbox.minX + watermarkPadding.x}px, ${bbox.maxY - height - watermarkPadding.y}px)`
 

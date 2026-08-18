@@ -3,10 +3,10 @@ import { Canvas } from "src/@types/Canvas"
 import CanvasExtension from "./canvas-extension"
 
 const DEFAULT_COLORS_COUNT = 6
-const CUSTOM_COLORS_MOD_STYLES_ID = 'mod-custom-colors'
 
 export default class ColorPaletteCanvasExtension extends CanvasExtension {
   observer: MutationObserver | null = null
+  private styleSheets: Map<Document, CSSStyleSheet> = new Map()
 
   isEnabled() { return true }
 
@@ -28,26 +28,31 @@ export default class ColorPaletteCanvasExtension extends CanvasExtension {
       (canvas: Canvas) => this.patchColorSelection(canvas)
     ))
 
-    this.plugin.register(() => this.observer?.disconnect())
+    this.plugin.register(() => {
+      this.observer?.disconnect()
+      for (const [doc, sheet] of this.styleSheets) {
+        doc.adoptedStyleSheets = doc.adoptedStyleSheets.filter(s => s !== sheet)
+      }
+      this.styleSheets.clear()
+    })
   }
 
   private updateCustomColorModStyleClasses() {
-    const customCss = this.getCustomColors().map((colorId) => `
-      .mod-canvas-color-${colorId} {
-        --canvas-color: var(--canvas-color-${colorId});
-      }
-    `).join('')
+    const customCss = this.getCustomColors().map((colorId) =>
+      `.mod-canvas-color-${colorId} { --canvas-color: var(--canvas-color-${colorId}); }`
+    ).join('\n')
 
     for (const win of this.plugin.windowsManager.windows) {
       const doc = win.activeDocument
 
-      doc.getElementById(CUSTOM_COLORS_MOD_STYLES_ID)?.remove()
+      let sheet = this.styleSheets.get(doc)
+      if (!sheet) {
+        sheet = new CSSStyleSheet()
+        doc.adoptedStyleSheets = [...doc.adoptedStyleSheets, sheet]
+        this.styleSheets.set(doc, sheet)
+      }
 
-      const customColorModStyle = doc.createElement('style')
-      customColorModStyle.id = CUSTOM_COLORS_MOD_STYLES_ID
-      doc.head.appendChild(customColorModStyle)
-
-      customColorModStyle.textContent = customCss
+      sheet.replaceSync(customCss)
     }
   }
 
@@ -80,7 +85,7 @@ export default class ColorPaletteCanvasExtension extends CanvasExtension {
   }
 
   private createColorMenuItem(canvas: Canvas, colorId: string) {
-    const menuItem = activeDocument.createElement('div')
+    const menuItem = activeWindow.createDiv()
     menuItem.classList.add('canvas-color-picker-item')
     menuItem.classList.add(`mod-canvas-color-${colorId}`)
 

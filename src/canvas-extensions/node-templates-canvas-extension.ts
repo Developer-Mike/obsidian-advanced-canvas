@@ -1,6 +1,6 @@
-import App, { FuzzyMatch, FuzzySuggestModal, getIconIds, Menu, Notice, setIcon, TFile } from "obsidian"
-import { CanvasColor, CanvasNodeData } from "obsidian/canvas"
-import { AnyCanvasNodeData } from "src/@types/AdvancedJsonCanvas"
+import { App, FuzzyMatch, FuzzySuggestModal, getIconIds, Menu, Notice, setIcon, TFile } from "obsidian"
+import { CanvasColor } from "obsidian/canvas"
+import { AnyCanvasNodeData, CanvasFileNodeData, CanvasLinkNodeData } from "src/@types/AdvancedJsonCanvas"
 import { Canvas, CanvasNode, Position } from "src/@types/Canvas"
 import CanvasHelper from "src/utils/canvas-helper"
 import { AbstractSelectionModal, FileSelectModal } from "src/utils/modal-helper"
@@ -188,8 +188,8 @@ export default class NodeTemplatesCanvasExtension extends CanvasExtension {
           color: selectedNodeData.color,
           styleAttributes: selectedNodeData.styleAttributes,
 
-          path: selectedNodeData.type === 'file' ? (selectedNodeData as CanvasNodeData).file : undefined,
-          url: selectedNodeData.type === 'link' ? (selectedNodeData as CanvasNodeData).url : undefined
+          path: selectedNodeData.type === 'file' ? (selectedNodeData as CanvasFileNodeData).file : undefined,
+          url: selectedNodeData.type === 'link' ? (selectedNodeData as CanvasLinkNodeData).url : undefined
         } as NodeTemplate
       ]
     })
@@ -217,10 +217,10 @@ class IconModal extends FuzzySuggestModal<string> {
   renderSuggestion(item: FuzzyMatch<string>, el: HTMLElement): void {
     el.classList.add('icon-modal-suggestion')
 
-    el.createEl('span', { cls: 'icon-modal-suggestion-icon' }, (iconEl) => {
+    el.createSpan({ cls: 'icon-modal-suggestion-icon' }, (iconEl) => {
       setIcon(iconEl, item.item)
     })
-    el.createEl('span', {
+    el.createSpan({
       text: item.item.replace("lucide-", ""),
       cls: 'icon-modal-suggestion-id'
     })

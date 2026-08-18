@@ -20,7 +20,7 @@ export default class ReadingModeFixCanvasExtension extends CanvasExtension {
   }
 
   private updateNodeRenderer(node: CanvasNode) {
-    const renderer = (node.child as any)?.previewMode?.renderer
+    const renderer = (node.child as unknown as { previewMode?: { renderer?: { text?: string; onRendered: (cb: () => void) => void; set: (text: string) => void } } })?.previewMode?.renderer
     if (!renderer) return
 
     renderer.onRendered(() => {

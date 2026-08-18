@@ -1,11 +1,11 @@
 import { TFile } from "obsidian"
 
 export interface BasesPlugin {
-  registrations: Record<string, BasesViewRegistrationEntry<any>>
+  registrations: Record<string, BasesViewRegistrationEntry<BasesTableView>>
 }
 
 export interface BasesViewRegistrationEntry<T> {
-  factory(...args: any): T
+  factory(...args: unknown[]): T
 }
 
 export interface BasesTableView {
@@ -18,7 +18,7 @@ export interface BasesTableView {
 export interface BasesTableRow {
   cells: BasesTableCell[]
 
-  render(...args: any[]): void
+  render(...args: unknown[]): void
 }
 
 export interface BasesTableCell {

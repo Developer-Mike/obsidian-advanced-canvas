@@ -29,7 +29,7 @@ export default class CanvasHelper {
   }
 
   static createControlMenuButton(menuOption: MenuOption): HTMLElement {
-    const quickSetting = activeDocument.createElement("div")
+    const quickSetting = activeWindow.createDiv()
     if (menuOption.id) quickSetting.id = menuOption.id
     quickSetting.classList.add('canvas-control-item')
     setIcon(quickSetting, menuOption.icon)
@@ -45,7 +45,7 @@ export default class CanvasHelper {
   }
 
   static createCardMenuOption(canvas: Canvas, menuOption: MenuOption, previewNodeSize: () => Size, onPlaced: (canvas: Canvas, pos: Position) => void, onRightClick?: (e: MouseEvent) => void): HTMLElement {
-    const menuOptionElement = activeDocument.createElement("div")
+    const menuOptionElement = activeWindow.createDiv()
     if (menuOption.id) menuOptionElement.id = menuOption.id
     menuOptionElement.classList.add('canvas-card-menu-button')
     menuOptionElement.classList.add('mod-draggable')
@@ -77,7 +77,7 @@ export default class CanvasHelper {
   }
 
   static createPopupMenuOption(menuOption: MenuOption): HTMLElement {
-    const menuOptionElement = activeDocument.createElement('button')
+    const menuOptionElement = activeWindow.createEl('button')
     if (menuOption.id) menuOptionElement.id = menuOption.id
     menuOptionElement.classList.add('clickable-icon')
     setIcon(menuOptionElement, menuOption.icon)
@@ -149,7 +149,7 @@ export default class CanvasHelper {
         return { minX: element.x, minY: element.y, maxX: element.x + element.width, maxY: element.y + element.height }
 
       return null
-    }).filter(bbox => bbox !== null) as BBox[]
+    }).filter(bbox => bbox !== null)
 
     return BBoxHelper.combineBBoxes(bBoxes)
   }
@@ -249,21 +249,17 @@ export default class CanvasHelper {
       styleMenuDropdownElement.id = STYLE_MENU_DROPDOWN_ID
       styleMenuDropdownElement.classList.add('menu')
 
-      // Position correctly
-      styleMenuDropdownElement.style.position = 'absolute'
-      styleMenuDropdownElement.style.maxHeight = 'initial'
-
-      styleMenuDropdownElement.style.top = `${popupMenuElement.getBoundingClientRect().height}px`
+      styleMenuDropdownElement.setCssStyles({ position: 'absolute', maxHeight: 'initial' })
+      styleMenuDropdownElement.setCssStyles({ top: `${popupMenuElement.getBoundingClientRect().height}px` })
 
       const canvasWrapperCenterX = canvas.wrapperEl.getBoundingClientRect().left + canvas.wrapperEl.getBoundingClientRect().width / 2
 
       const leftPosition = styleMenuButtonElement.getBoundingClientRect().left - popupMenuElement.getBoundingClientRect().left
       const rightPosition = popupMenuElement.getBoundingClientRect().right - styleMenuButtonElement.getBoundingClientRect().right
 
-      // Swap sides if it is too close to the edge
       if (popupMenuElement.getBoundingClientRect().left + leftPosition < canvasWrapperCenterX)
-        styleMenuDropdownElement.style.left = `${leftPosition}px`
-      else styleMenuDropdownElement.style.right = `${rightPosition}px`
+        styleMenuDropdownElement.setCssStyles({ left: `${leftPosition}px` })
+      else styleMenuDropdownElement.setCssStyles({ right: `${rightPosition}px` })
 
       // Add style options
       for (const stylableAttribute of stylableAttributes) {
@@ -310,21 +306,17 @@ export default class CanvasHelper {
           styleMenuDropdownSubmenuElement.id = STYLE_MENU_DROPDOWN_SUBMENU_ID
           styleMenuDropdownSubmenuElement.classList.add('menu')
 
-          // Position correctly
-          styleMenuDropdownSubmenuElement.style.position = 'absolute'
-          styleMenuDropdownSubmenuElement.style.maxHeight = 'initial'
+          styleMenuDropdownSubmenuElement.setCssStyles({ position: 'absolute', maxHeight: 'initial' })
 
           const topOffset = parseFloat(window.getComputedStyle(styleMenuDropdownElement).getPropertyValue('padding-top')) + (styleMenuDropdownElement.offsetHeight - styleMenuDropdownElement.clientHeight) / 2
-          styleMenuDropdownSubmenuElement.style.top = `${stylableAttributeElement.getBoundingClientRect().top - topOffset - popupMenuElement.getBoundingClientRect().top}px`
+          styleMenuDropdownSubmenuElement.setCssStyles({ top: `${stylableAttributeElement.getBoundingClientRect().top - topOffset - popupMenuElement.getBoundingClientRect().top}px` })
 
-          // Swap sides if it is too close to the edge
           const leftPosition = styleMenuDropdownElement.getBoundingClientRect().right - popupMenuElement.getBoundingClientRect().left
           const rightPosition = popupMenuElement.getBoundingClientRect().right - styleMenuDropdownElement.getBoundingClientRect().left
 
-          // Swap sides if it is too close to the edge
           if (popupMenuElement.getBoundingClientRect().left + leftPosition < canvasWrapperCenterX)
-            styleMenuDropdownSubmenuElement.style.left = `${leftPosition}px`
-          else styleMenuDropdownSubmenuElement.style.right = `${rightPosition}px`
+            styleMenuDropdownSubmenuElement.setCssStyles({ left: `${leftPosition}px` })
+          else styleMenuDropdownSubmenuElement.setCssStyles({ right: `${rightPosition}px` })
 
           // Add style options
           for (const styleOption of stylableAttribute.options) {
@@ -367,7 +359,7 @@ export default class CanvasHelper {
   }
 
   static createDropdownOptionElement(menuOption: MenuOption): HTMLElement {
-    const menuDropdownOptionElement = activeDocument.createElement('div')
+    const menuDropdownOptionElement = activeWindow.createDiv()
     menuDropdownOptionElement.classList.add('menu-item')
     menuDropdownOptionElement.classList.add('tappable')
 
@@ -399,7 +391,7 @@ export default class CanvasHelper {
   }
 
   static createDropdownSeparatorElement(): HTMLElement {
-    const separatorElement = activeDocument.createElement('div')
+    const separatorElement = activeWindow.createDiv()
     separatorElement.classList.add('menu-separator')
 
     return separatorElement

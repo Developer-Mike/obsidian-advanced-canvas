@@ -14,7 +14,7 @@ export interface StyleAttribute {
   options: StyleAttributeOption[]
 }
 
-export function styleAttributeValidator(json: Record<string, any>): StyleAttribute | null {
+export function styleAttributeValidator(json: Record<string, unknown>): StyleAttribute | null {
   const hasKey = json.key !== undefined
   const hasLabel = json.label !== undefined
   const hasOptions = Array.isArray(json.options)
@@ -23,19 +23,18 @@ export function styleAttributeValidator(json: Record<string, any>): StyleAttribu
   if (!hasLabel) console.error('Style attribute is missing the "label" property')
   if (!hasOptions) console.error('Style attribute is missing the "options" property or it is not an array')
 
-  // Camel case the key
-  json.key = TextHelper.toCamelCase(json.key)
+  json.key = TextHelper.toCamelCase(json.key as string)
 
   let optionsValid = true
   let hasDefault = false
-  for (const option of json.options) {
+  for (const option of json.options as Record<string, unknown>[]) {
     const hasIcon = option.icon !== undefined
     const hasLabel = option.label !== undefined
     const hasValue = option.value !== undefined
 
-    if (!hasIcon) console.error(`Style attribute option (${option.value ?? option.label}) is missing the "icon" property`)
-    if (!hasLabel) console.error(`Style attribute option (${option.value}) is missing the "label" property`)
-    if (!hasValue) console.error(`Style attribute option (${option.label}) is missing the "value" property`)
+    if (!hasIcon) console.error(`Style attribute option (${String(option.value ?? option.label)}) is missing the "icon" property`)
+    if (!hasLabel) console.error(`Style attribute option (${String(option.value)}) is missing the "label" property`)
+    if (!hasValue) console.error(`Style attribute option (${String(option.label)}) is missing the "value" property`)
 
     if (!hasIcon || !hasLabel || !hasValue) optionsValid = false
     if (option.value === null) hasDefault = true
@@ -43,7 +42,7 @@ export function styleAttributeValidator(json: Record<string, any>): StyleAttribu
   if (!hasDefault) console.error('Style attribute is missing a default option (option with a "value" of null)')
 
   const isValid = hasKey && hasLabel && hasOptions && optionsValid && hasDefault
-  return isValid ? json as StyleAttribute : null
+  return isValid ? json as unknown as StyleAttribute : null
 }
 
 export const BUILTIN_NODE_STYLE_ATTRIBUTES = [

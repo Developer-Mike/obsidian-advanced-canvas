@@ -1,18 +1,20 @@
-import { Component, EmbedContext, TFile } from "obsidian"
+import { EmbedContext, TFile } from "obsidian"
 import AdvancedCanvasEmbed from "src/advanced-canvas-embed"
-import Patcher from "./patcher"
+import Patcher, { invoke } from "./patcher"
 
 export default class EmbedPatcher extends Patcher {
   async patch() {
     if (!this.plugin.settings.getSetting('enableSingleNodeLinks')) return
 
-    Patcher.patch(this.plugin, this.plugin.app.embedRegistry.embedByExtension, {
-      canvas: next => function (context: EmbedContext, file: TFile, subpath?: string): Component {
-        // If there is a subpath, return custom embed
-        if (subpath) return new AdvancedCanvasEmbed(context, file, subpath)
+    const embedByExtension = this.plugin.app.embedRegistry.embedByExtension
+    const originalCanvasEmbed = embedByExtension['canvas']
+    if (!originalCanvasEmbed) return
 
-        return next.call(this, context, file, subpath)
-      },
-    })
+    embedByExtension['canvas'] = function (context: EmbedContext, file: TFile, subpath?: string) {
+      if (subpath) return new AdvancedCanvasEmbed(context, file, subpath)
+      return invoke(originalCanvasEmbed, this, context, file, subpath)
+    }
+
+    this.plugin.register(() => { embedByExtension['canvas'] = originalCanvasEmbed })
   }
 }

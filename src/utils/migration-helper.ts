@@ -1,5 +1,20 @@
 import { CanvasData, CanvasEdgeData } from "src/@types/AdvancedJsonCanvas"
 
+interface LegacyNodeData extends Record<string, unknown> {
+  id: string
+  autoResizeHeight?: unknown
+  dynamicHeight?: unknown
+  sideRatio?: unknown
+  ratio?: unknown
+  isCollapsed?: unknown
+  collapsed?: unknown
+  portalToFile?: unknown
+  portal?: unknown
+  isStartNode?: unknown
+  edgesToNodeFromPortal?: { [portalId: string]: CanvasEdgeData[] }
+  interdimensionalEdges?: CanvasEdgeData[]
+}
+
 export const CURRENT_SPEC_VERSION = '1.0-1.0'
 
 export default class MigrationHelper {
@@ -14,7 +29,7 @@ export default class MigrationHelper {
       const globalInterdimensionalEdges: { [portalId: string]: CanvasEdgeData[] } = {}
 
       // Rename node properties
-      for (const node of (canvas.nodes ?? []) as any[]) {
+      for (const node of (canvas.nodes ?? []) as unknown as LegacyNodeData[]) {
         node.dynamicHeight = node.autoResizeHeight
         delete node.autoResizeHeight
 
@@ -34,9 +49,8 @@ export default class MigrationHelper {
           delete node.isStartNode
         }
 
-        // edgesToNodeFromPortal?: { [key: string]: CanvasEdgeData[] }
         if (node.edgesToNodeFromPortal) {
-          const edgesToNodeFromPortal = node.edgesToNodeFromPortal as { [portalId: string]: CanvasEdgeData[] }
+          const edgesToNodeFromPortal = node.edgesToNodeFromPortal
 
           for (const [portalId, edges] of Object.entries(edgesToNodeFromPortal)) {
             // Create a new entry for the portal if it doesn't exist yet
@@ -57,7 +71,7 @@ export default class MigrationHelper {
       }
 
       // Distribute global interdimensional edges to portals
-      for (const node of (canvas.nodes ?? []) as any[]) {
+      for (const node of (canvas.nodes ?? []) as unknown as LegacyNodeData[]) {
         if (!(node.id in globalInterdimensionalEdges)) continue
         node.interdimensionalEdges = globalInterdimensionalEdges[node.id]
       }
@@ -78,7 +92,7 @@ export default class MigrationHelper {
   }
 
   static migrate(canvas: CanvasData): CanvasData {
-    let version = canvas.metadata?.version ?? 'undefined'
+    let version: string = canvas.metadata?.version ?? 'undefined'
 
     // Already migrated
     if (version === CURRENT_SPEC_VERSION) return canvas
@@ -95,12 +109,12 @@ export default class MigrationHelper {
       const { version: newVersion, canvas: migratedCanvas } = migrationFunction(canvas)
 
       // Update version and canvas
-      version = newVersion as any
+      version = newVersion
       canvas = migratedCanvas
 
       // Update metadata node
-      if (!canvas.metadata) canvas.metadata = { version: version, frontmatter: {} }
-      else canvas.metadata.version = version
+      if (!canvas.metadata) canvas.metadata = { version: version as typeof CURRENT_SPEC_VERSION, frontmatter: {} }
+      else canvas.metadata.version = version as typeof CURRENT_SPEC_VERSION
     }
 
     return canvas

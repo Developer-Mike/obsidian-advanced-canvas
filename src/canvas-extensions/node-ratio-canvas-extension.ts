@@ -22,7 +22,7 @@ export default class NodeRatioCanvasExtension extends CanvasExtension {
     if (!this.plugin.settings.getSetting('aspectRatioControlFeatureEnabled')) return
 
     menu.addItem((item) => {
-      item.setTitle('Set Aspect Ratio')
+      item.setTitle('Set aspect ratio')
         .setIcon('aspect-ratio')
         .onClick(async () => {
           const NO_RATIO = 'No ratio enforcement'

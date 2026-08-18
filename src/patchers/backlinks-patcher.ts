@@ -1,5 +1,5 @@
-import { ExtendedVault, TAbstractFile, TFile, TFolder } from "obsidian"
-import Patcher from "./patcher"
+import { TAbstractFile, TFile, TFolder, Vault } from "obsidian"
+import Patcher, { invoke } from "./patcher"
 import Backlink from "src/@types/BacklinkPlugin"
 
 export default class BacklinksPatcher extends Patcher {
@@ -9,18 +9,18 @@ export default class BacklinksPatcher extends Patcher {
     if (!this.plugin.settings.getSetting('canvasMetadataCompatibilityEnabled')) return
 
     const that = this // eslint-disable-line @typescript-eslint/no-this-alias -- For patcher
-    await Patcher.waitForViewRequest<any>(this.plugin, "backlink", view => {
+    await Patcher.waitForViewRequest<{ backlink: Backlink }>(this.plugin, "backlink", view => {
       Patcher.patchPrototype<Backlink>(this.plugin, view.backlink, {
         recomputeBacklink: Patcher.OverrideExisting(next => function (file: TFile): void {
           that.isRecomputingBacklinks = true
-          const result = next.call(this, file)
+          const result = invoke(next, this, file)
           that.isRecomputingBacklinks = false
           return result
         })
       })
     })
 
-    Patcher.patchPrototype<ExtendedVault>(this.plugin, this.plugin.app.vault, {
+    Patcher.patchPrototype<Vault>(this.plugin, this.plugin.app.vault, {
       recurseChildrenAC: _next => function (origin: TAbstractFile, traverse: (file: TAbstractFile) => void) {
         for (let stack = [origin]; stack.length > 0;) {
           const current = stack.pop()
@@ -33,7 +33,7 @@ export default class BacklinksPatcher extends Patcher {
         }
       },
       getMarkdownFiles: Patcher.OverrideExisting(next => function (): TFile[] {
-        if (!that.isRecomputingBacklinks) return next.call(this)
+        if (!that.isRecomputingBacklinks) return invoke(next, this)
 
         // If we are recomputing backlinks, we need to include markdown as well as canvas files
         const files: TFile[] = []

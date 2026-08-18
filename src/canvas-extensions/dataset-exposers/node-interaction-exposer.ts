@@ -20,7 +20,7 @@ export default class NodeInteractionExposerExtension extends CanvasExtension {
 
         for (const exposedDataKey of getExposedNodeData(this.plugin.settings)) {
           const datasetPairs = nodeData[exposedDataKey] instanceof Object
-            ? Object.entries(nodeData[exposedDataKey]!)
+            ? Object.entries(nodeData[exposedDataKey])
             : [[exposedDataKey, nodeData[exposedDataKey]]]
 
           for (const [key, value] of datasetPairs as [string, string][]) {
