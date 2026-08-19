@@ -6,11 +6,13 @@ const DEFAULT_COLORS_COUNT = 6
 
 export default class ColorPaletteCanvasExtension extends CanvasExtension {
   observer: MutationObserver | null = null
-  private styleSheets: Map<Document, CSSStyleSheet> = new Map()
+  private styleSheets: Map<Document, CSSStyleSheet>
 
   isEnabled() { return true }
 
   init() {
+    this.styleSheets = new Map()
+
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       'window-open',
       (_win: WorkspaceWindow, _window: Window) => this.updateCustomColorModStyleClasses()
