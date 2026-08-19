@@ -1,16 +1,24 @@
-import { Menu, Notice } from 'obsidian'
+import { Menu, Notice, Side } from 'obsidian'
 import { BBox, Canvas, CanvasEdge, CanvasElement, CanvasNode, Position, Size } from 'src/@types/Canvas'
 import BBoxHelper from "src/utils/bbox-helper"
 import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from './canvas-extension'
+import { NodeSide } from 'obsidian/canvas'
 
 const START_SLIDE_NAME = 'Start Slide'
 const DEFAULT_SLIDE_NAME = 'New Slide'
+const ARROW_SIDE_MAPPINGS: Record<string, NodeSide> = {
+  'ArrowRight': 'right',
+  'ArrowDown': 'bottom',
+  'ArrowLeft': 'left',
+  'ArrowUp': 'top'
+}
 
 export default class PresentationCanvasExtension extends CanvasExtension {
   savedViewport: { x: number, y: number, zoom: number } = { x: 0, y: 0, zoom: 1 }
   isPresentationMode = false
   visitedNodeIds: string[] = []
+  traveledEdges: string[] = []
   fullscreenModalObserver: MutationObserver | null = null
   presentationUsesFullscreen = false
 
@@ -249,6 +257,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
       }
 
       this.visitedNodeIds = [startNode.getData().id]
+      this.traveledEdges = []
     }
 
     // Save current viewport
@@ -290,8 +299,10 @@ export default class PresentationCanvasExtension extends CanvasExtension {
       }
 
       if (this.plugin.settings.getSetting('useArrowKeysToChangeSlides')) {
-        if (e.key === 'ArrowRight') this.nextNode(canvas)
-        else if (e.key === 'ArrowLeft') this.previousNode(canvas)
+        const direction = ARROW_SIDE_MAPPINGS[e.key]
+        if (!direction) return
+
+        this.nextNode(canvas, direction)
       }
 
       if (this.plugin.settings.getSetting('usePgUpPgDownKeysToChangeSlides')) {
@@ -370,7 +381,11 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     this.presentationUsesFullscreen = false
   }
 
-  private nextNode(canvas: Canvas) {
+  private nextNode(canvas: Canvas, direction?: NodeSide) {
+    const directionalNavigationEnabled = this.plugin.settings.getSetting("useDirectionalSlideNavigation")
+    if (!directionalNavigationEnabled && direction === "left")
+      return this.previousNode(canvas)
+
     const fromNodeId = this.visitedNodeIds.last()
     if (!fromNodeId) return
 
@@ -380,25 +395,52 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     const outgoingEdges = canvas.getEdgesForNode(fromNode).filter((edge: CanvasEdge) => edge.from.node.getData().id === fromNodeId)
     let toNode = outgoingEdges.first()?.to.node
 
+    // Create map of edge labels to nodes
+    const sortedOutgoingEdges = outgoingEdges
+      .sort((a: CanvasEdge, b: CanvasEdge) => {
+        if (!a.label) return 1
+        if (!b.label) return -1
+
+        return a.label.localeCompare(b.label)
+      })
+
+    let nextEdge: CanvasEdge | undefined
+    if (directionalNavigationEnabled && direction) {
+      const directionCompliantEdges = sortedOutgoingEdges.filter((edge: CanvasEdge) =>
+        edge.from.side === direction
+      )
+
+      // Try to find the first non-traveled edge, fallback to last
+      nextEdge = directionCompliantEdges.filter(edge =>
+        !this.traveledEdges.includes(edge.getData().id)
+      ).first() ?? directionCompliantEdges.last()
+      toNode = nextEdge?.to?.node
+
+      // Also consider bidirectional edges for directional navigation
+      if (!nextEdge) {
+        const bidirectionalEdges = canvas.getEdgesForNode(fromNode).filter((edge: CanvasEdge) =>
+          edge.to.node.getData().id === fromNodeId &&
+          edge.to.end === 'arrow' &&
+          edge.to.side === direction
+        )
+
+        nextEdge = bidirectionalEdges.filter(edge =>
+          !this.traveledEdges.includes(edge.getData().id)
+        ).first() ?? bidirectionalEdges.last()
+        toNode = nextEdge?.from?.node
+      }
+    }
+
     // If there are multiple outgoing edges, we need to look at the edge label
-    if (outgoingEdges.length > 1) {
-      // Create map of edge labels to nodes
-      const sortedEdges = outgoingEdges
-        .sort((a: CanvasEdge, b: CanvasEdge) => {
-          if (!a.label) return 1
-          if (!b.label) return -1
-
-          return a.label.localeCompare(b.label)
-        })
-
-      // Find which edges already have been traversed
-      const traversedEdgesCount = this.visitedNodeIds
-        .filter((visitedNodeId: string) => visitedNodeId === fromNodeId).length - 1
-
-      // Select next edge
-      const nextEdge = sortedEdges[traversedEdgesCount]
+    // But skip if directional navigation is enabled and a direction edge was already found
+    if (!nextEdge && outgoingEdges.length > 1) {
+      nextEdge ??= sortedOutgoingEdges.filter(edge =>
+        !this.traveledEdges.includes(edge.getData().id)
+      ).first() ?? sortedOutgoingEdges.last()
       toNode = nextEdge?.to?.node
     }
+
+    if (nextEdge) this.traveledEdges.push(nextEdge.getData().id)
 
     if (toNode) {
       this.visitedNodeIds.push(toNode.getData().id)
@@ -412,6 +454,9 @@ export default class PresentationCanvasExtension extends CanvasExtension {
   private previousNode(canvas: Canvas) {
     const fromNodeId = this.visitedNodeIds.pop()
     if (!fromNodeId) return
+
+    // Undo the last traveled edge
+    this.traveledEdges.pop()
 
     const fromNode = canvas.nodes.get(fromNodeId)
     if (!fromNode) return

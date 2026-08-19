@@ -92,6 +92,7 @@ export interface AdvancedCanvasPluginSettingsValues {
   resetViewportOnPresentationEnd: boolean
   useArrowKeysToChangeSlides: boolean
   usePgUpPgDownKeysToChangeSlides: boolean
+  useDirectionalSlideNavigation: boolean
   zoomToSlideWithoutPadding: boolean
   useUnclampedZoomWhilePresenting: boolean
   fullscreenPresentationEnabled: boolean
@@ -192,6 +193,7 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   resetViewportOnPresentationEnd: true,
   useArrowKeysToChangeSlides: true,
   usePgUpPgDownKeysToChangeSlides: true,
+  useDirectionalSlideNavigation: false,
   zoomToSlideWithoutPadding: true,
   useUnclampedZoomWhilePresenting: false,
   fullscreenPresentationEnabled: true,
@@ -528,6 +530,11 @@ export const SETTINGS = {
       usePgUpPgDownKeysToChangeSlides: {
         label: 'Use PgUp/PgDown keys to change slides',
         description: 'When enabled, you can use the PgUp/PgDown keys to change slides in presentation mode (Makes the presentation mode compatible with most presentation remotes).',
+        type: 'boolean'
+      },
+      useDirectionalSlideNavigation: {
+        label: 'Use directional slide navigation',
+        description: 'When enabled, navigating with the arrow keys will try to navigate along the slide\'s edge in the pressed direction instead of just navigating forward or backward in the slide order.',
         type: 'boolean'
       },
       zoomToSlideWithoutPadding: {
