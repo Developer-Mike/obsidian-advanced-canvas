@@ -1,4 +1,4 @@
-import { Menu, Notice, Side } from 'obsidian'
+import { Menu, Notice } from 'obsidian'
 import { BBox, Canvas, CanvasEdge, CanvasElement, CanvasNode, Position, Size } from 'src/@types/Canvas'
 import BBoxHelper from "src/utils/bbox-helper"
 import CanvasHelper from "src/utils/canvas-helper"
