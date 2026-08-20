@@ -4,42 +4,73 @@ import { Canvas, CanvasNode } from "src/@types/Canvas"
 import { invoke } from "src/patchers/patcher"
 import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "./canvas-extension"
+import { CanvasFileNodeData } from "src/@types/AdvancedJsonCanvas"
+
+const PINNED_PARAM = 'pinned=true'
 
 export default class PdfAnnotationCanvasExtension extends CanvasExtension {
   isEnabled() { return true }
 
   init(): void {
-    const embedByExtension = this.plugin.app.embedRegistry.embedByExtension
-    const originalPdfEmbed = embedByExtension['pdf']
-    if (!originalPdfEmbed) return
-
-    embedByExtension['pdf'] = function (context: EmbedContext, file: TFile, subpath?: string) {
-      if (subpath?.includes('pinned=true'))
-        return new PdfPageEmbedComponent(context, file, subpath)
-
-      return invoke(originalPdfEmbed, this, context, file, subpath)
-    }
-
-    this.plugin.register(() => { embedByExtension['canvas'] = originalPdfEmbed })
+    this.plugin.register(this.patchPdfEmbed())
 
     this.plugin.addCommand({
       id: 'pin-pdf-page',
       name: 'Pin pdf page',
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
-        (canvas: Canvas) => canvas.getSelectionData().nodes.length === 1,
-        (canvas: Canvas) => this.pinPdfPage(canvas, canvas.nodes.get(canvas.getSelectionData().nodes[0].id)!)
+        (canvas: Canvas) => {
+          const selection = canvas.getSelectionData()
+          const node = selection.nodes.first() as CanvasFileNodeData | undefined
+          if (!node) return false
+
+          return selection.nodes.length === 1 &&
+            node.type === "file" &&
+            node.file.endsWith(".pdf")
+        },
+        (canvas: Canvas) => {
+          const nodeId = canvas.getSelectionData().nodes.first()?.id
+          if (!nodeId) return
+
+          const node = canvas.nodes.get(nodeId)
+          if (!node) return
+
+          this.pinPdfPage(node)
+        }
       )
     })
   }
 
-  private pinPdfPage(canvas: Canvas, node: CanvasNode): void {
-    if (node.getData().type !== 'file') return
+  private patchPdfEmbed(): () => void {
+    const embedByExtension = this.plugin.app.embedRegistry.embedByExtension
+    const originalPdfEmbed = embedByExtension['pdf']
+    if (!originalPdfEmbed) {
+      console.error("Failed to patch PDF embed: original embed function not found.")
+      return () => { }
+    }
+
+    embedByExtension['pdf'] = function (context: EmbedContext, file: TFile, subpath?: string) {
+      if (subpath?.includes(`#${PINNED_PARAM}`) || subpath?.includes(`&${PINNED_PARAM}`))
+        return new PdfPageEmbedComponent(context, file, subpath)
+
+      return invoke(originalPdfEmbed, this, context, file, subpath)
+    }
+
+    return () => {
+      embedByExtension['pdf'] = originalPdfEmbed
+    }
+  }
+
+  private pinPdfPage(node: CanvasNode): void {
+    const nodeData = node.getData() as CanvasFileNodeData
+    if (!nodeData.subpath) return // No subpath, cannot pin a specific page
+    if (nodeData.subpath.includes(`#${PINNED_PARAM}`) || nodeData.subpath.includes(`&${PINNED_PARAM}`))
+      return // Already pinned
 
     node.setData({
-      ...node.getData(),
-      subpath: node.getData().subpath + "&pinned=true"
-    })
+      ...nodeData,
+      subpath: nodeData.subpath + "&" + PINNED_PARAM
+    } as CanvasFileNodeData)
   }
 }
 
@@ -53,6 +84,7 @@ class PdfPageEmbedComponent extends EmbedComponent {
   private subpath?: string
 
   private canvas: HTMLCanvasElement
+
 
   constructor(context: EmbedContext, file: TFile, subpath?: string) {
     super()
@@ -85,7 +117,7 @@ class PdfPageEmbedComponent extends EmbedComponent {
     if (!pageNumber || pageNumber < 1 || pageNumber > pdf.numPages) return
 
     const page = await pdf.getPage(pageNumber)
-    const viewport = page.getViewport({ scale: 1.0 })
+    const viewport = page.getViewport({ scale: 1.5 })
 
     this.canvas.width = viewport.width
     this.canvas.height = viewport.height
