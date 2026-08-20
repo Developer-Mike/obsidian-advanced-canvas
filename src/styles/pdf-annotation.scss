@@ -1,20 +1,4 @@
-.canvas-node .pdf-embed.pinned-pdf-page {
-  .pdf-toolbar, .pdf-sidebar-container, .pdf-findbar {
-    display: none;
-  }
-
-  .pdf-viewer-container {
-    position: relative;
-    overflow: hidden;
-
-    .page {
-      --page-num: attr(data-page-number number);
-      --diff: calc(var(--current-page) - var(--page-num));
-
-      position: sticky;
-      top: calc(abs(var(--diff)) * 200%);
-      width: 100%;
-      height: 100%;
-    }
-  }
+.ac-pinned-pdf-page-embed {
+  width: 100%;
+  height: 100%;
 }

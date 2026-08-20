@@ -44,13 +44,15 @@ export default class PdfAnnotationCanvasExtension extends CanvasExtension {
 }
 
 abstract class EmbedComponent extends Component {
-  abstract loadFile(): void
+  abstract loadFile(): Promise<void>
 }
 
 class PdfPageEmbedComponent extends EmbedComponent {
   private context: EmbedContext
   private file: TFile
   private subpath?: string
+
+  private canvas: HTMLCanvasElement
 
   constructor(context: EmbedContext, file: TFile, subpath?: string) {
     super()
@@ -61,41 +63,40 @@ class PdfPageEmbedComponent extends EmbedComponent {
   }
 
   override onload() {
-
+    this.canvas = activeWindow.createEl('canvas')
+    this.canvas.classList.add('ac-pinned-pdf-page-embed')
+    this.context.containerEl.appendChild(this.canvas)
   }
 
-  override loadFile() {
-    (async () => {
-      await new Promise<void>((resolve) => {
-        const interval = setInterval(() => {
-          if (!(window as any).pdfjsLib) return
+  override async loadFile() {
+    await new Promise<void>((resolve) => {
+      const interval = window.setInterval(() => {
+        if (!window.pdfjsLib) return
 
-          clearInterval(interval)
-          resolve()
-        }, 10)
-      })
+        window.clearInterval(interval)
+        resolve()
+      }, 10)
+    })
 
     const data = await this.context.app.vault.readBinary(this.file)
-  const pdf = await (window as any).pdfjsLib.getDocument({ data }).promise
+    const pdf = await window.pdfjsLib.getDocument({ data }).promise
 
-  const pageNumber = this.getPageNumberFromSubpath(this.subpath)
-  if (!pageNumber || pageNumber < 1 || pageNumber > pdf.numPages) return
+    const pageNumber = this.getPageNumberFromSubpath(this.subpath)
+    if (!pageNumber || pageNumber < 1 || pageNumber > pdf.numPages) return
 
-  const page = await pdf.getPage(pageNumber)
-  const viewport = page.getViewport({ scale: 1.0 })
+    const page = await pdf.getPage(pageNumber)
+    const viewport = page.getViewport({ scale: 1.0 })
 
-  const canvas = document.createElement('canvas')
-  canvas.width = viewport.width
-  canvas.height = viewport.height
+    this.canvas.width = viewport.width
+    this.canvas.height = viewport.height
 
-  const renderContext = {
-    canvasContext: canvas.getContext('2d'),
-    viewport: viewport
-  }
-  await page.render(renderContext).promise
+    const context = this.canvas.getContext('2d')
+    if (!context) return
 
-    this.context.containerEl.appendChild(canvas)
-    })()
+    await page.render({
+      canvasContext: context,
+      viewport: viewport
+    }).promise
   }
 
   private getPageNumberFromSubpath(subpath?: string): number | null {
