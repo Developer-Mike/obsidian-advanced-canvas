@@ -381,6 +381,12 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     this.presentationUsesFullscreen = false
   }
 
+  private getNextUntraveledEdge(edges: CanvasEdge[]): CanvasEdge | undefined {
+    return edges.filter(edge =>
+      !this.traveledEdges.includes(edge.getData().id)
+    ).first() ?? edges.last()
+  }
+
   private nextNode(canvas: Canvas, direction?: NodeSide) {
     const directionalNavigationEnabled = this.plugin.settings.getSetting("useDirectionalSlideNavigation")
     if (!directionalNavigationEnabled && direction === "left")
@@ -392,7 +398,8 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     const fromNode = canvas.nodes.get(fromNodeId)
     if (!fromNode) return
 
-    const outgoingEdges = canvas.getEdgesForNode(fromNode).filter((edge: CanvasEdge) => edge.from.node.getData().id === fromNodeId)
+    const outgoingEdges = canvas.getEdgesForNode(fromNode)
+      .filter((edge: CanvasEdge) => edge.from.node.getData().id === fromNodeId)
     let toNode = outgoingEdges.first()?.to.node
 
     // Create map of edge labels to nodes
@@ -406,14 +413,11 @@ export default class PresentationCanvasExtension extends CanvasExtension {
 
     let nextEdge: CanvasEdge | undefined
     if (directionalNavigationEnabled && direction) {
-      const directionCompliantEdges = sortedOutgoingEdges.filter((edge: CanvasEdge) =>
-        edge.from.side === direction
-      )
+      const directionCompliantEdges = sortedOutgoingEdges
+        .filter((edge: CanvasEdge) => edge.from.side === direction)
 
       // Try to find the first non-traveled edge, fallback to last
-      nextEdge = directionCompliantEdges.filter(edge =>
-        !this.traveledEdges.includes(edge.getData().id)
-      ).first() ?? directionCompliantEdges.last()
+      nextEdge = this.getNextUntraveledEdge(directionCompliantEdges)
       toNode = nextEdge?.to?.node
 
       // Also consider bidirectional edges for directional navigation
@@ -424,9 +428,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
           edge.to.side === direction
         )
 
-        nextEdge = bidirectionalEdges.filter(edge =>
-          !this.traveledEdges.includes(edge.getData().id)
-        ).first() ?? bidirectionalEdges.last()
+        nextEdge = this.getNextUntraveledEdge(bidirectionalEdges)
         toNode = nextEdge?.from?.node
       }
     }
@@ -434,9 +436,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     // If there are multiple outgoing edges, we need to look at the edge label
     // But skip if directional navigation is enabled and a direction edge was already found
     if (!nextEdge && outgoingEdges.length > 1) {
-      nextEdge ??= sortedOutgoingEdges.filter(edge =>
-        !this.traveledEdges.includes(edge.getData().id)
-      ).first() ?? sortedOutgoingEdges.last()
+      nextEdge ??= this.getNextUntraveledEdge(sortedOutgoingEdges)
       toNode = nextEdge?.to?.node
     }
 
