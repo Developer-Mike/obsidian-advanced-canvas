@@ -85,7 +85,6 @@ class PdfPageEmbedComponent extends EmbedComponent {
 
   private canvas: HTMLCanvasElement
 
-
   constructor(context: EmbedContext, file: TFile, subpath?: string) {
     super()
 
@@ -101,14 +100,7 @@ class PdfPageEmbedComponent extends EmbedComponent {
   }
 
   override async loadFile() {
-    await new Promise<void>((resolve) => {
-      const interval = window.setInterval(() => {
-        if (!window.pdfjsLib) return
-
-        window.clearInterval(interval)
-        resolve()
-      }, 10)
-    })
+    await waitForPdfJsLib()
 
     const data = await this.context.app.vault.readBinary(this.file)
     const pdf = await window.pdfjsLib.getDocument({ data }).promise
@@ -136,4 +128,15 @@ class PdfPageEmbedComponent extends EmbedComponent {
     const match = subpath.match(/page=(\d+)/)
     return match ? parseInt(match[1], 10) : null
   }
+}
+
+async function waitForPdfJsLib(): Promise<void> {
+  return new Promise<void>((resolve) => {
+    const interval = window.setInterval(() => {
+      if (!window.pdfjsLib) return
+
+      window.clearInterval(interval)
+      resolve()
+    }, 10)
+  })
 }
