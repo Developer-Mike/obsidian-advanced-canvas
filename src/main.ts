@@ -49,6 +49,7 @@ import FloatingEdgeCanvasExtension from './canvas-extensions/floating-edge-canva
 import EdgeHighlightCanvasExtension from './canvas-extensions/edge-highlight-canvas-extension'
 import CopyNodeReferenceCanvasExtension from './canvas-extensions/copy-node-reference-canvas-extension'
 import ReadingModeFixCanvasExtension from './canvas-extensions/reading-mode-fix-canvas-extension'
+import PdfAnnotationCanvasExtension from './canvas-extensions/pdf-annotation-canvas-extension'
 
 // Advanced Styles
 import NodeStylesExtension from './canvas-extensions/advanced-styles/node-styles'
@@ -99,6 +100,7 @@ const CANVAS_EXTENSIONS: CanvasExtensionConstructor[] = [
   ColorPaletteCanvasExtension,
   PresentationCanvasExtension,
   PortalsCanvasExtension,
+  PdfAnnotationCanvasExtension,
 
   // UI Extensions (Non-savable data)
   CanvasMetadataExposerExtension,
