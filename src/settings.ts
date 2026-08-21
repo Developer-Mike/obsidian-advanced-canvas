@@ -579,7 +579,7 @@ export const SETTINGS = {
   pdfAnnotationFeatureEnabled: {
     label: 'PDF annotation',
     description: 'Annotate PDF files in the canvas.',
-    infoSection: 'pdf-annotation',
+    infoSection: 'pdf-annotation', // FIXME
     children: {
       pdfPagesGap: {
         label: 'PDF pages gap',

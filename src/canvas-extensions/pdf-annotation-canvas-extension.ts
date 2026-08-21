@@ -1,5 +1,5 @@
-import { EmbedContext } from "@obsidian-typings/obsidian-public-latest"
-import { Component, TFile } from "obsidian"
+import { EmbedContext, PDFDocumentProxy } from "@obsidian-typings/obsidian-public-latest"
+import { Component, FileView, TFile } from "obsidian"
 import { CanvasFileNodeData } from "src/@types/AdvancedJsonCanvas"
 import { Canvas, CanvasElement, CanvasNode } from "src/@types/Canvas"
 import { invoke } from "src/patchers/patcher"
@@ -69,8 +69,10 @@ export default class PdfAnnotationCanvasExtension extends CanvasExtension {
 
     const that = this // eslint-disable-line @typescript-eslint/no-this-alias -- For patched function
     embedByExtension['pdf'] = function (context: EmbedContext, file: TFile, subpath?: string) {
-      if (that.isSubpathPinned(subpath))
-        return new PdfPageEmbedComponent(that.plugin, context, file, subpath)
+      if (that.isSubpathPinned(subpath)) {
+        const view = context.app.workspace.getActiveFileView()
+        return new PdfPageEmbedComponent(that.plugin, view, context, file, subpath)
+      }
 
       return invoke(originalPdfEmbed, this, context, file, subpath)
     }
@@ -142,18 +144,24 @@ abstract class EmbedComponent extends Component {
   abstract loadFile(): Promise<void>
 }
 
+interface PdfCacheHoldingView {
+  pdfCache?: Map<string, PDFDocumentProxy>
+}
+
 class PdfPageEmbedComponent extends EmbedComponent {
   private plugin: AdvancedCanvasPlugin
+  private parent: PdfCacheHoldingView | null
   private context: EmbedContext
   private file: TFile
   private subpath?: string
 
   private canvas: HTMLCanvasElement
 
-  constructor(plugin: AdvancedCanvasPlugin, context: EmbedContext, file: TFile, subpath?: string) {
+  constructor(plugin: AdvancedCanvasPlugin, parent: FileView | null, context: EmbedContext, file: TFile, subpath?: string) {
     super()
 
     this.plugin = plugin
+    this.parent = parent as PdfCacheHoldingView | null
     this.context = context
     this.file = file
     this.subpath = subpath
@@ -168,8 +176,16 @@ class PdfPageEmbedComponent extends EmbedComponent {
   override async loadFile() {
     await waitForPdfJsLib()
 
-    const data = await this.context.app.vault.readBinary(this.file)
-    const pdf = await window.pdfjsLib.getDocument({ data }).promise // FIXME: Maybe caching
+    let pdf = this.parent?.pdfCache?.get(this.file.path)
+    if (!pdf) {
+      const data = await this.context.app.vault.readBinary(this.file)
+      pdf = await window.pdfjsLib.getDocument({ data }).promise
+
+      if (this.parent) {
+        this.parent.pdfCache ??= new Map<string, PDFDocumentProxy>()
+        this.parent.pdfCache.set(this.file.path, pdf)
+      }
+    }
 
     const pageNumber = this.getPageNumberFromSubpath(this.subpath)
     if (!pageNumber || pageNumber < 1 || pageNumber > pdf.numPages) return
@@ -197,6 +213,7 @@ class PdfPageEmbedComponent extends EmbedComponent {
   }
 }
 
+// FIXME: Never resolving if no pdf is ever opened
 async function waitForPdfJsLib(): Promise<void> {
   return new Promise<void>((resolve) => {
     const interval = window.setInterval(() => {
