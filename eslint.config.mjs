@@ -38,6 +38,7 @@ export default defineConfig([
             "Advanced Canvas",
             "Focus Mode",
             "Properties view",
+            "PDF",
           ],
         },
       ],

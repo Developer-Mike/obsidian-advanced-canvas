@@ -99,6 +99,11 @@ export interface AdvancedCanvasPluginSettingsValues {
   slideTransitionAnimationDuration: number
   slideTransitionAnimationIntensity: number
 
+  pdfAnnotationFeatureEnabled: boolean
+  pdfPagesGap: number
+  pdfPageSizeFactor: number
+  pdfPageResolution: number
+
   canvasEncapsulationEnabled: boolean
 
   portalsFeatureEnabled: boolean
@@ -199,6 +204,11 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   fullscreenPresentationEnabled: true,
   slideTransitionAnimationDuration: 0.5,
   slideTransitionAnimationIntensity: 1.25,
+
+  pdfAnnotationFeatureEnabled: false,
+  pdfPagesGap: 60,
+  pdfPageSizeFactor: 1.5,
+  pdfPageResolution: 1.5,
 
   canvasEncapsulationEnabled: false,
 
@@ -563,6 +573,31 @@ export const SETTINGS = {
         description: 'The intensity of the slide transition animation. The higher the value, the more the canvas will zoom out before zooming in on the next slide.',
         type: 'number',
         parse: (value: string) => Math.max(0, parseFloat(value) || 0)
+      }
+    }
+  },
+  pdfAnnotationFeatureEnabled: {
+    label: 'PDF annotation',
+    description: 'Annotate PDF files in the canvas.',
+    infoSection: 'pdf-annotation',
+    children: {
+      pdfPagesGap: {
+        label: 'PDF pages gap',
+        description: 'The gap between PDF pages in pixels.',
+        type: 'number',
+        parse: (value: string) => Math.max(0, parseInt(value) || 0)
+      },
+      pdfPageSizeFactor: {
+        label: 'PDF page size factor',
+        description: 'The size factor of the PDF pages. The higher the value, the larger the newly created PDF pages will be.',
+        type: 'number',
+        parse: (value: string) => Math.max(0.1, parseFloat(value) || 1)
+      },
+      pdfPageResolution: {
+        label: 'PDF page resolution',
+        description: 'The resolution of the PDF pages. The higher the value, the sharper the pages will be (heavily affects performance).',
+        type: 'number',
+        parse: (value: string) => Math.max(0.1, parseFloat(value) || 1)
       }
     }
   },

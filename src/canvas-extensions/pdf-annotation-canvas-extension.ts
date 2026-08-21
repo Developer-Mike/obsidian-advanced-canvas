@@ -6,18 +6,19 @@ import { invoke } from "src/patchers/patcher"
 import CanvasHelper from "src/utils/canvas-helper"
 import { FileSelectModal } from "src/utils/modal-helper"
 import CanvasExtension from "./canvas-extension"
+import AdvancedCanvasPlugin from "src/main"
 
 const PINNED_PARAM = 'pinned=true'
 
 export default class PdfAnnotationCanvasExtension extends CanvasExtension {
-  isEnabled() { return true }
+  isEnabled() { return 'pdfAnnotationFeatureEnabled' as const }
 
   init(): void {
     this.plugin.register(this.patchPdfEmbed())
 
     this.plugin.addCommand({
       id: 'pin-pdf-page',
-      name: 'Pin pdf page',
+      name: 'Pin PDF page',
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (canvas: Canvas) => {
@@ -44,7 +45,7 @@ export default class PdfAnnotationCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'annotate-pdf',
-      name: 'Annotate pdf in canvas',
+      name: 'Annotate PDF in canvas',
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (canvas: Canvas) => !canvas.readonly,
@@ -66,10 +67,10 @@ export default class PdfAnnotationCanvasExtension extends CanvasExtension {
       return () => { }
     }
 
-    const isSubpathPinned = this.isSubpathPinned.bind(this) as unknown as (subpath?: string) => boolean
+    const that = this // eslint-disable-line @typescript-eslint/no-this-alias -- For patched function
     embedByExtension['pdf'] = function (context: EmbedContext, file: TFile, subpath?: string) {
-      if (isSubpathPinned(subpath))
-        return new PdfPageEmbedComponent(context, file, subpath)
+      if (that.isSubpathPinned(subpath))
+        return new PdfPageEmbedComponent(that.plugin, context, file, subpath)
 
       return invoke(originalPdfEmbed, this, context, file, subpath)
     }
@@ -80,31 +81,39 @@ export default class PdfAnnotationCanvasExtension extends CanvasExtension {
   }
 
   private async insertPdfPages(canvas: Canvas, file: TFile) {
-    const PDF_PAGE_SCALE = 1.5 // FIXME: Make this configurable
-    const PDF_PAGE_SPACING = 60 // FIXME: Make this configurable
-
     await waitForPdfJsLib()
 
     const data = await this.plugin.app.vault.readBinary(file)
     const pdf = await window.pdfjsLib.getDocument({ data }).promise
 
-    const pageNodes: Set<CanvasElement> = new Set()
+    const pdfPageSpacing = this.plugin.settings.getSetting("pdfPagesGap")
+    const pdfPageScale = this.plugin.settings.getSetting("pdfPageSizeFactor")
+
     const pos = CanvasHelper.getCenterCoordinates(canvas, { width: 0, height: 0 })
     let yPos = pos.y
+    const minZIndex = Math.min(...[...canvas.nodes.values()].map(n => n.zIndex))
+    const zIndex = Math.abs(minZIndex) !== Infinity ? minZIndex - 1 : -1000
+
+    const pageNodes: Set<CanvasElement> = new Set()
     for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
       const page = await pdf.getPage(pageNumber)
-      const viewport = page.getViewport({ scale: PDF_PAGE_SCALE })
+      const viewport = page.getViewport({ scale: pdfPageScale })
 
-      pageNodes.add(canvas.createFileNode({
+      const node = canvas.createFileNode({
         pos: { x: pos.x - viewport.width / 2, y: yPos },
         size: { width: viewport.width, height: viewport.height },
         file: file,
         subpath: `#page=${pageNumber}&${PINNED_PARAM}`
-      }))
+      })
+      pageNodes.add(node)
 
-      // FIXME: set z-index and ratio
+      node.setZIndex(zIndex)
+      node.setData({
+        ...node.getData(),
+        ratio: viewport.width / viewport.height
+      })
 
-      yPos += viewport.height + PDF_PAGE_SPACING
+      yPos += viewport.height + pdfPageSpacing
     }
 
     canvas.updateSelection(() => { canvas.selection = pageNodes })
@@ -134,15 +143,17 @@ abstract class EmbedComponent extends Component {
 }
 
 class PdfPageEmbedComponent extends EmbedComponent {
+  private plugin: AdvancedCanvasPlugin
   private context: EmbedContext
   private file: TFile
   private subpath?: string
 
   private canvas: HTMLCanvasElement
 
-  constructor(context: EmbedContext, file: TFile, subpath?: string) {
+  constructor(plugin: AdvancedCanvasPlugin, context: EmbedContext, file: TFile, subpath?: string) {
     super()
 
+    this.plugin = plugin
     this.context = context
     this.file = file
     this.subpath = subpath
@@ -155,8 +166,6 @@ class PdfPageEmbedComponent extends EmbedComponent {
   }
 
   override async loadFile() {
-    const PDF_PAGE_RESOLUTION = 1.5 // FIXME: Make this configurable
-
     await waitForPdfJsLib()
 
     const data = await this.context.app.vault.readBinary(this.file)
@@ -166,7 +175,8 @@ class PdfPageEmbedComponent extends EmbedComponent {
     if (!pageNumber || pageNumber < 1 || pageNumber > pdf.numPages) return
 
     const page = await pdf.getPage(pageNumber)
-    const viewport = page.getViewport({ scale: PDF_PAGE_RESOLUTION })
+    const pdfPageResolution = this.plugin.settings.getSetting("pdfPageSizeFactor")
+    const viewport = page.getViewport({ scale: pdfPageResolution })
 
     this.canvas.width = viewport.width
     this.canvas.height = viewport.height
