@@ -5,7 +5,7 @@ import { AbstractSelectionModal } from 'src/utils/modal-helper'
 
 export default class NodeRatioCanvasExtension extends CanvasExtension {
   isEnabled() { return true }
-  
+
   init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       'canvas:node-menu',
@@ -27,7 +27,7 @@ export default class NodeRatioCanvasExtension extends CanvasExtension {
         .onClick(async () => {
           const NO_RATIO = 'No ratio enforcement'
           const newRatioString = await new AbstractSelectionModal(this.plugin.app, 'Enter aspect ratio (width:height)', ['16:9', '4:3', '3:2', '1:1', NO_RATIO])
-            .awaitInput()
+            .promise
 
           const nodeData = node.getData()
 

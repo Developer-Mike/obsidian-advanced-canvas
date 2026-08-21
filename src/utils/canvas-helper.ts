@@ -17,12 +17,12 @@ export type ConnectionDirection = 'connected' | 'outgoing' | 'incoming'
 export default class CanvasHelper {
   static readonly GRID_SIZE = 20
 
-  static canvasCommand(plugin: AdvancedCanvasPlugin, check: (canvas: Canvas) => boolean, run: (canvas: Canvas) => void): (checking: boolean) => boolean {
+  static canvasCommand(plugin: AdvancedCanvasPlugin, check: (canvas: Canvas) => boolean, run: (canvas: Canvas) => void | Promise<void>): (checking: boolean) => boolean {
     return (checking: boolean) => {
       const canvas = plugin.getCurrentCanvas()
       if (checking) return canvas !== null && check(canvas)
 
-      if (canvas) run(canvas)
+      if (canvas) void run(canvas)
 
       return true
     }

@@ -34,7 +34,7 @@ export class AbstractSelectionModal extends FuzzySuggestModal<string> {
   }
 
   onChooseItem(_item: string, _evt: MouseEvent | KeyboardEvent): void { }
-  awaitInput(): Promise<string> {
+  get promise(): Promise<string> {
     return new Promise((resolve, _reject) => {
       this.onChooseItem = (item: string) => resolve(item)
       this.open()
@@ -72,7 +72,7 @@ export class FileNameModal extends SuggestModal<string> {
 
   onChooseSuggestion(_text: string, _evt: MouseEvent | KeyboardEvent) {}
 
-  awaitInput(): Promise<string> {
+  get promise(): Promise<string> {
     return new Promise((resolve, _reject) => {
       this.onChooseSuggestion = (text: string) => { resolve(text) }
       this.open()
@@ -88,8 +88,8 @@ export class FileSelectModal extends SuggestModal<string> {
     super(app)
 
     this.files = this.app.vault.getFiles()
+      .filter(file => file?.extension?.match(extensionsRegex ?? /.*/))
       .map(file => file.path)
-      .filter(path => FilepathHelper.extension(path)?.match(extensionsRegex ?? /.*/))
     this.suggestNewFile = suggestNewFile
 
     this.setPlaceholder('Type to search...')
@@ -127,7 +127,7 @@ export class FileSelectModal extends SuggestModal<string> {
 
   onChooseSuggestion(_path: string, _evt: MouseEvent | KeyboardEvent) {}
 
-  awaitInput(): Promise<TFile> {
+  get promise(): Promise<TFile> {
     return new Promise((resolve, _reject) => {
       this.onChooseSuggestion = (path: string, _evt: MouseEvent | KeyboardEvent) => {
         const file = this.app.vault.getAbstractFileByPath(path)

@@ -50,7 +50,7 @@ export default class EncapsulateCanvasExtension extends CanvasExtension {
       this.plugin.app,
       targetFolderPath,
       'canvas'
-    ).awaitInput()
+    ).promise
 
     const newFileData = { nodes: selection.nodes, edges: selection.edges }
     const file = await this.plugin.app.vault.create(targetFilePath, JSON.stringify(newFileData, null, 2))

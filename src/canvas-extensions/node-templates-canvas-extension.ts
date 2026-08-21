@@ -124,7 +124,7 @@ export default class NodeTemplatesCanvasExtension extends CanvasExtension {
         if (abstractFile instanceof TFile) tfile = abstractFile
       }
 
-      tfile ??= await new FileSelectModal(this.plugin.app, undefined, true).awaitInput()
+      tfile ??= await new FileSelectModal(this.plugin.app, undefined, true).promise
       node = canvas.createFileNode({ ...creationOptions, file: tfile })
     } else if (template.type === 'group') node = canvas.createGroupNode(creationOptions)
     else if (template.type === 'link') node = canvas.createLinkNode({ ...creationOptions, url: template.url })
@@ -172,7 +172,7 @@ export default class NodeTemplatesCanvasExtension extends CanvasExtension {
       new Notice("No icon selected, template creation cancelled.")
       return
     }
-    const label = await new AbstractSelectionModal(this.plugin.app, "Set template label (optional)", [], true).awaitInput()
+    const label = await new AbstractSelectionModal(this.plugin.app, "Set template label (optional)", [], true).promise
 
     await this.plugin.settings.setSetting({
       nodeTemplates: [
