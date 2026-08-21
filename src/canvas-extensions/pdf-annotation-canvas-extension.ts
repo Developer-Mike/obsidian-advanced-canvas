@@ -1,11 +1,11 @@
 import { EmbedContext } from "@obsidian-typings/obsidian-public-latest"
 import { Component, TFile } from "obsidian"
 import { CanvasFileNodeData } from "src/@types/AdvancedJsonCanvas"
-import { Canvas, CanvasNode, Size } from "src/@types/Canvas"
+import { Canvas, CanvasNode } from "src/@types/Canvas"
 import { invoke } from "src/patchers/patcher"
 import CanvasHelper from "src/utils/canvas-helper"
-import CanvasExtension from "./canvas-extension"
 import { FileSelectModal } from "src/utils/modal-helper"
+import CanvasExtension from "./canvas-extension"
 
 const PINNED_PARAM = 'pinned=true'
 
@@ -84,7 +84,7 @@ export default class PdfAnnotationCanvasExtension extends CanvasExtension {
     const pos = CanvasHelper.getCenterCoordinates(canvas, size)
 
     // FIXME
-    canvas.createFileNode({ pos: pos, size: size, file, subpath: "#page=1&" + PINNED_PARAM })
+    canvas.createFileNode({ pos: pos, size: size, file: pdf, subpath: "#page=1&" + PINNED_PARAM })
   }
 
   private pinPdfPage(node: CanvasNode): void {
