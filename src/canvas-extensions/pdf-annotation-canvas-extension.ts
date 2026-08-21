@@ -1,7 +1,7 @@
 import { EmbedContext } from "@obsidian-typings/obsidian-public-latest"
 import { Component, TFile } from "obsidian"
 import { CanvasFileNodeData } from "src/@types/AdvancedJsonCanvas"
-import { Canvas, CanvasNode } from "src/@types/Canvas"
+import { Canvas, CanvasElement, CanvasNode } from "src/@types/Canvas"
 import { invoke } from "src/patchers/patcher"
 import CanvasHelper from "src/utils/canvas-helper"
 import { FileSelectModal } from "src/utils/modal-helper"
@@ -52,7 +52,7 @@ export default class PdfAnnotationCanvasExtension extends CanvasExtension {
           const file = await new FileSelectModal(this.plugin.app, /^pdf$/).promise
           if (!file) return
 
-          this.insertPdfPages(canvas, file)
+          void this.insertPdfPages(canvas, file)
         }
       )
     })
@@ -79,12 +79,35 @@ export default class PdfAnnotationCanvasExtension extends CanvasExtension {
     }
   }
 
-  private insertPdfPages(canvas: Canvas, pdf: TFile) {
-    const size = { width: 100, height: 100 } // FIXME
-    const pos = CanvasHelper.getCenterCoordinates(canvas, size)
+  private async insertPdfPages(canvas: Canvas, file: TFile) {
+    const PDF_PAGE_SCALE = 1.5 // FIXME: Make this configurable
+    const PDF_PAGE_SPACING = 60 // FIXME: Make this configurable
 
-    // FIXME
-    canvas.createFileNode({ pos: pos, size: size, file: pdf, subpath: "#page=1&" + PINNED_PARAM })
+    await waitForPdfJsLib()
+
+    const data = await this.plugin.app.vault.readBinary(file)
+    const pdf = await window.pdfjsLib.getDocument({ data }).promise
+
+    const pageNodes: Set<CanvasElement> = new Set()
+    const pos = CanvasHelper.getCenterCoordinates(canvas, { width: 0, height: 0 })
+    let yPos = pos.y
+    for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+      const page = await pdf.getPage(pageNumber)
+      const viewport = page.getViewport({ scale: PDF_PAGE_SCALE })
+
+      pageNodes.add(canvas.createFileNode({
+        pos: { x: pos.x - viewport.width / 2, y: yPos },
+        size: { width: viewport.width, height: viewport.height },
+        file: file,
+        subpath: `#page=${pageNumber}&${PINNED_PARAM}`
+      }))
+
+      // FIXME: set z-index and ratio
+
+      yPos += viewport.height + PDF_PAGE_SPACING
+    }
+
+    canvas.updateSelection(() => { canvas.selection = pageNodes })
   }
 
   private pinPdfPage(node: CanvasNode): void {
@@ -132,6 +155,8 @@ class PdfPageEmbedComponent extends EmbedComponent {
   }
 
   override async loadFile() {
+    const PDF_PAGE_RESOLUTION = 1.5 // FIXME: Make this configurable
+
     await waitForPdfJsLib()
 
     const data = await this.context.app.vault.readBinary(this.file)
@@ -141,7 +166,7 @@ class PdfPageEmbedComponent extends EmbedComponent {
     if (!pageNumber || pageNumber < 1 || pageNumber > pdf.numPages) return
 
     const page = await pdf.getPage(pageNumber)
-    const viewport = page.getViewport({ scale: 1.5 }) // FIXME
+    const viewport = page.getViewport({ scale: PDF_PAGE_RESOLUTION })
 
     this.canvas.width = viewport.width
     this.canvas.height = viewport.height
