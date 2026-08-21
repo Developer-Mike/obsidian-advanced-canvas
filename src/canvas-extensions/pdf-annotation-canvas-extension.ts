@@ -2,11 +2,11 @@ import { EmbedContext, PDFDocumentProxy } from "@obsidian-typings/obsidian-publi
 import { Component, FileView, TFile } from "obsidian"
 import { CanvasFileNodeData } from "src/@types/AdvancedJsonCanvas"
 import { Canvas, CanvasElement, CanvasNode } from "src/@types/Canvas"
+import AdvancedCanvasPlugin from "src/main"
 import { invoke } from "src/patchers/patcher"
 import CanvasHelper from "src/utils/canvas-helper"
 import { FileSelectModal } from "src/utils/modal-helper"
 import CanvasExtension from "./canvas-extension"
-import AdvancedCanvasPlugin from "src/main"
 
 const PINNED_PARAM = 'pinned=true'
 
@@ -70,6 +70,12 @@ export default class PdfAnnotationCanvasExtension extends CanvasExtension {
     const that = this // eslint-disable-line @typescript-eslint/no-this-alias -- For patched function
     embedByExtension['pdf'] = function (context: EmbedContext, file: TFile, subpath?: string) {
       if (that.isSubpathPinned(subpath)) {
+        // Load pdfjsLib if not already loaded
+        if (!window.pdfjsLib) {
+          const original = invoke(originalPdfEmbed, this, context, file, subpath)
+          original.load() // FIXME: More elegant way
+        }
+
         const view = context.app.workspace.getActiveFileView()
         return new PdfPageEmbedComponent(that.plugin, view, context, file, subpath)
       }
