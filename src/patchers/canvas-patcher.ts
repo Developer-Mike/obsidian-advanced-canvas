@@ -159,6 +159,18 @@ export default class CanvasPatcher extends Patcher {
         that.plugin.app.workspace.trigger('advanced-canvas:containing-nodes-requested', this, bbox, result)
         return result
       }),
+      // Added by an LLM agent
+      getIntersectingNodes: Patcher.OverrideExisting(next => function (bbox: BBox): CanvasNode[] {
+        const result = next.call(this, bbox)
+        that.plugin.app.workspace.trigger('advanced-canvas:intersecting-nodes-requested', this, bbox, result)
+        return result
+      }),
+      // Added by an LLM agent
+      getIntersectingEdges: Patcher.OverrideExisting(next => function (bbox: BBox): CanvasEdge[] {
+        const result = next.call(this, bbox)
+        that.plugin.app.workspace.trigger('advanced-canvas:intersecting-edges-requested', this, bbox, result)
+        return result
+      }),
       updateSelection: Patcher.OverrideExisting(next => function (update: () => void): void {
         const oldSelection = new Set(this.selection)
         const result = next.call(this, update)
@@ -310,6 +322,9 @@ export default class CanvasPatcher extends Patcher {
       })
     })
 
+    // Added by an LLM agent: Patch the native grid spacing getter to make the grid size configurable
+    this.patchGridSpacing(view)
+
     // Patch canvas popup menu
     Patcher.patchPrototype<CanvasPopupMenu>(this.plugin, view.canvas.menu, {
       render: Patcher.OverrideExisting(next => function (...args: any): void {
@@ -339,6 +354,33 @@ export default class CanvasPatcher extends Patcher {
 
       that.plugin.app.workspace.trigger('advanced-canvas:node-text-content-changed', node.canvas, node, update)
     })])
+  }
+
+  // Added by an LLM agent: Override the native `gridSpacing` getter so the snap-to-grid size
+  // (drag snapping, resize snapping, arrow-key nudging and the background grid) follows the `gridSize` setting.
+  // Obsidian defines it as a zoom-dependent accessor on the Canvas prototype (tiers of 20/40/80/160).
+  private patchGridSpacing(view: CanvasView) {
+    const canvasPrototype = (view.canvas.constructor as any).prototype
+    const originalDescriptor = Object.getOwnPropertyDescriptor(canvasPrototype, 'gridSpacing')
+    if (!originalDescriptor?.get) {
+      console.warn('Advanced Canvas: Failed to patch gridSpacing - native getter not found')
+      return
+    }
+
+    const that = this // eslint-disable-line @typescript-eslint/no-this-alias -- For patcher
+    Object.defineProperty(canvasPrototype, 'gridSpacing', {
+      get: function (this: Canvas): number {
+        const gridSize = that.plugin.settings.getSetting('gridSize')
+        const zoom = this.zoom
+
+        // Mirror Obsidian's zoom-dependent tiers as multiples of the configured base grid size
+        return zoom < -3.3 ? 8 * gridSize : zoom < -2.16 ? 4 * gridSize : zoom < -0.91 ? 2 * gridSize : gridSize
+      },
+      enumerable: false,
+      configurable: true
+    })
+
+    this.plugin.register(() => Object.defineProperty(canvasPrototype, 'gridSpacing', originalDescriptor))
   }
 
   private patchNode(node: CanvasNode) {

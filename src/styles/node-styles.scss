@@ -263,9 +263,9 @@
   //#endregion
 
   //#region Group Opacity (added by an LLM agent)
-  // Obsidian tints a group with `color-mix(in oklch, var(--canvas-color) 7%, transparent)` on the
-  // content element - this replaces that 7% with the configured value, so 100% is a solid fill.
-  // Only the fill changes: the border and the label are left at full strength.
+  // Newer Obsidian builds tint a group with `color-mix(in oklch, var(--canvas-color) 7%, transparent)`
+  // on the content element - this replaces that 7% with the configured value, so 100% is a solid
+  // fill. Only the fill changes: the border and the label are left at full strength.
   &[data-group-opacity] {
     &[data-group-opacity='0.25'] { --group-opacity: 0.25; }
     &[data-group-opacity='0.5'] { --group-opacity: 0.5; }
@@ -275,6 +275,48 @@
     // Needs to outweigh Obsidian's own `.canvas-node.is-themed .canvas-node-content` rule
     .canvas-node-container > .canvas-node-content {
       background-color: color-mix(in oklch, var(--canvas-color) calc(var(--group-opacity, 0.07) * 100%), transparent);
+    }
+  }
+
+  // Older builds expose `--canvas-color` as an `r, g, b` triplet, which color-mix() can't
+  // take - the declaration above would be invalid at computed-value time and the fill would
+  // go transparent. They get an rgba() declaration instead, keyed on the wrapper attribute
+  // from default-style-sizes-canvas-extension.ts. Separate higher-specificity rule because a
+  // losing declaration never reaches computed-value time, while a winning-but-invalid one
+  // would compute to `unset`.
+  .canvas-wrapper[data-canvas-color-format='triplet'] &[data-group-opacity] {
+    .canvas-node-container > .canvas-node-content {
+      background-color: rgba(var(--canvas-color), var(--group-opacity, 0.07));
+    }
+  }
+  //#endregion
+
+  //#region Boxed Node Labels (added by an LLM agent)
+  // Mirrors Obsidian core's `.canvas-group-label` box styling - a rounded, colour-tinted
+  // background (solid when the node is themed) - onto regular file/text/link node labels,
+  // which core otherwise renders as plain text. Group nodes already get this from core, so
+  // they're excluded here to avoid doubling up.
+  .canvas-wrapper[data-boxed-node-labels='true'] &:not(.canvas-node-group) {
+    .canvas-node-label {
+      padding: var(--size-4-1) var(--size-4-2);
+      border-radius: var(--radius-s);
+      background-color: color-mix(in oklch, var(--canvas-color) 10%, transparent);
+      line-height: 1;
+    }
+
+    &.is-themed .canvas-node-label:not([contenteditable='true']) {
+      background-color: var(--canvas-color);
+    }
+  }
+
+  // Triplet `--canvas-color` builds - see the Group Opacity region above
+  .canvas-wrapper[data-canvas-color-format='triplet'][data-boxed-node-labels='true'] &:not(.canvas-node-group) {
+    .canvas-node-label {
+      background-color: rgba(var(--canvas-color), 0.1);
+    }
+
+    &.is-themed .canvas-node-label:not([contenteditable='true']) {
+      background-color: rgb(var(--canvas-color));
     }
   }
   //#endregion

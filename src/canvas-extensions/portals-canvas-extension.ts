@@ -23,6 +23,12 @@ export default class PortalsCanvasExtension extends CanvasExtension {
       (canvas: Canvas) => this.onPopupMenu(canvas)
     ))
 
+    // Added by an LLM agent
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      'advanced-canvas:node-created',
+      (canvas: Canvas, node: CanvasNode) => void this.tryAutoOpenSingleNodePortal(canvas, node)
+    ))
+
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       'advanced-canvas:node-removed',
       (canvas: Canvas, node: CanvasNode) => this.onNodeRemoved(canvas, node)
@@ -243,6 +249,55 @@ export default class PortalsCanvasExtension extends CanvasExtension {
         }
       })
     )
+  }
+
+  // Added by an LLM agent
+  // Automatically opens a newly created file node as a portal if it links to a canvas
+  // file that only contains a single node - saves a manual "Open portal" click for
+  // canvases that are trivial enough to just inline.
+  private async tryAutoOpenSingleNodePortal(canvas: Canvas, node: CanvasNode) {
+    if (!this.plugin.settings.getSetting('autoOpenSingleNodePortals')) return
+
+    const nodeData = node.getData() as CanvasFileNodeData
+    if (nodeData.type !== 'file' || nodeData.portal) return
+
+    // Use the live `.file` property, not `nodeData.file` - for freshly created file nodes
+    // the data isn't populated with the file path yet at this point. `.file` is set first,
+    // but as a bare path string until the node's own async file loading resolves it to a
+    // TFile, so resolve it through the vault ourselves rather than assuming the type.
+    const portalFilePath = typeof node.file === 'string' ? node.file : node.file?.path
+    if (!portalFilePath) return
+
+    const portalFile = this.plugin.app.vault.getAbstractFileByPath(portalFilePath)
+    if (!(portalFile instanceof TFile) || portalFile.extension !== 'canvas') return
+
+    // Fix direct recursion
+    if (portalFile.path === canvas.view.file?.path) return
+
+    const portalFileDataString = await this.plugin.app.vault.cachedRead(portalFile)
+    if (portalFileDataString === '') return
+
+    let portalFileData: CanvasData
+    try {
+      portalFileData = JSON.parse(portalFileDataString) as CanvasData
+    } catch (error) {
+      return
+    }
+    if (!portalFileData?.nodes || portalFileData.nodes.length !== 1) return
+
+    // Re-fetch the node in case it got removed/replaced while awaiting the file read
+    const currentNode = canvas.nodes.get(node.id)
+    if (!currentNode) return
+
+    // The node's own async file loading may not have populated `file` on its data yet -
+    // setPortalOpen()/tryOpenPortal() need it, so make sure it's there before opening
+    const currentNodeData = currentNode.getData() as CanvasFileNodeData
+    if (currentNodeData.portal) return // Someone else already toggled it open in the meantime
+    if (currentNodeData.file !== portalFile.path) {
+      currentNode.setData({ ...currentNodeData, file: portalFile.path })
+    }
+
+    this.setPortalOpen(canvas, currentNode, true)
   }
 
   private setPortalOpen(canvas: Canvas, portalNode: CanvasNode, open: boolean) {

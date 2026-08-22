@@ -370,6 +370,18 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     this.presentationUsesFullscreen = false
   }
 
+  // Added by an LLM agent
+  /** Re-focuses the viewport on the slide the presentation is currently on. */
+  zoomToCurrentSlide(canvas: Canvas) {
+    const currentNodeId = this.visitedNodeIds.last()
+    if (!currentNodeId) return
+
+    const currentNode = canvas.nodes.get(currentNodeId)
+    if (!currentNode) return
+
+    void this.animateNodeTransition(canvas, currentNode, currentNode)
+  }
+
   private nextNode(canvas: Canvas) {
     const fromNodeId = this.visitedNodeIds.last()
     if (!fromNodeId) return

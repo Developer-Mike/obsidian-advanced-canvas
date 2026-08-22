@@ -21,6 +21,7 @@ import FileManagerPatcher from './patchers/file-manager-patcher'
 import PropertiesPatcher from './patchers/properties-patcher'
 import SearchPatcher from './patchers/search-patcher'
 import SearchCommandPatcher from './patchers/search-command-patcher'
+import DotMdFileSearchPatcher from './patchers/dot-md-file-search-patcher' // Added by an LLM agent
 
 // Canvas Extensions
 import CanvasExtension from './canvas-extensions/canvas-extension'
@@ -55,6 +56,7 @@ import EdgeLabelMarkdownCanvasExtension from './canvas-extensions/edge-label-mar
 import EdgeArrowBaseCanvasExtension from './canvas-extensions/edge-arrow-base-canvas-extension' // Added by an LLM agent
 import CopyNodeReferenceCanvasExtension from './canvas-extensions/copy-node-reference-canvas-extension'
 import ReadingModeFixCanvasExtension from './canvas-extensions/reading-mode-fix-canvas-extension'
+import RotateNodeCanvasExtension from './canvas-extensions/rotate-node-canvas-extension' // Added by an LLM agent
 
 // Advanced Styles
 import NodeStylesExtension from './canvas-extensions/advanced-styles/node-styles'
@@ -72,6 +74,7 @@ const PATCHERS = [
   // Core canvas patchers
   CanvasPatcher,
   SearchCommandPatcher,
+  DotMdFileSearchPatcher, // Added by an LLM agent
 
   // Core metadata patchers
   MetadataCachePatcher,
@@ -132,7 +135,8 @@ const CANVAS_EXTENSIONS: typeof CanvasExtension[] = [
   CanvasFilterCanvasExtension, // Added by an LLM agent
   EncapsulateCanvasExtension,
   EdgeSelectionCanvasExtension,
-  CopyNodeReferenceCanvasExtension
+  CopyNodeReferenceCanvasExtension,
+  RotateNodeCanvasExtension // Added by an LLM agent
 ]
 
 export default class AdvancedCanvasPlugin extends Plugin {

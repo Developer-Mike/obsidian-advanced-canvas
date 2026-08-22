@@ -242,6 +242,7 @@ export interface Canvas {
   view: CanvasView
   config: CanvasConfig
   options: CanvasOptions
+  readonly gridSpacing: number // Added by an LLM agent - native zoom-dependent getter, patched by Advanced Canvas
 
   metadata: CanvasMetadata
 
@@ -340,6 +341,10 @@ export interface Canvas {
   removeEdge(edge: CanvasEdge): void
 
   getContainingNodes(bbox: BBox): CanvasNode[]
+  // Added by an LLM agent
+  getIntersectingNodes(bbox: BBox): CanvasNode[]
+  // Added by an LLM agent
+  getIntersectingEdges(bbox: BBox): CanvasEdge[]
   getViewportNodes(): CanvasNode[]
 
   history: CanvasHistory

@@ -1,11 +1,12 @@
 /* Added by an LLM agent */
 import { getAllTags, Notice, TFile } from "obsidian"
-import { AnyCanvasNodeData, CanvasEdgeData, CanvasGroupNodeData, CanvasNodeData, CanvasTextNodeData } from "src/@types/AdvancedJsonCanvas"
+import { AnyCanvasNodeData, CanvasEdgeData, CanvasFileNodeData, CanvasGroupNodeData, CanvasNodeData, CanvasTextNodeData } from "src/@types/AdvancedJsonCanvas"
 import { Canvas, CanvasEdge, CanvasNode } from "src/@types/Canvas"
 import { ExtendedCachedMetadata } from "src/@types/Obsidian"
 import CanvasHelper from "src/utils/canvas-helper"
 import { AbstractSelectionModal } from "src/utils/modal-helper"
 import CanvasExtension from "./canvas-extension"
+import PortalsCanvasExtension from "./portals-canvas-extension" // Added by an LLM agent
 
 /** Applied to hidden nodes/edges - the actual hiding happens in `styles/canvas-filter.scss` */
 const FILTERED_OUT_CLASS = 'advanced-canvas-filtered-out'
@@ -19,10 +20,13 @@ interface ConnectionFilter {
   outgoing: boolean
   /** Follow edges that point towards the already included nodes */
   incoming: boolean
+  /** Added by an LLM agent - only follow edges one hop away from the selection, not the whole connected component */
+  immediate?: boolean
 }
 
 const CONNECTION_FILTERS: ConnectionFilter[] = [
   { id: 'filter-connected-nodes', name: 'Filter to selection and connected nodes', outgoing: true, incoming: true },
+  { id: 'filter-immediately-connected-nodes', name: 'Filter to selection and immediately connected nodes', outgoing: true, incoming: true, immediate: true }, // Added by an LLM agent
   { id: 'filter-outgoing-nodes', name: 'Filter to selection and outgoing nodes', outgoing: true, incoming: false },
   { id: 'filter-incoming-nodes', name: 'Filter to selection and incoming nodes', outgoing: false, incoming: true }
 ]
@@ -130,18 +134,35 @@ export default class CanvasFilterCanvasExtension extends CanvasExtension {
 
   /** Shows the given nodes, the groups containing them and the edges between them - hides everything else */
   private showOnlyNodesAndTheirEdges(canvas: Canvas, nodesToShow: AnyCanvasNodeData[]) {
-    const canvasData = canvas.getData()
+    // Added by an LLM agent - use the live nodes/edges: canvas.getData() strips portal elements
+    const nodes = [...canvas.nodes.values()].map(node => node.getData())
+    const edges = [...canvas.edges.values()].map(edge => edge.getData())
 
     const nodeIdsToShow = new Set(nodesToShow.map(node => node.id))
-    const edgeIdsToShow = new Set(canvasData.edges
+    const edgeIdsToShow = new Set(edges
       .filter(edge => nodeIdsToShow.has(edge.fromNode) && nodeIdsToShow.has(edge.toNode))
       .map(edge => edge.id))
 
-    for (const group of this.getGroupsContaining(canvasData.nodes, nodesToShow))
+    for (const group of this.getGroupsContaining(nodes, nodesToShow))
       nodeIdsToShow.add(group.id)
 
     this.showOnlyNodes(canvas, nodeIdsToShow)
     this.showOnlyEdges(canvas, edgeIdsToShow)
+  }
+
+  // Added by an LLM agent
+  /** All live nodes nested inside the given portal (at any depth) */
+  private static getPortalNestedNodes(nodes: AnyCanvasNodeData[], portalId: string) {
+    return nodes.filter(node => node.id !== portalId &&
+      PortalsCanvasExtension.getNestedIds(node.id).contains(portalId))
+  }
+
+  // Added by an LLM agent
+  /** All live edges with both endpoints nested inside the given portal */
+  private static getPortalInternalEdges(edges: CanvasEdgeData[], portalId: string) {
+    return edges.filter(edge =>
+      PortalsCanvasExtension.getNestedIds(edge.fromNode).contains(portalId) &&
+      PortalsCanvasExtension.getNestedIds(edge.toNode).contains(portalId))
   }
 
   private static bboxContains(outerNode: CanvasNodeData, innerNode: CanvasNodeData) {
@@ -165,8 +186,28 @@ export default class CanvasFilterCanvasExtension extends CanvasExtension {
     if (colorsToShow.has(''))
       new Notice('One of the selected elements has no color, so colorless nodes stay visible as well')
 
-    const nodesToShow = canvas.getData().nodes
-      .filter(node => node.type !== 'group' && colorsToShow.has(node.color ?? ''))
+    // Added by an LLM agent
+    // Use the live nodes instead of canvas.getData() (which strips portal elements) and
+    // expand every color-matching portal so its entire content stays visible
+    const nodes = [...canvas.nodes.values()].map(node => node.getData())
+
+    const nodesToShow = nodes.filter(node =>
+      node.type !== 'group' &&
+      !PortalsCanvasExtension.isPortalElement(node.id) &&
+      colorsToShow.has(node.color ?? ''))
+
+    // Index-based loop - matching nested portals get appended and expanded as well
+    const shownNodeIds = new Set(nodesToShow.map(node => node.id))
+    for (let i = 0; i < nodesToShow.length; i++) {
+      const node = nodesToShow[i]
+      if (node.type !== 'file' || !(node as CanvasFileNodeData).portal) continue
+
+      for (const nestedNode of CanvasFilterCanvasExtension.getPortalNestedNodes(nodes, node.id)) {
+        if (shownNodeIds.has(nestedNode.id)) continue
+        shownNodeIds.add(nestedNode.id)
+        nodesToShow.push(nestedNode)
+      }
+    }
 
     this.showOnlyNodesAndTheirEdges(canvas, nodesToShow)
   }
@@ -188,17 +229,25 @@ export default class CanvasFilterCanvasExtension extends CanvasExtension {
   }
 
   private filterByConnections(canvas: Canvas, connectionFilter: ConnectionFilter) {
-    const canvasData = canvas.getData()
+    // Added by an LLM agent
+    // Use the live nodes/edges instead of canvas.getData() - getData() strips all portal
+    // elements (see PortalsCanvasExtension.onGetData), which made this filter incompatible
+    // with portals. Live portal elements look like normal nodes/edges with
+    // 'acportal||'-prefixed ids, so traversing into a portal works like normal traversal.
+    const nodes = [...canvas.nodes.values()].map(node => node.getData())
+    const edges = [...canvas.edges.values()].map(edge => edge.getData())
 
     const nodeIdsToShow = new Set([...canvas.selection].map(element => element.id))
     const edgeIdsToShow = new Set<string>()
+    const expandedPortalIds = new Set<string>()
+    const expandedGroupIds = new Set<string>() // Added by an LLM agent
 
     // Traverse the graph breadth-first, starting at the selection
     let frontier = new Set(nodeIdsToShow)
     while (frontier.size > 0) {
       const nextFrontier = new Set<string>()
 
-      for (const edge of canvasData.edges) {
+      for (const edge of edges) {
         let reachedNodeId: string | null = null
 
         if (connectionFilter.outgoing && frontier.has(edge.fromNode)) reachedNodeId = edge.toNode
@@ -212,11 +261,56 @@ export default class CanvasFilterCanvasExtension extends CanvasExtension {
         nextFrontier.add(reachedNodeId)
       }
 
+      // Added by an LLM agent
+      // Reaching an open portal node means reaching its entire content - reveal all nested
+      // nodes/edges and keep traversing from them (this also expands nested portals)
+      for (const node of nodes) {
+        if (!nodeIdsToShow.has(node.id) || expandedPortalIds.has(node.id)) continue
+        if (node.type !== 'file' || !(node as CanvasFileNodeData).portal) continue
+        expandedPortalIds.add(node.id)
+
+        for (const nestedNode of CanvasFilterCanvasExtension.getPortalNestedNodes(nodes, node.id)) {
+          if (nodeIdsToShow.has(nestedNode.id)) continue
+          nodeIdsToShow.add(nestedNode.id)
+          nextFrontier.add(nestedNode.id)
+        }
+
+        for (const edge of CanvasFilterCanvasExtension.getPortalInternalEdges(edges, node.id))
+          edgeIdsToShow.add(edge.id)
+      }
+
+      // Added by an LLM agent
+      // Reaching a group node means reaching its entire content - reveal all contained
+      // nodes and keep traversing from them (bbox containment also covers nested groups)
+      for (const node of nodes) {
+        if (!nodeIdsToShow.has(node.id) || expandedGroupIds.has(node.id)) continue
+        if (node.type !== 'group') continue
+        expandedGroupIds.add(node.id)
+
+        for (const containedNode of nodes) {
+          if (containedNode.id === node.id || nodeIdsToShow.has(containedNode.id)) continue
+          if (!CanvasFilterCanvasExtension.bboxContains(node, containedNode)) continue
+
+          nodeIdsToShow.add(containedNode.id)
+          nextFrontier.add(containedNode.id)
+        }
+      }
+
+      if (connectionFilter.immediate) break // Added by an LLM agent - stop after the first hop
+
       frontier = nextFrontier
     }
 
-    for (const group of this.getGroupsContaining(canvasData.nodes, canvasData.nodes.filter(node => nodeIdsToShow.has(node.id))))
+    for (const group of this.getGroupsContaining(nodes, nodes.filter(node => nodeIdsToShow.has(node.id))))
       nodeIdsToShow.add(group.id)
+
+    // Added by an LLM agent
+    // Show every edge between visible nodes, not just the ones the traversal followed
+    // (e.g. with edges A->B, A->C and B->C, filtering from A shows B->C as well)
+    for (const edge of edges) {
+      if (nodeIdsToShow.has(edge.fromNode) && nodeIdsToShow.has(edge.toNode))
+        edgeIdsToShow.add(edge.id)
+    }
 
     this.showOnlyNodes(canvas, nodeIdsToShow)
     this.showOnlyEdges(canvas, edgeIdsToShow)

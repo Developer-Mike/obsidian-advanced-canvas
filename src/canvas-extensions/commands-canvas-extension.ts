@@ -7,6 +7,7 @@ import CanvasHelper from "src/utils/canvas-helper"
 import { FileSelectModal } from "src/utils/modal-helper"
 import CanvasExtension from "./canvas-extension"
 import CopyNodeReferenceCanvasExtension from "./copy-node-reference-canvas-extension"
+import PresentationCanvasExtension from "./presentation-canvas-extension" // Added by an LLM agent
 
 type Direction = 'up' | 'down' | 'left' | 'right'
 const DIRECTIONS = ['up', 'down', 'left', 'right'] as Direction[]
@@ -88,13 +89,21 @@ export default class CommandsCanvasExtension extends CanvasExtension {
       )
     })
 
+    // Added by an LLM agent - while presenting with nothing selected, this refocuses the current slide instead
     this.plugin.addCommand({
       id: 'zoom-to-selection',
       name: 'Zoom to selection',
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
-        (canvas: Canvas) => canvas.selection.size > 0,
-        (canvas: Canvas) => canvas.zoomToSelection()
+        (canvas: Canvas) => canvas.selection.size > 0 || this.getPresentationExtension()?.isPresentationMode === true,
+        (canvas: Canvas) => {
+          if (canvas.selection.size > 0) {
+            canvas.zoomToSelection()
+            return
+          }
+
+          this.getPresentationExtension()?.zoomToCurrentSlide(canvas)
+        }
       )
     })
 
@@ -345,6 +354,16 @@ export default class CommandsCanvasExtension extends CanvasExtension {
         }
       )
     })
+  }
+
+  /**
+   * Added by an LLM agent.
+   * Finds the presentation extension instance. Looked up lazily because plugin.canvasExtensions
+   * is only assigned after every extension's constructor (and thus init()) has already run.
+   */
+  private getPresentationExtension(): PresentationCanvasExtension | undefined {
+    return this.plugin.canvasExtensions
+      ?.find(extension => extension instanceof PresentationCanvasExtension) as PresentationCanvasExtension | undefined
   }
 
   /**

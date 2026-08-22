@@ -1,11 +1,13 @@
 /* Added by an LLM agent */
-/* Applies the configured default group label size, group opacity, edge width and arrow size to
-   every element that doesn't have a value of its own set in the node/edge popup.
+/* Applies the configured default group label size, group opacity, edge width, arrow size and
+   node border to every element that doesn't have a value of its own set in the node/edge popup.
 
    The data attributes are only set on the canvas wrapper while the corresponding setting isn't
-   at 1x (see default-style-sizes-canvas-extension.ts), so Obsidian's own sizing is untouched by
-   default. An element with an explicit size sets its own `--*-multiplier` (see node-styles.scss
-   and edge-styles.scss), which takes precedence over the default via the `var()` fallback. */
+   at its unchanged value (see default-style-sizes-canvas-extension.ts), so Obsidian's own styling
+   is untouched by default. An element with an explicit size sets its own `--*-multiplier` (see
+   node-styles.scss and edge-styles.scss), which takes precedence over the default via the `var()`
+   fallback; the node border rules instead guard with `:not([data-border])`, matching the
+   attribute the per-node border style is exposed as. */
 
 //#region Group label size
 .canvas-wrapper[data-default-group-label-size] {
@@ -23,6 +25,7 @@
 //#region Group opacity
 // 0.07 is Obsidian's own group tint - see the Group Opacity region in node-styles.scss
 .canvas-wrapper[data-default-group-opacity] {
+  &[data-default-group-opacity='0'] { --default-group-opacity: 0; }
   &[data-default-group-opacity='0.25'] { --default-group-opacity: 0.25; }
   &[data-default-group-opacity='0.5'] { --default-group-opacity: 0.5; }
   &[data-default-group-opacity='0.75'] { --default-group-opacity: 0.75; }
@@ -32,13 +35,21 @@
     background-color: color-mix(in oklch, var(--canvas-color) calc(var(--group-opacity, var(--default-group-opacity, 0.07)) * 100%), transparent);
   }
 }
+
+// Triplet `--canvas-color` builds - see the Group Opacity region in node-styles.scss
+.canvas-wrapper[data-canvas-color-format='triplet'][data-default-group-opacity] {
+  .canvas-node.canvas-node-group .canvas-node-container > .canvas-node-content {
+    background-color: rgba(var(--canvas-color), var(--group-opacity, var(--default-group-opacity, 0.07)));
+  }
+}
 //#endregion
 
 //#region Edge width
 .canvas-wrapper[data-default-edge-width] {
-  &[data-default-edge-width='0.5'] { --default-edge-width-multiplier: 0.5; }
   &[data-default-edge-width='2'] { --default-edge-width-multiplier: 2; }
-  &[data-default-edge-width='3'] { --default-edge-width-multiplier: 3; }
+  // Added by an LLM agent - the settings dropdown offers 4x and 8x but no rules set their multipliers
+  &[data-default-edge-width='4'] { --default-edge-width-multiplier: 4; }
+  &[data-default-edge-width='8'] { --default-edge-width-multiplier: 8; }
 
   .canvas-edges path.canvas-display-path {
     stroke-width: calc(2px * var(--zoom-multiplier) * var(--edge-width-multiplier, var(--default-edge-width-multiplier, 1)));
@@ -53,13 +64,87 @@
 
 //#region Arrow size
 .canvas-wrapper[data-default-arrow-size] {
-  &[data-default-arrow-size='0.5'] { --default-arrow-size-multiplier: 0.5; }
-  &[data-default-arrow-size='1.5'] { --default-arrow-size-multiplier: 1.5; }
   &[data-default-arrow-size='2'] { --default-arrow-size-multiplier: 2; }
+  &[data-default-arrow-size='3'] { --default-arrow-size-multiplier: 3; }
+  &[data-default-arrow-size='4'] { --default-arrow-size-multiplier: 4; }
 
   // Obsidian anchors the arrow at `center top`, so scaling keeps the tip on the node border
   .canvas-edges polygon.canvas-path-end {
     transform: scale(calc(var(--zoom-multiplier) * var(--arrow-size-multiplier, var(--default-arrow-size-multiplier, 1))));
+  }
+}
+//#endregion
+
+//#region Node border
+// Mirrors the per-node [data-border] rules in node-styles.scss, applied to every node without
+// its own border style. Nodes with an explicit per-node border keep it thanks to :not([data-border]).
+.canvas-wrapper[data-default-node-border] {
+  &[data-default-node-border='dashed'] .canvas-node:not([data-border]) .canvas-node-container {
+    box-shadow: none;
+    border-style: dashed;
+  }
+
+  &[data-default-node-border='dotted'] .canvas-node:not([data-border]) .canvas-node-container {
+    box-shadow: none;
+    border-style: dotted;
+  }
+
+  &[data-default-node-border='invisible'] .canvas-node:not([data-border]) {
+    box-shadow: none;
+
+    &:not(.is-focused):not(.is-selected) .canvas-node-container {
+      border-color: transparent !important;
+    }
+
+    .canvas-node-label {
+      display: none;
+    }
+
+    .canvas-node-container {
+      background-color: transparent;
+      box-shadow: none;
+    }
+  }
+}
+//#endregion
+
+//#region Card node padding
+// Independently adjustable horizontal/vertical inner padding of a card's (text/file node)
+// content, so the content can reach all the way to the node's edge on either axis. The two
+// custom properties are set directly (not gated behind a dataset attribute like the sections
+// above) because this is a continuous pixel value, not a discrete preset - see
+// default-style-sizes-canvas-extension.ts, which always sets them to [16, 0] at minimum,
+// reproducing Obsidian's own default padding exactly.
+.canvas-wrapper {
+  .canvas-node:not(.canvas-node-group) .canvas-node-content {
+    // Reading/editing view of markdown content (text nodes and .md file nodes)
+    .markdown-preview-view {
+      padding-left: var(--ac-card-padding-h, var(--size-4-4));
+      padding-right: var(--ac-card-padding-h, var(--size-4-4));
+      padding-top: var(--ac-card-padding-v, 0px);
+      padding-bottom: var(--ac-card-padding-v, 0px);
+    }
+
+    .markdown-source-view .cm-content {
+      padding-left: var(--ac-card-padding-h, var(--size-4-4));
+      padding-right: var(--ac-card-padding-h, var(--size-4-4));
+      padding-top: var(--ac-card-padding-v, 0px);
+      padding-bottom: var(--ac-card-padding-v, 0px);
+    }
+  }
+
+  // Obsidian centers short reading-view content inside a card with a pair of flex spacers
+  // (::before/::after on .markdown-preview-view, see app.css) instead of padding - each one
+  // grows up to `min(canvas-node-height * 0.1 - 3px, var(--size-4-4))` (up to 16px) regardless
+  // of the padding-top/bottom set above, which is why vertical padding could still look nonzero
+  // even after setting it to 0. Both min-height and max-height need overriding - CSS resolves a
+  // min/max conflict in favor of min-height, so overriding max-height alone (as tried first) had
+  // no visible effect once it dropped below the still-active default min-height.
+  .canvas-node:not(.canvas-node-group) .canvas-node-content.markdown-embed > .markdown-embed-content > .markdown-preview-view {
+    &::before, &::after {
+      min-height: var(--ac-card-padding-v, min(calc(var(--canvas-node-height) * 0.1 - 3px), var(--size-4-4)));
+      max-height: var(--ac-card-padding-v, var(--size-4-4));
+    }
   }
 }
 //#endregion

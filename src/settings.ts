@@ -16,6 +16,7 @@ const KOFI_BADGE_URI = 'data:image/webp;base64,UklGRrosAABXRUJQVlA4TK4sAAAv1wNDE
 export interface AdvancedCanvasPluginSettingsValues {
   nodeTypeOnDoubleClick: keyof typeof SETTINGS.general.children.nodeTypeOnDoubleClick.options
   alignNewNodesToGrid: boolean
+  gridSize: number // Added by an LLM agent
   defaultTextNodeDimensions: [number, number]
   defaultFileNodeDimensions: [number, number]
   minNodeSize: number
@@ -23,11 +24,14 @@ export interface AdvancedCanvasPluginSettingsValues {
   disableFontSizeRelativeToZoom: boolean
   wrapGroupLabels: boolean // Added by an LLM agent
   hideGroupLabels: boolean // Added by an LLM agent
+  boxedNodeLabels: boolean // Added by an LLM agent
   defaultGroupLabelSize: keyof typeof SETTINGS.general.children.defaultGroupLabelSize.options // Added by an LLM agent
   defaultGroupOpacity: keyof typeof SETTINGS.general.children.defaultGroupOpacity.options // Added by an LLM agent
   defaultEdgeWidth: keyof typeof SETTINGS.general.children.defaultEdgeWidth.options // Added by an LLM agent
   defaultArrowSize: keyof typeof SETTINGS.general.children.defaultArrowSize.options // Added by an LLM agent
+  cardNodePadding: [number, number] // Added by an LLM agent - [horizontal, vertical] in px
   connectEdgesToArrowBase: boolean // Added by an LLM agent
+  defaultNodeBorder: keyof typeof SETTINGS.general.children.defaultNodeBorder.options // Added by an LLM agent
 
   canvasMetadataCompatibilityEnabled: boolean
   enableSingleNodeLinks: boolean
@@ -59,12 +63,15 @@ export interface AdvancedCanvasPluginSettingsValues {
 
   aspectRatioControlFeatureEnabled: boolean
 
+  nodeRotationFeatureEnabled: boolean // Added by an LLM agent
+
   commandsFeatureEnabled: boolean
   zoomToClonedNode: boolean
   cloneNodeMargin: number
   expandNodeStepSize: number
 
   nativeFileSearchEnabled: boolean
+  dotMdFileSearchEnabled: boolean // Added by an LLM agent
 
   floatingEdgeFeatureEnabled: boolean
   allowFloatingEdgeCreation: boolean
@@ -111,6 +118,7 @@ export interface AdvancedCanvasPluginSettingsValues {
 
   portalsFeatureEnabled: boolean
   showEdgesIntoDisabledPortals: boolean
+  autoOpenSingleNodePortals: boolean // Added by an LLM agent
 
   autoFileNodeEdgesFeatureEnabled: boolean
   autoFileNodeEdgesFrontmatterKey: string
@@ -130,6 +138,7 @@ export interface AdvancedCanvasPluginSettingsValues {
 export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   nodeTypeOnDoubleClick: 'text',
   alignNewNodesToGrid: true,
+  gridSize: 20, // Added by an LLM agent
   defaultTextNodeDimensions: [260, 60],
   defaultFileNodeDimensions: [400, 400],
   minNodeSize: 60,
@@ -137,11 +146,14 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   disableFontSizeRelativeToZoom: false,
   wrapGroupLabels: true, // Added by an LLM agent
   hideGroupLabels: false, // Added by an LLM agent
+  boxedNodeLabels: true, // Added by an LLM agent
   defaultGroupLabelSize: '1', // Added by an LLM agent
   defaultGroupOpacity: 'default', // Added by an LLM agent
   defaultEdgeWidth: '1', // Added by an LLM agent
   defaultArrowSize: '1', // Added by an LLM agent
+  cardNodePadding: [16, 0], // Added by an LLM agent - matches Obsidian's own default padding
   connectEdgesToArrowBase: false, // Added by an LLM agent
+  defaultNodeBorder: 'default', // Added by an LLM agent
 
   canvasMetadataCompatibilityEnabled: true,
   enableSingleNodeLinks: true,
@@ -173,12 +185,15 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
 
   aspectRatioControlFeatureEnabled: false,
 
+  nodeRotationFeatureEnabled: false, // Added by an LLM agent
+
   commandsFeatureEnabled: true,
   zoomToClonedNode: true,
   cloneNodeMargin: 20,
   expandNodeStepSize: 20,
 
   nativeFileSearchEnabled: true,
+  dotMdFileSearchEnabled: true, // Added by an LLM agent
 
   floatingEdgeFeatureEnabled: true,
   allowFloatingEdgeCreation: false,
@@ -225,6 +240,7 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
 
   portalsFeatureEnabled: true,
   showEdgesIntoDisabledPortals: true,
+  autoOpenSingleNodePortals: true, // Added by an LLM agent
 
   autoFileNodeEdgesFeatureEnabled: false,
   autoFileNodeEdgesFrontmatterKey: 'canvas-edges',
@@ -260,6 +276,12 @@ export const SETTINGS = {
         label: 'Always align new nodes to grid',
         description: 'When enabled, new nodes will be aligned to the grid.',
         type: 'boolean'
+      },
+      gridSize: { // Added by an LLM agent
+        label: 'Grid size',
+        description: 'The size of the grid that nodes snap to when "Snap to grid" is enabled. Also affects the background grid, arrow-key nudging and grid-aligned features. Obsidian\'s default is 20.',
+        type: 'number',
+        parse: (value: string) => Math.max(1, parseInt(value) || 20)
       },
       defaultTextNodeDimensions: {
         label: 'Default text node dimensions',
@@ -308,6 +330,11 @@ export const SETTINGS = {
         description: 'When enabled, group labels are hidden. Can be toggled with the "Toggle group label visibility" command.',
         type: 'boolean'
       },
+      boxedNodeLabels: { // Added by an LLM agent
+        label: 'Boxed node labels',
+        description: 'When enabled, file/text/link node labels get the same coloured box styling as group labels, instead of plain text.',
+        type: 'boolean'
+      },
       defaultGroupLabelSize: { // Added by an LLM agent
         label: 'Default group label size',
         description: 'The label size used by groups that don\'t have a label size of their own set in the node popup.',
@@ -337,10 +364,10 @@ export const SETTINGS = {
         description: 'The width used by edges that don\'t have an edge width of their own set in the edge popup.',
         type: 'dropdown',
         options: {
-          '0.5': 'Thin (0.5x)',
           '1': 'Default (1x)',
-          '2': 'Thick (2x)',
-          '3': 'Extra Thick (3x)'
+          '2': 'Thin (2x)',
+          '4': 'Thick (4x)',
+          '8': 'Extra Thick (8x)'
         }
       } as DropdownSetting,
       defaultArrowSize: { // Added by an LLM agent
@@ -348,17 +375,38 @@ export const SETTINGS = {
         description: 'The arrow size used by edges that don\'t have an arrow size of their own set in the edge popup.',
         type: 'dropdown',
         options: {
-          '0.5': 'Small (0.5x)',
           '1': 'Default (1x)',
-          '1.5': 'Large (1.5x)',
-          '2': 'Extra Large (2x)'
+		  '2': 'Small (2x)',
+          '3': 'Large (3x)',
+          '4': 'Extra Large (4x)'
         }
       } as DropdownSetting,
+      cardNodePadding: { // Added by an LLM agent
+        label: 'Card node padding (horizontal, vertical)',
+        description: 'The inner padding of a card\'s (text/file node) content, in pixels. Obsidian\'s own default is 16 horizontal, 0 vertical. Set either to 0 to let the content reach all the way to that edge.',
+        type: 'dimension',
+        parse: (value: [string, string]) => {
+          const horizontal = Math.max(0, parseInt(value[0]) || 0)
+          const vertical = Math.max(0, parseInt(value[1]) || 0)
+          return [horizontal, vertical]
+        }
+      } as DimensionSetting,
       connectEdgesToArrowBase: { // Added by an LLM agent
         label: 'Connect edges to the arrow base',
         description: 'When enabled, an edge\'s line stops at the back of its arrow head instead of continuing on towards the node. Without this, a line that reaches a node at an angle runs through the arrow and attaches off-centre. Only affects triangle arrow heads.',
         type: 'boolean'
-      }
+      },
+      defaultNodeBorder: { // Added by an LLM agent
+        label: 'Default node border',
+        description: 'The border used by nodes that don\'t have a border style of their own set in the node popup.',
+        type: 'dropdown',
+        options: {
+          'default': 'Default (solid)',
+          'dashed': 'Dashed',
+          'dotted': 'Dotted',
+          'invisible': 'Invisible'
+        }
+      } as DropdownSetting,
     }
   },
   commandsFeatureEnabled: {
@@ -408,6 +456,11 @@ export const SETTINGS = {
     infoSection: 'native-like-file-search',
     children: { }
   },
+  dotMdFileSearchEnabled: { // Added by an LLM agent
+    label: 'Hidden ".md" files in file search',
+    description: 'When enabled, files named exactly ".md" — hidden dotfiles that Obsidian never indexes — show up in the canvas "Add note from vault" file search. Note: nodes created for such files cannot render their content, because the vault does not track them.',
+    children: { }
+  },
   autoFileNodeEdgesFeatureEnabled: {
     label: 'Auto file node edges',
     description: 'Automatically create edges between file nodes based their frontmatter links.',
@@ -429,6 +482,11 @@ export const SETTINGS = {
       showEdgesIntoDisabledPortals: {
         label: 'Show edges into disabled portals',
         description: 'When enabled, edges into disabled portals will be shown.',
+        type: 'boolean'
+      },
+      autoOpenSingleNodePortals: { // Added by an LLM agent
+        label: 'Auto-open single-node portals',
+        description: 'When enabled, a new file node linking to a canvas that contains only one node automatically opens as a portal.',
         type: 'boolean'
       }
     }
@@ -664,6 +722,12 @@ export const SETTINGS = {
   aspectRatioControlFeatureEnabled: {
     label: 'Aspect ratio control',
     description: 'Change the aspect ratio of nodes using the node popup menu or the context menu.',
+    children: { }
+  },
+  // Added by an LLM agent
+  nodeRotationFeatureEnabled: {
+    label: 'Node rotation',
+    description: 'Rotate nodes around their own center using the context menu (90° steps or a custom angle) or commands. Rotating a group or an open portal rigidly rotates all fully contained nodes with it. Also allows rotating just the content of a node in 90° steps (cardinal content rotation, propagates from groups/portals to the nodes within).',
     children: { }
   },
   variableBreakpointFeatureEnabled: {

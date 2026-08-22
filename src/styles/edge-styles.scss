@@ -47,6 +47,9 @@
   &[data-edge-width='0.5'] { --edge-width-multiplier: 0.5; }
   &[data-edge-width='2'] { --edge-width-multiplier: 2; }
   &[data-edge-width='3'] { --edge-width-multiplier: 3; }
+  // Added by an LLM agent - the style config offers 4x and 8x but no rules set their multipliers
+  &[data-edge-width='4'] { --edge-width-multiplier: 4; }
+  &[data-edge-width='8'] { --edge-width-multiplier: 8; }
 }
 
 // Mirrors Obsidian's own selectors (+ the attribute) so the width multiplier also applies while focused/hovered
@@ -62,9 +65,9 @@
 
 //#region Arrow size
 .canvas-edges [data-arrow-size] {
-  &[data-arrow-size='0.5'] { --arrow-size-multiplier: 0.5; }
-  &[data-arrow-size='1.5'] { --arrow-size-multiplier: 1.5; }
   &[data-arrow-size='2'] { --arrow-size-multiplier: 2; }
+  &[data-arrow-size='3'] { --arrow-size-multiplier: 3; }
+  &[data-arrow-size='4'] { --arrow-size-multiplier: 4; }
 
   // Obsidian anchors the arrow at `center top`, so scaling keeps the tip on the node border
   polygon.canvas-path-end {

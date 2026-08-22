@@ -131,8 +131,10 @@ export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
 
     height = Math.max(height, node.canvas.config.minContainerDimension)
 
-    if (this.plugin.settings.getSetting('autoResizeNodeSnapToGrid'))
-      height = Math.ceil(height / CanvasHelper.GRID_SIZE) * CanvasHelper.GRID_SIZE
+    if (this.plugin.settings.getSetting('autoResizeNodeSnapToGrid')) {
+      const gridSize = this.plugin.settings.getSetting('gridSize') // Added by an LLM agent
+      height = Math.ceil(height / gridSize) * gridSize
+    }
 
     node.setData({
       ...nodeData,

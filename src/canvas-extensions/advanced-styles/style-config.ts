@@ -161,6 +161,11 @@ export const BUILTIN_NODE_STYLE_ATTRIBUTES = [
         label: 'Default',
         value: null
       },
+	  {
+        icon: 'opacity-0',
+        label: '0%',
+        value: '0'
+      },
       {
         icon: 'opacity-25',
         label: '25%',
@@ -300,24 +305,24 @@ export const BUILTIN_EDGE_STYLE_ATTRIBUTES = [
     label: 'Edge Width',
     options: [
       {
-        icon: 'edge-width-thin',
-        label: 'Thin (0.5x)',
-        value: '0.5'
-      },
-      {
         icon: 'edge-width-default',
         label: 'Default (1x)',
         value: null
       },
       {
-        icon: 'edge-width-thick',
-        label: 'Thick (2x)',
+        icon: 'edge-width-thin',
+        label: 'Thin (2x)',
         value: '2'
       },
       {
+        icon: 'edge-width-thick',
+        label: 'Thick (4)',
+        value: '4'
+      },
+      {
         icon: 'edge-width-extra-thick',
-        label: 'Extra Thick (3x)',
-        value: '3'
+        label: 'Extra Thick (8x)',
+        value: '8'
       }
     ]
   },
@@ -326,24 +331,24 @@ export const BUILTIN_EDGE_STYLE_ATTRIBUTES = [
     label: 'Arrow Size',
     options: [
       {
-        icon: 'arrow-size-small',
-        label: 'Small (0.5x)',
-        value: '0.5'
-      },
-      {
         icon: 'arrow-size-default',
         label: 'Default (1x)',
         value: null
       },
       {
+        icon: 'arrow-size-small',
+        label: 'Small (2x)',
+        value: '2'
+      },
+      {
         icon: 'arrow-size-large',
-        label: 'Large (1.5x)',
-        value: '1.5'
+        label: 'Large (3x)',
+        value: '3'
       },
       {
         icon: 'arrow-size-extra-large',
-        label: 'Extra Large (2x)',
-        value: '2'
+        label: 'Extra Large (4x)',
+        value: '4'
       }
     ]
   },

@@ -7,6 +7,7 @@ const EXPOSED_SETTINGS: (keyof AdvancedCanvasPluginSettingsValues)[] = [
   'disableFontSizeRelativeToZoom',
   'wrapGroupLabels', // Added by an LLM agent
   'hideGroupLabels', // Added by an LLM agent
+  'boxedNodeLabels', // Added by an LLM agent
   'hideBackgroundGridWhenInReadonly',
   'readingModeFixEnabled',
   'collapsibleGroupsFeatureEnabled',

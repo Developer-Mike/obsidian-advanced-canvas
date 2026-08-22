@@ -18,7 +18,9 @@ export default class CanvasMetadataExposerExtension extends CanvasExtension {
 
   private updateExposedSettings(canvas: Canvas) {
     // Expose start node
-    const startNodeId = canvas.metadata['startNode']
+    // `canvas.metadata` may not be set yet if MetadataCanvasExtension bailed out for this
+    // canvas (e.g. migration genuinely failed) - don't throw in that case.
+    const startNodeId = canvas.metadata?.['startNode']
     for (const [nodeId, node] of canvas.nodes) {
       if (nodeId === startNodeId) node.nodeEl.dataset.isStartNode = 'true'
       else delete node.nodeEl.dataset.isStartNode

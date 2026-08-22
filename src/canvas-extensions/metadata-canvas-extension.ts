@@ -1,6 +1,6 @@
 import { Notice } from "obsidian"
 import { Canvas, CanvasView } from "src/@types/Canvas"
-import { CURRENT_SPEC_VERSION } from "src/utils/migration-helper"
+import MigrationHelper, { CURRENT_SPEC_VERSION } from "src/utils/migration-helper"
 import CanvasExtension from "./canvas-extension"
 
 export default class MetadataCanvasExtension extends CanvasExtension {
@@ -27,7 +27,17 @@ export default class MetadataCanvasExtension extends CanvasExtension {
 
   private onCanvasChanged(canvas: Canvas): void {
     /* eslint-disable-next-line @typescript-eslint/no-deprecated -- It's my lint and I know the consequences */
-    const metadata = canvas.data?.metadata
+    if (!canvas.data) return
+
+    // Canvases fed through `Canvas.setData` directly (e.g. other plugins embedding a live,
+    // interactive mini-canvas, such as Better Embedded Canvas) never pass through the patched
+    // `CanvasFileView.setViewData`, so they skip migration entirely. Migrate here too instead of
+    // just warning - `needsMigration`/`migrate` are no-ops for canvases that already migrated
+    // (the normal, unpatched-view-loaded case), so this doesn't change existing behaviour there.
+    if (MigrationHelper.needsMigration(canvas.data))
+      canvas.data = MigrationHelper.migrate(canvas.data)
+
+    const metadata = canvas.data.metadata
     if (!metadata || metadata.version !== CURRENT_SPEC_VERSION)
       return void new Notice("Metadata node not found or version mismatch. Should have been migrated (but wasn't).")
 

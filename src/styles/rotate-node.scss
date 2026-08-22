@@ -1,0 +1,48 @@
+// Added by an LLM agent
+// Content rotation for the node rotation feature.
+// The `data-content-rotation` attribute is set on the node element by the rotate node
+// extension (only when the `nodeRotationFeatureEnabled` setting is on). Its value is the
+// effective content rotation: the node's own plus the content rotation of every group/open
+// portal that fully contains it. The node's own rotation (and group rotations) are applied
+// to the node element's inline transform by `rotate-node-canvas-extension.ts` - these styles
+// only rotate the inner content.
+//
+// Known limitation: while editing a content-rotated text node, the inline editor
+// (iframe) may appear unrotated; the rotation shows in reading/preview.
+
+.canvas-node[data-content-rotation="180"] .canvas-node-container > .canvas-node-content {
+  transform: rotate(180deg);
+}
+
+// For 90°/270° the content box gets swapped (width <-> height) using Obsidian's own
+// CSS variables, is centered absolutely and then rotated. Text reflows in the swapped
+// box, so combined with the node transform the content fills the rotated frame.
+.canvas-node[data-content-rotation="90"],
+.canvas-node[data-content-rotation="270"] {
+  .canvas-node-container > .canvas-node-content {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+
+    width: var(--canvas-node-height);
+    height: var(--canvas-node-width);
+
+    // Make sure embeds (images, portals, iframes) fill the swapped box
+    img, video, iframe, .markdown-embed, .canvas-node-content-blocker {
+      width: 100%;
+      height: 100%;
+    }
+
+    img, video {
+      object-fit: contain;
+    }
+  }
+}
+
+.canvas-node[data-content-rotation="90"] .canvas-node-container > .canvas-node-content {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.canvas-node[data-content-rotation="270"] .canvas-node-container > .canvas-node-content {
+  transform: translate(-50%, -50%) rotate(270deg);
+}

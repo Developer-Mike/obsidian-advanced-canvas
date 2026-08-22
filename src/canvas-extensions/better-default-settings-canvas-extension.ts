@@ -92,11 +92,12 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
   private enforceNodeGridAlignment(_canvas: Canvas, node: CanvasNode) {
     if (!this.plugin.settings.getSetting('alignNewNodesToGrid')) return
 
+    const gridSize = this.plugin.settings.getSetting('gridSize') // Added by an LLM agent
     const nodeData = node.getData()
     node.setData({
       ...nodeData,
-      x: CanvasHelper.alignToGrid(nodeData.x),
-      y: CanvasHelper.alignToGrid(nodeData.y)
+      x: CanvasHelper.alignToGrid(nodeData.x, gridSize),
+      y: CanvasHelper.alignToGrid(nodeData.y, gridSize)
     })
   }
 

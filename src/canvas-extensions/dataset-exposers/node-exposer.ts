@@ -12,6 +12,10 @@ export function getExposedNodeData(settings: SettingsManager): (keyof CanvasNode
   if (settings.getSetting('nodeStylingFeatureEnabled')) exposedData.push('styleAttributes')
   if (settings.getSetting('collapsibleGroupsFeatureEnabled')) exposedData.push('collapsed' satisfies keyof CanvasGroupNodeData as keyof CanvasNodeData)
   if (settings.getSetting('portalsFeatureEnabled')) exposedData.push('isPortalLoaded' as keyof CanvasNodeData)
+  // Added by an LLM agent - Expose the rotation as a data-rotation attribute (also mirrored into
+  // the editing iframe body). data-content-rotation is managed by the rotate node extension
+  // itself, because the effective value includes propagation from containing groups/portals.
+  if (settings.getSetting('nodeRotationFeatureEnabled')) exposedData.push('rotation')
 
   return exposedData
 }

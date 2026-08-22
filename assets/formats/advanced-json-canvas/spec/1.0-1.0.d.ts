@@ -24,6 +24,8 @@ export interface CanvasNodeData {
   dynamicHeight?: boolean // AdvancedJsonCanvas
   ratio?: number
   zIndex?: number // AdvancedJsonCanvas
+  rotation?: number // AdvancedJsonCanvas - Added by an LLM agent - Degrees clockwise, normalized to [0, 360); removed when 0
+  contentRotation?: 0 | 90 | 180 | 270 // AdvancedJsonCanvas - Added by an LLM agent - Rotates only the node's inner content; removed when 0
 
   color?: CanvasColor
 

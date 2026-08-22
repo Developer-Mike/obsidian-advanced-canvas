@@ -76,6 +76,10 @@ export interface CustomWorkspaceEvents {
   'advanced-canvas:edge-center-requested': (canvas: Canvas, edge: CanvasEdge, position: Position) => void
   /** Fired when the nodes inside a bounding box get requested */
   'advanced-canvas:containing-nodes-requested': (canvas: Canvas, bbox: BBox, nodes: CanvasNode[]) => void
+  /** Added by an LLM agent: Fired when the nodes intersecting a bounding box get requested (e.g. by Obsidian's viewport virtualization) */
+  'advanced-canvas:intersecting-nodes-requested': (canvas: Canvas, bbox: BBox, nodes: CanvasNode[]) => void
+  /** Added by an LLM agent: Fired when the edges intersecting a bounding box get requested (e.g. by Obsidian's viewport virtualization) */
+  'advanced-canvas:intersecting-edges-requested': (canvas: Canvas, bbox: BBox, edges: CanvasEdge[]) => void
   /** Fired when the selection of the canvas changes */
   'advanced-canvas:selection-changed': (canvas: Canvas, oldSelection: Set<CanvasElement>, updateSelection: (update: () => void) => void) => void
   /** Fired before the canvas gets zoomed to a bounding box (e.g. zoom to selection, zoom to fit all) */
