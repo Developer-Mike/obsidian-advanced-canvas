@@ -352,7 +352,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       },
       {
         name: 'Always align new nodes to grid',
-        desc: 'When enabled, new nodes will be aligned to the grid.',
+        desc: 'Aligns new nodes to the grid.',
         control: {
           type: 'toggle',
           key: 'alignNewNodesToGrid'
@@ -429,7 +429,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       },
       {
         name: 'Disable font size relative to zoom',
-        desc: 'When enabled, the font size of e.g. group node titles and edge labels will not increase when zooming out.',
+        desc: 'The font size of group node titles and edge labels will not increase when zooming out.',
         control: {
           type: 'toggle',
           key: 'disableFontSizeRelativeToZoom'
@@ -456,7 +456,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
             items: [
               {
                 name: 'Zoom to cloned node',
-                desc: 'When enabled, the canvas will zoom to the cloned node.',
+                desc: 'Zooms to the cloned node after creation.',
                 control: {
                   type: 'toggle',
                   key: 'zoomToClonedNode'
@@ -504,7 +504,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
             items: [
               {
                 name: 'Support linking to a node using a [[wikilink]]',
-                desc: 'When enabled, you can link and embed a node using [[canvas-file#node-id]] (Use the "Copy wikilink to node" command to get an id).',
+                desc: 'Link and embed a node using [[canvas-file#node-id]]. (Use the "Copy wikilink to node" command to get an id.)',
                 control: {
                   type: 'toggle',
                   key: 'enableSingleNodeLinks'
@@ -512,7 +512,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
               },
               {
                 name: 'Show button to copy node [[wikilink]]',
-                desc: 'When enabled, the node popup will show a button to copy the [[wikilink]] of the node for easy reference in other notes.',
+                desc: 'Shows a button in the node popup to copy the [[wikilink]] of the node for easy reference in other notes.',
                 control: {
                   type: 'toggle',
                   key: 'enableSingleNodePopupReferenceCopy'
@@ -593,7 +593,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
             items: [
               {
                 name: 'Show edges into disabled portals',
-                desc: 'When enabled, edges into disabled portals will be shown.',
+                desc: 'Shows edges into disabled portals.',
                 control: {
                   type: 'toggle',
                   key: 'showEdgesIntoDisabledPortals'
@@ -625,7 +625,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
             items: [
               {
                 name: 'Collapsed group preview on drag',
-                desc: 'When enabled, a group that is collapsed shows its border while dragging a node.',
+                desc: 'Shows the border of a collapsed group while dragging a node.',
                 control: {
                   type: 'toggle',
                   key: 'collapsedGroupPreviewOnDrag'
@@ -653,7 +653,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           this.getDocumentationButton('custom-styles', 'custom styles'),
           {
             name: 'Enable node styling',
-            desc: 'Requires a reload to take effect',
+            desc: 'Allows you to style nodes without limits.',
             control: {
               type: 'toggle',
               key: 'nodeStylingFeatureEnabled'
@@ -678,7 +678,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           this.getDocumentationButton('node-styles', 'node styling'),
           {
             name: 'Enable edges styling',
-            desc: 'Requires a reload to take effect',
+            desc: 'Allows you to style edges without limits.',
             control: {
               type: 'toggle',
               key: 'edgesStylingFeatureEnabled'
@@ -721,31 +721,31 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
               },
               {
                 name: 'Update edge style while dragging',
-                desc: 'When enabled, the edge style will be updated while dragging an edge. (Can be very slow)',
+                desc: 'Updates the edge style while dragging an edge. (Can be very slow)',
                 control: {
                   type: 'toggle',
                   key: 'edgeStyleUpdateWhileDragging'
                 }
               },
               {
-                name: 'Square path rounded',
-                desc: 'When enabled, the square path\'s corners will be rounded.',
+                name: 'Round square path edges',
+                desc: 'Rounds the corners of square path edges.',
                 control: {
                   type: 'toggle',
                   key: 'edgeStyleSquarePathRounded'
                 }
               },
               {
-                name: 'A* allow diagonal',
-                desc: 'When enabled, the A* path style will allow diagonal paths.',
+                name: 'Allow diagonal A* paths',
+                desc: 'Allows diagonal paths for the A* path style.',
                 control: {
                   type: 'toggle',
                   key: 'edgeStylePathfinderAllowDiagonal'
                 }
               },
               {
-                name: 'A* rounded path',
-                desc: 'When enabled, the A* path style will be rounded.',
+                name: 'Round A* path edges',
+                desc: 'Rounds the A* path style.',
                 control: {
                   type: 'toggle',
                   key: 'edgeStylePathfinderPathRounded'
@@ -776,8 +776,8 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
             visible: () => this.getControlValue('floatingEdgeFeatureEnabled') as boolean,
             items: [
               {
-                name: 'Allow floating edges creation',
-                desc: 'Allow floating edges creation by dragging the edge over the target node without placing it over a specific side connection point. (If disabled, floating edges can only be created and used by other Advanced Canvas features.)',
+                name: 'Allow floating edge creation',
+                desc: 'Create floating edges by dragging over the target node without placing the edge on a specific side connection point. (If disabled, floating edges can only be created and used by other Advanced Canvas features.)',
                 control: {
                   type: 'toggle',
                   key: 'allowFloatingEdgeCreation'
@@ -785,7 +785,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
               },
               {
                 name: 'New edge from side floating',
-                desc: 'When enabled, the "from" side of the edge will always be floating.',
+                desc: 'The "from" side of new edges will always be floating.',
                 control: {
                   type: 'toggle',
                   key: 'newEdgeFromSideFloating'
@@ -834,7 +834,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
             items: [
               {
                 name: 'Show "Set Start Node" in node popup',
-                desc: 'If turned off, you can still set the start node using the corresponding command.',
+                desc: 'Shows the "Set Start Node" option in the node popup. If not enabled, you can still set the start node using the corresponding command.',
                 control: {
                   type: 'toggle',
                   key: 'showSetStartNodeInPopup'
@@ -873,7 +873,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
               },
               {
                 name: 'Reset viewport on presentation end',
-                desc: 'When enabled, the viewport will be reset to the original position after the presentation ends.',
+                desc: 'Resets the viewport to the original position after the presentation ends.',
                 control: {
                   type: 'toggle',
                   key: 'resetViewportOnPresentationEnd'
@@ -881,7 +881,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
               },
               {
                 name: 'Use arrow keys to change slides',
-                desc: 'When enabled, you can use the arrow keys to change slides in presentation mode.',
+                desc: 'Use the arrow keys to change slides in presentation mode.',
                 control: {
                   type: 'toggle',
                   key: 'useArrowKeysToChangeSlides'
@@ -889,7 +889,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
               },
               {
                 name: 'Use PgUp/PgDown keys to change slides',
-                desc: 'When enabled, you can use the PgUp/PgDown keys to change slides in presentation mode (Makes the presentation mode compatible with most presentation remotes).',
+                desc: 'Use the PgUp/PgDown keys to change slides in presentation mode. (Makes the presentation mode compatible with most presentation remotes.)',
                 control: {
                   type: 'toggle',
                   key: 'usePgUpPgDownKeysToChangeSlides'
@@ -897,7 +897,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
               },
               {
                 name: 'Use directional slide navigation',
-                desc: 'When enabled, navigating with the arrow keys will try to navigate along the slide\'s edge in the pressed direction instead of just navigating forward or backward in the slide order.',
+                desc: 'Navigating with the arrow keys will try to navigate along the slide\'s edge in the pressed direction instead of just navigating forward or backward in the slide order.',
                 control: {
                   type: 'toggle',
                   key: 'useDirectionalSlideNavigation'
@@ -905,7 +905,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
               },
               {
                 name: 'Zoom to slide without padding',
-                desc: 'When enabled, the canvas will zoom to the slide without padding.',
+                desc: 'Zooms to the slide without padding.',
                 control: {
                   type: 'toggle',
                   key: 'zoomToSlideWithoutPadding'
@@ -913,7 +913,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
               },
               {
                 name: 'Use unclamped zoom while presenting',
-                desc: 'When enabled, the zoom will not be clamped while presenting.',
+                desc: 'The zoom will not be clamped while presenting.',
                 control: {
                   type: 'toggle',
                   key: 'useUnclampedZoomWhilePresenting'
@@ -921,7 +921,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
               },
               {
                 name: 'Enter fullscreen while presenting',
-                desc: 'When enabled, presentations automatically request fullscreen. Disable to keep Obsidian windowed during presentations.',
+                desc: 'Presentations automatically request fullscreen. Disable to keep Obsidian windowed during presentations.',
                 control: {
                   type: 'toggle',
                   key: 'fullscreenPresentationEnabled'
@@ -1017,7 +1017,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
             items: [
               {
                 name: 'Show one layer shift options',
-                desc: 'When enabled, you can move nodes one layer forward or backward.',
+                desc: 'Move nodes one layer forward or backward.',
                 control: {
                   type: 'toggle',
                   key: 'zOrderingControlShowOneLayerShiftOptions'
@@ -1098,7 +1098,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
             items: [
               {
                 name: 'Enable auto resize by default',
-                desc: 'When enabled, the auto resize feature will be enabled by default for all nodes.',
+                desc: 'The auto resize feature will be enabled by default for all nodes.',
                 control: {
                   type: 'toggle',
                   key: 'autoResizeNodeEnabledByDefault'
@@ -1114,7 +1114,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
               },
               {
                 name: 'Snap to grid',
-                desc: 'When enabled, the height of the node will snap to the grid.',
+                desc: 'The height of the node will snap to the grid.',
                 control: {
                   type: 'toggle',
                   key: 'autoResizeNodeSnapToGrid'
@@ -1163,7 +1163,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
             items: [
               {
                 name: 'Hide background grid when in readonly',
-                desc: 'When enabled, the background grid will be hidden when in readonly mode.',
+                desc: 'Hides the background grid when in readonly mode.',
                 control: {
                   type: 'toggle',
                   key: 'hideBackgroundGridWhenInReadonly'
@@ -1171,7 +1171,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
               },
               {
                 name: 'Disable node popup',
-                desc: 'When enabled, the node popup will be disabled in readonly mode.',
+                desc: 'Disables the node popup in readonly mode.',
                 control: {
                   type: 'toggle',
                   key: 'disableNodePopup'
@@ -1179,7 +1179,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
               },
               {
                 name: 'Disable zoom',
-                desc: 'When enabled, zooming will be disabled in readonly mode.',
+                desc: 'Disables zooming in readonly mode.',
                 control: {
                   type: 'toggle',
                   key: 'disableZoom'
@@ -1187,7 +1187,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
               },
               {
                 name: 'Disable pan',
-                desc: 'When enabled, panning will be disabled in readonly mode.',
+                desc: 'Disables panning in readonly mode.',
                 control: {
                   type: 'toggle',
                   key: 'disablePan'
@@ -1219,7 +1219,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
             items: [
               {
                 name: 'Highlight incoming edges',
-                desc: 'When enabled, incoming edges will also be highlighted.',
+                desc: 'Also highlights incoming edges.',
                 control: {
                   type: 'toggle',
                   key: 'highlightIncomingEdges'
