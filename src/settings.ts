@@ -309,10 +309,10 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
   private getFeatureGroupSetting(
     key: keyof AdvancedCanvasPluginSettingsValues,
     heading: string,
-    docs: string,
+    docs: string | null,
     items: SettingDefinitionItem[]
   ): SettingDefinitionGroup {
-    return {
+    const setting: SettingDefinitionGroup = {
       type: 'group',
       heading: heading,
       items: [
@@ -323,24 +323,32 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
             type: 'toggle',
             key: key
           }
-        },
-        {
-          type: 'page',
-          name: `Config - ${heading}`,
-          visible: () => this.getControlValue(key) as boolean,
-          items: items
-        },
-        {
-          name: 'Open documentation',
-          action: () => {
-            const anchor = activeWindow.createEl('a')
-            anchor.href = `${README_URL}#${docs}`
-            anchor.target = '_blank'
-            anchor.click()
-          }
         }
       ]
     }
+
+    if (items.length > 0) {
+      setting.items?.push({
+        type: 'page',
+        name: `Config - ${heading}`,
+        visible: () => this.getControlValue(key) as boolean,
+        items: items
+      })
+    }
+
+    if (docs !== null) {
+      setting.items?.push({
+        name: 'Open documentation',
+        action: () => {
+          const anchor = activeWindow.createEl('a')
+          anchor.href = `${README_URL}#${docs}`
+          anchor.target = '_blank'
+          anchor.click()
+        }
+      })
+    }
+
+    return setting
   }
 
   override getSettingDefinitions(): SettingDefinitionItem[] {
@@ -511,6 +519,27 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
             control: {
               type: 'toggle',
               key: 'enableSingleNodePopupReferenceCopy'
+            }
+          }
+        ]
+      ),
+      this.getFeatureGroupSetting(
+        'nativeFileSearchEnabled',
+        'Native-like file search',
+        'native-like-file-search',
+        []
+      ),
+      this.getFeatureGroupSetting(
+        'autoFileNodeEdgesFeatureEnabled',
+        'Auto file node edges',
+        'auto-file-node-edges',
+        [
+          {
+            name: 'Frontmatter key name',
+            desc: 'The frontmatter key to fetch the outgoing edges from. (Keep the default to ensure best compatibility.)',
+            control: {
+              type: 'text',
+              key: 'autoFileNodeEdgesFrontmatterKey'
             }
           }
         ]
