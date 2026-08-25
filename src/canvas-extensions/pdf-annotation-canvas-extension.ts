@@ -1,5 +1,5 @@
 import { EmbedContext, PDFDocumentProxy } from "@obsidian-typings/obsidian-public-latest"
-import { Component, FileView, TFile } from "obsidian"
+import { Component, FileView, loadPdfJs, TFile } from "obsidian"
 import { CanvasFileNodeData } from "src/@types/AdvancedJsonCanvas"
 import { Canvas, CanvasElement, CanvasNode } from "src/@types/Canvas"
 import AdvancedCanvasPlugin from "src/main"
@@ -45,7 +45,7 @@ export default class PdfAnnotationCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'annotate-pdf',
-      name: 'Annotate PDF in canvas',
+      name: 'Insert PDF for annotation',
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (canvas: Canvas) => !canvas.readonly,
@@ -70,12 +70,6 @@ export default class PdfAnnotationCanvasExtension extends CanvasExtension {
     const that = this // eslint-disable-line @typescript-eslint/no-this-alias -- For patched function
     embedByExtension['pdf'] = function (context: EmbedContext, file: TFile, subpath?: string) {
       if (that.isSubpathPinned(subpath)) {
-        // Load pdfjsLib if not already loaded
-        if (!window.pdfjsLib) {
-          const original = invoke(originalPdfEmbed, this, context, file, subpath)
-          original.load() // FIXME: More elegant way
-        }
-
         const view = context.app.workspace.getActiveFileView()
         return new PdfPageEmbedComponent(that.plugin, view, context, file, subpath)
       }
@@ -89,7 +83,7 @@ export default class PdfAnnotationCanvasExtension extends CanvasExtension {
   }
 
   private async insertPdfPages(canvas: Canvas, file: TFile) {
-    await waitForPdfJsLib()
+    if (!window.pdfjsLib) await loadPdfJs()
 
     const data = await this.plugin.app.vault.readBinary(file)
     const pdf = await window.pdfjsLib.getDocument({ data }).promise
@@ -151,7 +145,7 @@ abstract class EmbedComponent extends Component {
 }
 
 interface PdfCacheHoldingView {
-  pdfCache?: Map<string, PDFDocumentProxy>
+  pdfCache?: Map<string, Promise<PDFDocumentProxy>>
 }
 
 class PdfPageEmbedComponent extends EmbedComponent {
@@ -180,18 +174,20 @@ class PdfPageEmbedComponent extends EmbedComponent {
   }
 
   override async loadFile() {
-    await waitForPdfJsLib()
+    if (!window.pdfjsLib) await loadPdfJs()
 
-    let pdf = this.parent?.pdfCache?.get(this.file.path)
-    if (!pdf) {
-      const data = await this.context.app.vault.readBinary(this.file)
-      pdf = await window.pdfjsLib.getDocument({ data }).promise
+    let promise = this.parent?.pdfCache?.get(this.file.path)
+    if (!promise) {
+      promise = this.context.app.vault.readBinary(this.file)
+        .then(data => window.pdfjsLib.getDocument({ data }).promise)
 
       if (this.parent) {
-        this.parent.pdfCache ??= new Map<string, PDFDocumentProxy>()
-        this.parent.pdfCache.set(this.file.path, pdf)
+        this.parent.pdfCache ??= new Map<string, Promise<PDFDocumentProxy>>()
+        this.parent.pdfCache.set(this.file.path, promise)
       }
     }
+
+    const pdf = await promise
 
     const pageNumber = this.getPageNumberFromSubpath(this.subpath)
     if (!pageNumber || pageNumber < 1 || pageNumber > pdf.numPages) return
@@ -217,16 +213,4 @@ class PdfPageEmbedComponent extends EmbedComponent {
     const match = subpath.match(/page=(\d+)/)
     return match ? parseInt(match[1], 10) : null
   }
-}
-
-// FIXME: Never resolving if no pdf is ever opened
-async function waitForPdfJsLib(): Promise<void> {
-  return new Promise<void>((resolve) => {
-    const interval = window.setInterval(() => {
-      if (!window.pdfjsLib) return
-
-      window.clearInterval(interval)
-      resolve()
-    }, 10)
-  })
 }
