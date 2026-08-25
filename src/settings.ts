@@ -273,11 +273,11 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
     this.settingsManager = settingsManager
   }
 
-  private getKeyIndexFromSettingKey(settingKey: string): { key: string, index: number | null } {
-    const match = settingKey.match(/^(.*)\[(\d+)\]$/)
+  private getKeyIndexFromSettingKey(settingKey: string): { key: string, index: number | string | null } {
+    const match = settingKey.match(/^(.*)\[(.+)\]$/)
     if (match) return {
       key: match[1],
-      index: parseInt(match[2])
+      index: isNaN(Number(match[2])) ? match[2] : Number(match[2])
     }
 
     return { key: settingKey, index: null }
@@ -287,8 +287,13 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
     const { key, index } = this.getKeyIndexFromSettingKey(settingKey)
     const value = this.settingsManager.getSetting(key as keyof AdvancedCanvasPluginSettingsValues)
 
-    return (index !== null && Array.isArray(value)) ?
-      value[index] : value
+    if (typeof index === 'number' && Array.isArray(value))
+      return value[index]
+
+    if (typeof index === 'string')
+      return (value as Record<string, unknown>)[index]
+
+    return value
   }
 
   override async setControlValue(settingKey: string, value: unknown): Promise<void> {
@@ -297,8 +302,13 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
     if (index !== null) {
       const current = this.settingsManager.getSetting(key as keyof AdvancedCanvasPluginSettingsValues)
 
-      if (Array.isArray(current)) {
+      if (typeof index === 'number' && Array.isArray(current)) {
         current[index] = value as typeof current[number]
+        return await this.settingsManager.setSetting({ [key]: current })
+      } else if (typeof index === 'string') {
+        if (value === "") delete (current as Record<string, unknown>)[index]
+        else (current as Record<string, unknown>)[index] = value
+
         return await this.settingsManager.setSetting({ [key]: current })
       }
     }
@@ -675,6 +685,27 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
               }
             ]
           },
+          {
+            type: 'page',
+            name: 'Default node style',
+            desc: 'The default style of a node. The default style is applied to all newly created nodes.',
+            items: [
+              ...BUILTIN_NODE_STYLE_ATTRIBUTES, // BUILTINS
+              ...this.settingsManager.nodeCssStylesManager.getStyles(), // CUSTOM CSS STYLES
+              ...this.settingsManager.getSetting('customNodeStyleAttributes') // LEGACY CUSTOM STYLES
+            ].map(value => ({
+              name: value.label,
+              control: {
+                type: 'dropdown',
+                key: `defaultTextNodeStyleAttributes[${value.key}]`,
+                defaultValue: value.options.find(option => option.value === null)?.value ?? '',
+                options: value.options.reduce((acc, option) => {
+                  acc[option.value ?? ''] = option.label
+                  return acc
+                }, {} as Record<string, string>)
+              }
+            }))
+          },
           this.getDocumentationButton('node-styles', 'node styling'),
           {
             name: 'Enable edges styling',
@@ -753,7 +784,28 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
               }
             ]
           },
-          this.getDocumentationButton('node-styles', 'node styling')
+          {
+            type: 'page',
+            name: 'Default edge style',
+            desc: 'The default style of an edge. The default style is applied to all newly created edges.',
+            items: [
+              ...BUILTIN_EDGE_STYLE_ATTRIBUTES, // BUILTINS
+              ...this.settingsManager.edgeCssStylesManager.getStyles(), // CUSTOM CSS STYLES
+              ...this.settingsManager.getSetting('customEdgeStyleAttributes') // LEGACY CUSTOM STYLES
+            ].map(value => ({
+              name: value.label,
+              control: {
+                type: 'dropdown',
+                key: `defaultEdgeStyleAttributes[${value.key}]`,
+                defaultValue: value.options.find(option => option.value === null)?.value ?? '',
+                options: value.options.reduce((acc, option) => {
+                  acc[option.value ?? ''] = option.label
+                  return acc
+                }, {} as Record<string, string>)
+              }
+            }))
+          },
+          this.getDocumentationButton('edge-styles', 'edge styling')
         ]
       },
 
@@ -1298,29 +1350,3 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
     ]
   }
 }
-
-/*
-defaultTextNodeStyleAttributes: {
-  label: 'Default text node style attributes',
-  type: 'styles',
-  getParameters(settingsManager) {
-    return [
-      ...BUILTIN_NODE_STYLE_ATTRIBUTES, // BUILTINS
-      ...settingsManager.nodeCssStylesManager.getStyles(), // CUSTOM CSS STYLES
-        ...settingsManager.getSetting('customNodeStyleAttributes') // LEGACY CUSTOM STYLES
-    ].filter((setting) => setting.nodeTypes === undefined || setting.nodeTypes?.includes('text'))
-  }
-} as StyleAttributesSetting
-
-defaultEdgeStyleAttributes: {
-  label: 'Default edge style attributes',
-  type: 'styles',
-  getParameters(settingsManager) {
-    return [
-      ...BUILTIN_EDGE_STYLE_ATTRIBUTES, // BUILTINS
-      ...settingsManager.edgeCssStylesManager.getStyles(), // CUSTOM CSS STYLES
-      ...settingsManager.getSetting('customEdgeStyleAttributes') // LEGACY CUSTOM STYLES
-    ]
-  }
-} as StyleAttributesSetting
-*/
