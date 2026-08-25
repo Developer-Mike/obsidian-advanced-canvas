@@ -44,6 +44,7 @@ This plugin enhances the Obsidian canvas with a wide array of features:
     *   [Canvas Commands](#canvas-commands): A suite of commands for efficient canvas manipulation.
     *   [Native-Like File Search](#native-like-file-search): Search for text within the whole canvas using a native-like interface.
     *   [Presentation Mode](#presentation-mode): Create and navigate slide-like presentations.
+    *   [PDF Annotation](#pdf-annotation): Annotate PDF files directly within the canvas.
     *   [Portals](#portals): Embed other canvases within your current canvas.
     *   [Collapsible Groups](#collapsible-groups): Organize your canvas with expandable/collapsible groups.
     *   [Edge Highlight](#edge-highlight): Highlight edges when a connected node is selected.
@@ -450,6 +451,9 @@ In presentation mode, you can navigate through nodes using arrow keys or PageUp/
     *   Start: Command Palette (`Advanced Canvas: Start presentation`).
     *   Navigate: Arrow keys.
     *   Exit: `ESC` key.
+
+## PDF Annotation
+Add the `pinned=true` parameter for PDF embeds to display only the selected page, enabling reliable single-page embedding and annotation. Use the `Advanced Canvas: Insert PDF for annotation` command to create separate nodes for each PDF page (With locked aspect ratio), or the `Advanced Canvas: Pin PDF page` command to pin the current page of a PDF embed.
 
 ## Portals
 Embed other canvases inside your current canvas and create edges (arrows) to the embedded canvas.
