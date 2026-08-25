@@ -1,4 +1,4 @@
-import { PluginSettingTab, SettingDefinitionGroup, SettingDefinitionItem } from "obsidian"
+import { PluginSettingTab, SettingDefinitionGroup, SettingDefinitionItem, SettingGroupItem } from "obsidian"
 import { GET_EDGE_CSS_STYLES_MANAGER } from "./canvas-extensions/advanced-styles/edge-styles"
 import { GET_NODE_CSS_STYLES_MANAGER } from "./canvas-extensions/advanced-styles/node-styles"
 import { BUILTIN_EDGE_STYLE_ATTRIBUTES, BUILTIN_NODE_STYLE_ATTRIBUTES, StyleAttribute } from "./canvas-extensions/advanced-styles/style-config"
@@ -306,6 +306,21 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
     await this.settingsManager.setSetting({ [key]: value })
   }
 
+  private getDocumentationButton(section: string, label?: string): SettingGroupItem {
+    return {
+      name: label ? `Open ${label} documentation` : 'Open documentation',
+      action: () => {
+        const anchor = activeWindow.createEl('a')
+        anchor.href = `${README_URL}#${section}`
+        anchor.target = '_blank'
+        anchor.click()
+      }
+    }
+  }
+
+  /**
+  * @deprecated
+  */
   private getFeatureGroupSetting(
     key: keyof AdvancedCanvasPluginSettingsValues,
     heading: string,
@@ -469,60 +484,94 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
         }
       },
 
-      this.getFeatureGroupSetting(
-        'commandsFeatureEnabled',
-        'Extended commands',
-        'canvas-commands',
-        [
+      // Extended commands
+      {
+        type: 'group',
+        heading: 'Extended commands',
+        items: [
           {
-            name: 'Zoom to cloned node',
-            desc: 'When enabled, the canvas will zoom to the cloned node.',
+            name: 'Show commands in command palette',
+            desc: 'Features a bunch of commands that can be used to manipulate the canvas and its content.',
             control: {
               type: 'toggle',
-              key: 'zoomToClonedNode'
+              key: 'commandsFeatureEnabled'
             }
           },
           {
-            name: 'Clone node margin',
-            desc: 'The margin between the cloned node and the source node.',
-            control: {
-              type: 'number',
-              key: 'cloneNodeMargin'
-            }
+            type: 'page',
+            name: `Extended commands configuration`,
+            visible: () => this.getControlValue('commandsFeatureEnabled') as boolean,
+            items: [
+              {
+                name: 'Zoom to cloned node',
+                desc: 'When enabled, the canvas will zoom to the cloned node.',
+                control: {
+                  type: 'toggle',
+                  key: 'zoomToClonedNode'
+                }
+              },
+              {
+                name: 'Clone node margin',
+                desc: 'The margin between the cloned node and the source node.',
+                control: {
+                  type: 'number',
+                  key: 'cloneNodeMargin'
+                }
+              },
+              {
+                name: 'Expand node step size',
+                desc: 'The step size for expanding the node.',
+                control: {
+                  type: 'number',
+                  key: 'expandNodeStepSize'
+                }
+              },
+            ]
           },
-          {
-            name: 'Expand node step size',
-            desc: 'The step size for expanding the node.',
-            control: {
-              type: 'number',
-              key: 'expandNodeStepSize'
-            }
-          },
+          this.getDocumentationButton('canvas-commands')
         ]
-      ),
-      this.getFeatureGroupSetting(
-        'canvasMetadataCompatibilityEnabled',
-        'Canvas metadata compatibility',
-        'full-metadata-cache-support',
-        [
+      },
+
+      // Metadata compatibility
+      {
+        type: 'group',
+        heading: 'Metadata compatibility',
+        items: [
           {
-            name: 'Support linking to a node using a [[wikilink]]',
-            desc: 'When enabled, you can link and embed a node using [[canvas-file#node-id]] (Use the "Copy wikilink to node" command to get an id).',
+            name: 'Enable canvas metadata compatibility',
+            desc: 'Makes .canvas files compatible with the backlinks and outgoing links feature and show the connections in the graph view.',
             control: {
               type: 'toggle',
-              key: 'enableSingleNodeLinks'
+              key: 'canvasMetadataCompatibilityEnabled'
             }
           },
           {
-            name: 'Show button to copy node [[wikilink]]',
-            desc: 'When enabled, the node popup will show a button to copy the [[wikilink]] of the node for easy reference in other notes.',
-            control: {
-              type: 'toggle',
-              key: 'enableSingleNodePopupReferenceCopy'
-            }
-          }
+            type: 'page',
+            name: 'Canvas metadata compatibility settings',
+            visible: () => this.getControlValue('canvasMetadataCompatibilityEnabled') as boolean,
+            items: [
+              {
+                name: 'Support linking to a node using a [[wikilink]]',
+                desc: 'When enabled, you can link and embed a node using [[canvas-file#node-id]] (Use the "Copy wikilink to node" command to get an id).',
+                control: {
+                  type: 'toggle',
+                  key: 'enableSingleNodeLinks'
+                }
+              },
+              {
+                name: 'Show button to copy node [[wikilink]]',
+                desc: 'When enabled, the node popup will show a button to copy the [[wikilink]] of the node for easy reference in other notes.',
+                control: {
+                  type: 'toggle',
+                  key: 'enableSingleNodePopupReferenceCopy'
+                }
+              }
+            ]
+          },
+          this.getDocumentationButton('canvas-metadata-compatibility')
         ]
-      ),
+      },
+
       this.getFeatureGroupSetting(
         'nativeFileSearchEnabled',
         'Native-like file search',
@@ -544,6 +593,502 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           }
         ]
       ),
+      this.getFeatureGroupSetting(
+        'portalsFeatureEnabled',
+        'Portals',
+        'portals',
+        [
+          {
+            name: 'Show edges into disabled portals',
+            desc: 'When enabled, edges into disabled portals will be shown.',
+            control: {
+              type: 'toggle',
+              key: 'showEdgesIntoDisabledPortals'
+            }
+          }
+        ]
+      ),
+      this.getFeatureGroupSetting(
+        'collapsibleGroupsFeatureEnabled',
+        'Collapsible groups',
+        'collapsible-groups',
+        [
+          {
+            name: 'Collapsed group preview on drag',
+            desc: 'When enabled, a group that is collapsed shows its border while dragging a node.',
+            control: {
+              type: 'toggle',
+              key: 'collapsedGroupPreviewOnDrag'
+            }
+          }
+        ]
+      ),
+      {
+        type: 'group',
+        heading: 'Custom styles',
+        items: [
+          {
+              name: 'Manage custom node styles',
+              desc: 'Manage custom node styles. (Requires a reload to take effect)',
+          },
+          {
+            name: 'Combine custom styles in dropdown',
+            desc: 'Combine all style attributes of Advanced Canvas in a single dropdown.',
+            control: {
+              type: 'toggle',
+              key: 'combineCustomStylesInDropdown'
+            }
+          },
+          {
+            name: 'Enable node styling',
+            desc: 'Requires a reload to take effect',
+            control: {
+              type: 'toggle',
+              key: 'nodeStylingFeatureEnabled'
+            }
+          },
+          {
+            type: 'page',
+            name: 'Node styles',
+            desc: 'Manage custom node styles.',
+            visible: () => this.getControlValue('nodeStylingFeatureEnabled') as boolean,
+            items: [
+              {
+                name: 'Default text node color',
+                desc: 'The default color of a text node. The default range is from 0 to 6, where 0 is no color. The range can be extended by using the Custom Colors feature of Advanced Canvas.',
+                control: {
+                  type: 'number',
+                  key: 'defaultTextNodeColor'
+                }
+              }
+            ]
+          },
+          {
+            name: 'Open node styling documentation',
+            action: () => {
+              const anchor = activeWindow.createEl('a')
+              anchor.href = `${README_URL}#node-styles`
+              anchor.target = '_blank'
+              anchor.click()
+            }
+          },
+          {
+            name: 'Enable edges styling',
+            desc: 'Requires a reload to take effect',
+            control: {
+              type: 'toggle',
+              key: 'edgesStylingFeatureEnabled'
+            }
+          },
+          {
+            type: 'page',
+            name: 'Edge styles',
+            desc: 'Manage custom edge styles.',
+            visible: () => this.getControlValue('edgesStylingFeatureEnabled') as boolean,
+            items: [
+              {
+                name: 'Inherit edge color from node',
+                desc: 'When creating a new edge by dragging from a node, the edge will inherit the color of the node it is dragged from.',
+                control: {
+                  type: 'toggle',
+                  key: 'inheritEdgeColorFromNode'
+                }
+              },
+              {
+                name: 'Default edge color',
+                desc: 'The default color of an edge. The default range is from 0 to 6, where 0 is no color. The range can be extended by using the Custom Colors feature of Advanced Canvas.',
+                control: {
+                  type: 'number',
+                  key: 'defaultEdgeColor'
+                }
+              },
+              {
+                name: 'Default edge line direction',
+                desc: 'The default line direction of an edge.',
+                control: {
+                  type: 'dropdown',
+                  key: 'defaultEdgeLineDirection',
+                  options: {
+                    'nondirectional': 'Nondirectional',
+                    'unidirectional': 'Unidirectional',
+                    'bidirectional': 'Bidirectional'
+                  } satisfies Record<EdgeLineDirection, string>
+                }
+              },
+              {
+                name: 'Update edge style while dragging',
+                desc: 'When enabled, the edge style will be updated while dragging an edge. (Can be very slow)',
+                control: {
+                  type: 'toggle',
+                  key: 'edgeStyleUpdateWhileDragging'
+                }
+              },
+              {
+                name: 'Square path rounded',
+                desc: 'When enabled, the square path\'s corners will be rounded.',
+                control: {
+                  type: 'toggle',
+                  key: 'edgeStyleSquarePathRounded'
+                }
+              },
+              {
+                name: 'A* allow diagonal',
+                desc: 'When enabled, the A* path style will allow diagonal paths.',
+                control: {
+                  type: 'toggle',
+                  key: 'edgeStylePathfinderAllowDiagonal'
+                }
+              },
+              {
+                name: 'A* rounded path',
+                desc: 'When enabled, the A* path style will be rounded.',
+                control: {
+                  type: 'toggle',
+                  key: 'edgeStylePathfinderPathRounded'
+                }
+              }
+            ]
+          },
+          {
+            name: 'Open edge styling documentation',
+            action: () => {
+              const anchor = activeWindow.createEl('a')
+              anchor.href = `${README_URL}#edge-styles`
+              anchor.target = '_blank'
+              anchor.click()
+            }
+          }
+        ]
+      },
+      this.getFeatureGroupSetting(
+        'floatingEdgeFeatureEnabled',
+        'Floating edges',
+        'floating-edges-automatic-edge-side',
+        [
+          {
+            name: 'Allow floating edges creation',
+            desc: 'Allow floating edges creation by dragging the edge over the target node without placing it over a specific side connection point. (If disabled, floating edges can only be created and used by other Advanced Canvas features.)',
+            control: {
+              type: 'toggle',
+              key: 'allowFloatingEdgeCreation'
+            }
+          },
+          {
+            name: 'New edge from side floating',
+            desc: 'When enabled, the "from" side of the edge will always be floating.',
+            control: {
+              type: 'toggle',
+              key: 'newEdgeFromSideFloating'
+            }
+          }
+        ]
+      ),
+      this.getFeatureGroupSetting(
+        'flipEdgeFeatureEnabled',
+        'Flip edges',
+        'flip-edge',
+        []
+      ),
+      this.getFeatureGroupSetting(
+        'presentationFeatureEnabled',
+        'Presentations',
+        'presentation-mode',
+        [
+          {
+            name: 'Show "Set Start Node" in node popup',
+            desc: 'If turned off, you can still set the start node using the corresponding command.',
+            control: {
+              type: 'toggle',
+              key: 'showSetStartNodeInPopup'
+            }
+          },
+          {
+            type: 'page',
+            name: 'Default slide dimensions',
+            desc: 'The default dimensions of a slide.',
+            items: [
+              {
+                name: 'Width',
+                desc: 'The default width of a slide.',
+                control: {
+                  type: 'number',
+                  key: 'defaultSlideDimensions[0]'
+                }
+              },
+              {
+                name: 'Height',
+                desc: 'The default height of a slide.',
+                control: {
+                  type: 'number',
+                  key: 'defaultSlideDimensions[1]'
+                }
+              },
+            ]
+          },
+          {
+            name: 'Wrap in slide padding',
+            desc: 'The padding of the slide when wrapping the canvas in a slide.',
+            control: {
+              type: 'number',
+              key: 'wrapInSlidePadding'
+            }
+          },
+          {
+            name: 'Reset viewport on presentation end',
+            desc: 'When enabled, the viewport will be reset to the original position after the presentation ends.',
+            control: {
+              type: 'toggle',
+              key: 'resetViewportOnPresentationEnd'
+            }
+          },
+          {
+            name: 'Use arrow keys to change slides',
+            desc: 'When enabled, you can use the arrow keys to change slides in presentation mode.',
+            control: {
+              type: 'toggle',
+              key: 'useArrowKeysToChangeSlides'
+            }
+          },
+          {
+            name: 'Use PgUp/PgDown keys to change slides',
+            desc: 'When enabled, you can use the PgUp/PgDown keys to change slides in presentation mode (Makes the presentation mode compatible with most presentation remotes).',
+            control: {
+              type: 'toggle',
+              key: 'usePgUpPgDownKeysToChangeSlides'
+            }
+          },
+          {
+            name: 'Use directional slide navigation',
+            desc: 'When enabled, navigating with the arrow keys will try to navigate along the slide\'s edge in the pressed direction instead of just navigating forward or backward in the slide order.',
+            control: {
+              type: 'toggle',
+              key: 'useDirectionalSlideNavigation'
+            }
+          },
+          {
+            name: 'Zoom to slide without padding',
+            desc: 'When enabled, the canvas will zoom to the slide without padding.',
+            control: {
+              type: 'toggle',
+              key: 'zoomToSlideWithoutPadding'
+            }
+          },
+          {
+            name: 'Use unclamped zoom while presenting',
+            desc: 'When enabled, the zoom will not be clamped while presenting.',
+            control: {
+              type: 'toggle',
+              key: 'useUnclampedZoomWhilePresenting'
+            }
+          },
+          {
+            name: 'Enter fullscreen while presenting',
+            desc: 'When enabled, presentations automatically request fullscreen. Disable to keep Obsidian windowed during presentations.',
+            control: {
+              type: 'toggle',
+              key: 'fullscreenPresentationEnabled'
+            }
+          },
+          {
+            name: 'Slide transition animation duration',
+            desc: 'The duration of the slide transition animation in seconds. Set to 0 to disable the animation.',
+            control: {
+              type: 'number',
+              key: 'slideTransitionAnimationDuration'
+            }
+          },
+          {
+            name: 'Slide transition animation intensity',
+            desc: 'The intensity of the slide transition animation. The higher the value, the more the canvas will zoom out before zooming in on the next slide.',
+            control: {
+              type: 'number',
+              key: 'slideTransitionAnimationIntensity'
+            }
+          },
+        ]
+      ),
+      this.getFeatureGroupSetting(
+        'pdfAnnotationFeatureEnabled',
+        'PDF annotation',
+        'pdf-annotation',
+        [
+          {
+            name: 'PDF pages gap',
+            desc: 'The gap between PDF pages in pixels.',
+            control: {
+              type: 'number',
+              key: 'pdfPagesGap'
+            }
+          },
+          {
+            name: 'PDF page size factor',
+            desc: 'The size factor of the PDF pages. The higher the value, the larger the newly created PDF pages will be.',
+            control: {
+              type: 'number',
+              key: 'pdfPageSizeFactor'
+            }
+          },
+          {
+            name: 'PDF page resolution',
+            desc: 'The resolution of the PDF pages. The higher the value, the sharper the pages will be (heavily affects performance).',
+            control: {
+              type: 'number',
+              key: 'pdfPageResolution'
+            }
+          },
+        ]
+      ),
+      this.getFeatureGroupSetting(
+        'zOrderingControlFeatureEnabled',
+        'Z ordering controls',
+        null,
+        [
+          {
+            name: 'Show one layer shift options',
+            desc: 'When enabled, you can move nodes one layer forward or backward.',
+            control: {
+              type: 'toggle',
+              key: 'zOrderingControlShowOneLayerShiftOptions'
+            }
+          }
+        ]
+      ), // FIXME: Description
+      this.getFeatureGroupSetting(
+        'aspectRatioControlFeatureEnabled',
+        'Aspect ratio control',
+        null,
+        []
+      ), // FIXME: Description
+      this.getFeatureGroupSetting(
+        'variableBreakpointFeatureEnabled',
+        'Variable breakpoint',
+        'variable-breakpoints',
+        []
+      ), // FIXME: Description
+      this.getFeatureGroupSetting(
+        'readingModeFixEnabled',
+        'Alternative text rendering',
+        'alternative-text-rendering',
+        []
+      ), // FIXME: Description
+      this.getFeatureGroupSetting(
+        'autoResizeNodeFeatureEnabled',
+        'Auto resize node',
+        'auto-node-resizing',
+        [
+          {
+            name: 'Enable auto resize by default',
+            desc: 'When enabled, the auto resize feature will be enabled by default for all nodes.',
+            control: {
+              type: 'toggle',
+              key: 'autoResizeNodeEnabledByDefault'
+            }
+          },
+          {
+            name: 'Max height',
+            desc: 'The maximum height of the node when auto resizing (-1 for unlimited).',
+            control: {
+              type: 'number',
+              key: 'autoResizeNodeMaxHeight'
+            }
+          },
+          {
+            name: 'Snap to grid',
+            desc: 'When enabled, the height of the node will snap to the grid.',
+            control: {
+              type: 'toggle',
+              key: 'autoResizeNodeSnapToGrid'
+            }
+          },
+        ]
+      ),
+      this.getFeatureGroupSetting(
+        'canvasEncapsulationEnabled',
+        'Canvas encapsulation',
+        'encapsulate-selection',
+        []
+      ), // FIXME: Description
+      this.getFeatureGroupSetting(
+        'betterReadonlyEnabled',
+        'Better readonly',
+        'better-readonly',
+        [
+          {
+            name: 'Hide background grid when in readonly',
+            desc: 'When enabled, the background grid will be hidden when in readonly mode.',
+            control: {
+              type: 'toggle',
+              key: 'hideBackgroundGridWhenInReadonly'
+            }
+          },
+          {
+            name: 'Disable node popup',
+            desc: 'When enabled, the node popup will be disabled in readonly mode.',
+            control: {
+              type: 'toggle',
+              key: 'disableNodePopup'
+            }
+          },
+          {
+            name: 'Disable zoom',
+            desc: 'When enabled, zooming will be disabled in readonly mode.',
+            control: {
+              type: 'toggle',
+              key: 'disableZoom'
+            }
+          },
+          {
+            name: 'Disable pan',
+            desc: 'When enabled, panning will be disabled in readonly mode.',
+            control: {
+              type: 'toggle',
+              key: 'disablePan'
+            }
+          },
+        ]
+      ),
+      this.getFeatureGroupSetting(
+        'edgeHighlightEnabled',
+        'Edge highlight',
+        'edge-highlight',
+        [
+          {
+            name: 'Highlight incoming edges',
+            desc: 'When enabled, incoming edges will also be highlighted.',
+            control: {
+              type: 'toggle',
+              key: 'highlightIncomingEdges'
+            }
+          }
+        ]
+      ),
+      this.getFeatureGroupSetting(
+        'edgeSelectionEnabled',
+        'Edge selection',
+        'edge-selection',
+        [
+          {
+            name: 'Select edge by direction',
+            desc: 'Select incoming or outgoing edges using separate popup menu items.',
+            control: {
+              type: 'toggle',
+              key: 'selectEdgeByDirection'
+            }
+          }
+        ]
+      ),
+      this.getFeatureGroupSetting(
+        'focusModeFeatureEnabled',
+        'Focus Mode',
+        'focus-mode',
+        []
+      ), // FIXME: Description
+      this.getFeatureGroupSetting(
+        'betterExportFeatureEnabled',
+        'Better export',
+        null,
+        []
+      ), // FIXME: Description
     ]
   }
 }
