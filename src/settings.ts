@@ -637,19 +637,20 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
         ]
       },
 
-      // Custom styles
+      // Node/Edge styles
       {
         type: 'group',
-        heading: 'Custom styles',
+        heading: 'Node/Edge styles',
         items: [
           {
-            name: 'Combine custom styles in dropdown',
+            name: 'Combine new style settings in dropdown',
             desc: 'Combine all style attributes of Advanced Canvas in a single dropdown.',
             control: {
               type: 'toggle',
               key: 'combineCustomStylesInDropdown'
             }
           },
+          this.getDocumentationButton('custom-styles', 'custom styles'),
           {
             name: 'Enable node styling',
             desc: 'Requires a reload to take effect',
@@ -674,15 +675,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
               }
             ]
           },
-          {
-            name: 'Open node styling documentation',
-            action: () => {
-              const anchor = activeWindow.createEl('a')
-              anchor.href = `${README_URL}#node-styles`
-              anchor.target = '_blank'
-              anchor.click()
-            }
-          },
+          this.getDocumentationButton('node-styles', 'node styling'),
           {
             name: 'Enable edges styling',
             desc: 'Requires a reload to take effect',
@@ -760,15 +753,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
               }
             ]
           },
-          {
-            name: 'Open edge styling documentation',
-            action: () => {
-              const anchor = activeWindow.createEl('a')
-              anchor.href = `${README_URL}#edge-styles`
-              anchor.target = '_blank'
-              anchor.click()
-            }
-          }
+          this.getDocumentationButton('node-styles', 'node styling')
         ]
       },
 
@@ -1315,480 +1300,27 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
 }
 
 /*
-export const SETTINGS = {
-  general: {
-    label: 'General',
-    description: 'General settings of the Advanced Canvas plugin.',
-    disableToggle: true,
-    children: {
-      nodeTypeOnDoubleClick: {
-        label: 'Node type on double click',
-        description: 'The type of node that will be created when double clicking on the canvas.',
-        type: 'dropdown',
-        options: {
-          'text': 'Text',
-          'file': 'File'
-        }
-      } as DropdownSetting,
-      alignNewNodesToGrid: {
-        label: 'Always align new nodes to grid',
-        description: 'When enabled, new nodes will be aligned to the grid.',
-        type: 'boolean'
-      },
-      defaultTextNodeDimensions: {
-        label: 'Default text node dimensions',
-        description: 'The default dimensions of a text node.',
-        type: 'dimension',
-        parse: (value: [string, string]) => {
-          const width = Math.max(1, parseInt(value[0]) || 0)
-          const height = Math.max(1, parseInt(value[1]) || 0)
-          return [width, height]
-        }
-      },
-      defaultFileNodeDimensions: {
-        label: 'Default file node dimensions',
-        description: 'The default dimensions of a file node.',
-        type: 'dimension',
-        parse: (value: [string, string]) => {
-          const width = Math.max(1, parseInt(value[0]) || 0)
-          const height = Math.max(1, parseInt(value[1]) || 0)
-          return [width, height]
-        }
-      },
-      minNodeSize: {
-        label: 'Minimum node size',
-        description: 'The minimum size (either width or height) of a node.',
-        type: 'number',
-        parse: (value: string) => Math.max(1, parseInt(value) || 0)
-      },
-      maxNodeWidth: {
-        label: 'Maximum node width',
-        description: 'The maximum width of a node. Set to -1 for no limit.',
-        type: 'number',
-        parse: (value: string) => Math.max(-1, parseInt(value) || 0)
-      },
-      disableFontSizeRelativeToZoom: {
-        label: 'Disable font size relative to zoom',
-        description: 'When enabled, the font size of e.g. group node titles and edge labels will not increase when zooming out.',
-        type: 'boolean'
-      }
-    }
-  },
-  commandsFeatureEnabled: {
-    label: 'Extended commands',
-    description: 'Add more commands to the canvas.',
-    infoSection: 'canvas-commands',
-    children: {
-      zoomToClonedNode: {
-        label: 'Zoom to cloned node',
-        description: 'When enabled, the canvas will zoom to the cloned node.',
-        type: 'boolean'
-      },
-      cloneNodeMargin: {
-        label: 'Clone node margin',
-        description: 'The margin between the cloned node and the source node.',
-        type: 'number',
-        parse: (value: string) => Math.max(0, parseInt(value) || 0)
-      },
-      expandNodeStepSize: {
-        label: 'Expand node step size',
-        description: 'The step size for expanding the node.',
-        type: 'number',
-        parse: (value: string) => Math.max(1, parseInt(value) || 0)
-      }
-    }
-  },
-  canvasMetadataCompatibilityEnabled: {
-    label: 'Enable .canvas metadata cache compatibility',
-    description: 'Make .canvas files compatible with the backlinks and outgoing links feature and show the connections in the graph view.',
-    infoSection: 'full-metadata-cache-support',
-    children: {
-      enableSingleNodeLinks: {
-        label: 'Enable support for linking to a node using a [[wikilink]]',
-        description: 'When enabled, you can link and embed a node using [[canvas-file#node-id]] (Use the "Copy wikilink to node" command to get an id).',
-        type: 'boolean'
-      },
-      enableSingleNodePopupReferenceCopy: {
-        label: 'Show button to copy node [[wikilink]]',
-        description: 'When enabled, the node popup will show a button to copy the [[wikilink]] of the node for easy reference in other notes.',
-        type: 'boolean'
-      }
-    }
-  },
-  nativeFileSearchEnabled: {
-    label: 'Native-like file search',
-    description: 'When enabled, the file search will be done using the native Obsidian file search.',
-    infoSection: 'native-like-file-search',
-    children: { }
-  },
-  autoFileNodeEdgesFeatureEnabled: {
-    label: 'Auto file node edges',
-    description: 'Automatically create edges between file nodes based their frontmatter links.',
-    infoSection: 'auto-file-node-edges',
-    children: {
-      autoFileNodeEdgesFrontmatterKey: {
-        label: 'Frontmatter key name',
-        description: 'The frontmatter key to fetch the outgoing edges from. (Keep the default to ensure best compatibility.)',
-        type: 'text',
-        parse: (value: string) => value.trim() || 'canvas-edges'
-      }
-    }
-  },
-  portalsFeatureEnabled: {
-    label: 'Portals',
-    description: 'Create portals to other canvases.',
-    infoSection: 'portals',
-    children: {
-      showEdgesIntoDisabledPortals: {
-        label: 'Show edges into disabled portals',
-        description: 'When enabled, edges into disabled portals will be shown.',
-        type: 'boolean'
-      }
-    }
-  },
-  collapsibleGroupsFeatureEnabled: {
-    label: 'Collapsible groups',
-    description: 'Group nodes can be collapsed and expanded to keep the canvas organized.',
-    infoSection: 'collapsible-groups',
-    children: {
-      collapsedGroupPreviewOnDrag: {
-        label: 'Collapsed group preview on drag',
-        description: 'When enabled, a group that is collapsed show its border while dragging a node.',
-        type: 'boolean'
-      }
-    }
-  },
-  combineCustomStylesInDropdown: {
-    label: 'Combine custom styles',
-    description: 'Combine all style attributes of Advanced Canvas in a single dropdown.',
-    children: { }
-  },
-  nodeStylingFeatureEnabled: {
-    label: 'Node styling',
-    description: 'Style your nodes with different shapes and borders.',
-    infoSection: 'node-styles',
-    children: {
-      customNodeStyleAttributes: {
-        label: 'Custom node style settings',
-        description: 'Add custom style settings for nodes. (Go to GitHub for more information)',
-        type: 'button',
-        onClick: () => {
-          const anchor = activeWindow.createEl('a')
-          anchor.href = "https://github.com/Developer-Mike/obsidian-advanced-canvas/blob/main/README.md#custom-styles"
-          anchor.target = '_blank'
-          anchor.click()
-        },
-      } as ButtonSetting,
-      defaultTextNodeColor: {
-        label: 'Default text node color',
-        description: 'The default color of a text node. The default range is from 0 to 6, where 0 is no color. The range can be extended by using the Custom Colors feature of Advanced Canvas.',
-        type: 'number',
-        parse: (value: string) => Math.max(0, parseInt(value) || 0)
-      },
-      defaultTextNodeStyleAttributes: {
-        label: 'Default text node style attributes',
-        type: 'styles',
-        getParameters(settingsManager) {
-          return [
-            ...BUILTIN_NODE_STYLE_ATTRIBUTES, // BUILTINS
-            ...settingsManager.nodeCssStylesManager.getStyles(), // CUSTOM CSS STYLES
-              ...settingsManager.getSetting('customNodeStyleAttributes') // LEGACY CUSTOM STYLES
-          ].filter((setting) => setting.nodeTypes === undefined || setting.nodeTypes?.includes('text'))
-        }
-      } as StyleAttributesSetting
-    }
-  },
-  edgesStylingFeatureEnabled: {
-    label: 'Edges styling',
-    description: 'Style your edges with different path styles.',
-    infoSection: 'edge-styles',
-    children: {
-      customEdgeStyleAttributes: {
-        label: 'Custom edge style settings',
-        description: 'Add custom style settings for edges. (Go to GitHub for more information)',
-        type: 'button',
-        onClick: () => {
-          const anchor = activeWindow.createEl('a')
-          anchor.href = "https://github.com/Developer-Mike/obsidian-advanced-canvas/blob/main/README.md#custom-styles"
-          anchor.target = '_blank'
-          anchor.click()
-        },
-      } as ButtonSetting,
-      inheritEdgeColorFromNode: {
-        label: 'Inherit edge color from node',
-        description: 'When creating a new edge by dragging from a node, the edge will inherit the color of the node it is dragged from.',
-        type: 'boolean'
-      },
-      defaultEdgeColor: {
-        label: 'Default edge color',
-        description: 'The default color of an edge. The default range is from 0 to 6, where 0 is no color. The range can be extended by using the Custom Colors feature of Advanced Canvas.',
-        type: 'number',
-        parse: (value: string) => Math.max(0, parseInt(value) || 0)
-      },
-      defaultEdgeLineDirection: {
-        label: 'Default edge line direction',
-        description: 'The default line direction of an edge.',
-        type: 'dropdown',
-        options: {
-          'nondirectional': 'Nondirectional',
-          'unidirectional': 'Unidirectional',
-          'bidirectional': 'Bidirectional'
-        }
-      } as DropdownSetting,
-      defaultEdgeStyleAttributes: {
-        label: 'Default edge style attributes',
-        type: 'styles',
-        getParameters(settingsManager) {
-          return [
-            ...BUILTIN_EDGE_STYLE_ATTRIBUTES, // BUILTINS
-            ...settingsManager.edgeCssStylesManager.getStyles(), // CUSTOM CSS STYLES
-            ...settingsManager.getSetting('customEdgeStyleAttributes') // LEGACY CUSTOM STYLES
-          ]
-        }
-      } as StyleAttributesSetting,
-      edgeStyleUpdateWhileDragging: {
-        label: 'Update edge style while dragging (Can be very slow)',
-        description: 'When enabled, the edge style will be updated while dragging an edge.',
-        type: 'boolean'
-      },
-      edgeStyleSquarePathRounded: {
-        label: 'Square path rounded',
-        description: 'When enabled, the square path\'s corners will be rounded.',
-        type: 'boolean'
-      },
-      edgeStylePathfinderAllowDiagonal: {
-        label: 'A* allow diagonal',
-        description: 'When enabled, the A* path style will allow diagonal paths.',
-        type: 'boolean'
-      },
-      edgeStylePathfinderPathRounded: {
-        label: 'A* rounded path',
-        description: 'When enabled, the A* path style will be rounded.',
-        type: 'boolean'
-      }
-    }
-  },
-  floatingEdgeFeatureEnabled: {
-    label: 'Floating edges (auto edge side)',
-    description: 'Floating edges are automatically placed on the most suitable side of the node.',
-    infoSection: 'floating-edges-automatic-edge-side',
-    children: {
-      allowFloatingEdgeCreation: {
-        label: 'Allow floating edges creation',
-        description: 'Allow floating edges creation by dragging the edge over the target node without placing it over a specific side connection point. (If disabled, floating edges can only be created and used by other Advanced Canvas features.)',
-        type: 'boolean'
-      },
-      newEdgeFromSideFloating: {
-        label: 'New edge from side floating',
-        description: 'When enabled, the "from" side of the edge will always be floating.',
-        type: 'boolean'
-      }
-    }
-  },
-  flipEdgeFeatureEnabled: {
-    label: 'Flip edges',
-    description: 'Flip the direction of edges using the popup menu.',
-    infoSection: 'flip-edge',
-    children: { }
-  },
-  presentationFeatureEnabled: {
-    label: 'Presentations',
-    description: 'Create a presentation from your canvas.',
-    infoSection: 'presentation-mode',
-    children: {
-      showSetStartNodeInPopup: {
-        label: 'Show "Set Start Node" in node popup',
-        description: 'If turned off, you can still set the start node using the corresponding command.',
-        type: 'boolean'
-      },
-      defaultSlideDimensions: {
-        label: 'Default slide dimensions',
-        description: 'The default dimensions of a slide.',
-        type: 'dimension',
-        parse: (value: [string, string]) => {
-          const width = Math.max(1, parseInt(value[0]) || 0)
-          const height = Math.max(1, parseInt(value[1]) || 0)
-          return [width, height]
-        }
-      },
-      wrapInSlidePadding: {
-        label: 'Wrap in slide padding',
-        description: 'The padding of the slide when wrapping the canvas in a slide.',
-        type: 'number',
-        parse: (value: string) => Math.max(0, parseInt(value) || 0)
-      },
-      resetViewportOnPresentationEnd: {
-        label: 'Reset viewport on presentation end',
-        description: 'When enabled, the viewport will be reset to the original position after the presentation ends.',
-        type: 'boolean'
-      },
-      useArrowKeysToChangeSlides: {
-        label: 'Use arrow keys to change slides',
-        description: 'When enabled, you can use the arrow keys to change slides in presentation mode.',
-        type: 'boolean'
-      },
-      usePgUpPgDownKeysToChangeSlides: {
-        label: 'Use PgUp/PgDown keys to change slides',
-        description: 'When enabled, you can use the PgUp/PgDown keys to change slides in presentation mode (Makes the presentation mode compatible with most presentation remotes).',
-        type: 'boolean'
-      },
-      useDirectionalSlideNavigation: {
-        label: 'Use directional slide navigation',
-        description: 'When enabled, navigating with the arrow keys will try to navigate along the slide\'s edge in the pressed direction instead of just navigating forward or backward in the slide order.',
-        type: 'boolean'
-      },
-      zoomToSlideWithoutPadding: {
-        label: 'Zoom to slide without padding',
-        description: 'When enabled, the canvas will zoom to the slide without padding.',
-        type: 'boolean'
-      },
-      useUnclampedZoomWhilePresenting: {
-        label: 'Use unclamped zoom while presenting',
-        description: 'When enabled, the zoom will not be clamped while presenting.',
-        type: 'boolean'
-      },
-      fullscreenPresentationEnabled: {
-        label: 'Enter fullscreen while presenting',
-        description: 'When enabled, presentations automatically request fullscreen. Disable to keep Obsidian windowed during presentations.',
-        type: 'boolean'
-      },
-      slideTransitionAnimationDuration: {
-        label: 'Slide transition animation duration',
-        description: 'The duration of the slide transition animation in seconds. Set to 0 to disable the animation.',
-        type: 'number',
-        parse: (value: string) => Math.max(0, parseFloat(value) || 0)
-      },
-      slideTransitionAnimationIntensity: {
-        label: 'Slide transition animation intensity',
-        description: 'The intensity of the slide transition animation. The higher the value, the more the canvas will zoom out before zooming in on the next slide.',
-        type: 'number',
-        parse: (value: string) => Math.max(0, parseFloat(value) || 0)
-      }
-    }
-  },
-  pdfAnnotationFeatureEnabled: {
-    label: 'PDF annotation',
-    description: 'Annotate PDF files in the canvas.',
-    infoSection: 'pdf-annotation',
-    children: {
-      pdfPagesGap: {
-        label: 'PDF pages gap',
-        description: 'The gap between PDF pages in pixels.',
-        type: 'number',
-        parse: (value: string) => Math.max(0, parseInt(value) || 0)
-      },
-      pdfPageSizeFactor: {
-        label: 'PDF page size factor',
-        description: 'The size factor of the PDF pages. The higher the value, the larger the newly created PDF pages will be.',
-        type: 'number',
-        parse: (value: string) => Math.max(0.1, parseFloat(value) || 1)
-      },
-      pdfPageResolution: {
-        label: 'PDF page resolution',
-        description: 'The resolution of the PDF pages. The higher the value, the sharper the pages will be (heavily affects performance).',
-        type: 'number',
-        parse: (value: string) => Math.max(0.1, parseFloat(value) || 1)
-      }
-    }
-  },
-  zOrderingControlFeatureEnabled: {
-    label: 'Z ordering controls',
-    description: 'Change the persistent z-index of nodes using the context menu.',
-    children: {
-      zOrderingControlShowOneLayerShiftOptions: {
-        label: 'Show one layer shift options',
-        description: 'When enabled, you can move nodes one layer forward or backward.',
-        type: 'boolean'
-      }
-    }
-  },
-  aspectRatioControlFeatureEnabled: {
-    label: 'Aspect ratio control',
-    description: 'Change the aspect ratio of nodes using the context menu.',
-    children: { }
-  },
-  variableBreakpointFeatureEnabled: {
-    label: 'Variable breakpoint',
-    description: `Change the zoom breakpoint (the zoom level at which the nodes won't render their content anymore) on a per-node basis using the ${VARIABLE_BREAKPOINT_CSS_VAR} CSS variable.`,
-    infoSection: 'variable-breakpoints',
-    children: { }
-  },
-  readingModeFixEnabled: {
-    label: 'Alternative text rendering',
-    description: 'Tries to synchronize editing and reading view rendering. Caution: Causes visual inconsistencies compared to the default Obsidian reading view.',
-    infoSection: 'alternative-text-rendering',
-    children: { }
-  },
-  autoResizeNodeFeatureEnabled: {
-    label: 'Auto resize node',
-    description: 'Automatically resize the height of a node to fit the content.',
-    infoSection: 'auto-node-resizing',
-    children: {
-      autoResizeNodeEnabledByDefault: {
-        label: 'Enable auto resize by default',
-        description: 'When enabled, the auto resize feature will be enabled by default for all nodes.',
-        type: 'boolean'
-      },
-      autoResizeNodeMaxHeight: {
-        label: 'Max height',
-        description: 'The maximum height of the node when auto resizing (-1 for unlimited).',
-        type: 'number',
-        parse: (value: string) => Math.max(-1, parseInt(value) ?? -1)
-      },
-      autoResizeNodeSnapToGrid: {
-        label: 'Snap to grid',
-        description: 'When enabled, the height of the node will snap to the grid.',
-        type: 'boolean'
-      }
-    }
-  },
-  canvasEncapsulationEnabled: {
-    label: 'Canvas encapsulation',
-    description: 'Encapsulate a selection of nodes and edges into a new canvas using the context menu.',
-    infoSection: 'encapsulate-selection',
-    children: { }
-  },
-  betterReadonlyEnabled: {
-    label: 'Better readonly',
-    description: 'Improve the readonly mode.',
-    infoSection: 'better-readonly',
-    children: {
-      hideBackgroundGridWhenInReadonly: {
-        label: 'Hide background grid when in readonly',
-        description: 'When enabled, the background grid will be hidden when in readonly mode.',
-        type: 'boolean'
-      },
-    }
-  },
-  edgeHighlightEnabled: {
-    label: 'Edge highlight',
-    description: 'Highlight outgoing (and optionally incoming) edges of a selected node.',
-    infoSection: 'edge-highlight',
-    children: {
-      highlightIncomingEdges: {
-        label: 'Highlight incoming edges',
-        description: 'When enabled, incoming edges will also be highlighted.',
-        type: 'boolean'
-      }
-    }
-  },
-  edgeSelectionEnabled: {
-    label: 'Edge selection',
-    description: 'Select edges connected to the selected node(s) using the popup menu.',
-    infoSection: 'edge-selection',
-    children: {
-      selectEdgeByDirection: {
-        label: 'Select edge by direction',
-        description: 'Select incoming or outgoing edges using separate popup menu items.',
-        type: 'boolean'
-      }
-    }
-  },
-  focusModeFeatureEnabled: {
-    label: 'Focus Mode',
-    description: 'Focus on a single node and blur all other nodes.',
-    infoSection: 'focus-mode',
-    children: { }
-  },
-}
+defaultTextNodeStyleAttributes: {
+  label: 'Default text node style attributes',
+  type: 'styles',
+  getParameters(settingsManager) {
+    return [
+      ...BUILTIN_NODE_STYLE_ATTRIBUTES, // BUILTINS
+      ...settingsManager.nodeCssStylesManager.getStyles(), // CUSTOM CSS STYLES
+        ...settingsManager.getSetting('customNodeStyleAttributes') // LEGACY CUSTOM STYLES
+    ].filter((setting) => setting.nodeTypes === undefined || setting.nodeTypes?.includes('text'))
+  }
+} as StyleAttributesSetting
+
+defaultEdgeStyleAttributes: {
+  label: 'Default edge style attributes',
+  type: 'styles',
+  getParameters(settingsManager) {
+    return [
+      ...BUILTIN_EDGE_STYLE_ATTRIBUTES, // BUILTINS
+      ...settingsManager.edgeCssStylesManager.getStyles(), // CUSTOM CSS STYLES
+      ...settingsManager.getSetting('customEdgeStyleAttributes') // LEGACY CUSTOM STYLES
+    ]
+  }
+} as StyleAttributesSetting
 */
