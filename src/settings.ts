@@ -318,54 +318,6 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
     }
   }
 
-  /**
-  * @deprecated
-  */
-  private getFeatureGroupSetting(
-    key: keyof AdvancedCanvasPluginSettingsValues,
-    heading: string,
-    docs: string | null,
-    items: SettingDefinitionItem[]
-  ): SettingDefinitionGroup {
-    const setting: SettingDefinitionGroup = {
-      type: 'group',
-      heading: heading,
-      items: [
-        {
-          name: `Enable (${heading})`,
-          desc: 'Requires a reload to take effect',
-          control: {
-            type: 'toggle',
-            key: key
-          }
-        }
-      ]
-    }
-
-    if (items.length > 0) {
-      setting.items?.push({
-        type: 'page',
-        name: `Config - ${heading}`,
-        visible: () => this.getControlValue(key) as boolean,
-        items: items
-      })
-    }
-
-    if (docs !== null) {
-      setting.items?.push({
-        name: 'Open documentation',
-        action: () => {
-          const anchor = activeWindow.createEl('a')
-          anchor.href = `${README_URL}#${docs}`
-          anchor.target = '_blank'
-          anchor.click()
-        }
-      })
-    }
-
-    return setting
-  }
-
   override getSettingDefinitions(): SettingDefinitionItem[] {
     return [
       // Ko-fi banner
@@ -572,65 +524,124 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
         ]
       },
 
-      this.getFeatureGroupSetting(
-        'nativeFileSearchEnabled',
-        'Native-like file search',
-        'native-like-file-search',
-        []
-      ),
-      this.getFeatureGroupSetting(
-        'autoFileNodeEdgesFeatureEnabled',
-        'Auto file node edges',
-        'auto-file-node-edges',
-        [
+      // Native-like file search
+      {
+        type: 'group',
+        heading: 'Native-like file search',
+        items: [
           {
-            name: 'Frontmatter key name',
-            desc: 'The frontmatter key to fetch the outgoing edges from. (Keep the default to ensure best compatibility.)',
-            control: {
-              type: 'text',
-              key: 'autoFileNodeEdgesFrontmatterKey'
-            }
-          }
-        ]
-      ),
-      this.getFeatureGroupSetting(
-        'portalsFeatureEnabled',
-        'Portals',
-        'portals',
-        [
-          {
-            name: 'Show edges into disabled portals',
-            desc: 'When enabled, edges into disabled portals will be shown.',
+            name: 'Enable native-like file search',
+            desc: 'Quickly locate text within your canvas using the native Obsidian search interface.',
             control: {
               type: 'toggle',
-              key: 'showEdgesIntoDisabledPortals'
+              key: 'nativeFileSearchEnabled'
             }
-          }
+          },
+          this.getDocumentationButton('native-like-file-search')
         ]
-      ),
-      this.getFeatureGroupSetting(
-        'collapsibleGroupsFeatureEnabled',
-        'Collapsible groups',
-        'collapsible-groups',
-        [
+      },
+
+      // Auto file node edges
+      {
+        type: 'group',
+        heading: 'Auto file node edges',
+        items: [
           {
-            name: 'Collapsed group preview on drag',
-            desc: 'When enabled, a group that is collapsed shows its border while dragging a node.',
+            name: 'Enable auto file node edges',
+            desc: 'Automatically create edges between file nodes based on their frontmatter links.',
             control: {
               type: 'toggle',
-              key: 'collapsedGroupPreviewOnDrag'
+              key: 'autoFileNodeEdgesFeatureEnabled'
             }
-          }
+          },
+          {
+            type: 'page',
+            name: 'Auto file node edges settings',
+            visible: () => this.getControlValue('autoFileNodeEdgesFeatureEnabled') as boolean,
+            items: [
+              {
+                name: 'Frontmatter key name',
+                desc: 'The frontmatter key to fetch the outgoing edges from. (Keep the default to ensure best compatibility.)',
+                control: {
+                  type: 'text',
+                  key: 'autoFileNodeEdgesFrontmatterKey'
+                }
+              }
+            ]
+          },
+          this.getDocumentationButton('auto-file-node-edges')
         ]
-      ),
+      },
+
+      // Portals
+      {
+        type: 'group',
+        heading: 'Portals',
+        items: [
+          {
+            name: 'Enable portals',
+            desc: 'Create portals to other canvases.',
+            control: {
+              type: 'toggle',
+              key: 'portalsFeatureEnabled'
+            }
+          },
+          {
+            type: 'page',
+            name: 'Portals settings',
+            visible: () => this.getControlValue('portalsFeatureEnabled') as boolean,
+            items: [
+              {
+                name: 'Show edges into disabled portals',
+                desc: 'When enabled, edges into disabled portals will be shown.',
+                control: {
+                  type: 'toggle',
+                  key: 'showEdgesIntoDisabledPortals'
+                }
+              }
+            ]
+          },
+          this.getDocumentationButton('portals')
+        ]
+      },
+
+      // Collapsible groups
+      {
+        type: 'group',
+        heading: 'Collapsible groups',
+        items: [
+          {
+            name: 'Enable collapsible groups',
+            desc: 'Group nodes can be collapsed and expanded to keep the canvas organized.',
+            control: {
+              type: 'toggle',
+              key: 'collapsibleGroupsFeatureEnabled'
+            }
+          },
+          {
+            type: 'page',
+            name: 'Collapsible groups settings',
+            visible: () => this.getControlValue('collapsibleGroupsFeatureEnabled') as boolean,
+            items: [
+              {
+                name: 'Collapsed group preview on drag',
+                desc: 'When enabled, a group that is collapsed shows its border while dragging a node.',
+                control: {
+                  type: 'toggle',
+                  key: 'collapsedGroupPreviewOnDrag'
+                }
+              }
+            ]
+          },
+          this.getDocumentationButton('collapsible-groups')
+        ]
+      },
+
+      // Custom styles
       {
         type: 'group',
         heading: 'Custom styles',
         items: [
-          {
-              name: 'Manage custom node styles',
-              desc: 'Manage custom node styles. (Requires a reload to take effect)',
-          },
           {
             name: 'Combine custom styles in dropdown',
             desc: 'Combine all style attributes of Advanced Canvas in a single dropdown.',
@@ -760,335 +771,545 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           }
         ]
       },
-      this.getFeatureGroupSetting(
-        'floatingEdgeFeatureEnabled',
-        'Floating edges',
-        'floating-edges-automatic-edge-side',
-        [
+
+      // Floating edges
+      {
+        type: 'group',
+        heading: 'Floating edges',
+        items: [
           {
-            name: 'Allow floating edges creation',
-            desc: 'Allow floating edges creation by dragging the edge over the target node without placing it over a specific side connection point. (If disabled, floating edges can only be created and used by other Advanced Canvas features.)',
+            name: 'Enable floating edges',
+            desc: 'Floating edges are automatically placed on the most suitable side of the node.',
             control: {
               type: 'toggle',
-              key: 'allowFloatingEdgeCreation'
-            }
-          },
-          {
-            name: 'New edge from side floating',
-            desc: 'When enabled, the "from" side of the edge will always be floating.',
-            control: {
-              type: 'toggle',
-              key: 'newEdgeFromSideFloating'
-            }
-          }
-        ]
-      ),
-      this.getFeatureGroupSetting(
-        'flipEdgeFeatureEnabled',
-        'Flip edges',
-        'flip-edge',
-        []
-      ),
-      this.getFeatureGroupSetting(
-        'presentationFeatureEnabled',
-        'Presentations',
-        'presentation-mode',
-        [
-          {
-            name: 'Show "Set Start Node" in node popup',
-            desc: 'If turned off, you can still set the start node using the corresponding command.',
-            control: {
-              type: 'toggle',
-              key: 'showSetStartNodeInPopup'
+              key: 'floatingEdgeFeatureEnabled'
             }
           },
           {
             type: 'page',
-            name: 'Default slide dimensions',
-            desc: 'The default dimensions of a slide.',
+            name: 'Floating edges settings',
+            visible: () => this.getControlValue('floatingEdgeFeatureEnabled') as boolean,
             items: [
               {
-                name: 'Width',
-                desc: 'The default width of a slide.',
+                name: 'Allow floating edges creation',
+                desc: 'Allow floating edges creation by dragging the edge over the target node without placing it over a specific side connection point. (If disabled, floating edges can only be created and used by other Advanced Canvas features.)',
                 control: {
-                  type: 'number',
-                  key: 'defaultSlideDimensions[0]'
+                  type: 'toggle',
+                  key: 'allowFloatingEdgeCreation'
                 }
               },
               {
-                name: 'Height',
-                desc: 'The default height of a slide.',
+                name: 'New edge from side floating',
+                desc: 'When enabled, the "from" side of the edge will always be floating.',
+                control: {
+                  type: 'toggle',
+                  key: 'newEdgeFromSideFloating'
+                }
+              }
+            ]
+          },
+          this.getDocumentationButton('floating-edges-automatic-edge-side')
+        ]
+      },
+
+      // Flip edges
+      {
+        type: 'group',
+        heading: 'Flip edges',
+        items: [
+          {
+            name: 'Enable flip edges',
+            desc: 'Flip the direction of edges using the popup menu.',
+            control: {
+              type: 'toggle',
+              key: 'flipEdgeFeatureEnabled'
+            }
+          },
+          this.getDocumentationButton('flip-edge')
+        ]
+      },
+
+      // Presentations
+      {
+        type: 'group',
+        heading: 'Presentations',
+        items: [
+          {
+            name: 'Enable presentations',
+            desc: 'Create a presentation from your canvas.',
+            control: {
+              type: 'toggle',
+              key: 'presentationFeatureEnabled'
+            }
+          },
+          {
+            type: 'page',
+            name: 'Presentations settings',
+            visible: () => this.getControlValue('presentationFeatureEnabled') as boolean,
+            items: [
+              {
+                name: 'Show "Set Start Node" in node popup',
+                desc: 'If turned off, you can still set the start node using the corresponding command.',
+                control: {
+                  type: 'toggle',
+                  key: 'showSetStartNodeInPopup'
+                }
+              },
+              {
+                type: 'page',
+                name: 'Default slide dimensions',
+                desc: 'The default dimensions of a slide.',
+                items: [
+                  {
+                    name: 'Width',
+                    desc: 'The default width of a slide.',
+                    control: {
+                      type: 'number',
+                      key: 'defaultSlideDimensions[0]'
+                    }
+                  },
+                  {
+                    name: 'Height',
+                    desc: 'The default height of a slide.',
+                    control: {
+                      type: 'number',
+                      key: 'defaultSlideDimensions[1]'
+                    }
+                  },
+                ]
+              },
+              {
+                name: 'Wrap in slide padding',
+                desc: 'The padding of the slide when wrapping the canvas in a slide.',
                 control: {
                   type: 'number',
-                  key: 'defaultSlideDimensions[1]'
+                  key: 'wrapInSlidePadding'
+                }
+              },
+              {
+                name: 'Reset viewport on presentation end',
+                desc: 'When enabled, the viewport will be reset to the original position after the presentation ends.',
+                control: {
+                  type: 'toggle',
+                  key: 'resetViewportOnPresentationEnd'
+                }
+              },
+              {
+                name: 'Use arrow keys to change slides',
+                desc: 'When enabled, you can use the arrow keys to change slides in presentation mode.',
+                control: {
+                  type: 'toggle',
+                  key: 'useArrowKeysToChangeSlides'
+                }
+              },
+              {
+                name: 'Use PgUp/PgDown keys to change slides',
+                desc: 'When enabled, you can use the PgUp/PgDown keys to change slides in presentation mode (Makes the presentation mode compatible with most presentation remotes).',
+                control: {
+                  type: 'toggle',
+                  key: 'usePgUpPgDownKeysToChangeSlides'
+                }
+              },
+              {
+                name: 'Use directional slide navigation',
+                desc: 'When enabled, navigating with the arrow keys will try to navigate along the slide\'s edge in the pressed direction instead of just navigating forward or backward in the slide order.',
+                control: {
+                  type: 'toggle',
+                  key: 'useDirectionalSlideNavigation'
+                }
+              },
+              {
+                name: 'Zoom to slide without padding',
+                desc: 'When enabled, the canvas will zoom to the slide without padding.',
+                control: {
+                  type: 'toggle',
+                  key: 'zoomToSlideWithoutPadding'
+                }
+              },
+              {
+                name: 'Use unclamped zoom while presenting',
+                desc: 'When enabled, the zoom will not be clamped while presenting.',
+                control: {
+                  type: 'toggle',
+                  key: 'useUnclampedZoomWhilePresenting'
+                }
+              },
+              {
+                name: 'Enter fullscreen while presenting',
+                desc: 'When enabled, presentations automatically request fullscreen. Disable to keep Obsidian windowed during presentations.',
+                control: {
+                  type: 'toggle',
+                  key: 'fullscreenPresentationEnabled'
+                }
+              },
+              {
+                name: 'Slide transition animation duration',
+                desc: 'The duration of the slide transition animation in seconds. Set to 0 to disable the animation.',
+                control: {
+                  type: 'number',
+                  key: 'slideTransitionAnimationDuration'
+                }
+              },
+              {
+                name: 'Slide transition animation intensity',
+                desc: 'The intensity of the slide transition animation. The higher the value, the more the canvas will zoom out before zooming in on the next slide.',
+                control: {
+                  type: 'number',
+                  key: 'slideTransitionAnimationIntensity'
                 }
               },
             ]
           },
-          {
-            name: 'Wrap in slide padding',
-            desc: 'The padding of the slide when wrapping the canvas in a slide.',
-            control: {
-              type: 'number',
-              key: 'wrapInSlidePadding'
-            }
-          },
-          {
-            name: 'Reset viewport on presentation end',
-            desc: 'When enabled, the viewport will be reset to the original position after the presentation ends.',
-            control: {
-              type: 'toggle',
-              key: 'resetViewportOnPresentationEnd'
-            }
-          },
-          {
-            name: 'Use arrow keys to change slides',
-            desc: 'When enabled, you can use the arrow keys to change slides in presentation mode.',
-            control: {
-              type: 'toggle',
-              key: 'useArrowKeysToChangeSlides'
-            }
-          },
-          {
-            name: 'Use PgUp/PgDown keys to change slides',
-            desc: 'When enabled, you can use the PgUp/PgDown keys to change slides in presentation mode (Makes the presentation mode compatible with most presentation remotes).',
-            control: {
-              type: 'toggle',
-              key: 'usePgUpPgDownKeysToChangeSlides'
-            }
-          },
-          {
-            name: 'Use directional slide navigation',
-            desc: 'When enabled, navigating with the arrow keys will try to navigate along the slide\'s edge in the pressed direction instead of just navigating forward or backward in the slide order.',
-            control: {
-              type: 'toggle',
-              key: 'useDirectionalSlideNavigation'
-            }
-          },
-          {
-            name: 'Zoom to slide without padding',
-            desc: 'When enabled, the canvas will zoom to the slide without padding.',
-            control: {
-              type: 'toggle',
-              key: 'zoomToSlideWithoutPadding'
-            }
-          },
-          {
-            name: 'Use unclamped zoom while presenting',
-            desc: 'When enabled, the zoom will not be clamped while presenting.',
-            control: {
-              type: 'toggle',
-              key: 'useUnclampedZoomWhilePresenting'
-            }
-          },
-          {
-            name: 'Enter fullscreen while presenting',
-            desc: 'When enabled, presentations automatically request fullscreen. Disable to keep Obsidian windowed during presentations.',
-            control: {
-              type: 'toggle',
-              key: 'fullscreenPresentationEnabled'
-            }
-          },
-          {
-            name: 'Slide transition animation duration',
-            desc: 'The duration of the slide transition animation in seconds. Set to 0 to disable the animation.',
-            control: {
-              type: 'number',
-              key: 'slideTransitionAnimationDuration'
-            }
-          },
-          {
-            name: 'Slide transition animation intensity',
-            desc: 'The intensity of the slide transition animation. The higher the value, the more the canvas will zoom out before zooming in on the next slide.',
-            control: {
-              type: 'number',
-              key: 'slideTransitionAnimationIntensity'
-            }
-          },
+          this.getDocumentationButton('presentation-mode')
         ]
-      ),
-      this.getFeatureGroupSetting(
-        'pdfAnnotationFeatureEnabled',
-        'PDF annotation',
-        'pdf-annotation',
-        [
+      },
+
+      // PDF annotation
+      {
+        type: 'group',
+        heading: 'PDF annotation',
+        items: [
           {
-            name: 'PDF pages gap',
-            desc: 'The gap between PDF pages in pixels.',
-            control: {
-              type: 'number',
-              key: 'pdfPagesGap'
-            }
-          },
-          {
-            name: 'PDF page size factor',
-            desc: 'The size factor of the PDF pages. The higher the value, the larger the newly created PDF pages will be.',
-            control: {
-              type: 'number',
-              key: 'pdfPageSizeFactor'
-            }
-          },
-          {
-            name: 'PDF page resolution',
-            desc: 'The resolution of the PDF pages. The higher the value, the sharper the pages will be (heavily affects performance).',
-            control: {
-              type: 'number',
-              key: 'pdfPageResolution'
-            }
-          },
-        ]
-      ),
-      this.getFeatureGroupSetting(
-        'zOrderingControlFeatureEnabled',
-        'Z ordering controls',
-        null,
-        [
-          {
-            name: 'Show one layer shift options',
-            desc: 'When enabled, you can move nodes one layer forward or backward.',
+            name: 'Enable PDF annotation',
+            desc: 'Annotate PDF files in the canvas.',
             control: {
               type: 'toggle',
-              key: 'zOrderingControlShowOneLayerShiftOptions'
+              key: 'pdfAnnotationFeatureEnabled'
+            }
+          },
+          {
+            type: 'page',
+            name: 'PDF annotation settings',
+            visible: () => this.getControlValue('pdfAnnotationFeatureEnabled') as boolean,
+            items: [
+              {
+                name: 'PDF pages gap',
+                desc: 'The gap between PDF pages in pixels.',
+                control: {
+                  type: 'number',
+                  key: 'pdfPagesGap'
+                }
+              },
+              {
+                name: 'PDF page size factor',
+                desc: 'The size factor of the PDF pages. The higher the value, the larger the newly created PDF pages will be.',
+                control: {
+                  type: 'number',
+                  key: 'pdfPageSizeFactor'
+                }
+              },
+              {
+                name: 'PDF page resolution',
+                desc: 'The resolution of the PDF pages. The higher the value, the sharper the pages will be (heavily affects performance).',
+                control: {
+                  type: 'number',
+                  key: 'pdfPageResolution'
+                }
+              },
+            ]
+          },
+          this.getDocumentationButton('pdf-annotation')
+        ]
+      },
+
+      // Z ordering controls
+      {
+        type: 'group',
+        heading: 'Z ordering controls',
+        items: [
+          {
+            name: 'Enable Z ordering controls',
+            desc: 'Change the persistent z-index of nodes using the context menu.',
+            control: {
+              type: 'toggle',
+              key: 'zOrderingControlFeatureEnabled'
+            }
+          },
+          {
+            type: 'page',
+            name: 'Z ordering controls settings',
+            visible: () => this.getControlValue('zOrderingControlFeatureEnabled') as boolean,
+            items: [
+              {
+                name: 'Show one layer shift options',
+                desc: 'When enabled, you can move nodes one layer forward or backward.',
+                control: {
+                  type: 'toggle',
+                  key: 'zOrderingControlShowOneLayerShiftOptions'
+                }
+              }
+            ]
+          }
+        ]
+      },
+
+      // Aspect ratio control
+      {
+        type: 'group',
+        heading: 'Aspect ratio control',
+        items: [
+          {
+            name: 'Enable aspect ratio control',
+            desc: 'Change the aspect ratio of nodes using the context menu.',
+            control: {
+              type: 'toggle',
+              key: 'aspectRatioControlFeatureEnabled'
             }
           }
         ]
-      ), // FIXME: Description
-      this.getFeatureGroupSetting(
-        'aspectRatioControlFeatureEnabled',
-        'Aspect ratio control',
-        null,
-        []
-      ), // FIXME: Description
-      this.getFeatureGroupSetting(
-        'variableBreakpointFeatureEnabled',
-        'Variable breakpoint',
-        'variable-breakpoints',
-        []
-      ), // FIXME: Description
-      this.getFeatureGroupSetting(
-        'readingModeFixEnabled',
-        'Alternative text rendering',
-        'alternative-text-rendering',
-        []
-      ), // FIXME: Description
-      this.getFeatureGroupSetting(
-        'autoResizeNodeFeatureEnabled',
-        'Auto resize node',
-        'auto-node-resizing',
-        [
+      },
+
+      // Variable breakpoint
+      {
+        type: 'group',
+        heading: 'Variable breakpoint',
+        items: [
           {
-            name: 'Enable auto resize by default',
-            desc: 'When enabled, the auto resize feature will be enabled by default for all nodes.',
+            name: 'Enable variable breakpoint',
+            desc: `Change the zoom breakpoint (the zoom level at which the nodes won't render their content anymore) on a per-node basis using the ${VARIABLE_BREAKPOINT_CSS_VAR} CSS variable.`,
             control: {
               type: 'toggle',
-              key: 'autoResizeNodeEnabledByDefault'
+              key: 'variableBreakpointFeatureEnabled'
             }
           },
-          {
-            name: 'Max height',
-            desc: 'The maximum height of the node when auto resizing (-1 for unlimited).',
-            control: {
-              type: 'number',
-              key: 'autoResizeNodeMaxHeight'
-            }
-          },
-          {
-            name: 'Snap to grid',
-            desc: 'When enabled, the height of the node will snap to the grid.',
-            control: {
-              type: 'toggle',
-              key: 'autoResizeNodeSnapToGrid'
-            }
-          },
+          this.getDocumentationButton('variable-breakpoints')
         ]
-      ),
-      this.getFeatureGroupSetting(
-        'canvasEncapsulationEnabled',
-        'Canvas encapsulation',
-        'encapsulate-selection',
-        []
-      ), // FIXME: Description
-      this.getFeatureGroupSetting(
-        'betterReadonlyEnabled',
-        'Better readonly',
-        'better-readonly',
-        [
+      },
+
+      // Alternative text rendering
+      {
+        type: 'group',
+        heading: 'Alternative text rendering',
+        items: [
           {
-            name: 'Hide background grid when in readonly',
-            desc: 'When enabled, the background grid will be hidden when in readonly mode.',
+            name: 'Enable alternative text rendering',
+            desc: 'Tries to synchronize editing and reading view rendering. Caution: Causes visual inconsistencies compared to the default Obsidian reading view.',
             control: {
               type: 'toggle',
-              key: 'hideBackgroundGridWhenInReadonly'
+              key: 'readingModeFixEnabled'
             }
           },
-          {
-            name: 'Disable node popup',
-            desc: 'When enabled, the node popup will be disabled in readonly mode.',
-            control: {
-              type: 'toggle',
-              key: 'disableNodePopup'
-            }
-          },
-          {
-            name: 'Disable zoom',
-            desc: 'When enabled, zooming will be disabled in readonly mode.',
-            control: {
-              type: 'toggle',
-              key: 'disableZoom'
-            }
-          },
-          {
-            name: 'Disable pan',
-            desc: 'When enabled, panning will be disabled in readonly mode.',
-            control: {
-              type: 'toggle',
-              key: 'disablePan'
-            }
-          },
+          this.getDocumentationButton('alternative-text-rendering')
         ]
-      ),
-      this.getFeatureGroupSetting(
-        'edgeHighlightEnabled',
-        'Edge highlight',
-        'edge-highlight',
-        [
+      },
+
+      // Auto resize node
+      {
+        type: 'group',
+        heading: 'Auto resize node',
+        items: [
           {
-            name: 'Highlight incoming edges',
-            desc: 'When enabled, incoming edges will also be highlighted.',
+            name: 'Enable auto resize node',
+            desc: 'Automatically resize the height of a node to fit the content.',
             control: {
               type: 'toggle',
-              key: 'highlightIncomingEdges'
+              key: 'autoResizeNodeFeatureEnabled'
+            }
+          },
+          {
+            type: 'page',
+            name: 'Auto resize node settings',
+            visible: () => this.getControlValue('autoResizeNodeFeatureEnabled') as boolean,
+            items: [
+              {
+                name: 'Enable auto resize by default',
+                desc: 'When enabled, the auto resize feature will be enabled by default for all nodes.',
+                control: {
+                  type: 'toggle',
+                  key: 'autoResizeNodeEnabledByDefault'
+                }
+              },
+              {
+                name: 'Max height',
+                desc: 'The maximum height of the node when auto resizing (-1 for unlimited).',
+                control: {
+                  type: 'number',
+                  key: 'autoResizeNodeMaxHeight'
+                }
+              },
+              {
+                name: 'Snap to grid',
+                desc: 'When enabled, the height of the node will snap to the grid.',
+                control: {
+                  type: 'toggle',
+                  key: 'autoResizeNodeSnapToGrid'
+                }
+              },
+            ]
+          },
+          this.getDocumentationButton('auto-node-resizing')
+        ]
+      },
+
+      // Canvas encapsulation
+      {
+        type: 'group',
+        heading: 'Canvas encapsulation',
+        items: [
+          {
+            name: 'Enable canvas encapsulation',
+            desc: 'Encapsulate a selection of nodes and edges into a new canvas using the context menu.',
+            control: {
+              type: 'toggle',
+              key: 'canvasEncapsulationEnabled'
+            }
+          },
+          this.getDocumentationButton('encapsulate-selection')
+        ]
+      },
+
+      // Better readonly
+      {
+        type: 'group',
+        heading: 'Better readonly',
+        items: [
+          {
+            name: 'Enable better readonly',
+            desc: 'Improve the readonly mode.',
+            control: {
+              type: 'toggle',
+              key: 'betterReadonlyEnabled'
+            }
+          },
+          {
+            type: 'page',
+            name: 'Better readonly settings',
+            visible: () => this.getControlValue('betterReadonlyEnabled') as boolean,
+            items: [
+              {
+                name: 'Hide background grid when in readonly',
+                desc: 'When enabled, the background grid will be hidden when in readonly mode.',
+                control: {
+                  type: 'toggle',
+                  key: 'hideBackgroundGridWhenInReadonly'
+                }
+              },
+              {
+                name: 'Disable node popup',
+                desc: 'When enabled, the node popup will be disabled in readonly mode.',
+                control: {
+                  type: 'toggle',
+                  key: 'disableNodePopup'
+                }
+              },
+              {
+                name: 'Disable zoom',
+                desc: 'When enabled, zooming will be disabled in readonly mode.',
+                control: {
+                  type: 'toggle',
+                  key: 'disableZoom'
+                }
+              },
+              {
+                name: 'Disable pan',
+                desc: 'When enabled, panning will be disabled in readonly mode.',
+                control: {
+                  type: 'toggle',
+                  key: 'disablePan'
+                }
+              },
+            ]
+          },
+          this.getDocumentationButton('better-readonly')
+        ]
+      },
+
+      // Edge highlight
+      {
+        type: 'group',
+        heading: 'Edge highlight',
+        items: [
+          {
+            name: 'Enable edge highlight',
+            desc: 'Highlight outgoing (and optionally incoming) edges of a selected node.',
+            control: {
+              type: 'toggle',
+              key: 'edgeHighlightEnabled'
+            }
+          },
+          {
+            type: 'page',
+            name: 'Edge highlight settings',
+            visible: () => this.getControlValue('edgeHighlightEnabled') as boolean,
+            items: [
+              {
+                name: 'Highlight incoming edges',
+                desc: 'When enabled, incoming edges will also be highlighted.',
+                control: {
+                  type: 'toggle',
+                  key: 'highlightIncomingEdges'
+                }
+              }
+            ]
+          },
+          this.getDocumentationButton('edge-highlight')
+        ]
+      },
+
+      // Edge selection
+      {
+        type: 'group',
+        heading: 'Edge selection',
+        items: [
+          {
+            name: 'Enable edge selection',
+            desc: 'Select edges connected to the selected node(s) using the popup menu.',
+            control: {
+              type: 'toggle',
+              key: 'edgeSelectionEnabled'
+            }
+          },
+          {
+            type: 'page',
+            name: 'Edge selection settings',
+            visible: () => this.getControlValue('edgeSelectionEnabled') as boolean,
+            items: [
+              {
+                name: 'Select edge by direction',
+                desc: 'Select incoming or outgoing edges using separate popup menu items.',
+                control: {
+                  type: 'toggle',
+                  key: 'selectEdgeByDirection'
+                }
+              }
+            ]
+          },
+          this.getDocumentationButton('edge-selection')
+        ]
+      },
+
+      // Focus Mode
+      {
+        type: 'group',
+        heading: 'Focus Mode',
+        items: [
+          {
+            name: 'Enable focus mode',
+            desc: 'Focus on a single node and blur all other nodes.',
+            control: {
+              type: 'toggle',
+              key: 'focusModeFeatureEnabled'
+            }
+          },
+          this.getDocumentationButton('focus-mode')
+        ]
+      },
+
+      // Better export
+      {
+        type: 'group',
+        heading: 'Better export',
+        items: [
+          {
+            name: 'Enable better export',
+            desc: 'Export to PNG/SVG with transparency and other options.',
+            control: {
+              type: 'toggle',
+              key: 'betterExportFeatureEnabled'
             }
           }
         ]
-      ),
-      this.getFeatureGroupSetting(
-        'edgeSelectionEnabled',
-        'Edge selection',
-        'edge-selection',
-        [
-          {
-            name: 'Select edge by direction',
-            desc: 'Select incoming or outgoing edges using separate popup menu items.',
-            control: {
-              type: 'toggle',
-              key: 'selectEdgeByDirection'
-            }
-          }
-        ]
-      ),
-      this.getFeatureGroupSetting(
-        'focusModeFeatureEnabled',
-        'Focus Mode',
-        'focus-mode',
-        []
-      ), // FIXME: Description
-      this.getFeatureGroupSetting(
-        'betterExportFeatureEnabled',
-        'Better export',
-        null,
-        []
-      ), // FIXME: Description
+      },
     ]
   }
 }
