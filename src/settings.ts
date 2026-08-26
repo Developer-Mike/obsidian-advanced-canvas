@@ -1,4 +1,4 @@
-import { PluginSettingTab, SettingDefinitionGroup, SettingDefinitionItem, SettingGroupItem } from "obsidian"
+import { PluginSettingTab, SettingDefinitionItem, SettingGroupItem } from "obsidian"
 import { GET_EDGE_CSS_STYLES_MANAGER } from "./canvas-extensions/advanced-styles/edge-styles"
 import { GET_NODE_CSS_STYLES_MANAGER } from "./canvas-extensions/advanced-styles/node-styles"
 import { BUILTIN_EDGE_STYLE_ATTRIBUTES, BUILTIN_NODE_STYLE_ATTRIBUTES, StyleAttribute } from "./canvas-extensions/advanced-styles/style-config"
