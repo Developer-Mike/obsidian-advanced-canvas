@@ -107,7 +107,6 @@ export interface AdvancedCanvasPluginSettingsValues {
   canvasEncapsulationEnabled: boolean
 
   portalsFeatureEnabled: boolean
-  showEdgesIntoDisabledPortals: boolean
 
   autoFileNodeEdgesFeatureEnabled: boolean
   autoFileNodeEdgesFrontmatterKey: string
@@ -213,7 +212,6 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   canvasEncapsulationEnabled: false,
 
   portalsFeatureEnabled: true,
-  showEdgesIntoDisabledPortals: true,
 
   autoFileNodeEdgesFeatureEnabled: false,
   autoFileNodeEdgesFrontmatterKey: 'canvas-edges',
@@ -595,21 +593,6 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
               type: 'toggle',
               key: 'portalsFeatureEnabled'
             }
-          },
-          {
-            type: 'page',
-            name: 'Portals settings',
-            visible: () => this.getControlValue('portalsFeatureEnabled') as boolean,
-            items: [
-              {
-                name: 'Show edges into disabled portals',
-                desc: 'Shows edges into disabled portals.',
-                control: {
-                  type: 'toggle',
-                  key: 'showEdgesIntoDisabledPortals'
-                }
-              }
-            ]
           },
           this.getDocumentationButton('portals')
         ]

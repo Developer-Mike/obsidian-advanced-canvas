@@ -266,7 +266,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     for (const nodeData of data.nodes) delete (nodeData as CanvasFileNodeData).isPortalLoaded
 
     const portalsIdMap = new Map(data.nodes
-      .filter((nodeData: CanvasFileNodeData) => nodeData.portal)
+      .filter((nodeData: CanvasFileNodeData) => nodeData.type === 'file') // When portal closing right now, the nodeData.portal is false -> unreliable
       .map(nodeData => [nodeData.id, nodeData])
     ) as Map<string, CanvasFileNodeData>
 
