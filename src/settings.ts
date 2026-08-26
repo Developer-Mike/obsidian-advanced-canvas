@@ -1032,13 +1032,13 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
         ]
       },
 
-      // Z ordering controls
+      // Z-Ordering controls
       {
         type: 'group',
-        heading: 'Z ordering controls',
+        heading: 'Z-Ordering controls',
         items: [
           {
-            name: 'Enable Z ordering controls',
+            name: 'Enable Z-Ordering controls',
             desc: 'Change the persistent z-index of nodes using the context menu.',
             control: {
               type: 'toggle',
@@ -1047,7 +1047,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           },
           {
             type: 'page',
-            name: 'Z ordering controls settings',
+            name: 'Z-Ordering controls settings',
             visible: () => this.getControlValue('zOrderingControlFeatureEnabled') as boolean,
             items: [
               {
@@ -1059,7 +1059,8 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
                 }
               }
             ]
-          }
+          },
+          this.getDocumentationButton('z-ordering-control')
         ]
       },
 
@@ -1327,7 +1328,8 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
               type: 'toggle',
               key: 'betterExportFeatureEnabled'
             }
-          }
+          },
+          this.getDocumentationButton('image-export')
         ]
       },
     ]

@@ -472,7 +472,7 @@ Collapse and expand groups to organize your canvas.
 </details>
 
 ## Image Export
-Export the whole canvas or just a selection as a PNG/SVG image with transparency. Core plugin export options like "Privacy Mode" and "Show Logo" (extended to include Advanced Canvas logo) are also available.
+Export the whole canvas or just a selection as a PNG/SVG image with transparency. Core plugin export options like "Privacy Mode" and "Show Logo" (extended to include Advanced Canvas logo) are also available. Run the `Advanced Canvas: Export canvas as image` command to use the enhanced export options.
 
 <details>
     <summary>Image Export Example (SVG)</summary>
