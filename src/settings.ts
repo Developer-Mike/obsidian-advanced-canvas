@@ -38,7 +38,7 @@ export interface AdvancedCanvasPluginSettingsValues {
   customEdgeStyleAttributes: StyleAttribute[]
   inheritEdgeColorFromNode: boolean
   defaultEdgeColor: number
-  defaultEdgeLineDirection: EdgeLineDirection // FIXME: satisfies enforcement
+  defaultEdgeLineDirection: EdgeLineDirection
   defaultEdgeStyleAttributes: { [key: string]: string }
   edgeStyleUpdateWhileDragging: boolean
   edgeStyleSquarePathRounded: boolean
