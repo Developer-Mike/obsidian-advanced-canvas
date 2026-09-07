@@ -253,7 +253,7 @@ export default class CanvasHelper {
       styleMenuDropdownScrollElement.classList.add('menu-scroll')
 
       const styleMenuDropdownGroupElement = styleMenuDropdownScrollElement.createDiv()
-      styleMenuDropdownScrollElement.classList.add('menu-group')
+      styleMenuDropdownGroupElement.classList.add('menu-group')
 
       styleMenuDropdownElement.setCssStyles({ position: 'absolute', maxHeight: 'initial' })
       styleMenuDropdownElement.setCssStyles({ top: `${popupMenuElement.getBoundingClientRect().height}px` })
@@ -313,10 +313,10 @@ export default class CanvasHelper {
           styleMenuDropdownSubmenuElement.classList.add('menu')
 
           const styleMenuDropdownSubmenuScrollElement = styleMenuDropdownSubmenuElement.createDiv()
-          styleMenuDropdownScrollElement.classList.add('menu-scroll')
+          styleMenuDropdownSubmenuScrollElement.classList.add('menu-scroll')
 
           const styleMenuDropdownSubmenuGroupElement = styleMenuDropdownSubmenuScrollElement.createDiv()
-          styleMenuDropdownScrollElement.classList.add('menu-group')
+          styleMenuDropdownSubmenuGroupElement.classList.add('menu-group')
 
           styleMenuDropdownSubmenuElement.setCssStyles({ position: 'absolute', maxHeight: 'initial' })
 
