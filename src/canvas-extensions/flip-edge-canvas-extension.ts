@@ -28,18 +28,21 @@ export default class FlipEdgeCanvasExtension extends CanvasExtension {
   }
 
   private onEdgeDirectionDropdownCreated(canvas: Canvas) {
-    const dropdownEl = activeDocument.body.querySelector('div.menu')
-    if (!dropdownEl) return
+    const dropdownScrollerEl = activeDocument.body.querySelector('div.menu .menu-scroll')
+    if (!dropdownScrollerEl) return
 
     const separatorEl = CanvasHelper.createDropdownSeparatorElement()
-    dropdownEl.appendChild(separatorEl)
+    dropdownScrollerEl.appendChild(separatorEl)
+
+    const groupEl = dropdownScrollerEl.createDiv()
+    groupEl.classList.add('menu-group')
 
     const flipEdgeButton = CanvasHelper.createDropdownOptionElement({
       icon: 'flip-horizontal-2',
       label: 'Flip Edge',
       callback: () => this.flipEdge(canvas)
     })
-    dropdownEl.appendChild(flipEdgeButton)
+    groupEl.appendChild(flipEdgeButton)
   }
 
   private flipEdge(canvas: Canvas) {
