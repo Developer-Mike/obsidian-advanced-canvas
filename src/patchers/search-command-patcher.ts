@@ -1,6 +1,6 @@
 import { CanvasView } from "src/@types/Canvas"
 import Patcher, { invoke } from "./patcher"
-import { setIcon } from "obsidian"
+import { debounce, setIcon } from "obsidian"
 import { CanvasGroupNodeData, CanvasTextNodeData } from "src/@types/AdvancedJsonCanvas"
 
 export default class SearchCommandPatcher extends Patcher {
@@ -42,6 +42,7 @@ class CanvasSearchView {
   private searchInput: HTMLInputElement
   private searchCount: HTMLDivElement
 
+  private debouncing: boolean = false
   private searchMatches: SearchMatch[] = []
   private matchIndex = 0
 
@@ -64,7 +65,9 @@ class CanvasSearchView {
     this.searchInput.type = "text"
     this.searchInput.placeholder = "Find..."
     this.searchInput.addEventListener("keydown", (e: KeyboardEvent) => this.onKeyDown(e))
-    this.searchInput.addEventListener("input", () => this.onInput())
+
+    const debouncedOnInput = debounce(() => this.onInput(), 200, true)
+    this.searchInput.addEventListener("input", debouncedOnInput)
 
     this.searchCount = searchInputContainer.createDiv()
     this.searchCount.className = "document-search-count"
@@ -106,40 +109,51 @@ class CanvasSearchView {
       this.changeMatch(this.matchIndex + (e.shiftKey ? -1 : 1))
     else if (e.key === "Escape")
       this.close()
+    else this.debouncing = false
   }
 
   private onInput() {
+    this.debouncing = false
+
     const hasQuery = this.searchInput.value.length > 0
     this.searchCount.toggleClass("is-hidden", !hasQuery)
 
-    if (!hasQuery) this.searchMatches = []
-    else {
-      this.searchMatches = Array.from(this.view.canvas.nodes.values()).map(node => {
-        const nodeData = node.getData()
-
-        let content: string | undefined = undefined
-        if (nodeData.type === "text") content = (nodeData as CanvasTextNodeData).text
-        else if (nodeData.type === "group") content = (nodeData as CanvasGroupNodeData).label
-        else if (nodeData.type === "file") content = node.child.data
-
-        if (!content) return null
-
-        const matches: number[][] = []
-        const regex = new RegExp(this.searchInput.value, "gi")
-        let match: RegExpExecArray | null
-        while ((match = regex.exec(content)) !== null) {
-          matches.push([match.index, match.index + match[0].length])
-        }
-
-        return { nodeId: node.id, content: content, matches: matches }
-      }).filter(match => match && match.matches.length > 0) as SearchMatch[]
+    if (!hasQuery) {
+      this.searchMatches = []
+      return
     }
 
-    // Update match index and update the count display
+    const regex = new RegExp(this.searchInput.value, "gi")
+    const matchesList: SearchMatch[] = []
+
+    for (const node of this.view.canvas.nodes.values()) {
+      const nodeData = node.getData()
+
+      let content: string | undefined = undefined
+      if (nodeData.type === "text") content = (nodeData as CanvasTextNodeData).text
+      else if (nodeData.type === "group") content = (nodeData as CanvasGroupNodeData).label
+      else if (nodeData.type === "file") content = node.child.data
+      if (!content) continue
+
+      regex.lastIndex = 0
+      const matches: number[][] = []
+      let match: RegExpExecArray | null
+
+      while ((match = regex.exec(content)) !== null)
+        matches.push([match.index, match.index + match[0].length])
+
+      if (matches.length === 0) continue
+      matchesList.push({ nodeId: node.id, content: content, matches: matches })
+    }
+
+    this.searchMatches = matchesList
     this.changeMatch(0)
   }
 
   private changeMatch(index: number) {
+    // If the search is pending, immediately perform the search before changing the match index
+    if (this.debouncing) this.onInput()
+
     // Bind the index to the range of searchMatches
     if (this.searchMatches.length === 0) this.matchIndex = -1
     else {
