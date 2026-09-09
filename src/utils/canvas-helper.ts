@@ -249,6 +249,12 @@ export default class CanvasHelper {
       styleMenuDropdownElement.id = STYLE_MENU_DROPDOWN_ID
       styleMenuDropdownElement.classList.add('menu')
 
+      const styleMenuDropdownScrollElement = styleMenuDropdownElement.createDiv()
+      styleMenuDropdownScrollElement.classList.add('menu-scroll')
+
+      const styleMenuDropdownGroupElement = styleMenuDropdownScrollElement.createDiv()
+      styleMenuDropdownGroupElement.classList.add('menu-group')
+
       styleMenuDropdownElement.setCssStyles({ position: 'absolute', maxHeight: 'initial' })
       styleMenuDropdownElement.setCssStyles({ top: `${popupMenuElement.getBoundingClientRect().height}px` })
 
@@ -263,7 +269,7 @@ export default class CanvasHelper {
 
       // Add style options
       for (const stylableAttribute of stylableAttributes) {
-        const stylableAttributeElement = styleMenuDropdownElement.createDiv()
+        const stylableAttributeElement = styleMenuDropdownGroupElement.createDiv()
         stylableAttributeElement.classList.add('menu-item')
         stylableAttributeElement.classList.add('tappable')
 
@@ -305,6 +311,12 @@ export default class CanvasHelper {
           const styleMenuDropdownSubmenuElement = popupMenuElement.createDiv()
           styleMenuDropdownSubmenuElement.id = STYLE_MENU_DROPDOWN_SUBMENU_ID
           styleMenuDropdownSubmenuElement.classList.add('menu')
+
+          const styleMenuDropdownSubmenuScrollElement = styleMenuDropdownSubmenuElement.createDiv()
+          styleMenuDropdownSubmenuScrollElement.classList.add('menu-scroll')
+
+          const styleMenuDropdownSubmenuGroupElement = styleMenuDropdownSubmenuScrollElement.createDiv()
+          styleMenuDropdownSubmenuGroupElement.classList.add('menu-group')
 
           styleMenuDropdownSubmenuElement.setCssStyles({ position: 'absolute', maxHeight: 'initial' })
 
@@ -351,7 +363,7 @@ export default class CanvasHelper {
             }
 
             // Add to dropdown submenu
-            styleMenuDropdownSubmenuElement.appendChild(styleMenuDropdownSubmenuOptionElement)
+            styleMenuDropdownSubmenuGroupElement.appendChild(styleMenuDropdownSubmenuOptionElement)
           }
         })
       }
