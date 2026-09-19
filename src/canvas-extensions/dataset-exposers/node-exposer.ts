@@ -17,6 +17,8 @@ export function getExposedNodeData(settings: SettingsManager): (keyof CanvasNode
 }
 
 export default class NodeExposerExtension extends CanvasExtension {
+  private iframeObservers = new WeakSet<HTMLElement>()
+
   isEnabled() { return true }
 
   init() {
@@ -28,8 +30,11 @@ export default class NodeExposerExtension extends CanvasExtension {
 
         this.setDataAttributes(node.nodeEl, nodeData)
 
-        const iframe = node.nodeEl.querySelector('iframe')?.contentDocument?.body
-        if (iframe) this.setDataAttributes(iframe, nodeData)
+        // Cross-origin iframes throw when their contentDocument is accessed on some platforms
+        let iframeBody: HTMLElement | null = null
+        try { iframeBody = node.nodeEl.querySelector('iframe')?.contentDocument?.body ?? null }
+        catch { iframeBody = null }
+        if (iframeBody) this.setDataAttributes(iframeBody, nodeData)
       }
     ))
 
@@ -42,16 +47,22 @@ export default class NodeExposerExtension extends CanvasExtension {
         const nodeData = node.getData()
         if (!nodeData) return
 
-        const iframe = node.nodeEl.querySelector('iframe')?.contentDocument?.body
-        if (!iframe) return
+        let iframeBody: HTMLElement | null = null
+        // Cross-origin iframes throw when their contentDocument is accessed on some platforms
+        try { iframeBody = node.nodeEl.querySelector('iframe')?.contentDocument?.body ?? null }
+        catch { return }
+        if (!iframeBody) return
 
-        iframe.classList.add(CANVAS_NODE_IFRAME_BODY_CLASS)
-        new MutationObserver(() => iframe.classList.toggle(CANVAS_NODE_IFRAME_BODY_CLASS, true))
-          .observe(iframe, { attributes: true, attributeFilter: ['class'] })
-        this.setDataAttributes(iframe, nodeData)
+        if (!this.iframeObservers.has(iframeBody)) {
+          this.iframeObservers.add(iframeBody)
+          iframeBody.classList.add(CANVAS_NODE_IFRAME_BODY_CLASS)
+          new MutationObserver(() => iframeBody.classList.toggle(CANVAS_NODE_IFRAME_BODY_CLASS, true))
+            .observe(iframeBody, { attributes: true, attributeFilter: ['class'] })
+        }
+        this.setDataAttributes(iframeBody, nodeData)
 
         // Expose wrapper settings in the iframe too
-        CanvasWrapperExposerExtension.updateCanvasExposedSettings(this.plugin, iframe)
+        CanvasWrapperExposerExtension.updateCanvasExposedSettings(this.plugin, iframeBody)
       }
     ))
   }
