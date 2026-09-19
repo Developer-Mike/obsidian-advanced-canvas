@@ -53,7 +53,9 @@ export default class CssStylesConfigManager<T> {
       const yamlString = match[1]
       if (!yamlString) continue
 
-      const configYaml = parseYaml(yamlString) as Record<string, unknown>
+      let configYaml: Record<string, unknown>
+      try { configYaml = parseYaml(yamlString) as Record<string, unknown> }
+      catch { continue }
       configs.push(configYaml)
     }
 
