@@ -2,6 +2,8 @@ import { Canvas, CanvasNode } from 'src/@types/Canvas'
 import CanvasExtension from './canvas-extension'
 
 export default class ReadingModeFixCanvasExtension extends CanvasExtension {
+  private hookedRenderers = new WeakSet<object>()
+
   isEnabled() { return 'readingModeFixEnabled' as const }
 
   init() {
@@ -22,6 +24,9 @@ export default class ReadingModeFixCanvasExtension extends CanvasExtension {
   private updateNodeRenderer(node: CanvasNode) {
     const renderer = node.child?.previewMode?.renderer
     if (!renderer) return
+
+    if (this.hookedRenderers.has(renderer)) return
+    this.hookedRenderers.add(renderer)
 
     renderer.onRendered(() => {
       let text = renderer.text ?? ""
