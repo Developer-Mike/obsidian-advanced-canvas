@@ -132,6 +132,7 @@ export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
     if (this.plugin.settings.getSetting('autoResizeNodeSnapToGrid'))
       height = Math.ceil(height / CanvasHelper.GRID_SIZE) * CanvasHelper.GRID_SIZE
 
+    if (height === nodeData.height) return
     node.setData({
       ...nodeData,
       height: height
