@@ -317,12 +317,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
   private getDocumentationButton(section: string, label?: string): SettingGroupItem {
     return {
       name: label ? `Open ${label} documentation` : 'Open documentation',
-      action: () => {
-        const anchor = activeWindow.createEl('a')
-        anchor.href = `${README_URL}#${section}`
-        anchor.target = '_blank'
-        anchor.click()
-      }
+      action: () => window.open(`${README_URL}#${section}`, '_blank')
     }
   }
 
@@ -335,12 +330,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           {
             name: 'Support me on Ko-fi',
             desc: 'If you like this plugin, consider supporting its development <3',
-            action: () => {
-              const anchor = activeWindow.createEl('a')
-              anchor.href = KOFI_PAGE_URL
-              anchor.target = '_blank'
-              anchor.click()
-            }
+            action: () => window.open(KOFI_PAGE_URL, '_blank')
           }
         ]
       },
