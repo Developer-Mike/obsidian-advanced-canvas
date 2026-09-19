@@ -40,6 +40,7 @@ import FrontmatterControlButtonCanvasExtension from './canvas-extensions/frontma
 import BetterDefaultSettingsCanvasExtension from './canvas-extensions/better-default-settings-canvas-extension'
 import ColorPaletteCanvasExtension from './canvas-extensions/color-palette-canvas-extension'
 import CollapsibleGroupsCanvasExtension from './canvas-extensions/collapsible-groups-canvas-extension'
+import CollapsibleEdgesCanvasExtension from './canvas-extensions/collapsible-edges-canvas-extension'
 import FocusModeCanvasExtension from './canvas-extensions/focus-mode-canvas-extension'
 import AutoFileNodeEdgesCanvasExtension from './canvas-extensions/auto-file-node-edges-canvas-extension'
 import FlipEdgeCanvasExtension from './canvas-extensions/flip-edge-canvas-extension'
@@ -97,6 +98,7 @@ const CANVAS_EXTENSIONS: CanvasExtensionConstructor[] = [
   FloatingEdgeCanvasExtension,
   AutoResizeNodeCanvasExtension,
   CollapsibleGroupsCanvasExtension,
+  CollapsibleEdgesCanvasExtension,
   ColorPaletteCanvasExtension,
   PresentationCanvasExtension,
   PortalsCanvasExtension,
