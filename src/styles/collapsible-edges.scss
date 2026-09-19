@@ -1,0 +1,29 @@
+/* Collapse / expand toggle placed at the start of a node's outgoing edges */
+.ce-edge-collapse-toggle {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 100;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: var(--size-4-1);
+  border-radius: 50%;
+
+  color: var(--text-muted);
+  background-color: var(--background-secondary);
+  box-shadow: 0 0 0 1px var(--background-modifier-border);
+
+  pointer-events: initial;
+  cursor: pointer;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  &:hover {
+    color: var(--text-normal);
+  }
+}
