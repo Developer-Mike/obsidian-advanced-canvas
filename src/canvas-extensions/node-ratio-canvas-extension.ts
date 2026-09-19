@@ -62,11 +62,7 @@ export default class NodeRatioCanvasExtension extends CanvasExtension {
     const nodeData = node.getData()
     if (!nodeData.ratio) return
 
-    const nodeBBox = node.getBBox()
-    const nodeSize = {
-      width: nodeBBox.maxX - nodeBBox.minX,
-      height: nodeBBox.maxY - nodeBBox.minY
-    }
+    const nodeSize = { width: node.width, height: node.height }
     const nodeAspectRatio = nodeSize.width / nodeSize.height
 
     if (nodeAspectRatio < nodeData.ratio)
