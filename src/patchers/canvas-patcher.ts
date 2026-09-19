@@ -201,11 +201,13 @@ export default class CanvasPatcher extends Patcher {
         return invoke(next, this, edge)
       }),
       removeNode: Patcher.OverrideExisting(next => function (node: CanvasNode): void {
+        that.uninstallNodeElementPatches(node)
         const result = invoke(next, this, node)
         if (!this.isClearing) that.plugin.app.workspace.trigger('advanced-canvas:node-removed', this, node)
         return result
       }),
       removeEdge: Patcher.OverrideExisting(next => function (edge: CanvasEdge): void {
+        that.uninstallNodeElementPatches(edge)
         const result = invoke(next, this, edge)
         if (!this.isClearing) that.plugin.app.workspace.trigger('advanced-canvas:edge-removed', this, edge)
         return result
@@ -334,7 +336,11 @@ export default class CanvasPatcher extends Patcher {
     this.plugin.registerEditorExtension([EditorView.updateListener.of((update: ViewUpdate) => {
       if (!update.docChanged) return
 
-      const editor = update.state.field(editorInfoField) as { node?: CanvasNode }
+      // The editor info field can be undefined
+      let editor: { node?: CanvasNode }
+      try { editor = update.state.field(editorInfoField) as { node?: CanvasNode } }
+      catch { return }
+
       const node = editor.node
       if (!node) return
 
@@ -342,9 +348,20 @@ export default class CanvasPatcher extends Patcher {
     })])
   }
 
+  // Uninstall patches when an element gets removed from the canvas
+  private elementUninstallers = new Map<CanvasNode | CanvasEdge, (() => void)[]>()
+  private uninstallNodeElementPatches(element: CanvasNode | CanvasEdge) {
+    const uninstallers = this.elementUninstallers.get(element)
+    if (!uninstallers) return
+
+    for (const uninstaller of uninstallers) uninstaller()
+    this.elementUninstallers.delete(element)
+  }
+
   private patchNode(node: CanvasNode) {
     const that = this // eslint-disable-line @typescript-eslint/no-this-alias -- For patcher
 
+    const uninstallers: Array<() => void> = []
     Patcher.patch<CanvasNode>(this.plugin, node, {
       render: Patcher.OverrideExisting(next => function (...args: Parameters<typeof next>): void {
         const result = invoke(next, this, ...args)
@@ -352,21 +369,26 @@ export default class CanvasPatcher extends Patcher {
         return result
       }),
       setData: Patcher.OverrideExisting(next => function (data: CanvasNodeData, addHistory?: boolean): void {
+        const unchanged = JSON.stringify(this.getData()) === JSON.stringify(data)
         const result = invoke(next, this, data)
 
-        if (node.initialized && !node.isDirty) {
-          node.isDirty = true
-          that.plugin.app.workspace.trigger('advanced-canvas:node-changed', this.canvas, node)
-          delete node.isDirty
+        let savedData: CanvasData | null = null
+        if (!unchanged) {
+          if (node.initialized && !node.isDirty) {
+            node.isDirty = true
+            that.plugin.app.workspace.trigger('advanced-canvas:node-changed', this.canvas, node)
+            delete node.isDirty
+          }
+
+          // Save the data to the file (only if the canvas is initialized)
+          if (this.initialized) {
+            savedData = this.canvas.getData()
+            this.canvas.view.requestSave()
+          }
         }
 
-        // Save the data to the file (only if the canvas isn't loading)
-        const canvasWithData = this.canvas as { data: CanvasData }
-        canvasWithData.data = this.canvas.getData()
-        if (this.initialized) this.canvas.view.requestSave()
-
         // Add to the undo stack
-        if (addHistory) this.canvas.pushHistory(canvasWithData.data)
+        if (addHistory) this.canvas.pushHistory(savedData ?? this.canvas.getData())
 
         return result
       }),
@@ -447,7 +469,8 @@ export default class CanvasPatcher extends Patcher {
         that.plugin.app.workspace.trigger('advanced-canvas:node-changed', this.canvas, this)
         return result
       }
-    })
+    }, false, uninstallers)
+    this.elementUninstallers.set(node, uninstallers)
 
     this.runAfterInitialized(node, () => {
       this.plugin.app.workspace.trigger('advanced-canvas:node-added', node.canvas, node)
@@ -458,23 +481,29 @@ export default class CanvasPatcher extends Patcher {
   private patchEdge(edge: CanvasEdge) {
     const that = this // eslint-disable-line @typescript-eslint/no-this-alias -- For patcher
 
+    const uninstallers: Array<() => void> = []
     Patcher.patch<CanvasEdge>(this.plugin, edge, {
       setData: Patcher.OverrideExisting(next => function (data: CanvasEdgeData, addHistory?: boolean): void {
+        const unchanged = JSON.stringify(this.getData()) === JSON.stringify(data)
         const result = invoke(next, this, data)
 
-        if (this.initialized && !this.isDirty) {
-          this.isDirty = true
-          that.plugin.app.workspace.trigger('advanced-canvas:edge-changed', this.canvas, this)
-          delete this.isDirty
+        let savedData: CanvasData | null = null
+        if (!unchanged) {
+          if (this.initialized && !this.isDirty) {
+            this.isDirty = true
+            that.plugin.app.workspace.trigger('advanced-canvas:edge-changed', this.canvas, this)
+            delete this.isDirty
+          }
+
+          // Save the data to the file (only if the canvas is initialized)
+          if (this.initialized) {
+            savedData = this.canvas.getData()
+            this.canvas.view.requestSave()
+          }
         }
 
-        // Save the data to the file (only if the canvas isn't loading)
-        const canvasWithData = this.canvas as { data: CanvasData }
-        canvasWithData.data = this.canvas.getData()
-        if (this.initialized) this.canvas.view.requestSave()
-
         // Add to the undo stack
-        if (addHistory) this.canvas.pushHistory(this.canvas.getData())
+        if (addHistory) this.canvas.pushHistory(savedData ?? this.canvas.getData())
 
         return result
       }),
@@ -517,7 +546,8 @@ export default class CanvasPatcher extends Patcher {
 
         return result
       }),
-    })
+    }, false, uninstallers)
+    this.elementUninstallers.set(edge, uninstallers)
 
     this.runAfterInitialized(edge, () => {
       this.plugin.app.workspace.trigger('advanced-canvas:edge-added', edge.canvas, edge)
