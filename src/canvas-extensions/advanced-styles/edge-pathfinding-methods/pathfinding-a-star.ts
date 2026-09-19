@@ -40,10 +40,60 @@ class Node {
     this.fCost = 0
     this.parent = null
   }
+}
 
-  // Only check for x and y, not gCost, hCost, fCost, or parent
-  inList(nodes: Node[]): boolean {
-    return nodes.some(n => n.x === this.x && n.y === this.y)
+// Min-heap of the open set ordered by fCost, so extracting the cheapest node is O(log n)
+// instead of a full linear scan per iteration.
+class MinHeap {
+  private items: Node[] = []
+
+  get size(): number {
+    return this.items.length
+  }
+
+  push(node: Node): void {
+    const items = this.items
+    items.push(node)
+
+    // Sift the new node up until its parent has an equal or lower fCost
+    let index = items.length - 1
+    while (index > 0) {
+      const parentIndex = (index - 1) >> 1
+      if (items[parentIndex].fCost <= node.fCost) break
+
+      items[index] = items[parentIndex]
+      index = parentIndex
+    }
+    items[index] = node
+  }
+
+  pop(): Node | null {
+    const items = this.items
+    const top = items[0]
+    if (top === undefined) return null
+
+    const last = items.pop()!
+    if (items.length > 0) {
+      // Move the last node to the root and sift it down to restore the heap property
+      let index = 0
+      while (true) {
+        const leftIndex = 2 * index + 1
+        if (leftIndex >= items.length) break
+
+        const rightIndex = leftIndex + 1
+        let smallestIndex = leftIndex
+        if (rightIndex < items.length && items[rightIndex].fCost < items[leftIndex].fCost)
+          smallestIndex = rightIndex
+
+        if (items[smallestIndex].fCost >= last.fCost) break
+
+        items[index] = items[smallestIndex]
+        index = smallestIndex
+      }
+      items[index] = last
+    }
+
+    return top
   }
 }
 
@@ -111,34 +161,25 @@ export default class EdgePathfindingAStar extends EdgePathfindingMethod {
     // Check if start and end positions are valid
     if (this.isInsideObstacle(start, obstacles) || this.isInsideObstacle(end, obstacles)) return null
 
-    const openSet: Node[] = [start]
-    const closedSet: Node[] = []
+    const openSet = new MinHeap()
+    openSet.push(start)
+    const closedSet = new Set<string>()
+    const bestGCost = new Map<string, number>([[`${start.x},${start.y}`, 0]])
 
     const startTimestamp = performance.now()
 
-    while (openSet.length > 0) {
-      // Find the node with the lowest fCost in the open set
-      let current: Node|null = null
-      let lowestFCost = Infinity
-
-      for (const node of openSet) {
-        if (node.fCost < lowestFCost) {
-          current = node
-          lowestFCost = node.fCost
-        }
-      }
-
+    while (openSet.size > 0) {
       // Check if the calculation is taking too long
       if (performance.now() - startTimestamp > MAX_MS_CALCULATION)
         return null
 
-      // No path found
-      if (!current)
-        return null
+      const current = openSet.pop()!
+      const currentKey = `${current.x},${current.y}`
 
-      // Remove the current node from the open set and add it to the closed set
-      openSet.splice(openSet.indexOf(current), 1)
-      closedSet.push(current)
+      // Skip stale heap entries that were already closed through a cheaper path
+      if (closedSet.has(currentKey))
+        continue
+      closedSet.add(currentKey)
 
       // Check if we have reached the end
       if (current.x === end.x && current.y === end.y)
@@ -150,8 +191,10 @@ export default class EdgePathfindingAStar extends EdgePathfindingMethod {
 
       // Expand neighbors
       for (const neighbor of this.getPossibleNeighbors(current, obstacles, gridResolution, allowDiagonal)) {
+        const neighborKey = `${neighbor.x},${neighbor.y}`
+
         // Skip if already processed
-        if (neighbor.inList(closedSet))
+        if (closedSet.has(neighborKey))
           continue
 
         // Calculate tentative gCost
@@ -160,14 +203,15 @@ export default class EdgePathfindingAStar extends EdgePathfindingMethod {
           dy: neighbor.y - current.y,
         }) : 1)
 
-        // Check if neighbor is not already in the open set or if the new gCost is lower
-        if (!neighbor.inList(openSet) || tentativeGCost < neighbor.gCost) {
+        // Only enqueue when this is the cheapest known path to the neighbor
+        const previousGCost = bestGCost.get(neighborKey)
+        if (previousGCost === undefined || tentativeGCost < previousGCost) {
           neighbor.parent = current
           neighbor.gCost = tentativeGCost
           neighbor.hCost = this.heuristic(neighbor, end)
           neighbor.fCost = neighbor.gCost + neighbor.hCost
+          bestGCost.set(neighborKey, tentativeGCost)
 
-          // Add neighbor to the open set
           openSet.push(neighbor)
         }
       }
