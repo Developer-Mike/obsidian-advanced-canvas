@@ -10,6 +10,7 @@ export default class FocusModeCanvasExtension extends CanvasExtension {
   init() {
     this.plugin.addCommand({
       id: 'toggle-focus-mode',
+      // FIXME: Translation target
       name: 'Toggle Focus Mode',
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
@@ -30,6 +31,7 @@ export default class FocusModeCanvasExtension extends CanvasExtension {
 
     const controlMenuFocusToggle = CanvasHelper.createControlMenuButton({
       id: CONTROL_MENU_FOCUS_TOGGLE_ID,
+      // FIXME: Translation target
       label: 'Focus Mode',
       icon: 'focus',
       callback: () => this.toggleFocusMode(canvas)

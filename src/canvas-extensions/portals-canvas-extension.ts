@@ -77,6 +77,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
           setData(newData)
         }).catch((error) => {
           console.error('Error loading portal data:', error)
+          // FIXME: Translation target
           new Notice('An error occurred while loading portal data. Please check console for details.')
         })
       }
@@ -194,6 +195,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     if (!PortalsCanvasExtension.isPortalElement(edge.id)) return
 
     cancelRef.value = true // Cancel dragging
+    // FIXME: Translation target
     new Notice('Updating edges from portals is not supported yet.')
   }
 
@@ -202,6 +204,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     if (!PortalsCanvasExtension.isPortalElement(edge.from.node.id) || !PortalsCanvasExtension.isPortalElement(edge.to.node.id)) return // Do not cancel if at least one end is not from a portal
 
     canvas.removeEdge(edge)
+    // FIXME: Translation target
     new Notice('Creating edges with both ends in portals are not supported yet.')
   }
 

@@ -5,6 +5,7 @@ import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from './canvas-extension'
 import { NodeSide } from 'obsidian/canvas'
 
+// FIXME: Translation target
 const START_SLIDE_NAME = 'Start Slide'
 const DEFAULT_SLIDE_NAME = 'New Slide'
 const ARROW_SIDE_MAPPINGS: Record<string, NodeSide> = {
@@ -31,6 +32,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
       (menu: Menu, canvas: Canvas) => {
         menu.addItem((item) =>
           item
+            // FIXME: Translation target
             .setTitle('Wrap in slide')
             .setIcon('gallery-vertical')
             .onClick(() => this.addSlide(canvas, undefined,
@@ -44,6 +46,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'create-new-slide',
+      // FIXME: Translation target
       name: 'Create new slide',
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
@@ -54,6 +57,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'set-start-node',
+      // FIXME: Translation target
       name: 'Set start node',
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
@@ -64,6 +68,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'start-presentation',
+      // FIXME: Translation target
       name: 'Start presentation',
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
@@ -74,6 +79,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'continue-presentation',
+      // FIXME: Translation target
       name: 'Continue presentation',
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
@@ -84,6 +90,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'end-presentation',
+      // FIXME: Translation target
       name: 'End presentation',
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
@@ -94,6 +101,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'previous-node',
+      // FIXME: Translation target
       name: 'Previous node',
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
@@ -104,6 +112,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'next-node',
+      // FIXME: Translation target
       name: 'Next node',
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
@@ -131,6 +140,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
         canvas,
         {
           id: 'new-slide',
+          // FIXME: Translation target
           label: 'Drag to add slide',
           icon: 'gallery-vertical'
         },
@@ -154,6 +164,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
       canvas,
       CanvasHelper.createPopupMenuOption({
         id: 'start-node',
+        // FIXME: Translation target
         label: 'Set as start slide',
         icon: 'play',
         callback: () => this.setStartNode(canvas, selectedNode)
@@ -252,6 +263,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     if (!tryContinue || this.visitedNodeIds.length === 0) {
       const startNode = canvas.metadata['startNode'] && canvas.nodes.get(canvas.metadata['startNode'])
       if (!startNode) {
+        // FIXME: Translation target
         new Notice('No start node found. Please mark a node as a start node through the popup menu.')
         return
       }

@@ -36,6 +36,7 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'toggle-collapse-group',
+      // FIXME: Translation target
       name: 'Toggle collapse group',
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,

@@ -18,6 +18,7 @@ export default class PdfAnnotationCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'pin-pdf-page',
+      // FIXME: Translation target
       name: 'Pin PDF page',
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
@@ -45,6 +46,7 @@ export default class PdfAnnotationCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'annotate-pdf',
+      // FIXME: Translation target
       name: 'Insert PDF for annotation',
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,

@@ -24,6 +24,7 @@ export default class FrontmatterControlButtonCanvasExtension extends CanvasExten
       CanvasHelper.createControlMenuButton({
         id: 'properties-button',
         icon: 'info',
+        // FIXME: Translation target
         label: 'Properties',
         callback: () => {
           const propertiesPlugin = this.plugin.app.internalPlugins.plugins['properties']

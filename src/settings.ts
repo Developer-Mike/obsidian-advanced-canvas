@@ -321,6 +321,7 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
     }
   }
 
+  // FIXME: Translation target
   override getSettingDefinitions(): SettingDefinitionItem[] {
     return [
       // Ko-fi banner

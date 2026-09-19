@@ -35,12 +35,14 @@ export default class ZOrderingCanvasExtension  extends CanvasExtension {
 
     if (this.plugin.settings.getSetting('zOrderingControlShowOneLayerShiftOptions') && nodes.length === 1) {
       menu.addItem(item => {
+        // FIXME: Translation target
         item.setTitle('Move one layer forward')
         item.setIcon('arrow-up')
         item.onClick(() => this.moveOneLayer(canvas, nodes.first()!, true))
       })
 
       menu.addItem(item => {
+        // FIXME: Translation target
         item.setTitle('Move one layer backward')
         item.setIcon('arrow-down')
         item.onClick(() => this.moveOneLayer(canvas, nodes.first()!, false))
@@ -48,12 +50,14 @@ export default class ZOrderingCanvasExtension  extends CanvasExtension {
     }
 
     menu.addItem(item => {
+      // FIXME: Translation target
       item.setTitle('Bring to front')
       item.setIcon('bring-to-front')
       item.onClick(() => this.moveMaxLayers(canvas, nodes, true))
     })
 
     menu.addItem(item => {
+      // FIXME: Translation target
       item.setTitle('Send to back')
       item.setIcon('send-to-back')
       item.onClick(() => this.moveMaxLayers(canvas, nodes, false))
@@ -61,6 +65,7 @@ export default class ZOrderingCanvasExtension  extends CanvasExtension {
 
     if (nodes.some(node => node.getData().zIndex !== undefined)) {
       menu.addItem(item => {
+        // FIXME: Translation target
         item.setTitle('Remove persistent z-index')
         item.setIcon('pin-off')
         item.onClick(() => this.removePersistentZIndexes(canvas, nodes))

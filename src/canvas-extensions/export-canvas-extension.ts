@@ -21,6 +21,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'export-all-as-image',
+      // FIXME: Translation target
       name: 'Export canvas as image',
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
@@ -31,6 +32,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'export-selected-as-image',
+      // FIXME: Translation target
       name: 'Export selected nodes as image',
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
@@ -47,6 +49,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
 
   private async showExportImageSettingsModal(canvas: Canvas, nodesToExport: CanvasNode[] | null) {
     const modal = new Modal(this.plugin.app)
+    // FIXME: Translation target
     modal.setTitle('Export image settings')
 
     // Create ref to dynamic settings
@@ -67,6 +70,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
 
     let svg = false
     new Setting(modal.contentEl)
+      // FIXME: Translation target
       .setName('Export file format')
       .setDesc('Choose the file format to export the canvas as.')
       .addDropdown(dropdown => dropdown
@@ -83,6 +87,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
 
     let pixelRatioFactor = 1
     pixelRatioSetting = new Setting(modal.contentEl)
+      // FIXME: Translation target
       .setName('Pixel ratio')
       .setDesc('Higher pixel ratios result in higher resolution images but also larger file sizes.')
       .addSlider(slider => slider
@@ -93,6 +98,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
 
     let noFontExport = true
     noFontExportSetting = new Setting(modal.contentEl)
+      // FIXME: Translation target
       .setName('Skip font export')
       .setDesc('This will not include the fonts in the exported SVG. This will make the SVG file smaller.')
       .addToggle(toggle => toggle
@@ -102,6 +108,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
 
     let theme: 'light' | 'dark' = activeDocument.body.classList.contains('theme-dark') ? 'dark' : 'light'
     new Setting(modal.contentEl)
+      // FIXME: Translation target
       .setName('Theme')
       .setDesc('The theme used for the export.')
       .addDropdown(dropdown => dropdown
@@ -115,6 +122,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
 
     let watermark = false
     new Setting(modal.contentEl)
+      // FIXME: Translation target
       .setName('Show logo')
       .setDesc('This will add an Obsidian + Advanced Canvas logo to the bottom left.')
       .addToggle(toggle => toggle
@@ -124,6 +132,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
 
     let garbledText = false
     new Setting(modal.contentEl)
+      // FIXME: Translation target
       .setName('Privacy mode')
       .setDesc('This will obscure any text on your canvas.')
       .addToggle(toggle => toggle
@@ -133,6 +142,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
 
     let transparentBackground = false
     transparentBackgroundSetting = new Setting(modal.contentEl)
+      // FIXME: Translation target
       .setName('Transparent background')
       .setDesc('This will make the background of the image transparent.')
       .addToggle(toggle => toggle
@@ -142,6 +152,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
 
     new Setting(modal.contentEl)
       .addButton(button => button
+        // FIXME: Translation target
         .setButtonText('Save')
         .setCta()
         .onClick(async () => {
@@ -189,6 +200,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
       window.getComputedStyle(canvas.canvasEl).getPropertyValue('--canvas-background')
 
     // Create loading overlay
+    // FIXME: Translation target
     new Notice('Exporting the canvas. Please wait...')
     const interactionBlocker = this.getInteractionBlocker()
     activeDocument.body.appendChild(interactionBlocker)
@@ -339,6 +351,7 @@ export default class ExportCanvasExtension extends CanvasExtension {
         downloadEl.download = filename
         downloadEl.click()
       } else {
+        // FIXME: Translation target
         const ERROR_MESSAGE = 'Export cancelled: Nodes did not finish loading in time'
         new Notice(ERROR_MESSAGE)
         console.error(ERROR_MESSAGE)

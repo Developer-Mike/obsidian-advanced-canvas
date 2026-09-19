@@ -28,6 +28,7 @@ export default class NodeTemplatesCanvasExtension extends CanvasExtension {
   init() {
     this.plugin.addCommand({
       id: 'save-node-as-template',
+      // FIXME: Translation target
       name: 'Save node as template',
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
@@ -57,6 +58,7 @@ export default class NodeTemplatesCanvasExtension extends CanvasExtension {
 
       this.plugin.addCommand({
         id: commandId,
+        // FIXME: Translation target
         name: "Create template node " + (template.label ? `"${template.label}"` : (i + 1)),
         checkCallback: CanvasHelper.canvasCommand(
           this.plugin,
@@ -95,6 +97,7 @@ export default class NodeTemplatesCanvasExtension extends CanvasExtension {
           canvas,
           {
             id: `${TEMPLATE_NODE_BUTTON_ID_PREFIX}${i}`,
+            // FIXME: Translation target
             label: "Drag to add template node " + (template.label ? `"${template.label}"` : (i + 1)),
             icon: template.icon ?? 'book-dashed'
           },
@@ -147,6 +150,7 @@ export default class NodeTemplatesCanvasExtension extends CanvasExtension {
     const menu = new Menu()
 
     menu.addItem(item => item
+      // FIXME: Translation target
       .setTitle("Remove")
       .setIcon("trash")
       .onClick(async () => {
@@ -169,9 +173,11 @@ export default class NodeTemplatesCanvasExtension extends CanvasExtension {
     const selectedNodeData = canvas.getSelectionData().nodes[0]
     const icon = await new IconModal(this.plugin.app).promise
     if (!icon) {
+      // FIXME: Translation target
       new Notice("No icon selected, template creation cancelled.")
       return
     }
+    // FIXME: Translation target
     const label = await new AbstractSelectionModal(this.plugin.app, "Set template label (optional)", [], true).promise
 
     await this.plugin.settings.setSetting({
@@ -203,6 +209,7 @@ class IconModal extends FuzzySuggestModal<string> {
   constructor(app: App) {
     super(app)
 
+    // FIXME: Translation target
     this.setPlaceholder("Set template icon")
   }
 

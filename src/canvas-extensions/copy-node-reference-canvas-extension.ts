@@ -24,6 +24,7 @@ export default class CopyNodeReferenceCanvasExtension extends CanvasExtension {
 
     const menuOption: MenuOption = {
       id: 'node-popup-menu-option-copy-reference',
+      // FIXME: Translation target
       label: 'Copy wikilink to node',
       icon: 'link',
       callback: () => CopyNodeReferenceCanvasExtension.copyWikilinkToNode(canvas.view.file, selectionData.nodes[0])
@@ -38,8 +39,8 @@ export default class CopyNodeReferenceCanvasExtension extends CanvasExtension {
     const wikilink = `[[${file.path}#${nodeData.id}|${file.name} (${nodeTypeString} node)]]`
 
     navigator.clipboard.writeText(wikilink).then(() =>
-      new Notice("Copied wikilink to node to clipboard.", 2000)
-    ).catch(() => new Notice("Failed to copy wikilink to node to clipboard.", 2000))
+      new Notice("Copied wikilink to node to clipboard.", 2000) // FIXME: Translation target
+    ).catch(() => new Notice("Failed to copy wikilink to node to clipboard.", 2000)) // FIXME: Translation target
   }
 
 }

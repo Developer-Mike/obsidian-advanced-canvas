@@ -6,16 +6,19 @@ const DIRECTION_MENU_MAP: Record<ConnectionDirection, MenuOption> = {
   connected: {
     id: 'select-connected-edges',
     icon: 'arrows-selected',
+    // FIXME: Translation target
     label: 'Select Connected Edges',
   },
   outgoing: {
     id: 'select-outgoing-edges',
     icon: 'arrow-right-selected',
+    // FIXME: Translation target
     label: 'Select Outgoing Edges',
   },
   incoming: {
     id: 'select-incoming-edges',
     icon: 'arrow-left-selected',
+    // FIXME: Translation target
     label: 'Select Incoming Edges',
   },
 }

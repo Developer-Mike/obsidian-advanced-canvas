@@ -45,6 +45,7 @@ export function styleAttributeValidator(json: Record<string, unknown>): StyleAtt
   return isValid ? json as unknown as StyleAttribute : null
 }
 
+// FIXME: Translation target
 export const BUILTIN_NODE_STYLE_ATTRIBUTES = [
   {
     key: 'textAlign',
@@ -143,6 +144,7 @@ export const BUILTIN_NODE_STYLE_ATTRIBUTES = [
   }
 ] as StyleAttribute[]
 
+// FIXME: Translation target
 export const BUILTIN_EDGE_STYLE_ATTRIBUTES = [
   {
     key: 'path',

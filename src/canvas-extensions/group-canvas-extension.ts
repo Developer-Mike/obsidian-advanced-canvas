@@ -12,6 +12,7 @@ export default class GroupCanvasExtension extends CanvasExtension {
   init() {
     this.plugin.addCommand({
       id: 'create-group-around-selection',
+      // FIXME: Translation target
       name: 'Group selected nodes',
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
@@ -29,6 +30,7 @@ export default class GroupCanvasExtension extends CanvasExtension {
             canvas,
             {
               id: 'create-group',
+              // FIXME: Translation target
               label: 'Drag to add group',
               icon: 'group'
             },

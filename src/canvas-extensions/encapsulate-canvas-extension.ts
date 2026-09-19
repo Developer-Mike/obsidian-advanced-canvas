@@ -13,6 +13,7 @@ export default class EncapsulateCanvasExtension extends CanvasExtension {
     /* Add command to encapsulate selection */
     this.plugin.addCommand({
       id: 'encapsulate-selection',
+      // FIXME: Translation target
       name: 'Encapsulate selection',
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
@@ -27,6 +28,7 @@ export default class EncapsulateCanvasExtension extends CanvasExtension {
       (menu: Menu, canvas: Canvas) => {
         menu.addItem((item) =>
           item
+            // FIXME: Translation target
             .setTitle('Encapsulate')
             .setIcon('file-plus')
             .onClick(() => this.encapsulateSelection(canvas))

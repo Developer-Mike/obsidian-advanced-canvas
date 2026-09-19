@@ -39,6 +39,7 @@ export default class FlipEdgeCanvasExtension extends CanvasExtension {
 
     const flipEdgeButton = CanvasHelper.createDropdownOptionElement({
       icon: 'flip-horizontal-2',
+      // FIXME: Translation target
       label: 'Flip Edge',
       callback: () => this.flipEdge(canvas)
     })

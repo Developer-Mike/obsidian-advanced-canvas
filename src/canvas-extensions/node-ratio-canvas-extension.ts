@@ -22,10 +22,12 @@ export default class NodeRatioCanvasExtension extends CanvasExtension {
     if (!this.plugin.settings.getSetting('aspectRatioControlFeatureEnabled')) return
 
     menu.addItem((item) => {
+      // FIXME: Translation target
       item.setTitle('Set aspect ratio')
         .setIcon('aspect-ratio')
         .onClick(async () => {
           const NO_RATIO = 'No ratio enforcement'
+          // FIXME: Translation target
           const newRatioString = await new AbstractSelectionModal(this.plugin.app, 'Enter aspect ratio (width:height)', ['16:9', '4:3', '3:2', '1:1', NO_RATIO])
             .promise
 

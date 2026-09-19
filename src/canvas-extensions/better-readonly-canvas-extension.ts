@@ -77,6 +77,7 @@ export default class BetterReadonlyCanvasExtension extends CanvasExtension {
       settingsContainer,
       this.createToggle({
         id: 'disable-node-popup',
+        // FIXME: Translation target
         label: 'Disable node popup',
         icon: 'arrow-up-right-from-circle',
         callback: () => this.updatePopupMenu(canvas)
@@ -87,6 +88,7 @@ export default class BetterReadonlyCanvasExtension extends CanvasExtension {
       settingsContainer,
       this.createToggle({
         id: 'disable-zoom',
+        // FIXME: Translation target
         label: 'Disable zoom',
         icon: 'zoom-in',
         callback: () => this.updateLockedZoom(canvas)
@@ -97,6 +99,7 @@ export default class BetterReadonlyCanvasExtension extends CanvasExtension {
       settingsContainer,
       this.createToggle({
         id: 'disable-pan',
+        // FIXME: Translation target
         label: 'Disable pan',
         icon: 'move',
         callback: () => this.updateLockedPan(canvas)

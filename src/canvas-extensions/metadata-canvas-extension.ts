@@ -28,6 +28,7 @@ export default class MetadataCanvasExtension extends CanvasExtension {
   private onCanvasChanged(canvas: Canvas): void {
     const metadata = canvas.getData()?.metadata
     if (!metadata || metadata.version !== CURRENT_SPEC_VERSION)
+      // FIXME: Translation target
       return void new Notice("Metadata node not found or version mismatch. Should have been migrated (but wasn't).")
 
     // Add proxy to metadata to listen for changes

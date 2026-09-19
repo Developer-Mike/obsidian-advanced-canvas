@@ -51,6 +51,7 @@ class CanvasSearchView {
     this.createSearchView()
   }
 
+  // FIXME: Translation target
   private createSearchView() {
     this.containerEl = this.view.canvas.wrapperEl.createDiv()
     this.containerEl.className = "document-search-container"
