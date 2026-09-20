@@ -312,6 +312,7 @@ Custom style attributes for nodes and edges can easily be added. They get expose
     ```css
     /* @advanced-canvas-node-style
     key: validation-state
+    icon: hourglass # Optional
     label: Validation State
     options:
       -

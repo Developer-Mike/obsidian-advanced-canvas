@@ -1,23 +1,24 @@
 /* @advanced-canvas-node-style
 key: validation-state
+icon: hourglass # Optional
 label: Validation State
-options: 
-  - 
+options:
+  -
     label: Stateless
     value: null
     icon: circle-help
 
-  - 
+  -
     label: Approved
     value: approved
     icon: circle-check
 
-  - 
+  -
     label: Pending
     value: pending
     icon: circle-dot
 
-  - 
+  -
     label: Rejected
     value: rejected
     icon: circle-x

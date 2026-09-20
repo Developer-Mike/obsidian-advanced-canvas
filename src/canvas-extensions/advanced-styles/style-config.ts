@@ -9,6 +9,7 @@ export interface StyleAttributeOption {
 
 export interface StyleAttribute {
   key: string
+  icon?: string
   label: string
   nodeTypes?: CanvasNodeType[]
   options: StyleAttributeOption[]
@@ -48,6 +49,7 @@ export function styleAttributeValidator(json: Record<string, unknown>): StyleAtt
 export const BUILTIN_NODE_STYLE_ATTRIBUTES = [
   {
     key: 'textAlign',
+    icon: 'align-left',
     label: 'Text Alignment',
     nodeTypes: ['text'],
     options: [
@@ -70,6 +72,7 @@ export const BUILTIN_NODE_STYLE_ATTRIBUTES = [
   },
   {
     key: 'shape',
+    icon: 'shapes',
     label: 'Shape',
     nodeTypes: ['text'],
     options: [
@@ -117,6 +120,7 @@ export const BUILTIN_NODE_STYLE_ATTRIBUTES = [
   },
   {
     key: 'border',
+    icon: 'square-dashed-bottom',
     label: 'Border',
     options: [
       {
@@ -141,11 +145,12 @@ export const BUILTIN_NODE_STYLE_ATTRIBUTES = [
       }
     ]
   }
-] as StyleAttribute[]
+] satisfies StyleAttribute[]
 
 export const BUILTIN_EDGE_STYLE_ATTRIBUTES = [
   {
     key: 'path',
+    icon: 'path-solid',
     label: 'Path Style',
     options: [
       {
@@ -172,6 +177,7 @@ export const BUILTIN_EDGE_STYLE_ATTRIBUTES = [
   },
   {
     key: 'arrow',
+    icon: 'play',
     label: 'Arrow Style',
     options: [
       {
@@ -223,6 +229,7 @@ export const BUILTIN_EDGE_STYLE_ATTRIBUTES = [
   },
   {
     key: 'pathfindingMethod',
+    icon: 'pathfinding-method-square',
     label: 'Pathfinding Method',
     options: [
       {
@@ -247,4 +254,4 @@ export const BUILTIN_EDGE_STYLE_ATTRIBUTES = [
       }
     ]
   }
-] as StyleAttribute[]
+] satisfies StyleAttribute[]
