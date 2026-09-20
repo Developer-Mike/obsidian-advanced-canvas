@@ -46,10 +46,11 @@ export default class ColorPaletteCanvasExtension extends CanvasExtension {
 
     for (const win of this.plugin.windowsManager.windows) {
       const doc = win.activeDocument
+      if (!doc.defaultView) continue
 
       let sheet = this.styleSheets.get(doc)
       if (!sheet) {
-        sheet = new CSSStyleSheet()
+        sheet = new doc.defaultView.CSSStyleSheet()
         doc.adoptedStyleSheets = [...doc.adoptedStyleSheets, sheet]
         this.styleSheets.set(doc, sheet)
       }
