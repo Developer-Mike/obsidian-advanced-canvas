@@ -2,6 +2,7 @@ import { Notice, TFile } from "obsidian"
 import { CanvasData, CanvasEdgeData, CanvasFileNodeData, CanvasNodeData } from "src/@types/AdvancedJsonCanvas"
 import { BBox, Canvas, CanvasEdge, CanvasEdgeEnd, CanvasElement, CanvasElementsData, CanvasNode } from "src/@types/Canvas"
 import CanvasHelper from "src/utils/canvas-helper"
+import t from "src/utils/i18n"
 import CanvasExtension from "./canvas-extension"
 
 const PORTAL_ID_DELIMITER = '||'
@@ -77,8 +78,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
           setData(newData)
         }).catch((error) => {
           console.error('Error loading portal data:', error)
-          // FIXME: Translation target
-          new Notice('An error occurred while loading portal data. Please check console for details.')
+          new Notice(t({ en: 'An error occurred while loading portal data. Please check console for details.' }))
         })
       }
     ))
@@ -195,8 +195,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     if (!PortalsCanvasExtension.isPortalElement(edge.id)) return
 
     cancelRef.value = true // Cancel dragging
-    // FIXME: Translation target
-    new Notice('Updating edges from portals is not supported yet.')
+    new Notice(t({ en: 'Updating edges from portals is not supported yet.' }))
   }
 
   private onEdgeConnectionDraggingAfter(canvas: Canvas, edge: CanvasEdge, _event: PointerEvent, _newEdge: boolean, _side: 'from' | 'to', _previousEnds?: { from: CanvasEdgeEnd, to: CanvasEdgeEnd }) {
@@ -204,8 +203,7 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     if (!PortalsCanvasExtension.isPortalElement(edge.from.node.id) || !PortalsCanvasExtension.isPortalElement(edge.to.node.id)) return // Do not cancel if at least one end is not from a portal
 
     canvas.removeEdge(edge)
-    // FIXME: Translation target
-    new Notice('Creating edges with both ends in portals are not supported yet.')
+    new Notice(t({ en: 'Creating edges with both ends in portals are not supported yet.' }))
   }
 
   private onPopupMenu(canvas: Canvas) {

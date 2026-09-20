@@ -3,6 +3,7 @@ import { CanvasColor } from "obsidian/canvas"
 import { AnyCanvasNodeData, CanvasFileNodeData, CanvasLinkNodeData } from "src/@types/AdvancedJsonCanvas"
 import { Canvas, CanvasNode, Position } from "src/@types/Canvas"
 import CanvasHelper from "src/utils/canvas-helper"
+import t from "src/utils/i18n"
 import { AbstractSelectionModal, FileSelectModal } from "src/utils/modal-helper"
 import CanvasExtension from "./canvas-extension"
 
@@ -28,8 +29,7 @@ export default class NodeTemplatesCanvasExtension extends CanvasExtension {
   init() {
     this.plugin.addCommand({
       id: 'save-node-as-template',
-      // FIXME: Translation target
-      name: 'Save node as template',
+      name: t({ en: 'Save node as template' }),
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (canvas: Canvas) => canvas.getSelectionData().nodes.length === 1,
@@ -58,8 +58,7 @@ export default class NodeTemplatesCanvasExtension extends CanvasExtension {
 
       this.plugin.addCommand({
         id: commandId,
-        // FIXME: Translation target
-        name: "Create template node " + (template.label ? `"${template.label}"` : (i + 1)),
+        name: t({ en: "Create template node " }) + (template.label ? `"${template.label}"` : (i + 1)),
         checkCallback: CanvasHelper.canvasCommand(
           this.plugin,
           (_: Canvas) => true,
@@ -97,8 +96,7 @@ export default class NodeTemplatesCanvasExtension extends CanvasExtension {
           canvas,
           {
             id: `${TEMPLATE_NODE_BUTTON_ID_PREFIX}${i}`,
-            // FIXME: Translation target
-            label: "Drag to add template node " + (template.label ? `"${template.label}"` : (i + 1)),
+            label: t({ en: "Drag to add template node " }) + (template.label ? `"${template.label}"` : (i + 1)),
             icon: template.icon ?? 'book-dashed'
           },
           () => ({ width: template.width, height: template.height }),
@@ -150,8 +148,7 @@ export default class NodeTemplatesCanvasExtension extends CanvasExtension {
     const menu = new Menu()
 
     menu.addItem(item => item
-      // FIXME: Translation target
-      .setTitle("Remove")
+      .setTitle(t({ en: "Remove" }))
       .setIcon("trash")
       .onClick(async () => {
         const buttonEl = e.target as HTMLElement
@@ -173,12 +170,10 @@ export default class NodeTemplatesCanvasExtension extends CanvasExtension {
     const selectedNodeData = canvas.getSelectionData().nodes[0]
     const icon = await new IconModal(this.plugin.app).promise
     if (!icon) {
-      // FIXME: Translation target
-      new Notice("No icon selected, template creation cancelled.")
+      new Notice(t({ en: "No icon selected, template creation cancelled." }))
       return
     }
-    // FIXME: Translation target
-    const label = await new AbstractSelectionModal(this.plugin.app, "Set template label (optional)", [], true).promise
+    const label = await new AbstractSelectionModal(this.plugin.app, t({ en: "Set template label (optional)" }), [], true).promise
 
     await this.plugin.settings.setSetting({
       nodeTemplates: [
@@ -209,8 +204,7 @@ class IconModal extends FuzzySuggestModal<string> {
   constructor(app: App) {
     super(app)
 
-    // FIXME: Translation target
-    this.setPlaceholder("Set template icon")
+    this.setPlaceholder(t({ en: "Set template icon" }))
   }
 
   getItems(): string[] {

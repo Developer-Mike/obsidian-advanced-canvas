@@ -2,6 +2,7 @@ import { Menu } from "obsidian"
 import { Canvas } from "src/@types/Canvas"
 import CanvasHelper from "src/utils/canvas-helper"
 import { FileNameModal } from "src/utils/modal-helper"
+import t from "src/utils/i18n"
 import CanvasExtension from "./canvas-extension"
 
 const ENCAPSULATED_FILE_NODE_SIZE = { width: 300, height: 300 }
@@ -13,8 +14,7 @@ export default class EncapsulateCanvasExtension extends CanvasExtension {
     /* Add command to encapsulate selection */
     this.plugin.addCommand({
       id: 'encapsulate-selection',
-      // FIXME: Translation target
-      name: 'Encapsulate selection',
+      name: t({ en: 'Encapsulate selection' }),
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (canvas: Canvas) => !canvas.readonly && canvas.selection.size > 0,
@@ -28,8 +28,7 @@ export default class EncapsulateCanvasExtension extends CanvasExtension {
       (menu: Menu, canvas: Canvas) => {
         menu.addItem((item) =>
           item
-            // FIXME: Translation target
-            .setTitle('Encapsulate')
+            .setTitle(t({ en: 'Encapsulate' }))
             .setIcon('file-plus')
             .onClick(() => this.encapsulateSelection(canvas))
         )

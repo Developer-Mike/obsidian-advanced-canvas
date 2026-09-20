@@ -2,6 +2,7 @@ import { Canvas, CanvasNode } from 'src/@types/Canvas'
 import CanvasExtension from './canvas-extension'
 import { Menu } from 'obsidian'
 import { AbstractSelectionModal } from 'src/utils/modal-helper'
+import t from 'src/utils/i18n'
 
 export default class NodeRatioCanvasExtension extends CanvasExtension {
   isEnabled() { return true }
@@ -22,13 +23,11 @@ export default class NodeRatioCanvasExtension extends CanvasExtension {
     if (!this.plugin.settings.getSetting('aspectRatioControlFeatureEnabled')) return
 
     menu.addItem((item) => {
-      // FIXME: Translation target
-      item.setTitle('Set aspect ratio')
+      item.setTitle(t({ en: 'Set aspect ratio' }))
         .setIcon('aspect-ratio')
         .onClick(async () => {
-          const NO_RATIO = 'No ratio enforcement'
-          // FIXME: Translation target
-          const newRatioString = await new AbstractSelectionModal(this.plugin.app, 'Enter aspect ratio (width:height)', ['16:9', '4:3', '3:2', '1:1', NO_RATIO])
+          const NO_RATIO = t({ en: 'No ratio enforcement' })
+          const newRatioString = await new AbstractSelectionModal(this.plugin.app, t({ en: 'Enter aspect ratio (width:height)' }), ['16:9', '4:3', '3:2', '1:1', NO_RATIO])
             .promise
 
           const nodeData = node.getData()

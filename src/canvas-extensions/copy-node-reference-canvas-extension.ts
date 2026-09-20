@@ -3,6 +3,7 @@ import CanvasHelper, { MenuOption } from 'src/utils/canvas-helper'
 import CanvasExtension from './canvas-extension'
 import { Notice, TFile } from 'obsidian'
 import TextHelper from "../utils/text-helper"
+import t from "../utils/i18n"
 import { CanvasNodeData } from "obsidian/canvas"
 
 export default class CopyNodeReferenceCanvasExtension extends CanvasExtension {
@@ -24,8 +25,7 @@ export default class CopyNodeReferenceCanvasExtension extends CanvasExtension {
 
     const menuOption: MenuOption = {
       id: 'node-popup-menu-option-copy-reference',
-      // FIXME: Translation target
-      label: 'Copy wikilink to node',
+      label: t({ en: 'Copy wikilink to node' }),
       icon: 'link',
       callback: () => CopyNodeReferenceCanvasExtension.copyWikilinkToNode(canvas.view.file, selectionData.nodes[0])
     }
@@ -39,8 +39,8 @@ export default class CopyNodeReferenceCanvasExtension extends CanvasExtension {
     const wikilink = `[[${file.path}#${nodeData.id}|${file.name} (${nodeTypeString} node)]]`
 
     navigator.clipboard.writeText(wikilink).then(() =>
-      new Notice("Copied wikilink to node to clipboard.", 2000) // FIXME: Translation target
-    ).catch(() => new Notice("Failed to copy wikilink to node to clipboard.", 2000)) // FIXME: Translation target
+      new Notice(t({ en: "Copied wikilink to node to clipboard." }), 2000)
+    ).catch(() => new Notice(t({ en: "Failed to copy wikilink to node to clipboard." }), 2000))
   }
 
 }

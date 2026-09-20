@@ -5,6 +5,7 @@ import { ExtendedCachedMetadata } from "src/@types/Obsidian"
 import BBoxHelper from "src/utils/bbox-helper"
 import CanvasHelper from "src/utils/canvas-helper"
 import { FileSelectModal } from "src/utils/modal-helper"
+import t from "src/utils/i18n"
 import CanvasExtension from "./canvas-extension"
 import CopyNodeReferenceCanvasExtension from "./copy-node-reference-canvas-extension"
 
@@ -17,8 +18,7 @@ export default class CommandsCanvasExtension extends CanvasExtension {
   init() {
     this.plugin.addCommand({
       id: 'toggle-readonly',
-      // FIXME: Translation target
-      name: 'Toggle readonly',
+      name: t({ en: 'Toggle readonly' }),
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (_canvas: Canvas) => true,
@@ -28,8 +28,7 @@ export default class CommandsCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'create-text-node',
-      // FIXME: Translation target
-      name: 'Create text node',
+      name: t({ en: 'Create text node' }),
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (canvas: Canvas) => !canvas.readonly,
@@ -39,8 +38,7 @@ export default class CommandsCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'create-file-node',
-      // FIXME: Translation target
-      name: 'Create file node',
+      name: t({ en: 'Create file node' }),
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (canvas: Canvas) => !canvas.readonly,
@@ -50,8 +48,7 @@ export default class CommandsCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'select-all-edges',
-      // FIXME: Translation target
-      name: 'Select all edges',
+      name: t({ en: 'Select all edges' }),
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (_canvas: Canvas) => true,
@@ -63,8 +60,7 @@ export default class CommandsCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'zoom-to-selection',
-      // FIXME: Translation target
-      name: 'Zoom to selection',
+      name: t({ en: 'Zoom to selection' }),
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (canvas: Canvas) => canvas.selection.size > 0,
@@ -74,8 +70,7 @@ export default class CommandsCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'zoom-to-fit',
-      // FIXME: Translation target
-      name: 'Zoom to fit',
+      name: t({ en: 'Zoom to fit' }),
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (_canvas: Canvas) => true,
@@ -86,8 +81,7 @@ export default class CommandsCanvasExtension extends CanvasExtension {
     for (const direction of DIRECTIONS) {
       this.plugin.addCommand({
         id: `clone-node-${direction}`,
-        // FIXME: Translation target
-        name: `Clone node ${direction}`,
+        name: t({ en: `Clone node ${direction}` }),
         checkCallback: CanvasHelper.canvasCommand(
           this.plugin,
           (canvas: Canvas) => !canvas.readonly && canvas.selection.size === 1 && ([...canvas.selection][0] as CanvasNode | undefined)?.getData().type === 'text',
@@ -97,8 +91,7 @@ export default class CommandsCanvasExtension extends CanvasExtension {
 
       this.plugin.addCommand({
         id: `expand-node-${direction}`,
-        // FIXME: Translation target
-        name: `Expand node ${direction}`,
+        name: t({ en: `Expand node ${direction}` }),
         checkCallback: CanvasHelper.canvasCommand(
           this.plugin,
           (canvas: Canvas) => !canvas.readonly && canvas.selection.size === 1,
@@ -108,8 +101,7 @@ export default class CommandsCanvasExtension extends CanvasExtension {
 
       this.plugin.addCommand({
         id: `navigate-${direction}`,
-        // FIXME: Translation target
-        name: `Navigate ${direction}`,
+        name: t({ en: `Navigate ${direction}` }),
         checkCallback: CanvasHelper.canvasCommand(
           this.plugin,
           (canvas: Canvas) => canvas.getSelectionData().nodes.length === 1,
@@ -120,8 +112,7 @@ export default class CommandsCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'flip-selection-horizontally',
-      // FIXME: Translation target
-      name: 'Flip selection horizontally',
+      name: t({ en: 'Flip selection horizontally' }),
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (canvas: Canvas) => !canvas.readonly && canvas.selection.size > 0,
@@ -131,8 +122,7 @@ export default class CommandsCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'flip-selection-vertically',
-      // FIXME: Translation target
-      name: 'Flip selection vertically',
+      name: t({ en: 'Flip selection vertically' }),
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (canvas: Canvas) => !canvas.readonly && canvas.selection.size > 0,
@@ -142,8 +132,7 @@ export default class CommandsCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'select-connected-edges',
-      // FIXME: Translation target
-      name: 'Select connected edges',
+      name: t({ en: 'Select connected edges' }),
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (canvas: Canvas) => canvas.selection.size > 0,
@@ -153,8 +142,7 @@ export default class CommandsCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'select-incoming-edges',
-      // FIXME: Translation target
-      name: 'Select incoming edges',
+      name: t({ en: 'Select incoming edges' }),
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (canvas: Canvas) => canvas.selection.size > 0,
@@ -164,8 +152,7 @@ export default class CommandsCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'select-outgoing-edges',
-      // FIXME: Translation target
-      name: 'Select outgoing edges',
+      name: t({ en: 'Select outgoing edges' }),
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (canvas: Canvas) => canvas.selection.size > 0,
@@ -175,8 +162,7 @@ export default class CommandsCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'swap-nodes',
-      // FIXME: Translation target
-      name: 'Swap nodes',
+      name: t({ en: 'Swap nodes' }),
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (canvas: Canvas) => !canvas.readonly && canvas.getSelectionData().nodes.length === 2,
@@ -200,8 +186,7 @@ export default class CommandsCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'copy-wikilink-to-node',
-      // FIXME: Translation target
-      name: 'Copy wikilink to node',
+      name: t({ en: 'Copy wikilink to node' }),
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (canvas: Canvas) => !canvas.readonly && canvas.selection.size === 1,
@@ -219,8 +204,7 @@ export default class CommandsCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'pull-outgoing-links-to-canvas',
-      // FIXME: Translation target
-      name: 'Pull outgoing links to canvas',
+      name: t({ en: 'Pull outgoing links to canvas' }),
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (canvas: Canvas) => !canvas.readonly,
@@ -275,8 +259,7 @@ export default class CommandsCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'pull-backlinks-to-canvas',
-      // FIXME: Translation target
-      name: 'Pull backlinks to canvas',
+      name: t({ en: 'Pull backlinks to canvas' }),
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (canvas: Canvas) => !canvas.readonly,

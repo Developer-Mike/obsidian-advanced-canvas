@@ -3,6 +3,7 @@ import { CanvasData, CanvasGroupNodeData } from "src/@types/AdvancedJsonCanvas"
 import { BBox, Canvas, CanvasNode, SelectionData } from "src/@types/Canvas"
 import BBoxHelper from "src/utils/bbox-helper"
 import CanvasHelper from "src/utils/canvas-helper"
+import t from "src/utils/i18n"
 import CanvasExtension from "./canvas-extension"
 
 export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
@@ -36,8 +37,7 @@ export default class CollapsibleGroupsCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'toggle-collapse-group',
-      // FIXME: Translation target
-      name: 'Toggle collapse group',
+      name: t({ en: 'Toggle collapse group' }),
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (canvas: Canvas) => canvas.selection.size === 1 && ([...canvas.selection][0] as CanvasNode | undefined)?.getData().type === 'group',

@@ -1,6 +1,7 @@
 import { Canvas } from "src/@types/Canvas"
 import CanvasExtension from "./canvas-extension"
 import CanvasHelper from "src/utils/canvas-helper"
+import t from "src/utils/i18n"
 import { Notice } from "obsidian"
 
 export default class FrontmatterControlButtonCanvasExtension extends CanvasExtension {
@@ -24,8 +25,7 @@ export default class FrontmatterControlButtonCanvasExtension extends CanvasExten
       CanvasHelper.createControlMenuButton({
         id: 'properties-button',
         icon: 'info',
-        // FIXME: Translation target
-        label: 'Properties',
+        label: t({ en: 'Properties' }),
         callback: () => {
           const propertiesPlugin = this.plugin.app.internalPlugins.plugins['properties']
           if (!propertiesPlugin?._loaded) {

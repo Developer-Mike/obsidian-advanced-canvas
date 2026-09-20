@@ -1,6 +1,7 @@
 import { Notice } from "obsidian"
 import { Canvas, CanvasView } from "src/@types/Canvas"
 import { CURRENT_SPEC_VERSION } from "src/utils/migration-helper"
+import t from "src/utils/i18n"
 import CanvasExtension from "./canvas-extension"
 
 export default class MetadataCanvasExtension extends CanvasExtension {
@@ -28,8 +29,7 @@ export default class MetadataCanvasExtension extends CanvasExtension {
   private onCanvasChanged(canvas: Canvas): void {
     const metadata = canvas.getData()?.metadata
     if (!metadata || metadata.version !== CURRENT_SPEC_VERSION)
-      // FIXME: Translation target
-      return void new Notice("Metadata node not found or version mismatch. Should have been migrated (but wasn't).")
+      return void new Notice(t({ en: "Metadata node not found or version mismatch. Should have been migrated (but wasn't)." }))
 
     // Add proxy to metadata to listen for changes
     const that = this // eslint-disable-line @typescript-eslint/no-this-alias -- For patcher

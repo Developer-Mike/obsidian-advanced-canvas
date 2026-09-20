@@ -2,6 +2,7 @@ import { Canvas, Position } from "src/@types/Canvas"
 import CanvasHelper from "src/utils/canvas-helper"
 import CanvasExtension from "./canvas-extension"
 import BBoxHelper from "src/utils/bbox-helper"
+import t from "src/utils/i18n"
 
 const GROUP_NODE_SIZE = { width: 300, height: 300 }
 const GROUP_NODE_PADDING = 20
@@ -12,8 +13,7 @@ export default class GroupCanvasExtension extends CanvasExtension {
   init() {
     this.plugin.addCommand({
       id: 'create-group-around-selection',
-      // FIXME: Translation target
-      name: 'Group selected nodes',
+      name: t({ en: 'Group selected nodes' }),
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (canvas: Canvas) => canvas.selection.size > 0,
@@ -30,8 +30,7 @@ export default class GroupCanvasExtension extends CanvasExtension {
             canvas,
             {
               id: 'create-group',
-              // FIXME: Translation target
-              label: 'Drag to add group',
+              label: t({ en: 'Drag to add group' }),
               icon: 'group'
             },
             () => GROUP_NODE_SIZE,

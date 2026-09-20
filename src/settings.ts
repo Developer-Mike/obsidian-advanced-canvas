@@ -6,6 +6,7 @@ import { NodeTemplate } from "./canvas-extensions/node-templates-canvas-extensio
 import { VARIABLE_BREAKPOINT_CSS_VAR } from "./canvas-extensions/variable-breakpoint-canvas-extension"
 import AdvancedCanvasPlugin from "./main"
 import CssStylesConfigManager from "./managers/css-styles-config-manager"
+import t from "./utils/i18n"
 
 const README_URL = 'https://github.com/Developer-Mike/obsidian-advanced-canvas?tab=readme-ov-file'
 const KOFI_PAGE_URL = 'https://ko-fi.com/X8X27IA08'
@@ -316,12 +317,11 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
 
   private getDocumentationButton(section: string, label?: string): SettingGroupItem {
     return {
-      name: label ? `Open ${label} documentation` : 'Open documentation',
+      name: label ? t({ en: `Open ${label} documentation` }) : t({ en: 'Open documentation' }),
       action: () => window.open(`${README_URL}#${section}`, '_blank')
     }
   }
 
-  // FIXME: Translation target
   override getSettingDefinitions(): SettingDefinitionItem[] {
     return [
       // Ko-fi banner
@@ -329,8 +329,8 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
         type: 'group',
         items: [
           {
-            name: 'Support me on Ko-fi',
-            desc: 'If you like this plugin, consider supporting its development <3',
+            name: t({ en: 'Support me on Ko-fi' }),
+            desc: t({ en: 'If you like this plugin, consider supporting its development <3' }),
             action: () => window.open(KOFI_PAGE_URL, '_blank')
           }
         ]
@@ -338,20 +338,20 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
 
       // General settings
       {
-        name: 'Node type on double click',
-        desc: 'The type of node that will be created when double clicking on the canvas.',
+        name: t({ en: 'Node type on double click' }),
+        desc: t({ en: 'The type of node that will be created when double clicking on the canvas.' }),
         control: {
           type: 'dropdown',
           key: 'nodeTypeOnDoubleClick',
           options: {
-            'text': 'Text',
-            'file': 'File'
+            'text': t({ en: 'Text' }),
+            'file': t({ en: 'File' }),
           } satisfies Record<NodeTypesOnDoubleClick, string>
         }
       },
       {
-        name: 'Always align new nodes to grid',
-        desc: 'Aligns new nodes to the grid.',
+        name: t({ en: 'Always align new nodes to grid' }),
+        desc: t({ en: 'Aligns new nodes to the grid.' }),
         control: {
           type: 'toggle',
           key: 'alignNewNodesToGrid'
@@ -359,20 +359,20 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       },
       {
         type: 'page',
-        name: 'Text node dimensions',
-        desc: 'The default dimensions of a text node.',
+        name: t({ en: 'Text node dimensions' }),
+        desc: t({ en: 'The default dimensions of a text node.' }),
         items: [
           {
-            name: 'Width',
-            desc: 'The default width of a text node.',
+            name: t({ en: 'Width' }),
+            desc: t({ en: 'The default width of a text node.' }),
             control: {
               type: 'number',
               key: 'defaultTextNodeDimensions[0]'
             }
           },
           {
-            name: 'Height',
-            desc: 'The default height of a text node.',
+            name: t({ en: 'Height' }),
+            desc: t({ en: 'The default height of a text node.' }),
             control: {
               type: 'number',
               key: 'defaultTextNodeDimensions[1]'
@@ -382,20 +382,20 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       },
       {
         type: 'page',
-        name: 'File node dimensions',
-        desc: 'The default dimensions of a file node.',
+        name: t({ en: 'File node dimensions' }),
+        desc: t({ en: 'The default dimensions of a file node.' }),
         items: [
           {
-            name: 'Width',
-            desc: 'The default width of a file node.',
+            name: t({ en: 'Width' }),
+            desc: t({ en: 'The default width of a file node.' }),
             control: {
               type: 'number',
               key: 'defaultFileNodeDimensions[0]'
             }
           },
           {
-            name: 'Height',
-            desc: 'The default height of a file node.',
+            name: t({ en: 'Height' }),
+            desc: t({ en: 'The default height of a file node.' }),
             control: {
               type: 'number',
               key: 'defaultFileNodeDimensions[1]'
@@ -405,20 +405,20 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       },
       {
         type: 'page',
-        name: 'Node size limits',
-        desc: 'The minimum and maximum size of a node.',
+        name: t({ en: 'Node size limits' }),
+        desc: t({ en: 'The minimum and maximum size of a node.' }),
         items: [
           {
-            name: 'Minimum node width/height',
-            desc: 'The minimum size of a node.',
+            name: t({ en: 'Minimum node width/height' }),
+            desc: t({ en: 'The minimum size of a node.' }),
             control: {
               type: 'number',
               key: 'minNodeSize'
             }
           },
           {
-            name: 'Maximum node width',
-            desc: 'The maximum width of a node. Set to -1 for no limit.',
+            name: t({ en: 'Maximum node width' }),
+            desc: t({ en: 'The maximum width of a node. Set to -1 for no limit.' }),
             control: {
               type: 'number',
               key: 'maxNodeWidth'
@@ -427,8 +427,8 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
         ]
       },
       {
-        name: 'Disable font size relative to zoom',
-        desc: 'The font size of group node titles and edge labels will not increase when zooming out.',
+        name: t({ en: 'Disable font size relative to zoom' }),
+        desc: t({ en: 'The font size of group node titles and edge labels will not increase when zooming out.' }),
         control: {
           type: 'toggle',
           key: 'disableFontSizeRelativeToZoom'
@@ -438,11 +438,11 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       // Extended commands
       {
         type: 'group',
-        heading: 'Extended commands',
+        heading: t({ en: 'Extended commands' }),
         items: [
           {
-            name: 'Show commands in command palette',
-            desc: 'Features a bunch of commands that can be used to manipulate the canvas and its content.',
+            name: t({ en: 'Show commands in command palette' }),
+            desc: t({ en: 'Features a bunch of commands that can be used to manipulate the canvas and its content.' }),
             control: {
               type: 'toggle',
               key: 'commandsFeatureEnabled'
@@ -450,28 +450,28 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           },
           {
             type: 'page',
-            name: `Extended commands configuration`,
+            name: t({ en: `Extended commands configuration` }),
             visible: () => this.getControlValue('commandsFeatureEnabled') as boolean,
             items: [
               {
-                name: 'Zoom to cloned node',
-                desc: 'Zooms to the cloned node after creation.',
+                name: t({ en: 'Zoom to cloned node' }),
+                desc: t({ en: 'Zooms to the cloned node after creation.' }),
                 control: {
                   type: 'toggle',
                   key: 'zoomToClonedNode'
                 }
               },
               {
-                name: 'Clone node margin',
-                desc: 'The margin between the cloned node and the source node.',
+                name: t({ en: 'Clone node margin' }),
+                desc: t({ en: 'The margin between the cloned node and the source node.' }),
                 control: {
                   type: 'number',
                   key: 'cloneNodeMargin'
                 }
               },
               {
-                name: 'Expand node step size',
-                desc: 'The step size for expanding the node.',
+                name: t({ en: 'Expand node step size' }),
+                desc: t({ en: 'The step size for expanding the node.' }),
                 control: {
                   type: 'number',
                   key: 'expandNodeStepSize'
@@ -486,11 +486,11 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       // Metadata compatibility
       {
         type: 'group',
-        heading: 'Metadata compatibility',
+        heading: t({ en: 'Metadata compatibility' }),
         items: [
           {
-            name: 'Enable canvas metadata compatibility',
-            desc: 'Makes .canvas files compatible with the backlinks and outgoing links feature and show the connections in the graph view.',
+            name: t({ en: 'Enable canvas metadata compatibility' }),
+            desc: t({ en: 'Makes .canvas files compatible with the backlinks and outgoing links feature and show the connections in the graph view.' }),
             control: {
               type: 'toggle',
               key: 'canvasMetadataCompatibilityEnabled'
@@ -498,20 +498,20 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           },
           {
             type: 'page',
-            name: 'Canvas metadata compatibility settings',
+            name: t({ en: 'Canvas metadata compatibility settings' }),
             visible: () => this.getControlValue('canvasMetadataCompatibilityEnabled') as boolean,
             items: [
               {
-                name: 'Support linking to a node using a [[wikilink]]',
-                desc: 'Link and embed a node using [[canvas-file#node-id]]. (Use the "Copy wikilink to node" command to get an id.)',
+                name: t({ en: 'Support linking to a node using a [[wikilink]]' }),
+                desc: t({ en: 'Link and embed a node using [[canvas-file#node-id]]. (Use the "Copy wikilink to node" command to get an id.)' }),
                 control: {
                   type: 'toggle',
                   key: 'enableSingleNodeLinks'
                 }
               },
               {
-                name: 'Show button to copy node [[wikilink]]',
-                desc: 'Shows a button in the node popup to copy the [[wikilink]] of the node for easy reference in other notes.',
+                name: t({ en: 'Show button to copy node [[wikilink]]' }),
+                desc: t({ en: 'Shows a button in the node popup to copy the [[wikilink]] of the node for easy reference in other notes.' }),
                 control: {
                   type: 'toggle',
                   key: 'enableSingleNodePopupReferenceCopy'
@@ -526,11 +526,11 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       // Native-like file search
       {
         type: 'group',
-        heading: 'Native-like file search',
+        heading: t({ en: 'Native-like file search' }),
         items: [
           {
-            name: 'Enable native-like file search',
-            desc: 'Quickly locate text within your canvas using the native Obsidian search interface.',
+            name: t({ en: 'Enable native-like file search' }),
+            desc: t({ en: 'Quickly locate text within your canvas using the native Obsidian search interface.' }),
             control: {
               type: 'toggle',
               key: 'nativeFileSearchEnabled'
@@ -543,11 +543,11 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       // Auto file node edges
       {
         type: 'group',
-        heading: 'Auto file node edges',
+        heading: t({ en: 'Auto file node edges' }),
         items: [
           {
-            name: 'Enable auto file node edges',
-            desc: 'Automatically create edges between file nodes based on their frontmatter links.',
+            name: t({ en: 'Enable auto file node edges' }),
+            desc: t({ en: 'Automatically create edges between file nodes based on their frontmatter links.' }),
             control: {
               type: 'toggle',
               key: 'autoFileNodeEdgesFeatureEnabled'
@@ -555,12 +555,12 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           },
           {
             type: 'page',
-            name: 'Auto file node edges settings',
+            name: t({ en: 'Auto file node edges settings' }),
             visible: () => this.getControlValue('autoFileNodeEdgesFeatureEnabled') as boolean,
             items: [
               {
-                name: 'Frontmatter key name',
-                desc: 'The frontmatter key to fetch the outgoing edges from. (Keep the default to ensure best compatibility.)',
+                name: t({ en: 'Frontmatter key name' }),
+                desc: t({ en: 'The frontmatter key to fetch the outgoing edges from. (Keep the default to ensure best compatibility.)' }),
                 control: {
                   type: 'text',
                   key: 'autoFileNodeEdgesFrontmatterKey'
@@ -575,11 +575,11 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       // Portals
       {
         type: 'group',
-        heading: 'Portals',
+        heading: t({ en: 'Portals' }),
         items: [
           {
-            name: 'Enable portals',
-            desc: 'Create portals to other canvases.',
+            name: t({ en: 'Enable portals' }),
+            desc: t({ en: 'Create portals to other canvases.' }),
             control: {
               type: 'toggle',
               key: 'portalsFeatureEnabled'
@@ -592,11 +592,11 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       // Collapsible groups
       {
         type: 'group',
-        heading: 'Collapsible groups',
+        heading: t({ en: 'Collapsible groups' }),
         items: [
           {
-            name: 'Enable collapsible groups',
-            desc: 'Group nodes can be collapsed and expanded to keep the canvas organized.',
+            name: t({ en: 'Enable collapsible groups' }),
+            desc: t({ en: 'Group nodes can be collapsed and expanded to keep the canvas organized.' }),
             control: {
               type: 'toggle',
               key: 'collapsibleGroupsFeatureEnabled'
@@ -604,12 +604,12 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           },
           {
             type: 'page',
-            name: 'Collapsible groups settings',
+            name: t({ en: 'Collapsible groups settings' }),
             visible: () => this.getControlValue('collapsibleGroupsFeatureEnabled') as boolean,
             items: [
               {
-                name: 'Collapsed group preview on drag',
-                desc: 'Shows the border of a collapsed group while dragging a node.',
+                name: t({ en: 'Collapsed group preview on drag' }),
+                desc: t({ en: 'Shows the border of a collapsed group while dragging a node.' }),
                 control: {
                   type: 'toggle',
                   key: 'collapsedGroupPreviewOnDrag'
@@ -624,11 +624,11 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       // Node/Edge styles
       {
         type: 'group',
-        heading: 'Node/Edge styles',
+        heading: t({ en: 'Node/Edge styles' }),
         items: [
           {
-            name: 'Combine new style settings in dropdown',
-            desc: 'Combine all style attributes of Advanced Canvas in a single dropdown.',
+            name: t({ en: 'Combine new style settings in dropdown' }),
+            desc: t({ en: 'Combine all style attributes of Advanced Canvas in a single dropdown.' }),
             control: {
               type: 'toggle',
               key: 'combineCustomStylesInDropdown'
@@ -636,8 +636,8 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           },
           this.getDocumentationButton('custom-styles', 'custom styles'),
           {
-            name: 'Enable node styling',
-            desc: 'Allows you to style nodes without limits.',
+            name: t({ en: 'Enable node styling' }),
+            desc: t({ en: 'Allows you to style nodes without limits.' }),
             control: {
               type: 'toggle',
               key: 'nodeStylingFeatureEnabled'
@@ -645,13 +645,13 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           },
           {
             type: 'page',
-            name: 'Node styles',
-            desc: 'Manage custom node styles.',
+            name: t({ en: 'Node styles' }),
+            desc: t({ en: 'Manage custom node styles.' }),
             visible: () => this.getControlValue('nodeStylingFeatureEnabled') as boolean,
             items: [
               {
-                name: 'Default text node color',
-                desc: 'The default color of a text node. The default range is from 0 to 6, where 0 is no color. The range can be extended by using the Custom Colors feature of Advanced Canvas.',
+                name: t({ en: 'Default text node color' }),
+                desc: t({ en: 'The default color of a text node. The default range is from 0 to 6, where 0 is no color. The range can be extended by using the Custom Colors feature of Advanced Canvas.' }),
                 control: {
                   type: 'number',
                   key: 'defaultTextNodeColor'
@@ -661,8 +661,8 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           },
           {
             type: 'page',
-            name: 'Default node style',
-            desc: 'The default style of a node. The default style is applied to all newly created nodes.',
+            name: t({ en: 'Default node style' }),
+            desc: t({ en: 'The default style of a node. The default style is applied to all newly created nodes.' }),
             items: [
               ...BUILTIN_NODE_STYLE_ATTRIBUTES, // BUILTINS
               ...this.settingsManager.nodeCssStylesManager.getStyles(), // CUSTOM CSS STYLES
@@ -682,8 +682,8 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           },
           this.getDocumentationButton('node-styles', 'node styling'),
           {
-            name: 'Enable edges styling',
-            desc: 'Allows you to style edges without limits.',
+            name: t({ en: 'Enable edges styling' }),
+            desc: t({ en: 'Allows you to style edges without limits.' }),
             control: {
               type: 'toggle',
               key: 'edgesStylingFeatureEnabled'
@@ -691,66 +691,66 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           },
           {
             type: 'page',
-            name: 'Edge styles',
-            desc: 'Manage custom edge styles.',
+            name: t({ en: 'Edge styles' }),
+            desc: t({ en: 'Manage custom edge styles.' }),
             visible: () => this.getControlValue('edgesStylingFeatureEnabled') as boolean,
             items: [
               {
-                name: 'Inherit edge color from node',
-                desc: 'When creating a new edge by dragging from a node, the edge will inherit the color of the node it is dragged from.',
+                name: t({ en: 'Inherit edge color from node' }),
+                desc: t({ en: 'When creating a new edge by dragging from a node, the edge will inherit the color of the node it is dragged from.' }),
                 control: {
                   type: 'toggle',
                   key: 'inheritEdgeColorFromNode'
                 }
               },
               {
-                name: 'Default edge color',
-                desc: 'The default color of an edge. The default range is from 0 to 6, where 0 is no color. The range can be extended by using the Custom Colors feature of Advanced Canvas.',
+                name: t({ en: 'Default edge color' }),
+                desc: t({ en: 'The default color of an edge. The default range is from 0 to 6, where 0 is no color. The range can be extended by using the Custom Colors feature of Advanced Canvas.' }),
                 control: {
                   type: 'number',
                   key: 'defaultEdgeColor'
                 }
               },
               {
-                name: 'Default edge line direction',
-                desc: 'The default line direction of an edge.',
+                name: t({ en: 'Default edge line direction' }),
+                desc: t({ en: 'The default line direction of an edge.' }),
                 control: {
                   type: 'dropdown',
                   key: 'defaultEdgeLineDirection',
                   options: {
-                    'nondirectional': 'Nondirectional',
-                    'unidirectional': 'Unidirectional',
-                    'bidirectional': 'Bidirectional'
+                    'nondirectional': t({ en: 'Nondirectional' }),
+                    'unidirectional': t({ en: 'Unidirectional' }),
+                    'bidirectional': t({ en: 'Bidirectional' }),
                   } satisfies Record<EdgeLineDirection, string>
                 }
               },
               {
-                name: 'Update edge style while dragging',
-                desc: 'Updates the edge style while dragging an edge. (Can be very slow)',
+                name: t({ en: 'Update edge style while dragging' }),
+                desc: t({ en: 'Updates the edge style while dragging an edge. (Can be very slow)' }),
                 control: {
                   type: 'toggle',
                   key: 'edgeStyleUpdateWhileDragging'
                 }
               },
               {
-                name: 'Round square path edges',
-                desc: 'Rounds the corners of square path edges.',
+                name: t({ en: 'Round square path edges' }),
+                desc: t({ en: 'Rounds the corners of square path edges.' }),
                 control: {
                   type: 'toggle',
                   key: 'edgeStyleSquarePathRounded'
                 }
               },
               {
-                name: 'Allow diagonal A* paths',
-                desc: 'Allows diagonal paths for the A* path style.',
+                name: t({ en: 'Allow diagonal A* paths' }),
+                desc: t({ en: 'Allows diagonal paths for the A* path style.' }),
                 control: {
                   type: 'toggle',
                   key: 'edgeStylePathfinderAllowDiagonal'
                 }
               },
               {
-                name: 'Round A* path edges',
-                desc: 'Rounds the A* path style.',
+                name: t({ en: 'Round A* path edges' }),
+                desc: t({ en: 'Rounds the A* path style.' }),
                 control: {
                   type: 'toggle',
                   key: 'edgeStylePathfinderPathRounded'
@@ -760,8 +760,8 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           },
           {
             type: 'page',
-            name: 'Default edge style',
-            desc: 'The default style of an edge. The default style is applied to all newly created edges.',
+            name: t({ en: 'Default edge style' }),
+            desc: t({ en: 'The default style of an edge. The default style is applied to all newly created edges.' }),
             items: [
               ...BUILTIN_EDGE_STYLE_ATTRIBUTES, // BUILTINS
               ...this.settingsManager.edgeCssStylesManager.getStyles(), // CUSTOM CSS STYLES
@@ -786,11 +786,11 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       // Floating edges
       {
         type: 'group',
-        heading: 'Floating edges',
+        heading: t({ en: 'Floating edges' }),
         items: [
           {
-            name: 'Enable floating edges',
-            desc: 'Floating edges are automatically placed on the most suitable side of the node.',
+            name: t({ en: 'Enable floating edges' }),
+            desc: t({ en: 'Floating edges are automatically placed on the most suitable side of the node.' }),
             control: {
               type: 'toggle',
               key: 'floatingEdgeFeatureEnabled'
@@ -798,20 +798,20 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           },
           {
             type: 'page',
-            name: 'Floating edges settings',
+            name: t({ en: 'Floating edges settings' }),
             visible: () => this.getControlValue('floatingEdgeFeatureEnabled') as boolean,
             items: [
               {
-                name: 'Allow floating edge creation',
-                desc: 'Create floating edges by dragging over the target node without placing the edge on a specific side connection point. (If disabled, floating edges can only be created and used by other Advanced Canvas features.)',
+                name: t({ en: 'Allow floating edge creation' }),
+                desc: t({ en: 'Create floating edges by dragging over the target node without placing the edge on a specific side connection point. (If disabled, floating edges can only be created and used by other Advanced Canvas features.)' }),
                 control: {
                   type: 'toggle',
                   key: 'allowFloatingEdgeCreation'
                 }
               },
               {
-                name: 'New edge from side floating',
-                desc: 'The "from" side of new edges will always be floating.',
+                name: t({ en: 'New edge from side floating' }),
+                desc: t({ en: 'The "from" side of new edges will always be floating.' }),
                 control: {
                   type: 'toggle',
                   key: 'newEdgeFromSideFloating'
@@ -826,11 +826,11 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       // Flip edges
       {
         type: 'group',
-        heading: 'Flip edges',
+        heading: t({ en: 'Flip edges' }),
         items: [
           {
-            name: 'Enable flip edges',
-            desc: 'Flip the direction of edges using the popup menu.',
+            name: t({ en: 'Enable flip edges' }),
+            desc: t({ en: 'Flip the direction of edges using the popup menu.' }),
             control: {
               type: 'toggle',
               key: 'flipEdgeFeatureEnabled'
@@ -843,11 +843,11 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       // Presentations
       {
         type: 'group',
-        heading: 'Presentations',
+        heading: t({ en: 'Presentations' }),
         items: [
           {
-            name: 'Enable presentations',
-            desc: 'Create a presentation from your canvas.',
+            name: t({ en: 'Enable presentations' }),
+            desc: t({ en: 'Create a presentation from your canvas.' }),
             control: {
               type: 'toggle',
               key: 'presentationFeatureEnabled'
@@ -855,12 +855,12 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           },
           {
             type: 'page',
-            name: 'Presentations settings',
+            name: t({ en: 'Presentations settings' }),
             visible: () => this.getControlValue('presentationFeatureEnabled') as boolean,
             items: [
               {
-                name: 'Show "Set Start Node" in node popup',
-                desc: 'Shows the "Set Start Node" option in the node popup. If not enabled, you can still set the start node using the corresponding command.',
+                name: t({ en: 'Show "Set Start Node" in node popup' }),
+                desc: t({ en: 'Shows the "Set Start Node" option in the node popup. If not enabled, you can still set the start node using the corresponding command.' }),
                 control: {
                   type: 'toggle',
                   key: 'showSetStartNodeInPopup'
@@ -868,20 +868,20 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
               },
               {
                 type: 'page',
-                name: 'Default slide dimensions',
-                desc: 'The default dimensions of a slide.',
+                name: t({ en: 'Default slide dimensions' }),
+                desc: t({ en: 'The default dimensions of a slide.' }),
                 items: [
                   {
-                    name: 'Width',
-                    desc: 'The default width of a slide.',
+                    name: t({ en: 'Width' }),
+                    desc: t({ en: 'The default width of a slide.' }),
                     control: {
                       type: 'number',
                       key: 'defaultSlideDimensions[0]'
                     }
                   },
                   {
-                    name: 'Height',
-                    desc: 'The default height of a slide.',
+                    name: t({ en: 'Height' }),
+                    desc: t({ en: 'The default height of a slide.' }),
                     control: {
                       type: 'number',
                       key: 'defaultSlideDimensions[1]'
@@ -890,80 +890,80 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
                 ]
               },
               {
-                name: 'Wrap in slide padding',
-                desc: 'The padding of the slide when wrapping the canvas in a slide.',
+                name: t({ en: 'Wrap in slide padding' }),
+                desc: t({ en: 'The padding of the slide when wrapping the canvas in a slide.' }),
                 control: {
                   type: 'number',
                   key: 'wrapInSlidePadding'
                 }
               },
               {
-                name: 'Reset viewport on presentation end',
-                desc: 'Resets the viewport to the original position after the presentation ends.',
+                name: t({ en: 'Reset viewport on presentation end' }),
+                desc: t({ en: 'Resets the viewport to the original position after the presentation ends.' }),
                 control: {
                   type: 'toggle',
                   key: 'resetViewportOnPresentationEnd'
                 }
               },
               {
-                name: 'Use arrow keys to change slides',
-                desc: 'Use the arrow keys to change slides in presentation mode.',
+                name: t({ en: 'Use arrow keys to change slides' }),
+                desc: t({ en: 'Use the arrow keys to change slides in presentation mode.' }),
                 control: {
                   type: 'toggle',
                   key: 'useArrowKeysToChangeSlides'
                 }
               },
               {
-                name: 'Use PgUp/PgDown keys to change slides',
-                desc: 'Use the PgUp/PgDown keys to change slides in presentation mode. (Makes the presentation mode compatible with most presentation remotes.)',
+                name: t({ en: 'Use PgUp/PgDown keys to change slides' }),
+                desc: t({ en: 'Use the PgUp/PgDown keys to change slides in presentation mode. (Makes the presentation mode compatible with most presentation remotes.)' }),
                 control: {
                   type: 'toggle',
                   key: 'usePgUpPgDownKeysToChangeSlides'
                 }
               },
               {
-                name: 'Use directional slide navigation',
-                desc: 'Navigating with the arrow keys will try to navigate along the slide\'s edge in the pressed direction instead of just navigating forward or backward in the slide order.',
+                name: t({ en: 'Use directional slide navigation' }),
+                desc: t({ en: 'Navigating with the arrow keys will try to navigate along the slide\'s edge in the pressed direction instead of just navigating forward or backward in the slide order.' }),
                 control: {
                   type: 'toggle',
                   key: 'useDirectionalSlideNavigation'
                 }
               },
               {
-                name: 'Zoom to slide without padding',
-                desc: 'Zooms to the slide without padding.',
+                name: t({ en: 'Zoom to slide without padding' }),
+                desc: t({ en: 'Zooms to the slide without padding.' }),
                 control: {
                   type: 'toggle',
                   key: 'zoomToSlideWithoutPadding'
                 }
               },
               {
-                name: 'Use unclamped zoom while presenting',
-                desc: 'The zoom will not be clamped while presenting.',
+                name: t({ en: 'Use unclamped zoom while presenting' }),
+                desc: t({ en: 'The zoom will not be clamped while presenting.' }),
                 control: {
                   type: 'toggle',
                   key: 'useUnclampedZoomWhilePresenting'
                 }
               },
               {
-                name: 'Enter fullscreen while presenting',
-                desc: 'Presentations automatically request fullscreen. Disable to keep Obsidian windowed during presentations.',
+                name: t({ en: 'Enter fullscreen while presenting' }),
+                desc: t({ en: 'Presentations automatically request fullscreen. Disable to keep Obsidian windowed during presentations.' }),
                 control: {
                   type: 'toggle',
                   key: 'fullscreenPresentationEnabled'
                 }
               },
               {
-                name: 'Slide transition animation duration',
-                desc: 'The duration of the slide transition animation in seconds. Set to 0 to disable the animation.',
+                name: t({ en: 'Slide transition animation duration' }),
+                desc: t({ en: 'The duration of the slide transition animation in seconds. Set to 0 to disable the animation.' }),
                 control: {
                   type: 'number',
                   key: 'slideTransitionAnimationDuration'
                 }
               },
               {
-                name: 'Slide transition animation intensity',
-                desc: 'The intensity of the slide transition animation. The higher the value, the more the canvas will zoom out before zooming in on the next slide.',
+                name: t({ en: 'Slide transition animation intensity' }),
+                desc: t({ en: 'The intensity of the slide transition animation. The higher the value, the more the canvas will zoom out before zooming in on the next slide.' }),
                 control: {
                   type: 'number',
                   key: 'slideTransitionAnimationIntensity'
@@ -978,11 +978,11 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       // PDF annotation
       {
         type: 'group',
-        heading: 'PDF annotation',
+        heading: t({ en: 'PDF annotation' }),
         items: [
           {
-            name: 'Enable PDF annotation',
-            desc: 'Annotate PDF files in the canvas.',
+            name: t({ en: 'Enable PDF annotation' }),
+            desc: t({ en: 'Annotate PDF files in the canvas.' }),
             control: {
               type: 'toggle',
               key: 'pdfAnnotationFeatureEnabled'
@@ -990,28 +990,28 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           },
           {
             type: 'page',
-            name: 'PDF annotation settings',
+            name: t({ en: 'PDF annotation settings' }),
             visible: () => this.getControlValue('pdfAnnotationFeatureEnabled') as boolean,
             items: [
               {
-                name: 'PDF pages gap',
-                desc: 'The gap between PDF pages in pixels.',
+                name: t({ en: 'PDF pages gap' }),
+                desc: t({ en: 'The gap between PDF pages in pixels.' }),
                 control: {
                   type: 'number',
                   key: 'pdfPagesGap'
                 }
               },
               {
-                name: 'PDF page size factor',
-                desc: 'The size factor of the PDF pages. The higher the value, the larger the newly created PDF pages will be.',
+                name: t({ en: 'PDF page size factor' }),
+                desc: t({ en: 'The size factor of the PDF pages. The higher the value, the larger the newly created PDF pages will be.' }),
                 control: {
                   type: 'number',
                   key: 'pdfPageSizeFactor'
                 }
               },
               {
-                name: 'PDF page resolution',
-                desc: 'The resolution of the PDF pages. The higher the value, the sharper the pages will be (heavily affects performance).',
+                name: t({ en: 'PDF page resolution' }),
+                desc: t({ en: 'The resolution of the PDF pages. The higher the value, the sharper the pages will be (heavily affects performance).' }),
                 control: {
                   type: 'number',
                   key: 'pdfPageResolution'
@@ -1026,11 +1026,11 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       // Z-Ordering controls
       {
         type: 'group',
-        heading: 'Z-Ordering controls',
+        heading: t({ en: 'Z-Ordering controls' }),
         items: [
           {
-            name: 'Enable Z-Ordering controls',
-            desc: 'Change the persistent z-index of nodes using the context menu.',
+            name: t({ en: 'Enable Z-Ordering controls' }),
+            desc: t({ en: 'Change the persistent z-index of nodes using the context menu.' }),
             control: {
               type: 'toggle',
               key: 'zOrderingControlFeatureEnabled'
@@ -1038,12 +1038,12 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           },
           {
             type: 'page',
-            name: 'Z-Ordering controls settings',
+            name: t({ en: 'Z-Ordering controls settings' }),
             visible: () => this.getControlValue('zOrderingControlFeatureEnabled') as boolean,
             items: [
               {
-                name: 'Show one layer shift options',
-                desc: 'Move nodes one layer forward or backward.',
+                name: t({ en: 'Show one layer shift options' }),
+                desc: t({ en: 'Move nodes one layer forward or backward.' }),
                 control: {
                   type: 'toggle',
                   key: 'zOrderingControlShowOneLayerShiftOptions'
@@ -1058,11 +1058,11 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       // Aspect ratio control
       {
         type: 'group',
-        heading: 'Aspect ratio control',
+        heading: t({ en: 'Aspect ratio control' }),
         items: [
           {
-            name: 'Enable aspect ratio control',
-            desc: 'Change the aspect ratio of nodes using the context menu.',
+            name: t({ en: 'Enable aspect ratio control' }),
+            desc: t({ en: 'Change the aspect ratio of nodes using the context menu.' }),
             control: {
               type: 'toggle',
               key: 'aspectRatioControlFeatureEnabled'
@@ -1074,11 +1074,11 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       // Variable breakpoint
       {
         type: 'group',
-        heading: 'Variable breakpoint',
+        heading: t({ en: 'Variable breakpoint' }),
         items: [
           {
-            name: 'Enable variable breakpoint',
-            desc: `Change the zoom breakpoint (the zoom level at which the nodes won't render their content anymore) on a per-node basis using the ${VARIABLE_BREAKPOINT_CSS_VAR} CSS variable.`,
+            name: t({ en: 'Enable variable breakpoint' }),
+            desc: t({ en: `Change the zoom breakpoint (the zoom level at which the nodes won't render their content anymore) on a per-node basis using the ${VARIABLE_BREAKPOINT_CSS_VAR} CSS variable.` }),
             control: {
               type: 'toggle',
               key: 'variableBreakpointFeatureEnabled'
@@ -1091,11 +1091,11 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       // Alternative text rendering
       {
         type: 'group',
-        heading: 'Alternative text rendering',
+        heading: t({ en: 'Alternative text rendering' }),
         items: [
           {
-            name: 'Enable alternative text rendering',
-            desc: 'Tries to synchronize editing and reading view rendering. Caution: Causes visual inconsistencies compared to the default Obsidian reading view.',
+            name: t({ en: 'Enable alternative text rendering' }),
+            desc: t({ en: 'Tries to synchronize editing and reading view rendering. Caution: Causes visual inconsistencies compared to the default Obsidian reading view.' }),
             control: {
               type: 'toggle',
               key: 'readingModeFixEnabled'
@@ -1108,11 +1108,11 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       // Auto resize node
       {
         type: 'group',
-        heading: 'Auto resize node',
+        heading: t({ en: 'Auto resize node' }),
         items: [
           {
-            name: 'Enable auto resize node',
-            desc: 'Automatically resize the height of a node to fit the content.',
+            name: t({ en: 'Enable auto resize node' }),
+            desc: t({ en: 'Automatically resize the height of a node to fit the content.' }),
             control: {
               type: 'toggle',
               key: 'autoResizeNodeFeatureEnabled'
@@ -1120,28 +1120,28 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           },
           {
             type: 'page',
-            name: 'Auto resize node settings',
+            name: t({ en: 'Auto resize node settings' }),
             visible: () => this.getControlValue('autoResizeNodeFeatureEnabled') as boolean,
             items: [
               {
-                name: 'Enable auto resize by default',
-                desc: 'The auto resize feature will be enabled by default for all nodes.',
+                name: t({ en: 'Enable auto resize by default' }),
+                desc: t({ en: 'The auto resize feature will be enabled by default for all nodes.' }),
                 control: {
                   type: 'toggle',
                   key: 'autoResizeNodeEnabledByDefault'
                 }
               },
               {
-                name: 'Max height',
-                desc: 'The maximum height of the node when auto resizing (-1 for unlimited).',
+                name: t({ en: 'Max height' }),
+                desc: t({ en: 'The maximum height of the node when auto resizing (-1 for unlimited).' }),
                 control: {
                   type: 'number',
                   key: 'autoResizeNodeMaxHeight'
                 }
               },
               {
-                name: 'Snap to grid',
-                desc: 'The height of the node will snap to the grid.',
+                name: t({ en: 'Snap to grid' }),
+                desc: t({ en: 'The height of the node will snap to the grid.' }),
                 control: {
                   type: 'toggle',
                   key: 'autoResizeNodeSnapToGrid'
@@ -1156,11 +1156,11 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       // Canvas encapsulation
       {
         type: 'group',
-        heading: 'Canvas encapsulation',
+        heading: t({ en: 'Canvas encapsulation' }),
         items: [
           {
-            name: 'Enable canvas encapsulation',
-            desc: 'Encapsulate a selection of nodes and edges into a new canvas using the context menu.',
+            name: t({ en: 'Enable canvas encapsulation' }),
+            desc: t({ en: 'Encapsulate a selection of nodes and edges into a new canvas using the context menu.' }),
             control: {
               type: 'toggle',
               key: 'canvasEncapsulationEnabled'
@@ -1173,11 +1173,11 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       // Better readonly
       {
         type: 'group',
-        heading: 'Better readonly',
+        heading: t({ en: 'Better readonly' }),
         items: [
           {
-            name: 'Enable better readonly',
-            desc: 'Improve the readonly mode.',
+            name: t({ en: 'Enable better readonly' }),
+            desc: t({ en: 'Improve the readonly mode.' }),
             control: {
               type: 'toggle',
               key: 'betterReadonlyEnabled'
@@ -1185,36 +1185,36 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           },
           {
             type: 'page',
-            name: 'Better readonly settings',
+            name: t({ en: 'Better readonly settings' }),
             visible: () => this.getControlValue('betterReadonlyEnabled') as boolean,
             items: [
               {
-                name: 'Hide background grid when in readonly',
-                desc: 'Hides the background grid when in readonly mode.',
+                name: t({ en: 'Hide background grid when in readonly' }),
+                desc: t({ en: 'Hides the background grid when in readonly mode.' }),
                 control: {
                   type: 'toggle',
                   key: 'hideBackgroundGridWhenInReadonly'
                 }
               },
               {
-                name: 'Disable node popup',
-                desc: 'Disables the node popup in readonly mode.',
+                name: t({ en: 'Disable node popup' }),
+                desc: t({ en: 'Disables the node popup in readonly mode.' }),
                 control: {
                   type: 'toggle',
                   key: 'disableNodePopup'
                 }
               },
               {
-                name: 'Disable zoom',
-                desc: 'Disables zooming in readonly mode.',
+                name: t({ en: 'Disable zoom' }),
+                desc: t({ en: 'Disables zooming in readonly mode.' }),
                 control: {
                   type: 'toggle',
                   key: 'disableZoom'
                 }
               },
               {
-                name: 'Disable pan',
-                desc: 'Disables panning in readonly mode.',
+                name: t({ en: 'Disable pan' }),
+                desc: t({ en: 'Disables panning in readonly mode.' }),
                 control: {
                   type: 'toggle',
                   key: 'disablePan'
@@ -1229,11 +1229,11 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       // Edge highlight
       {
         type: 'group',
-        heading: 'Edge highlight',
+        heading: t({ en: 'Edge highlight' }),
         items: [
           {
-            name: 'Enable edge highlight',
-            desc: 'Highlight outgoing (and optionally incoming) edges of a selected node.',
+            name: t({ en: 'Enable edge highlight' }),
+            desc: t({ en: 'Highlight outgoing (and optionally incoming) edges of a selected node.' }),
             control: {
               type: 'toggle',
               key: 'edgeHighlightEnabled'
@@ -1241,12 +1241,12 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           },
           {
             type: 'page',
-            name: 'Edge highlight settings',
+            name: t({ en: 'Edge highlight settings' }),
             visible: () => this.getControlValue('edgeHighlightEnabled') as boolean,
             items: [
               {
-                name: 'Highlight incoming edges',
-                desc: 'Also highlights incoming edges.',
+                name: t({ en: 'Highlight incoming edges' }),
+                desc: t({ en: 'Also highlights incoming edges.' }),
                 control: {
                   type: 'toggle',
                   key: 'highlightIncomingEdges'
@@ -1261,11 +1261,11 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       // Edge selection
       {
         type: 'group',
-        heading: 'Edge selection',
+        heading: t({ en: 'Edge selection' }),
         items: [
           {
-            name: 'Enable edge selection',
-            desc: 'Select edges connected to the selected node(s) using the popup menu.',
+            name: t({ en: 'Enable edge selection' }),
+            desc: t({ en: 'Select edges connected to the selected node(s) using the popup menu.' }),
             control: {
               type: 'toggle',
               key: 'edgeSelectionEnabled'
@@ -1273,12 +1273,12 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
           },
           {
             type: 'page',
-            name: 'Edge selection settings',
+            name: t({ en: 'Edge selection settings' }),
             visible: () => this.getControlValue('edgeSelectionEnabled') as boolean,
             items: [
               {
-                name: 'Select edge by direction',
-                desc: 'Select incoming or outgoing edges using separate popup menu items.',
+                name: t({ en: 'Select edge by direction' }),
+                desc: t({ en: 'Select incoming or outgoing edges using separate popup menu items.' }),
                 control: {
                   type: 'toggle',
                   key: 'selectEdgeByDirection'
@@ -1293,11 +1293,11 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       // Focus Mode
       {
         type: 'group',
-        heading: 'Focus Mode',
+        heading: t({ en: 'Focus Mode' }),
         items: [
           {
-            name: 'Enable focus mode',
-            desc: 'Focus on a single node and blur all other nodes.',
+            name: t({ en: 'Enable focus mode' }),
+            desc: t({ en: 'Focus on a single node and blur all other nodes.' }),
             control: {
               type: 'toggle',
               key: 'focusModeFeatureEnabled'
@@ -1310,11 +1310,11 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
       // Better export
       {
         type: 'group',
-        heading: 'Better export',
+        heading: t({ en: 'Better export' }),
         items: [
           {
-            name: 'Enable better export',
-            desc: 'Export to PNG/SVG with transparency and other options.',
+            name: t({ en: 'Enable better export' }),
+            desc: t({ en: 'Export to PNG/SVG with transparency and other options.' }),
             control: {
               type: 'toggle',
               key: 'betterExportFeatureEnabled'

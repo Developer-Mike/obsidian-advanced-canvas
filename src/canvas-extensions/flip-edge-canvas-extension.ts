@@ -1,6 +1,7 @@
 import { Canvas, CanvasEdge, CanvasElement } from "src/@types/Canvas"
 import CanvasExtension from "./canvas-extension"
 import CanvasHelper from "src/utils/canvas-helper"
+import t from "src/utils/i18n"
 
 export default class FlipEdgeCanvasExtension extends CanvasExtension {
   isEnabled() { return 'flipEdgeFeatureEnabled' as const }
@@ -39,8 +40,7 @@ export default class FlipEdgeCanvasExtension extends CanvasExtension {
 
     const flipEdgeButton = CanvasHelper.createDropdownOptionElement({
       icon: 'flip-horizontal-2',
-      // FIXME: Translation target
-      label: 'Flip Edge',
+      label: t({ en: 'Flip Edge' }),
       callback: () => this.flipEdge(canvas)
     })
     groupEl.appendChild(flipEdgeButton)

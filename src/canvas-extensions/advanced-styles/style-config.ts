@@ -1,4 +1,5 @@
 import { CanvasNodeType } from "src/@types/AdvancedJsonCanvas"
+import t from "src/utils/i18n"
 import TextHelper from "src/utils/text-helper"
 
 export interface StyleAttributeOption {
@@ -45,206 +46,204 @@ export function styleAttributeValidator(json: Record<string, unknown>): StyleAtt
   return isValid ? json as unknown as StyleAttribute : null
 }
 
-// FIXME: Translation target
 export const BUILTIN_NODE_STYLE_ATTRIBUTES = [
   {
     key: 'textAlign',
-    label: 'Text Alignment',
+    label: t({ en: 'Text Alignment' }),
     nodeTypes: ['text'],
     options: [
       {
         icon: 'align-left',
-        label: 'Left',
+        label: t({ en: 'Left' }),
         value: null
       },
       {
         icon: 'align-center',
-        label: 'Center',
+        label: t({ en: 'Center' }),
         value: 'center'
       },
       {
         icon: 'align-right',
-        label: 'Right',
+        label: t({ en: 'Right' }),
         value: 'right'
       }
     ]
   },
   {
     key: 'shape',
-    label: 'Shape',
+    label: t({ en: 'Shape' }),
     nodeTypes: ['text'],
     options: [
       {
         icon: 'rectangle-horizontal',
-        label: 'Round Rectangle',
+        label: t({ en: 'Round Rectangle' }),
         value: null
       },
       {
         icon: 'shape-pill',
-        label: 'Pill',
+        label: t({ en: 'Pill' }),
         value: 'pill'
       },
       {
         icon: 'diamond',
-        label: 'Diamond',
+        label: t({ en: 'Diamond' }),
         value: 'diamond'
       },
       {
         icon: 'shape-parallelogram',
-        label: 'Parallelogram',
+        label: t({ en: 'Parallelogram' }),
         value: 'parallelogram'
       },
       {
         icon: 'circle',
-        label: 'Circle',
+        label: t({ en: 'Circle' }),
         value: 'circle'
       },
       {
         icon: 'shape-predefined-process',
-        label: 'Predefined Process',
+        label: t({ en: 'Predefined Process' }),
         value: 'predefined-process'
       },
       {
         icon: 'shape-document',
-        label: 'Document',
+        label: t({ en: 'Document' }),
         value: 'document'
       },
       {
         icon: 'shape-database',
-        label: 'Database',
+        label: t({ en: 'Database' }),
         value: 'database'
       }
     ]
   },
   {
     key: 'border',
-    label: 'Border',
+    label: t({ en: 'Border' }),
     options: [
       {
         icon: 'border-solid',
-        label: 'Solid',
+        label: t({ en: 'Solid' }),
         value: null
       },
       {
         icon: 'border-dashed',
-        label: 'Dashed',
+        label: t({ en: 'Dashed' }),
         value: 'dashed'
       },
       {
         icon: 'border-dotted',
-        label: 'Dotted',
+        label: t({ en: 'Dotted' }),
         value: 'dotted'
       },
       {
         icon: 'eye-off',
-        label: 'Invisible',
+        label: t({ en: 'Invisible' }),
         value: 'invisible'
       }
     ]
   }
 ] as StyleAttribute[]
 
-// FIXME: Translation target
 export const BUILTIN_EDGE_STYLE_ATTRIBUTES = [
   {
     key: 'path',
-    label: 'Path Style',
+    label: t({ en: 'Path Style' }),
     options: [
       {
         icon: 'path-solid',
-        label: 'Solid',
+        label: t({ en: 'Solid' }),
         value: null
       },
       {
         icon: 'path-dotted',
-        label: 'Dotted',
+        label: t({ en: 'Dotted' }),
         value: 'dotted'
       },
       {
         icon: 'path-short-dashed',
-        label: 'Short Dashed',
+        label: t({ en: 'Short Dashed' }),
         value: 'short-dashed'
       },
       {
         icon: 'path-long-dashed',
-        label: 'Long Dashed',
+        label: t({ en: 'Long Dashed' }),
         value: 'long-dashed'
       }
     ]
   },
   {
     key: 'arrow',
-    label: 'Arrow Style',
+    label: t({ en: 'Arrow Style' }),
     options: [
       {
         icon: 'arrow-triangle',
-        label: 'Triangle',
+        label: t({ en: 'Triangle' }),
         value: null
       },
       {
         icon: 'arrow-triangle-outline',
-        label: 'Triangle Outline',
+        label: t({ en: 'Triangle Outline' }),
         value: 'triangle-outline'
       },
       {
         icon: 'arrow-thin-triangle',
-        label: 'Thin Triangle',
+        label: t({ en: 'Thin Triangle' }),
         value: 'thin-triangle'
       },
       {
         icon: 'arrow-halved-triangle',
-        label: 'Halved Triangle',
+        label: t({ en: 'Halved Triangle' }),
         value: 'halved-triangle'
       },
       {
         icon: 'arrow-diamond',
-        label: 'Diamond',
+        label: t({ en: 'Diamond' }),
         value: 'diamond'
       },
       {
         icon: 'arrow-diamond-outline',
-        label: 'Diamond Outline',
+        label: t({ en: 'Diamond Outline' }),
         value: 'diamond-outline'
       },
       {
         icon: 'arrow-circle',
-        label: 'Circle',
+        label: t({ en: 'Circle' }),
         value: 'circle'
       },
       {
         icon: 'arrow-circle-outline',
-        label: 'Circle Outline',
+        label: t({ en: 'Circle Outline' }),
         value: 'circle-outline'
       },
       {
         icon: 'tally-1',
-        label: 'Blunt',
+        label: t({ en: 'Blunt' }),
         value: 'blunt'
       }
     ]
   },
   {
     key: 'pathfindingMethod',
-    label: 'Pathfinding Method',
+    label: t({ en: 'Pathfinding Method' }),
     options: [
       {
         icon: 'pathfinding-method-bezier',
-        label: 'Bezier',
+        label: t({ en: 'Bezier' }),
         value: null
       },
       {
         icon: 'slash',
-        label: 'Direct',
+        label: t({ en: 'Direct' }),
         value: 'direct'
       },
       {
         icon: 'pathfinding-method-square',
-        label: 'Square',
+        label: t({ en: 'Square' }),
         value: 'square'
       },
       {
         icon: 'map',
-        label: 'A*',
+        label: t({ en: 'A*' }),
         value: 'a-star'
       }
     ]

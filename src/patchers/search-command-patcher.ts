@@ -1,6 +1,7 @@
 import { CanvasView } from "src/@types/Canvas"
 import Patcher, { invoke } from "./patcher"
 import { debounce, setIcon } from "obsidian"
+import t from "src/utils/i18n"
 import { CanvasGroupNodeData, CanvasTextNodeData } from "src/@types/AdvancedJsonCanvas"
 
 export default class SearchCommandPatcher extends Patcher {
@@ -51,7 +52,6 @@ class CanvasSearchView {
     this.createSearchView()
   }
 
-  // FIXME: Translation target
   private createSearchView() {
     this.containerEl = this.view.canvas.wrapperEl.createDiv()
     this.containerEl.className = "document-search-container"
@@ -64,7 +64,7 @@ class CanvasSearchView {
 
     this.searchInput = searchInputContainer.createEl("input")
     this.searchInput.type = "text"
-    this.searchInput.placeholder = "Find..."
+    this.searchInput.placeholder = t({ en: "Find..." })
     this.searchInput.addEventListener("keydown", (e: KeyboardEvent) => this.onKeyDown(e))
 
     const debouncedOnInput = debounce(() => this.onInput(), 200, true)
@@ -80,21 +80,21 @@ class CanvasSearchView {
 
     const previousButton = documentSearchButtons.createEl("button")
     previousButton.className = "clickable-icon document-search-button"
-    previousButton.setAttribute("aria-label", "Previous\nShift + F3")
+    previousButton.setAttribute("aria-label", t({ en: "Previous\nShift + F3" }))
     previousButton.setAttribute("data-tooltip-position", "top")
     setIcon(previousButton, "arrow-up")
     previousButton.addEventListener("click", () => this.changeMatch(this.matchIndex - 1))
 
     const nextButton = documentSearchButtons.createEl("button")
     nextButton.className = "clickable-icon document-search-button"
-    nextButton.setAttribute("aria-label", "Next\nF3")
+    nextButton.setAttribute("aria-label", t({ en: "Next\nF3" }))
     nextButton.setAttribute("data-tooltip-position", "top")
     setIcon(nextButton, "arrow-down")
     nextButton.addEventListener("click", () => this.changeMatch(this.matchIndex + 1))
 
     const closeButton = documentSearch.createEl("button")
     closeButton.className = "clickable-icon document-search-close-button"
-    closeButton.setAttribute("aria-label", "Exit search")
+    closeButton.setAttribute("aria-label", t({ en: "Exit search" }))
     closeButton.setAttribute("data-tooltip-position", "top")
     setIcon(closeButton, "x")
     closeButton.addEventListener("click", () => this.close())

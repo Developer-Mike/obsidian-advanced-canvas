@@ -1,5 +1,6 @@
 import { Canvas } from "src/@types/Canvas"
 import CanvasHelper from "src/utils/canvas-helper"
+import t from "src/utils/i18n"
 import CanvasExtension from "./canvas-extension"
 
 const CONTROL_MENU_FOCUS_TOGGLE_ID = 'focus-mode-toggle'
@@ -10,8 +11,7 @@ export default class FocusModeCanvasExtension extends CanvasExtension {
   init() {
     this.plugin.addCommand({
       id: 'toggle-focus-mode',
-      // FIXME: Translation target
-      name: 'Toggle Focus Mode',
+      name: t({ en: 'Toggle Focus Mode' }),
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (_canvas: Canvas) => true,
@@ -31,8 +31,7 @@ export default class FocusModeCanvasExtension extends CanvasExtension {
 
     const controlMenuFocusToggle = CanvasHelper.createControlMenuButton({
       id: CONTROL_MENU_FOCUS_TOGGLE_ID,
-      // FIXME: Translation target
-      label: 'Focus Mode',
+      label: t({ en: 'Focus Mode' }),
       icon: 'focus',
       callback: () => this.toggleFocusMode(canvas)
     })
