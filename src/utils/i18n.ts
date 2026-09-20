@@ -1,10 +1,9 @@
 import { getLanguage } from "obsidian"
 
 export type Language = "en"
-export type TranslateableResource = {
-  en: string
-  [key: string]: string
-}
+export type TranslateableResource =
+  { [key in Language]: string } &
+  { [key: string]: string }
 
 const FALLBACKS: Partial<Record<string, Language>> = {
   "en-GB": "en",
