@@ -14,11 +14,7 @@ const FALLBACKS: Partial<Record<string, Language>> = {
 
 export default function t(resource: TranslateableResource) {
   let lang = getLanguage()
-
-  if (!(lang in resource)) {
-    console.warn(`Language ${lang} not found in resource, falling back to ${FALLBACKS[lang] ?? "en"}`)
-    lang = FALLBACKS[lang] ?? lang
-  }
+  if (!(lang in resource)) lang = FALLBACKS[lang] ?? lang
 
   return resource[lang] ?? resource.en
 }
