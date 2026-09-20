@@ -46,7 +46,7 @@ export function styleAttributeValidator(json: Record<string, unknown>): StyleAtt
   return isValid ? json as unknown as StyleAttribute : null
 }
 
-export const BUILTIN_NODE_STYLE_ATTRIBUTES = [
+export const BUILTIN_NODE_STYLE_ATTRIBUTES: StyleAttribute[] = [
   {
     key: 'textAlign',
     icon: 'align-left',
@@ -147,7 +147,7 @@ export const BUILTIN_NODE_STYLE_ATTRIBUTES = [
   }
 ] satisfies StyleAttribute[]
 
-export const BUILTIN_EDGE_STYLE_ATTRIBUTES = [
+export const BUILTIN_EDGE_STYLE_ATTRIBUTES: StyleAttribute[] = [
   {
     key: 'path',
     icon: 'path-solid',
