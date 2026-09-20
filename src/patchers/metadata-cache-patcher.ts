@@ -1,5 +1,5 @@
 import { CanvasData, CanvasTextNodeData } from "assets/formats/advanced-json-canvas/spec/1.0-1.0"
-import { FrontmatterLinkCache, MetadataCache, Notice, TFile } from "obsidian"
+import { CachedMetadata, FrontmatterLinkCache, MetadataCache, Notice, TFile } from "obsidian"
 import { CanvasFileNodeData } from "src/@types/AdvancedJsonCanvas"
 import { ExtendedCachedMetadata, ExtendedEmbedCache, ExtendedLinkCache } from "src/@types/Obsidian"
 import FilepathHelper from "src/utils/filepath-helper"
@@ -12,14 +12,14 @@ export default class MetadataCachePatcher extends Patcher {
     if (!this.plugin.settings.getSetting('canvasMetadataCompatibilityEnabled')) return
 
     Patcher.patchPrototype<MetadataCache>(this.plugin, this.plugin.app.metadataCache, {
-      getCache: Patcher.OverrideExisting(next => function (filepath: string, ...args: unknown[]): ExtendedCachedMetadata | null {
+      getCache: Patcher.OverrideExisting(next => function (filepath: string, ...args: unknown[]): CachedMetadata | null {
         // Bypass the "md" extension check by handling the "canvas" extension here
         if (FilepathHelper.extension(filepath) === 'canvas') {
           if (!Object.prototype.hasOwnProperty.call(this.fileCache, filepath))
             return null
 
           const hash = this.fileCache[filepath]?.hash
-          return (hash && this.metadataCache[hash] as ExtendedCachedMetadata) || null
+          return (hash && this.metadataCache[hash]) || null
         }
 
         return invoke(next, this, filepath, ...args)
