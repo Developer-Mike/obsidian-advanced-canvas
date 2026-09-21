@@ -26,6 +26,18 @@ export default class NodeTemplatesCanvasExtension extends CanvasExtension {
   isEnabled() { return true }
 
   init() {
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      'canvas:selection-menu',
+      (menu: Menu, canvas: Canvas) => {
+        menu.addItem((item) =>
+          item
+            .setTitle('Save node as template')
+            .setIcon('book-plus')
+            .onClick(() => void this.saveNodeAsTemplate(canvas))
+        )
+      }
+    ))
+
     this.plugin.addCommand({
       id: 'save-node-as-template',
       name: 'Save node as template',
@@ -53,11 +65,12 @@ export default class NodeTemplatesCanvasExtension extends CanvasExtension {
     const templates = this.plugin.settings.getSetting("nodeTemplates")
     for (let i = 0; i < templates.length; i++) {
       const template = templates[i]
-      const commandId = `create-template-node-${i}`
+      const label = template.label ? `"${template.label}"` : (i + 1)
 
+      const createCommandId = `create-template-node-${i}`
       this.plugin.addCommand({
-        id: commandId,
-        name: "Create template node " + (template.label ? `"${template.label}"` : (i + 1)),
+        id: createCommandId,
+        name: `Create template node ${label}`,
         checkCallback: CanvasHelper.canvasCommand(
           this.plugin,
           (_: Canvas) => true,
@@ -74,8 +87,25 @@ export default class NodeTemplatesCanvasExtension extends CanvasExtension {
           }
         )
       })
+      this.registeredNodeTemplateCommandIds.push(createCommandId)
 
-      this.registeredNodeTemplateCommandIds.push(commandId)
+      const applyCommandId = `apply-template-${i}-to-node`
+      this.plugin.addCommand({
+        id: applyCommandId,
+        name: `Apply template ${label} to selected node(s)`,
+        checkCallback: CanvasHelper.canvasCommand(
+          this.plugin,
+          (canvas: Canvas) => canvas.getSelectionData().nodes.length > 0,
+          (canvas: Canvas) => {
+            const selectedNodesData = canvas.getSelectionData().nodes
+            for (const nodeData of selectedNodesData) {
+              const node = canvas.nodes.get(nodeData.id)
+              if (node) this.applyTemplateToNode(node, template)
+            }
+          }
+        )
+      })
+      this.registeredNodeTemplateCommandIds.push(applyCommandId)
     }
   }
 
@@ -131,8 +161,12 @@ export default class NodeTemplatesCanvasExtension extends CanvasExtension {
     else throw new Error(`Unknown template type: ${template.type}`)
 
     // FIXME: Delete history containing blank state
+    this.applyTemplateToNode(node, template)
+  }
 
+  private applyTemplateToNode(node: CanvasNode, template: NodeTemplate) {
     const data = node.getData()
+
     node.setData({
       ...data,
       color: template.color ?? data.color,
