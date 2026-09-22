@@ -102,6 +102,9 @@ export default class NodeTemplatesCanvasExtension extends CanvasExtension {
               const node = canvas.nodes.get(nodeData.id)
               if (node) this.applyTemplateToNode(node, template)
             }
+
+            if (selectedNodesData.length > 0)
+              canvas.pushHistory(canvas.getData())
           }
         )
       })
@@ -166,6 +169,7 @@ export default class NodeTemplatesCanvasExtension extends CanvasExtension {
 
   private applyTemplateToNode(node: CanvasNode, template: NodeTemplate) {
     const data = node.getData()
+    if (data.type !== template.type) return
 
     node.setData({
       ...data,
