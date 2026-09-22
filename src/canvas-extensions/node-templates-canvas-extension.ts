@@ -27,13 +27,13 @@ export default class NodeTemplatesCanvasExtension extends CanvasExtension {
 
   init() {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
-      'canvas:selection-menu',
-      (menu: Menu, canvas: Canvas) => {
+      'canvas:node-menu',
+      (menu: Menu, node: CanvasNode) => {
         menu.addItem((item) =>
           item
             .setTitle('Save node as template')
             .setIcon('book-plus')
-            .onClick(() => void this.saveNodeAsTemplate(canvas))
+            .onClick(() => void this.saveNodeAsTemplate(node.canvas))
         )
       }
     ))
