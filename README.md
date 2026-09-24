@@ -72,6 +72,16 @@ Open the Community Plugins tab in the settings and search for "Advanced Canvas" 
     3.  Enable the plugin in Settings -> Community plugins -> Installed plugins
 </details>
 
+### Agent skill
+
+Install the `editing-advanced-canvases` skill to help compatible AI agents read, understand, and safely edit `.canvas` files with Advanced Canvas features:
+
+```sh
+npx skills add markosnarinian/obsidian-advanced-canvas --skill editing-advanced-canvases
+```
+
+<!-- This agent-skill documentation was added by an LLM agent. -->
+
 ## Support
 Please consider supporting the plugin. There are many hours of work and effort behind it. The two easiest ways to support the plugin are either by starring ⭐ the repository or by donating any amount on [Ko-fi](https://ko-fi.com/X8X27IA08) ❤️. Thank you!
 
