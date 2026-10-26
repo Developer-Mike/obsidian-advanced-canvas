@@ -17,6 +17,9 @@
     <b>⚡ Supercharge</b> your canvas experience! Create presentations, flowcharts and more!
 </div>
 
+> [!NOTE]
+> If you want to use handwriting in Obsidian or want to annotate PDFs directly inside Obsidian, check out [Starlight PDF](https://starlight.by-mika.dev/).
+
 ## Feature Overview
 This plugin enhances the Obsidian canvas with a wide array of features:
 
