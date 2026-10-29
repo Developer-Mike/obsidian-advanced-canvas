@@ -55,7 +55,7 @@ fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2), 'utf8');
 console.log(`Updated version in manifest.json to ${newVersion}`);
 
 // Git operations
-execSync(`git add ${versionFilePath} ${manifestPath}`, { stdio: 'inherit' });
+execSync(`git add ${manifestPath}`, { stdio: 'inherit' });
 execSync(`git commit -m "Bump version ${oldVersion} -> ${newVersion}"`, { stdio: 'inherit' });
 console.log(`Committed changes with message: "Bump version ${oldVersion} -> ${newVersion}"`);
 
