@@ -41,7 +41,7 @@ export interface AdvancedCanvasPluginSettingsValues {
   defaultEdgeLineDirection: EdgeLineDirection
   defaultEdgeStyleAttributes: { [key: string]: string }
   edgeStyleUpdateWhileDragging: boolean
-  edgeStyleSquarePathRounded: boolean
+  edgeStyleSquarePathRoundedRadius: number
   edgeStylePathfinderAllowDiagonal: boolean
   edgeStylePathfinderPathRounded: boolean
 
@@ -146,7 +146,7 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   defaultEdgeLineDirection: 'unidirectional',
   defaultEdgeStyleAttributes: {},
   edgeStyleUpdateWhileDragging: false,
-  edgeStyleSquarePathRounded: true,
+  edgeStyleSquarePathRoundedRadius: 5,
   edgeStylePathfinderAllowDiagonal: false,
   edgeStylePathfinderPathRounded: true,
 
@@ -732,11 +732,11 @@ export class AdvancedCanvasPluginSettingTab extends PluginSettingTab {
                 }
               },
               {
-                name: 'Round square path edges',
-                desc: 'Rounds the corners of square path edges.',
+                name: 'Square path edges corner radius',
+                desc: 'Rounds the corners of square path edges by the specified radius.',
                 control: {
-                  type: 'toggle',
-                  key: 'edgeStyleSquarePathRounded'
+                  type: 'number',
+                  key: 'edgeStyleSquarePathRoundedRadius'
                 }
               },
               {
