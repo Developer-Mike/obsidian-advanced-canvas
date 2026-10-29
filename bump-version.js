@@ -10,7 +10,7 @@ const { execSync } = require('child_process');
 const prompt = require('prompt-sync')();
 
 // Get the current version from the manifest.json file
-const manifestPath = path.join(__dirname, 'obsidian', 'manifest.json');
+const manifestPath = path.join(__dirname, 'manifest.json');
 const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
 
 const versionType = process.argv[2];
