@@ -12,6 +12,7 @@ const prompt = require('prompt-sync')();
 // Get the current version from the manifest.json file
 const manifestPath = path.join(__dirname, 'manifest.json');
 const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+const oldVersion = manifest.version;
 
 const versionType = process.argv[2];
 if (!['patch', 'minor', 'major'].includes(versionType)) {
@@ -26,7 +27,7 @@ if (currentBranch !== 'main') {
   process.exit(1);
 }
 
-const versionParts = manifest.version.split('.').map(Number);
+const versionParts = oldVersion.split('.').map(Number);
 if (versionType === 'patch') {
   versionParts[2] += 1; // Increment patch version
 }
