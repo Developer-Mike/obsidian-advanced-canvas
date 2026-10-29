@@ -437,6 +437,8 @@ export default class CommandsCanvasExtension extends CanvasExtension {
     canvas.updateSelection(() => {
       canvas.selection = new Set([node])
     })
+
+    canvas.zoomToSelection()
   }
 
   private getNextNode(canvas: Canvas, direction: typeof DIRECTIONS[number]) {
