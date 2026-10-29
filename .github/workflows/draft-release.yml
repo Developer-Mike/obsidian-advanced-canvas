@@ -1,0 +1,112 @@
+name: Build and create a draft release
+
+on:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-draft:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build in Production Mode
+        run: npm run build
+
+      - name: Verify Files Exist
+        run: ls -la dist/main.js dist/styles.css dist/manifest.json
+
+      - name: Generate artifact attestation
+        uses: actions/attest@v4
+        with:
+          subject-path: |
+            dist/main.js
+            dist/styles.css
+            dist/manifest.json
+
+      - name: Find milestone matching tag
+        id: milestone
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const tag = context.ref.replace('refs/tags/', '');
+
+            async function getMilestoneId(tag) {
+              for await (const response of github.paginate.iterator(
+                github.rest.issues.listMilestones,
+                { owner, repo, state: 'all', per_page: 100 }
+              )) {
+                const found = response.data.find(m => m.title === tag);
+                if (found) return found.number;
+              }
+            }
+
+            const id = await getMilestoneId(tag);
+            if (id) {
+              core.info(`Matched milestone #${id} for tag ${tag}`);
+              core.setOutput('id', id);
+            } else {
+              core.warning(`No milestone found for tag ${tag} — using <MILESTONE> placeholder`);
+              core.setOutput('id', '<MILESTONE>');
+            }
+
+      - name: Determine previous tag
+        id: prev_tag
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const current = context.ref.replace('refs/tags/', '');
+            const { data: tags } = await github.rest.repos.listTags({ owner, repo, per_page: 100 });
+
+            const idx = tags.findIndex(t => t.name === current);
+            const previous =
+              (idx >= 0 && tags[idx + 1] && tags[idx + 1].name) ||
+              (tags.find(t => t.name !== current) || {}).name ||
+              current;
+
+            core.setOutput('tag', previous);
+
+      - name: Compose release body
+        id: body
+        env:
+          MILESTONE_ID: ${{ steps.milestone.outputs.id }}
+          PREV_TAG: ${{ steps.prev_tag.outputs.tag }}
+          CURR_TAG: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
+        run: |
+          {
+            echo '## Changes'
+            echo "- [Milestone](https://github.com/${REPO}/milestone/${MILESTONE_ID}?closed=1)"
+            echo
+            echo "**Full Changelog**: https://github.com/${REPO}/compare/${PREV_TAG}...${CURR_TAG}"
+          } > release-body.md
+
+      - name: Create Draft Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          draft: true
+          body_path: release-body.md
+          files: |
+            dist/main.js
+            dist/styles.css
+            dist/manifest.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

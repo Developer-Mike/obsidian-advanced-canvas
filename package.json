@@ -4,6 +4,7 @@
     "postinstall": "patch-package",
     "dev": "node esbuild.config.mjs",
     "build": "node esbuild.config.mjs production",
+    "bump": "node bump-version.js",
     "lint": "eslint src/ --ext .ts,.tsx"
   },
   "devDependencies": {
@@ -14,6 +15,7 @@
     "eslint-plugin-obsidianmd": "^0.4.1",
     "obsidian": "^1.13.1",
     "patch-package": "^8.0.1",
+    "prompt-sync": "^4.2.0",
     "tslib": "2.4.0",
     "typescript": "~5.8"
   },
