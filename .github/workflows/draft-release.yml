@@ -4,17 +4,28 @@ on:
   push:
     tags:
       - '*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to publish'
+        required: true
+        type: string
 
 permissions:
   contents: write
+  id-token: write
 
 jobs:
   build-and-draft:
     runs-on: ubuntu-latest
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -44,7 +55,7 @@ jobs:
         with:
           script: |
             const { owner, repo } = context.repo;
-            const tag = context.ref.replace('refs/tags/', '');
+            const tag = process.env.TAG;
 
             async function getMilestoneId(tag) {
               for await (const response of github.paginate.iterator(
@@ -71,7 +82,7 @@ jobs:
         with:
           script: |
             const { owner, repo } = context.repo;
-            const current = context.ref.replace('refs/tags/', '');
+            const current = process.env.TAG;
             const { data: tags } = await github.rest.repos.listTags({ owner, repo, per_page: 100 });
 
             const idx = tags.findIndex(t => t.name === current);
@@ -87,21 +98,20 @@ jobs:
         env:
           MILESTONE_ID: ${{ steps.milestone.outputs.id }}
           PREV_TAG: ${{ steps.prev_tag.outputs.tag }}
-          CURR_TAG: ${{ github.ref_name }}
           REPO: ${{ github.repository }}
         run: |
           {
             echo '## Changes'
             echo "- [Milestone](https://github.com/${REPO}/milestone/${MILESTONE_ID}?closed=1)"
             echo
-            echo "**Full Changelog**: https://github.com/${REPO}/compare/${PREV_TAG}...${CURR_TAG}"
+            echo "**Full Changelog**: https://github.com/${REPO}/compare/${PREV_TAG}...${TAG}"
           } > release-body.md
 
       - name: Create Draft Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
-          name: ${{ github.ref_name }}
+          tag_name: ${{ env.TAG }}
+          name: ${{ env.TAG }}
           draft: true
           body_path: release-body.md
           files: |
