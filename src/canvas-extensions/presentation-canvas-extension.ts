@@ -19,6 +19,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
   isPresentationMode = false
   visitedNodeIds: string[] = []
   traveledEdges: string[] = []
+  fullscreenListener: ((e: Event) => void) | null = null
   fullscreenModalObserver: MutationObserver | null = null
   presentationUsesFullscreen = false
 
@@ -327,10 +328,11 @@ export default class PresentationCanvasExtension extends CanvasExtension {
       this.fullscreenModalObserver.observe(activeDocument.body, { childList: true })
 
       // Register event handler for exiting presentation mode
-      canvas.wrapperEl.onfullscreenchange = (_e: Event) => {
+      this.fullscreenListener = (_e: Event) => {
         if (activeDocument.fullscreenElement) return
         this.endPresentation(canvas)
       }
+      activeDocument.addEventListener("fullscreenchange", this.fullscreenListener)
     }
 
     this.isPresentationMode = true
@@ -356,7 +358,8 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     if (this.presentationUsesFullscreen) {
       this.fullscreenModalObserver?.disconnect()
       this.fullscreenModalObserver = null
-      canvas.wrapperEl.onfullscreenchange = null
+      activeDocument.removeEventListener("fullscreenchange", this.fullscreenListener)
+      this.fullscreenListener = null
 
       // Exit fullscreen mode
       if (activeDocument.fullscreenElement) void activeDocument.exitFullscreen()
