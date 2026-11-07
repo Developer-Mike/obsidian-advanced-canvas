@@ -1,6 +1,7 @@
 .ac-card-embed {
   display: flex;
   flex-direction: column;
+  height: fit-content;
 
   overflow: hidden;
   background-color: var(--background-primary);
