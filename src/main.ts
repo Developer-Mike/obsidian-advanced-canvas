@@ -1,4 +1,4 @@
-import { Plugin, requireApiVersion, TextFileView } from 'obsidian'
+import { Plugin, TextFileView } from 'obsidian'
 import { Canvas, CanvasView } from './@types/Canvas'
 
 // Utils
@@ -15,7 +15,6 @@ import CanvasPatcher from './patchers/canvas-patcher'
 import LinkSuggestionsPatcher from './patchers/link-suggestions-patcher'
 import EmbedPatcher from './patchers/embed-patcher'
 import MetadataCachePatcher from './patchers/metadata-cache-patcher'
-import BacklinksPatcher from './patchers/backlinks-patcher'
 import OutgoingLinksPatcher from './patchers/outgoing-links-patcher'
 import FileManagerPatcher from './patchers/file-manager-patcher'
 import PropertiesPatcher from './patchers/properties-patcher'
@@ -78,11 +77,10 @@ const PATCHERS: (PatcherConstructor | false)[] = [
 
   // Direct metadata dependant patchers
   PropertiesPatcher,
-  (!requireApiVersion("1.12.0") && BacklinksPatcher),
   OutgoingLinksPatcher,
 
   // Metadata dependant patchers
-  (requireApiVersion("1.9.0") && BasesTableViewPatcher),
+  BasesTableViewPatcher,
   LinkSuggestionsPatcher,
   EmbedPatcher,
   SearchPatcher,

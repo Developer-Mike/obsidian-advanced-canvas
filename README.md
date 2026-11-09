@@ -17,6 +17,13 @@
     <b>⚡ Supercharge</b> your canvas experience! Create presentations, flowcharts and more!
 </div>
 
+---
+
+> [!TIP]
+> If you want to use handwriting in Obsidian or want to annotate PDFs directly inside Obsidian, check out [Starlight PDF](https://starlight.by-mika.dev/).
+
+---
+
 ## Feature Overview
 This plugin enhances the Obsidian canvas with a wide array of features:
 
@@ -312,6 +319,7 @@ Custom style attributes for nodes and edges can easily be added. They get expose
     ```css
     /* @advanced-canvas-node-style
     key: validation-state
+    icon: hourglass # Optional
     label: Validation State
     options:
       -

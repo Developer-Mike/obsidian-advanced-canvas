@@ -4,6 +4,7 @@ import OutgoingLink from "src/@types/OutgoingLinkPlugin"
 export default class OutgoingLinksPatcher extends Patcher {
   protected async patch() {
     if (!this.plugin.settings.getSetting('canvasMetadataCompatibilityEnabled')) return
+    if (!this.plugin.app.viewRegistry.viewByType["outgoing-link"]) return // Core plugin not enabled
 
     await Patcher.waitForViewRequest<{ outgoingLink: OutgoingLink }>(this.plugin, "outgoing-link", view => {
       Patcher.patchPrototype<OutgoingLink>(this.plugin, view.outgoingLink, {

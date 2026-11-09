@@ -1,6 +1,6 @@
 import { Notice, TFile } from "obsidian"
 import { CanvasData, CanvasEdgeData, CanvasFileNodeData, CanvasNodeData } from "src/@types/AdvancedJsonCanvas"
-import { BBox, Canvas, CanvasEdge, CanvasEdgeEnd, CanvasElement, CanvasElementsData, CanvasNode } from "src/@types/Canvas"
+import { BBox, Canvas, CanvasEdge, CanvasEdgeEnd, CanvasElement, CanvasElementsData, CanvasNode, SelectionData } from "src/@types/Canvas"
 import CanvasHelper from "src/utils/canvas-helper"
 import t from "src/utils/i18n"
 import CanvasExtension from "./canvas-extension"
@@ -67,6 +67,11 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       'advanced-canvas:data-requested',
       (canvas: Canvas, data: CanvasData) => this.onGetData(canvas, data)
+    ))
+
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      'advanced-canvas:copy',
+      (canvas: Canvas, selectionData: SelectionData) => this.onCopy(canvas, selectionData)
     ))
 
     this.plugin.registerEvent(this.plugin.app.workspace.on(
@@ -401,6 +406,19 @@ export default class PortalsCanvasExtension extends CanvasExtension {
     portalNodeData.height = targetSize.height
 
     return addedData
+  }
+
+  private onCopy(canvas: Canvas, data: SelectionData) {
+    for (const nodeData of data.nodes) {
+      if (nodeData.type !== 'file') continue
+      const fileNodeData = nodeData as CanvasFileNodeData
+      if (!fileNodeData.portal) continue
+
+      fileNodeData.portal = false
+      fileNodeData.isPortalLoaded = false
+      if (fileNodeData.interdimensionalEdges)
+        fileNodeData.interdimensionalEdges = []
+    }
   }
 
   // Helper functions

@@ -10,6 +10,7 @@ export interface StyleAttributeOption {
 
 export interface StyleAttribute {
   key: string
+  icon?: string
   label: string
   nodeTypes?: CanvasNodeType[]
   options: StyleAttributeOption[]
@@ -46,10 +47,15 @@ export function styleAttributeValidator(json: Record<string, unknown>): StyleAtt
   return isValid ? json as unknown as StyleAttribute : null
 }
 
-export const BUILTIN_NODE_STYLE_ATTRIBUTES = [
+export const BUILTIN_NODE_STYLE_ATTRIBUTES: StyleAttribute[] = [
   {
     key: 'textAlign',
+<<<<<<< HEAD
     label: t({ en: 'Text Alignment' }),
+=======
+    icon: 'align-left',
+    label: 'Text Alignment',
+>>>>>>> beta
     nodeTypes: ['text'],
     options: [
       {
@@ -71,7 +77,12 @@ export const BUILTIN_NODE_STYLE_ATTRIBUTES = [
   },
   {
     key: 'shape',
+<<<<<<< HEAD
     label: t({ en: 'Shape' }),
+=======
+    icon: 'shapes',
+    label: 'Shape',
+>>>>>>> beta
     nodeTypes: ['text'],
     options: [
       {
@@ -118,7 +129,12 @@ export const BUILTIN_NODE_STYLE_ATTRIBUTES = [
   },
   {
     key: 'border',
+<<<<<<< HEAD
     label: t({ en: 'Border' }),
+=======
+    icon: 'square-dashed-bottom',
+    label: 'Border',
+>>>>>>> beta
     options: [
       {
         icon: 'border-solid',
@@ -142,12 +158,17 @@ export const BUILTIN_NODE_STYLE_ATTRIBUTES = [
       }
     ]
   }
-] as StyleAttribute[]
+] satisfies StyleAttribute[]
 
-export const BUILTIN_EDGE_STYLE_ATTRIBUTES = [
+export const BUILTIN_EDGE_STYLE_ATTRIBUTES: StyleAttribute[] = [
   {
     key: 'path',
+<<<<<<< HEAD
     label: t({ en: 'Path Style' }),
+=======
+    icon: 'path-solid',
+    label: 'Path Style',
+>>>>>>> beta
     options: [
       {
         icon: 'path-solid',
@@ -173,7 +194,12 @@ export const BUILTIN_EDGE_STYLE_ATTRIBUTES = [
   },
   {
     key: 'arrow',
+<<<<<<< HEAD
     label: t({ en: 'Arrow Style' }),
+=======
+    icon: 'play',
+    label: 'Arrow Style',
+>>>>>>> beta
     options: [
       {
         icon: 'arrow-triangle',
@@ -224,7 +250,12 @@ export const BUILTIN_EDGE_STYLE_ATTRIBUTES = [
   },
   {
     key: 'pathfindingMethod',
+<<<<<<< HEAD
     label: t({ en: 'Pathfinding Method' }),
+=======
+    icon: 'pathfinding-method-square',
+    label: 'Pathfinding Method',
+>>>>>>> beta
     options: [
       {
         icon: 'pathfinding-method-bezier',
@@ -248,4 +279,4 @@ export const BUILTIN_EDGE_STYLE_ATTRIBUTES = [
       }
     ]
   }
-] as StyleAttribute[]
+] satisfies StyleAttribute[]

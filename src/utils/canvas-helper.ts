@@ -189,10 +189,11 @@ export default class CanvasHelper {
         continue
       }
 
+      const icon = stylableAttribute.icon ?? selectedStyle.icon
       const menuOption = CanvasHelper.createExpandablePopupMenuOption({
         id: `menu-option-${stylableAttribute.key}`,
         label: stylableAttribute.label,
-        icon: selectedStyle.icon
+        icon: icon
       }, stylableAttribute.options.map((styleOption) => ({
         label: styleOption.label,
         icon: styleOption.icon,
@@ -203,8 +204,9 @@ export default class CanvasHelper {
           // Keep correct reference
           currentStyleAttributes[stylableAttribute.key] = styleOption.value
 
-          // Update icon
-          setIcon(menuOption, styleOption.icon)
+          // Update icon if the stylable attribute has no icon of its own
+          if (!stylableAttribute.icon)
+            setIcon(menuOption, styleOption.icon)
 
           // Close menu
           menuOption.dispatchEvent(new Event('click'))
@@ -255,15 +257,17 @@ export default class CanvasHelper {
       const styleMenuDropdownGroupElement = styleMenuDropdownScrollElement.createDiv()
       styleMenuDropdownGroupElement.classList.add('menu-group')
 
+      const popupMenuElementRect = popupMenuElement.getBoundingClientRect()
+
       styleMenuDropdownElement.setCssStyles({ position: 'absolute', maxHeight: 'initial' })
-      styleMenuDropdownElement.setCssStyles({ top: `${popupMenuElement.getBoundingClientRect().height}px` })
+      styleMenuDropdownElement.setCssStyles({ top: `${popupMenuElementRect.height}px` })
 
       const canvasWrapperCenterX = canvas.wrapperEl.getBoundingClientRect().left + canvas.wrapperEl.getBoundingClientRect().width / 2
 
-      const leftPosition = styleMenuButtonElement.getBoundingClientRect().left - popupMenuElement.getBoundingClientRect().left
-      const rightPosition = popupMenuElement.getBoundingClientRect().right - styleMenuButtonElement.getBoundingClientRect().right
+      const leftPosition = styleMenuButtonElement.getBoundingClientRect().left - popupMenuElementRect.left
+      const rightPosition = popupMenuElementRect.right - styleMenuButtonElement.getBoundingClientRect().right
 
-      if (popupMenuElement.getBoundingClientRect().left + leftPosition < canvasWrapperCenterX)
+      if (popupMenuElementRect.left + leftPosition < canvasWrapperCenterX)
         styleMenuDropdownElement.setCssStyles({ left: `${leftPosition}px` })
       else styleMenuDropdownElement.setCssStyles({ right: `${rightPosition}px` })
 
@@ -280,9 +284,13 @@ export default class CanvasHelper {
         let selectedStyle = stylableAttribute.options
           .find(option => currentStyleAttributes[stylableAttribute.key] === option.value) ??
           stylableAttribute.options.find(value => value.value === null)
-        if (!selectedStyle) continue
+        if (!selectedStyle) {
+          console.warn(`No "null" style option found for stylable attribute "${stylableAttribute.key}"`)
+          continue
+        }
 
-        setIcon(iconElement, selectedStyle.icon)
+        const icon = stylableAttribute.icon ?? selectedStyle.icon
+        setIcon(iconElement, icon)
 
         // Add label
         const labelElement = stylableAttributeElement.createDiv()
@@ -343,8 +351,9 @@ export default class CanvasHelper {
                 currentStyleAttributes[stylableAttribute.key] = styleOption.value
                 selectedStyle = styleOption
 
-                // Update icon
-                setIcon(iconElement, styleOption.icon)
+                // Update icon if the stylable attribute has no icon of its own
+                if (!stylableAttribute.icon)
+                  setIcon(iconElement, styleOption.icon)
 
                 // Close menu
                 styleMenuDropdownSubmenuElement.remove()

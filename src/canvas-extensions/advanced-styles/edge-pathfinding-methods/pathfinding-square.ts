@@ -5,8 +5,6 @@ import SvgPathHelper from "src/utils/svg-path-helper"
 import EdgePathfindingMethod, { EdgePath } from "./edge-pathfinding-method"
 import { Side } from "src/@types/AdvancedJsonCanvas"
 
-const ROUNDED_EDGE_RADIUS = 5
-
 export default class EdgePathfindingSquare extends EdgePathfindingMethod {
   getPath(): EdgePath | null {
     const pathArray: Position[] = []
@@ -211,8 +209,9 @@ export default class EdgePathfindingSquare extends EdgePathfindingMethod {
       }
     }
 
-    const svgPath = this.plugin.settings.getSetting('edgeStyleSquarePathRounded')
-      ? SvgPathHelper.pathArrayToRoundedSvgPath(pathArray, ROUNDED_EDGE_RADIUS)
+    const radius = this.plugin.settings.getSetting('edgeStyleSquarePathRoundedRadius')
+    const svgPath = radius > 0
+      ? SvgPathHelper.pathArrayToRoundedSvgPath(pathArray, radius)
       : SvgPathHelper.pathArrayToSvgPath(pathArray)
 
     return { svgPath, center, rotateArrows: false }

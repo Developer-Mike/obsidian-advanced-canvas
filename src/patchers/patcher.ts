@@ -4,7 +4,7 @@ import { Plugin } from "obsidian"
 
 /** Typed wrapper for Function.prototype.call — preserves return type that .call() erases to `any`. */
 export function invoke<T, A extends unknown[], R>(fn: (this: T, ...args: A) => R, thisArg: T, ...args: A): R {
-  return fn.call(thisArg, ...args)
+  return fn.call(thisArg, ...args) // eslint-disable-line @typescript-eslint/no-unsafe-return -- Not flagged in online lint
 }
 
 // Is any
