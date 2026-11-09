@@ -358,7 +358,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     if (this.presentationUsesFullscreen) {
       this.fullscreenModalObserver?.disconnect()
       this.fullscreenModalObserver = null
-      activeDocument.removeEventListener("fullscreenchange", this.fullscreenListener)
+      if (this.fullscreenListener) activeDocument.removeEventListener("fullscreenchange", this.fullscreenListener)
       this.fullscreenListener = null
 
       // Exit fullscreen mode
