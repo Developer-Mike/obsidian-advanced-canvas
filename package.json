@@ -5,7 +5,7 @@
     "dev": "node esbuild.config.mjs",
     "build": "node esbuild.config.mjs production",
     "bump": "node bump-version.js",
-    "lint": "eslint src/ --ext .ts,.tsx"
+    "lint": "eslint src/ --ext .ts,.tsx && tsc --noEmit"
   },
   "devDependencies": {
     "@obsidian-typings/obsidian-public-latest": "^6.32.0",
