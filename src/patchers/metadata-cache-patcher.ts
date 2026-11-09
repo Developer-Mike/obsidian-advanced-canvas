@@ -6,6 +6,7 @@ import FilepathHelper from "src/utils/filepath-helper"
 import HashHelper from "src/utils/hash-helper"
 import TaskQueue from "src/utils/task-queue"
 import Patcher, { invoke } from "./patcher"
+import t from "src/utils/i18n"
 
 export default class MetadataCachePatcher extends Patcher {
   protected async patch() {
@@ -91,7 +92,7 @@ async function updateMetadataCache(this: MetadataCache, file: TFile) {
   )
 
   const slowIndexingTimeout = window.setTimeout(() => {
-    new Notice(`Canvas indexing taking a long time for file ${file.path}`)
+    new Notice(t({ en: `Canvas indexing taking a long time for file ${file.path}` }))
   }, 10000)
 
   try {

@@ -1,6 +1,6 @@
 import { getLanguage } from "obsidian"
 
-export type Language = "en"
+export type Language = "en" // | "zh"
 export type TranslateableResource =
   { [key in Language]: string } &
   { [key: string]: string }
