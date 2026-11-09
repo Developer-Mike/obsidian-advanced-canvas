@@ -70,13 +70,8 @@ export default class NodeTemplatesCanvasExtension extends CanvasExtension {
 
       const createCommandId = `create-template-node-${i}`
       this.plugin.addCommand({
-<<<<<<< HEAD
-        id: commandId,
-        name: t({ en: "Create template node " }) + (template.label ? `"${template.label}"` : (i + 1)),
-=======
         id: createCommandId,
-        name: `Create template node ${label}`,
->>>>>>> beta
+        name: t({ en: "Create template node " }) + (template.label ? `"${template.label}"` : (i + 1)),
         checkCallback: CanvasHelper.canvasCommand(
           this.plugin,
           (_: Canvas) => true,

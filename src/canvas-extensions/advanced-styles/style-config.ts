@@ -50,12 +50,8 @@ export function styleAttributeValidator(json: Record<string, unknown>): StyleAtt
 export const BUILTIN_NODE_STYLE_ATTRIBUTES: StyleAttribute[] = [
   {
     key: 'textAlign',
-<<<<<<< HEAD
-    label: t({ en: 'Text Alignment' }),
-=======
     icon: 'align-left',
-    label: 'Text Alignment',
->>>>>>> beta
+    label: t({ en: 'Text Alignment' }),
     nodeTypes: ['text'],
     options: [
       {
@@ -77,12 +73,8 @@ export const BUILTIN_NODE_STYLE_ATTRIBUTES: StyleAttribute[] = [
   },
   {
     key: 'shape',
-<<<<<<< HEAD
-    label: t({ en: 'Shape' }),
-=======
     icon: 'shapes',
-    label: 'Shape',
->>>>>>> beta
+    label: t({ en: 'Shape' }),
     nodeTypes: ['text'],
     options: [
       {
@@ -129,12 +121,8 @@ export const BUILTIN_NODE_STYLE_ATTRIBUTES: StyleAttribute[] = [
   },
   {
     key: 'border',
-<<<<<<< HEAD
-    label: t({ en: 'Border' }),
-=======
     icon: 'square-dashed-bottom',
-    label: 'Border',
->>>>>>> beta
+    label: t({ en: 'Border' }),
     options: [
       {
         icon: 'border-solid',
@@ -163,12 +151,8 @@ export const BUILTIN_NODE_STYLE_ATTRIBUTES: StyleAttribute[] = [
 export const BUILTIN_EDGE_STYLE_ATTRIBUTES: StyleAttribute[] = [
   {
     key: 'path',
-<<<<<<< HEAD
-    label: t({ en: 'Path Style' }),
-=======
     icon: 'path-solid',
-    label: 'Path Style',
->>>>>>> beta
+    label: t({ en: 'Path Style' }),
     options: [
       {
         icon: 'path-solid',
@@ -194,12 +178,8 @@ export const BUILTIN_EDGE_STYLE_ATTRIBUTES: StyleAttribute[] = [
   },
   {
     key: 'arrow',
-<<<<<<< HEAD
-    label: t({ en: 'Arrow Style' }),
-=======
     icon: 'play',
-    label: 'Arrow Style',
->>>>>>> beta
+    label: t({ en: 'Arrow Style' }),
     options: [
       {
         icon: 'arrow-triangle',
@@ -250,12 +230,8 @@ export const BUILTIN_EDGE_STYLE_ATTRIBUTES: StyleAttribute[] = [
   },
   {
     key: 'pathfindingMethod',
-<<<<<<< HEAD
-    label: t({ en: 'Pathfinding Method' }),
-=======
     icon: 'pathfinding-method-square',
-    label: 'Pathfinding Method',
->>>>>>> beta
+    label: t({ en: 'Pathfinding Method' }),
     options: [
       {
         icon: 'pathfinding-method-bezier',
