@@ -25,7 +25,7 @@ export default class CopyNodeReferenceCanvasExtension extends CanvasExtension {
 
     const menuOption: MenuOption = {
       id: 'node-popup-menu-option-copy-reference',
-      label: t({ en: 'Copy wikilink to node' }),
+      label: t({ en: 'Copy wikilink to node', zh: '复制节点 wikilink' }),
       icon: 'link',
       callback: () => CopyNodeReferenceCanvasExtension.copyWikilinkToNode(canvas.view.file, selectionData.nodes[0])
     }
@@ -39,8 +39,8 @@ export default class CopyNodeReferenceCanvasExtension extends CanvasExtension {
     const wikilink = `[[${file.path}#${nodeData.id}|${file.name} (${nodeTypeString} node)]]`
 
     navigator.clipboard.writeText(wikilink).then(() =>
-      new Notice(t({ en: "Copied wikilink to node to clipboard." }), 2000)
-    ).catch(() => new Notice(t({ en: "Failed to copy wikilink to node to clipboard." }), 2000))
+      new Notice(t({ en: "Copied wikilink to node to clipboard.", zh: "已复制节点 wikilink 到剪贴板。" }), 2000)
+    ).catch(() => new Notice(t({ en: "Failed to copy wikilink to node to clipboard.", zh: "无法将节点 wikilink 复制到剪贴板。" }), 2000))
   }
 
 }

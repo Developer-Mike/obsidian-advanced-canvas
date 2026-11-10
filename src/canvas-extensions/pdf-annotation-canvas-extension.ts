@@ -19,7 +19,7 @@ export default class PdfAnnotationCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'pin-pdf-page',
-      name: t({ en: 'Pin PDF page' }),
+      name: t({ en: 'Pin PDF page', zh: '固定 PDF 页面' }),
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (canvas: Canvas) => {
@@ -46,7 +46,7 @@ export default class PdfAnnotationCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'annotate-pdf',
-      name: t({ en: 'Insert PDF for annotation' }),
+      name: t({ en: 'Insert PDF for annotation', zh: '插入用于批注的 PDF' }),
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (canvas: Canvas) => !canvas.readonly,

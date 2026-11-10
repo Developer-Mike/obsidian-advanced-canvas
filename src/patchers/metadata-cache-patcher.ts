@@ -92,7 +92,7 @@ async function updateMetadataCache(this: MetadataCache, file: TFile) {
   )
 
   const slowIndexingTimeout = window.setTimeout(() => {
-    new Notice(t({ en: `Canvas indexing taking a long time for file ${file.path}` }))
+    new Notice(t({ en: `Canvas indexing taking a long time for file ${file.path}`, zh: `文件 ${file.path} 的白板索引耗时较长` }))
   }, 10000)
 
   try {

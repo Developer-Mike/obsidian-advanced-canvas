@@ -64,7 +64,7 @@ class CanvasSearchView {
 
     this.searchInput = searchInputContainer.createEl("input")
     this.searchInput.type = "text"
-    this.searchInput.placeholder = t({ en: "Find..." })
+    this.searchInput.placeholder = t({ en: "Find...", zh: "查找…" })
     this.searchInput.addEventListener("keydown", (e: KeyboardEvent) => this.onKeyDown(e))
 
     const debouncedOnInput = debounce(() => this.onInput(), 200, true)
@@ -80,21 +80,21 @@ class CanvasSearchView {
 
     const previousButton = documentSearchButtons.createEl("button")
     previousButton.className = "clickable-icon document-search-button"
-    previousButton.setAttribute("aria-label", t({ en: "Previous\nShift + F3" }))
+    previousButton.setAttribute("aria-label", t({ en: "Previous\nShift + F3", zh: "上一个\nShift + F3" }))
     previousButton.setAttribute("data-tooltip-position", "top")
     setIcon(previousButton, "arrow-up")
     previousButton.addEventListener("click", () => this.changeMatch(this.matchIndex - 1))
 
     const nextButton = documentSearchButtons.createEl("button")
     nextButton.className = "clickable-icon document-search-button"
-    nextButton.setAttribute("aria-label", t({ en: "Next\nF3" }))
+    nextButton.setAttribute("aria-label", t({ en: "Next\nF3", zh: "下一个\nF3" }))
     nextButton.setAttribute("data-tooltip-position", "top")
     setIcon(nextButton, "arrow-down")
     nextButton.addEventListener("click", () => this.changeMatch(this.matchIndex + 1))
 
     const closeButton = documentSearch.createEl("button")
     closeButton.className = "clickable-icon document-search-close-button"
-    closeButton.setAttribute("aria-label", t({ en: "Exit search" }))
+    closeButton.setAttribute("aria-label", t({ en: "Exit search", zh: "退出搜索" }))
     closeButton.setAttribute("data-tooltip-position", "top")
     setIcon(closeButton, "x")
     closeButton.addEventListener("click", () => this.close())

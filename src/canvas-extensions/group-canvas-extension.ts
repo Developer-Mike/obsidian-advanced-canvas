@@ -13,7 +13,7 @@ export default class GroupCanvasExtension extends CanvasExtension {
   init() {
     this.plugin.addCommand({
       id: 'create-group-around-selection',
-      name: t({ en: 'Group selected nodes' }),
+      name: t({ en: 'Group selected nodes', zh: '分组所选节点' }),
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (canvas: Canvas) => canvas.selection.size > 0,
@@ -30,7 +30,7 @@ export default class GroupCanvasExtension extends CanvasExtension {
             canvas,
             {
               id: 'create-group',
-              label: t({ en: 'Drag to add group' }),
+              label: t({ en: 'Drag to add group', zh: '拖动以添加分组' }),
               icon: 'group'
             },
             () => GROUP_NODE_SIZE,

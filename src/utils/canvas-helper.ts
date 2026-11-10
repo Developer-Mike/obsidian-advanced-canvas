@@ -236,7 +236,7 @@ export default class CanvasHelper {
     styleMenuButtonElement.classList.add('clickable-icon')
 
     setIcon(styleMenuButtonElement, 'paintbrush')
-    setTooltip(styleMenuButtonElement, t({ en: 'Style' }), { placement: 'top' })
+    setTooltip(styleMenuButtonElement, t({ en: 'Style', zh: '样式' }), { placement: 'top' })
 
     // Add click event
     styleMenuButtonElement.addEventListener('click', () => {

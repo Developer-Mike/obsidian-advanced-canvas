@@ -7,17 +7,17 @@ const DIRECTION_MENU_MAP: Record<ConnectionDirection, MenuOption> = {
   connected: {
     id: 'select-connected-edges',
     icon: 'arrows-selected',
-    label: t({ en: 'Select Connected Edges' }),
+    label: t({ en: 'Select Connected Edges', zh: '选择相连连线' }),
   },
   outgoing: {
     id: 'select-outgoing-edges',
     icon: 'arrow-right-selected',
-    label: t({ en: 'Select Outgoing Edges' }),
+    label: t({ en: 'Select Outgoing Edges', zh: '选择出边' }),
   },
   incoming: {
     id: 'select-incoming-edges',
     icon: 'arrow-left-selected',
-    label: t({ en: 'Select Incoming Edges' }),
+    label: t({ en: 'Select Incoming Edges', zh: '选择入边' }),
   },
 }
 

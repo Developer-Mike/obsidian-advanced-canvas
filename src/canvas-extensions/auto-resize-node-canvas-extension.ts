@@ -63,7 +63,7 @@ export default class AutoResizeNodeCanvasExtension  extends CanvasExtension {
       canvas,
       CanvasHelper.createPopupMenuOption({
         id: 'auto-resize-height',
-        label: autoResizeHeightEnabled ? t({ en: 'Disable auto-resize' }) : t({ en: 'Enable auto-resize' }),
+        label: autoResizeHeightEnabled ? t({ en: 'Disable auto-resize', zh: '禁用自动调整高度' }) : t({ en: 'Enable auto-resize', zh: '启用自动调整高度' }),
         icon: autoResizeHeightEnabled ? 'scan-text' : 'lock',
         callback: () => this.toggleAutoResizeHeightEnabled(canvas, selectedNodes, autoResizeHeightEnabled)
       })
