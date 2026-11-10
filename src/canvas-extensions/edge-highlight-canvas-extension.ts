@@ -1,4 +1,4 @@
-import { Canvas, CanvasElement } from "src/@types/Canvas"
+import { Canvas, CanvasEdge, CanvasElement } from "src/@types/Canvas"
 import CanvasExtension from "./canvas-extension"
 
 export default class EdgeHighlightCanvasExtension  extends CanvasExtension {
@@ -12,21 +12,29 @@ export default class EdgeHighlightCanvasExtension  extends CanvasExtension {
   }
 
   private onSelectionChanged(canvas: Canvas, oldSelection: Set<CanvasElement>) {
-    const connectedEdgesToBeHighlighted = new Set(canvas.getSelectionData().nodes
-      .flatMap(nodeData => [
-        ...canvas.edgeFrom.get(canvas.nodes.get(nodeData.id)!) ?? [],
-        ...(this.plugin.settings.getSetting("highlightIncomingEdges") ?
-          canvas.edgeTo.get(canvas.nodes.get(nodeData.id)!) ?? [] :
-          []
-        )
-      ]))
+    const selectedNodesData = canvas.getSelectionData().nodes
+
+    const outgoingEdges = new Set(selectedNodesData.flatMap(nodeData =>
+      Array.from(canvas.edgeFrom.get(canvas.nodes.get(nodeData.id)!) ?? [])
+    ))
+
+    const incomingEdges = this.plugin.settings.getSetting("highlightIncomingEdges") ?
+      new Set(selectedNodesData.flatMap(nodeData =>
+        Array.from(canvas.edgeTo.get(canvas.nodes.get(nodeData.id)!) ?? [])
+      )) : new Set()
 
     for (const edge of canvas.edges.values()) {
-      const isFocused = canvas.selection.has(edge) || connectedEdgesToBeHighlighted.has(edge)
+      const isFocused = canvas.selection.has(edge) || outgoingEdges.has(edge) || incomingEdges.has(edge)
 
-      edge.lineGroupEl.classList.toggle("is-focused", isFocused)
-      edge.lineEndGroupEl?.classList?.toggle("is-focused", isFocused)
-      edge.labelElement?.textareaEl?.classList?.toggle("is-focused", isFocused)
+      this.toggleEdgeClass(edge, "is-focused", isFocused)
+      this.toggleEdgeClass(edge, "outgoing", outgoingEdges.has(edge))
+      this.toggleEdgeClass(edge, "incoming", incomingEdges.has(edge))
     }
+  }
+
+  private toggleEdgeClass(edge: CanvasEdge, classname: string, value: boolean) {
+    edge.lineGroupEl.classList.toggle(classname, value)
+    edge.lineEndGroupEl?.classList?.toggle(classname, value)
+    edge.labelElement?.textareaEl?.classList?.toggle(classname, value)
   }
 }
