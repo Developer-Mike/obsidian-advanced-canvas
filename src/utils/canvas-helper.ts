@@ -4,6 +4,7 @@ import { StyleAttribute } from "src/canvas-extensions/advanced-styles/style-conf
 import AdvancedCanvasPlugin from "src/main"
 import BBoxHelper from "./bbox-helper"
 import { CanvasNodeData, Side } from "src/@types/AdvancedJsonCanvas"
+import t from "./i18n"
 
 export interface MenuOption {
   id?: string
@@ -235,7 +236,7 @@ export default class CanvasHelper {
     styleMenuButtonElement.classList.add('clickable-icon')
 
     setIcon(styleMenuButtonElement, 'paintbrush')
-    setTooltip(styleMenuButtonElement, 'Style', { placement: 'top' })
+    setTooltip(styleMenuButtonElement, t({ en: 'Style', zh: '样式' }), { placement: 'top' })
 
     // Add click event
     styleMenuButtonElement.addEventListener('click', () => {

@@ -5,6 +5,7 @@ import { Canvas, CanvasElement, CanvasNode } from "src/@types/Canvas"
 import AdvancedCanvasPlugin from "src/main"
 import { invoke } from "src/patchers/patcher"
 import CanvasHelper from "src/utils/canvas-helper"
+import t from "src/utils/i18n"
 import { FileSelectModal } from "src/utils/modal-helper"
 import CanvasExtension from "./canvas-extension"
 
@@ -18,7 +19,7 @@ export default class PdfAnnotationCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'pin-pdf-page',
-      name: 'Pin PDF page',
+      name: t({ en: 'Pin PDF page', zh: '固定 PDF 页面' }),
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (canvas: Canvas) => {
@@ -45,7 +46,7 @@ export default class PdfAnnotationCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'annotate-pdf',
-      name: 'Insert PDF for annotation',
+      name: t({ en: 'Insert PDF for annotation', zh: '插入用于批注的 PDF' }),
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (canvas: Canvas) => !canvas.readonly,

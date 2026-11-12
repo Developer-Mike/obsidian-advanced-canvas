@@ -2,11 +2,12 @@ import { Menu, Notice } from 'obsidian'
 import { BBox, Canvas, CanvasEdge, CanvasElement, CanvasNode, Position, Size } from 'src/@types/Canvas'
 import BBoxHelper from "src/utils/bbox-helper"
 import CanvasHelper from "src/utils/canvas-helper"
+import t from "src/utils/i18n"
 import CanvasExtension from './canvas-extension'
 import { NodeSide } from 'obsidian/canvas'
 
-const START_SLIDE_NAME = 'Start Slide'
-const DEFAULT_SLIDE_NAME = 'New Slide'
+const START_SLIDE_NAME = t({ en: 'Start Slide', zh: '起始幻灯片' })
+const DEFAULT_SLIDE_NAME = t({ en: 'New Slide', zh: '新建幻灯片' })
 const ARROW_SIDE_MAPPINGS: Record<string, NodeSide> = {
   'ArrowRight': 'right',
   'ArrowDown': 'bottom',
@@ -32,7 +33,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
       (menu: Menu, canvas: Canvas) => {
         menu.addItem((item) =>
           item
-            .setTitle('Wrap in slide')
+            .setTitle(t({ en: 'Wrap in slide', zh: '包装为幻灯片' }))
             .setIcon('gallery-vertical')
             .onClick(() => this.addSlide(canvas, undefined,
               BBoxHelper.enlargeBBox(BBoxHelper.combineBBoxes(
@@ -45,7 +46,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'create-new-slide',
-      name: 'Create new slide',
+      name: t({ en: 'Create new slide', zh: '新建幻灯片' }),
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (canvas: Canvas) => !canvas.readonly && !this.isPresentationMode,
@@ -55,7 +56,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'set-start-node',
-      name: 'Set start node',
+      name: t({ en: 'Set start node', zh: '设置起始节点' }),
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (canvas: Canvas) => !canvas.readonly && !this.isPresentationMode && canvas.getSelectionData().nodes.length === 1,
@@ -65,7 +66,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'start-presentation',
-      name: 'Start presentation',
+      name: t({ en: 'Start presentation', zh: '开始演示' }),
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (_canvas: Canvas) => !this.isPresentationMode,
@@ -75,7 +76,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'continue-presentation',
-      name: 'Continue presentation',
+      name: t({ en: 'Continue presentation', zh: '继续演示' }),
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (_canvas: Canvas) => !this.isPresentationMode,
@@ -85,7 +86,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'end-presentation',
-      name: 'End presentation',
+      name: t({ en: 'End presentation', zh: '结束演示' }),
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (_canvas: Canvas) => this.isPresentationMode,
@@ -95,7 +96,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'previous-node',
-      name: 'Previous node',
+      name: t({ en: 'Previous node', zh: '上一个节点' }),
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (_canvas: Canvas) => this.isPresentationMode,
@@ -105,7 +106,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
 
     this.plugin.addCommand({
       id: 'next-node',
-      name: 'Next node',
+      name: t({ en: 'Next node', zh: '下一个节点' }),
       checkCallback: CanvasHelper.canvasCommand(
         this.plugin,
         (_canvas: Canvas) => this.isPresentationMode,
@@ -132,7 +133,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
         canvas,
         {
           id: 'new-slide',
-          label: 'Drag to add slide',
+          label: t({ en: 'Drag to add slide', zh: '拖动以添加幻灯片' }),
           icon: 'gallery-vertical'
         },
         () => this.getDefaultSlideSize(),
@@ -155,7 +156,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
       canvas,
       CanvasHelper.createPopupMenuOption({
         id: 'start-node',
-        label: 'Set as start slide',
+        label: t({ en: 'Set as start slide', zh: '设为起始幻灯片' }),
         icon: 'play',
         callback: () => this.setStartNode(canvas, selectedNode)
       })
@@ -253,7 +254,7 @@ export default class PresentationCanvasExtension extends CanvasExtension {
     if (!tryContinue || this.visitedNodeIds.length === 0) {
       const startNode = canvas.metadata['startNode'] && canvas.nodes.get(canvas.metadata['startNode'])
       if (!startNode) {
-        new Notice('No start node found. Please mark a node as a start node through the popup menu.')
+        new Notice(t({ en: 'No start node found. Please mark a node as a start node through the popup menu.', zh: '未找到起始节点。请通过弹出菜单将某个节点标记为起始节点。' }))
         return
       }
 

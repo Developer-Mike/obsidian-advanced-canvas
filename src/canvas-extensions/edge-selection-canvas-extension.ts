@@ -1,22 +1,23 @@
 import { Canvas } from "src/@types/Canvas"
 import CanvasHelper, { ConnectionDirection, MenuOption } from "src/utils/canvas-helper"
+import t from "src/utils/i18n"
 import CanvasExtension from "./canvas-extension"
 
 const DIRECTION_MENU_MAP: Record<ConnectionDirection, MenuOption> = {
   connected: {
     id: 'select-connected-edges',
     icon: 'arrows-selected',
-    label: 'Select Connected Edges',
+    label: t({ en: 'Select Connected Edges', zh: '选择相连连线' }),
   },
   outgoing: {
     id: 'select-outgoing-edges',
     icon: 'arrow-right-selected',
-    label: 'Select Outgoing Edges',
+    label: t({ en: 'Select Outgoing Edges', zh: '选择出边' }),
   },
   incoming: {
     id: 'select-incoming-edges',
     icon: 'arrow-left-selected',
-    label: 'Select Incoming Edges',
+    label: t({ en: 'Select Incoming Edges', zh: '选择入边' }),
   },
 }
 
