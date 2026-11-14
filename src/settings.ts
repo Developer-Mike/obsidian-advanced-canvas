@@ -3,6 +3,7 @@ import { GET_EDGE_CSS_STYLES_MANAGER } from "./canvas-extensions/advanced-styles
 import { GET_NODE_CSS_STYLES_MANAGER } from "./canvas-extensions/advanced-styles/node-styles"
 import { BUILTIN_EDGE_STYLE_ATTRIBUTES, BUILTIN_NODE_STYLE_ATTRIBUTES, StyleAttribute } from "./canvas-extensions/advanced-styles/style-config"
 import { NodeTemplate } from "./canvas-extensions/node-templates-canvas-extension"
+import { CanvasColor } from "./@types/AdvancedJsonCanvas"
 import { VARIABLE_BREAKPOINT_CSS_VAR } from "./canvas-extensions/variable-breakpoint-canvas-extension"
 import AdvancedCanvasPlugin from "./main"
 import CssStylesConfigManager from "./managers/css-styles-config-manager"
@@ -12,6 +13,12 @@ const KOFI_PAGE_URL = 'https://ko-fi.com/X8X27IA08'
 
 export type NodeTypesOnDoubleClick = 'text' | 'file'
 export type EdgeLineDirection = 'nondirectional' | 'unidirectional' | 'bidirectional'
+
+export interface CanvasStyleTemplate {
+  name: string
+  color?: CanvasColor
+  styleAttributes: Record<string, string | null>
+}
 
 export interface AdvancedCanvasPluginSettingsValues {
   nodeTypeOnDoubleClick: NodeTypesOnDoubleClick
@@ -31,15 +38,21 @@ export interface AdvancedCanvasPluginSettingsValues {
   nodeStylingFeatureEnabled: boolean
   customNodeStyleAttributes: StyleAttribute[]
   defaultTextNodeColor: number
-  defaultTextNodeStyleAttributes: { [key: string]: string }
+  defaultTextNodeColorOverride: CanvasColor | null
+  defaultTextNodeStyleAttributes: { [key: string]: string | null }
+  applyNodeStyleDefaultToAllTypes: boolean
   nodeTemplates: NodeTemplate[]
+  nodeStyleTemplates: CanvasStyleTemplate[]
+  edgeStyleTemplates: CanvasStyleTemplate[]
+  styleTemplatesPanelPinned: boolean
 
   edgesStylingFeatureEnabled: boolean
   customEdgeStyleAttributes: StyleAttribute[]
   inheritEdgeColorFromNode: boolean
   defaultEdgeColor: number
+  defaultEdgeColorOverride: CanvasColor | null
   defaultEdgeLineDirection: EdgeLineDirection
-  defaultEdgeStyleAttributes: { [key: string]: string }
+  defaultEdgeStyleAttributes: { [key: string]: string | null }
   edgeStyleUpdateWhileDragging: boolean
   edgeStyleSquarePathRoundedRadius: number
   edgeStylePathfinderAllowDiagonal: boolean
@@ -136,13 +149,19 @@ export const DEFAULT_SETTINGS_VALUES: AdvancedCanvasPluginSettingsValues = {
   nodeStylingFeatureEnabled: true,
   customNodeStyleAttributes: [],
   defaultTextNodeColor: 0,
+  defaultTextNodeColorOverride: null,
   defaultTextNodeStyleAttributes: {},
+  applyNodeStyleDefaultToAllTypes: false,
   nodeTemplates: [],
+  nodeStyleTemplates: [],
+  edgeStyleTemplates: [],
+  styleTemplatesPanelPinned: false,
 
   edgesStylingFeatureEnabled: true,
   customEdgeStyleAttributes: [],
   inheritEdgeColorFromNode: false,
   defaultEdgeColor: 0,
+  defaultEdgeColorOverride: null,
   defaultEdgeLineDirection: 'unidirectional',
   defaultEdgeStyleAttributes: {},
   edgeStyleUpdateWhileDragging: false,
@@ -252,6 +271,10 @@ export default class SettingsManager {
   }
 
   async setSetting(data: Partial<AdvancedCanvasPluginSettingsValues>) {
+    if ('defaultTextNodeColor' in data && !('defaultTextNodeColorOverride' in data))
+      data.defaultTextNodeColorOverride = null
+    if ('defaultEdgeColor' in data && !('defaultEdgeColorOverride' in data))
+      data.defaultEdgeColorOverride = null
     this.settings = Object.assign(this.settings, data)
     await this.saveSettings()
     this.plugin.app.workspace.trigger("advanced-canvas:settings-changed")

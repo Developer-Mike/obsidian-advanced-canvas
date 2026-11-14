@@ -50,6 +50,7 @@ import CopyNodeReferenceCanvasExtension from './canvas-extensions/copy-node-refe
 import ReadingModeFixCanvasExtension from './canvas-extensions/reading-mode-fix-canvas-extension'
 import PdfAnnotationCanvasExtension from './canvas-extensions/pdf-annotation-canvas-extension'
 import FixedStyleMenuCanvasExtension from './canvas-extensions/fixed-style-menu-canvas-extension'
+import StyleTemplatesCanvasExtension from './canvas-extensions/style-templates-canvas-extension'
 
 // Advanced Styles
 import NodeStylesExtension from './canvas-extensions/advanced-styles/node-styles'
@@ -98,6 +99,7 @@ const CANVAS_EXTENSIONS: CanvasExtensionConstructor[] = [
   CollapsibleGroupsCanvasExtension,
   ColorPaletteCanvasExtension,
   FixedStyleMenuCanvasExtension,
+  StyleTemplatesCanvasExtension,
   PresentationCanvasExtension,
   PortalsCanvasExtension,
   PdfAnnotationCanvasExtension,

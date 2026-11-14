@@ -3,6 +3,7 @@ import CanvasHelper from "src/utils/canvas-helper"
 import { FileSelectModal } from "src/utils/modal-helper"
 import CanvasExtension from "./canvas-extension"
 import { CanvasColor, CanvasFileNodeData } from "src/@types/AdvancedJsonCanvas"
+import { BUILTIN_NODE_STYLE_ATTRIBUTES } from "./advanced-styles/style-config"
 
 export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtension {
   isEnabled() { return true }
@@ -102,17 +103,27 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
 
   private applyDefaultNodeStyles(_canvas: Canvas, node: CanvasNode) {
     const nodeData = node.getData()
-    if (nodeData.type !== 'text') return
+    if (nodeData.type !== 'text' && !this.plugin.settings.getSetting('applyNodeStyleDefaultToAllTypes')) return
 
-    let color: CanvasColor | undefined = this.plugin.settings.getSetting('defaultTextNodeColor').toString() as CanvasColor
+    let color: CanvasColor | undefined = this.plugin.settings.getSetting('defaultTextNodeColorOverride') ?? this.plugin.settings.getSetting('defaultTextNodeColor').toString() as CanvasColor
     if (color === "0") color = undefined
+
+    const defaultStyles = this.plugin.settings.getSetting('defaultTextNodeStyleAttributes')
+    let applicableStyles = defaultStyles
+    if (this.plugin.settings.getSetting('applyNodeStyleDefaultToAllTypes')) {
+      const nodeStyles = [...BUILTIN_NODE_STYLE_ATTRIBUTES, ...this.plugin.settings.getSetting('customNodeStyleAttributes'), ...this.plugin.settings.nodeCssStylesManager.getStyles()]
+      applicableStyles = Object.fromEntries(Object.entries(defaultStyles).filter(([key]) => {
+        const attribute = nodeStyles.find(style => style.key === key)
+        return !attribute?.nodeTypes || attribute.nodeTypes.includes(nodeData.type)
+      }))
+    }
 
     node.setData({
       ...nodeData,
       color: color,
       styleAttributes: {
         ...nodeData.styleAttributes,
-        ...this.plugin.settings.getSetting('defaultTextNodeStyleAttributes')
+        ...applicableStyles
       }
     })
   }
@@ -120,7 +131,7 @@ export default class BetterDefaultSettingsCanvasExtension  extends CanvasExtensi
   private async applyDefaultEdgeStyles(canvas: Canvas, edge: CanvasEdge) {
     const edgeData = edge.getData()
 
-    let color: CanvasColor | undefined = this.plugin.settings.getSetting('defaultEdgeColor').toString() as CanvasColor
+    let color: CanvasColor | undefined = this.plugin.settings.getSetting('defaultEdgeColorOverride') ?? this.plugin.settings.getSetting('defaultEdgeColor').toString() as CanvasColor
     if (this.plugin.settings.getSetting('inheritEdgeColorFromNode'))
       color = edge.from.node.getData().color ?? color
     if (color === "0") color = undefined
