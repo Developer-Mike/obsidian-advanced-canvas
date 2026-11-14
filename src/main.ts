@@ -49,6 +49,7 @@ import EdgeHighlightCanvasExtension from './canvas-extensions/edge-highlight-can
 import CopyNodeReferenceCanvasExtension from './canvas-extensions/copy-node-reference-canvas-extension'
 import ReadingModeFixCanvasExtension from './canvas-extensions/reading-mode-fix-canvas-extension'
 import PdfAnnotationCanvasExtension from './canvas-extensions/pdf-annotation-canvas-extension'
+import FixedStyleMenuCanvasExtension from './canvas-extensions/fixed-style-menu-canvas-extension'
 
 // Advanced Styles
 import NodeStylesExtension from './canvas-extensions/advanced-styles/node-styles'
@@ -96,6 +97,7 @@ const CANVAS_EXTENSIONS: CanvasExtensionConstructor[] = [
   AutoResizeNodeCanvasExtension,
   CollapsibleGroupsCanvasExtension,
   ColorPaletteCanvasExtension,
+  FixedStyleMenuCanvasExtension,
   PresentationCanvasExtension,
   PortalsCanvasExtension,
   PdfAnnotationCanvasExtension,

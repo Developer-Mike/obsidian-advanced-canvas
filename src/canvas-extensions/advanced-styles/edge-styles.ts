@@ -93,26 +93,8 @@ export default class EdgeStylesExtension extends CanvasExtension {
     CanvasHelper.addStyleAttributesToPopup(
       this.plugin, canvas,  [...BUILTIN_EDGE_STYLE_ATTRIBUTES, /* Legacy */ ...this.plugin.settings.getSetting('customEdgeStyleAttributes'), ...this.cssStylesManager.getStyles()],
       selectedEdges[0].getData().styleAttributes ?? {},
-      (attribute, value) => this.setStyleAttributeForSelection(canvas, attribute, value)
+      (attribute, value) => CanvasHelper.setStyleAttributeForSelection(canvas, attribute, value)
     )
-  }
-
-  private setStyleAttributeForSelection(canvas: Canvas, attribute: StyleAttribute, value: string | null): void {
-    const selectedEdges = [...canvas.selection].filter((item: CanvasElement) => (item as CanvasEdge).path !== undefined) as CanvasEdge[]
-
-    for (const edge of selectedEdges) {
-      const edgeData = edge.getData()
-
-      edge.setData({
-        ...edgeData,
-        styleAttributes: {
-          ...edgeData.styleAttributes,
-          [attribute.key]: value
-        }
-      })
-    }
-
-    canvas.pushHistory(canvas.getData())
   }
 
   private updateAllEdgesInArea(canvas: Canvas, bbox: BBox) {

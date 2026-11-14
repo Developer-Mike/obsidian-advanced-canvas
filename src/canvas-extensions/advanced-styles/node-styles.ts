@@ -34,28 +34,7 @@ export default class NodeStylesExtension extends CanvasExtension {
     CanvasHelper.addStyleAttributesToPopup(
       this.plugin, canvas, availableNodeStyles,
       selectionNodeData[0].styleAttributes ?? {},
-      (attribute, value) => this.setStyleAttributeForSelection(canvas, attribute, value)
+      (attribute, value) => CanvasHelper.setStyleAttributeForSelection(canvas, attribute, value)
     )
-  }
-
-  private setStyleAttributeForSelection(canvas: Canvas, attribute: StyleAttribute, value: string | null): void {
-    const selectionNodeData = canvas.getSelectionData().nodes
-    for (const nodeData of selectionNodeData) {
-      const node = canvas.nodes.get(nodeData.id)
-      if (!node) continue
-
-      // Only apply the attribute if the node type is allowed
-      if (attribute.nodeTypes && !attribute.nodeTypes.includes(nodeData.type)) continue
-
-      node.setData({
-        ...nodeData,
-        styleAttributes: {
-          ...nodeData.styleAttributes,
-          [attribute.key]: value
-        }
-      })
-    }
-
-    canvas.pushHistory(canvas.getData())
   }
 }

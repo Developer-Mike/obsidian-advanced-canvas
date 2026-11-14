@@ -178,6 +178,23 @@ export default class CanvasHelper {
     else this.addStyleAttributesDropdownMenu(canvas, styleAttributes, currentStyleAttributes, setStyleAttribute)
   }
 
+  static setStyleAttributeForSelection(canvas: Canvas, attribute: StyleAttribute, value: string | null): void {
+    for (const element of canvas.selection) {
+      const node = canvas.nodes.get(element.id)
+      const edge = canvas.edges.get(element.id)
+      if (node === element) {
+        const data = node.getData()
+        if (attribute.nodeTypes && !attribute.nodeTypes.includes(data.type)) continue
+        node.setData({ ...data, styleAttributes: { ...data.styleAttributes, [attribute.key]: value } })
+      } else if (edge === element) {
+        const data = edge.getData()
+        edge.setData({ ...data, styleAttributes: { ...data.styleAttributes, [attribute.key]: value } })
+      }
+    }
+
+    canvas.pushHistory(canvas.getData())
+  }
+
   static addStyleAttributesButtons(canvas: Canvas, stylableAttributes: StyleAttribute[], currentStyleAttributes: { [key: string]: string | null }, setStyleAttribute: (attribute: StyleAttribute, value: string | null) => void) {
     for (const stylableAttribute of stylableAttributes) {
       const selectedStyle = stylableAttribute.options
