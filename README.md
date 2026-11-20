@@ -499,7 +499,7 @@ Resize nodes automatically when their text content changes. Toggle this feature 
 ## Edge Highlight
 Highlight edges when a connected node is selected. This feature helps to visually identify relationships between nodes.
 
-If you want to edit the look of the highlighted edges, you need to edit the `is-focused` CSS class in a custom CSS snippet.
+If you want to edit the look of the highlighted edges, you need to edit the `is-focused` CSS class in a custom CSS snippet. Depending on the direction you can also CSS select the `.outgoing` or `.incoming` class.
 
 ## Focus Mode
 Focus on a single node by blurring all other nodes.
